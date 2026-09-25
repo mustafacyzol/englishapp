@@ -3,7 +3,9 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { Check, Gem, Heart, Infinity as InfinityIcon, Keyboard, Mic, MicOff, Snail, Volume2, X } from 'lucide-react'
+import { Check, Gem, Infinity as InfinityIcon, Keyboard, Mic, MicOff, Snail, Volume2, X } from 'lucide-react'
+import { rewardImg } from '@/lib/assets'
+import { Ada } from '@/components/game/Ada'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { canListen, listen, normalize, similarity, speak } from '@/lib/speech'
@@ -145,8 +147,8 @@ export default function LessonPlayer() {
           <X className="size-7" />
         </button>
         <Progress value={done} max={total} color="bg-mint" tall className="flex-1" />
-        <span className="flex items-center gap-1 font-display text-lg font-extrabold text-berry">
-          <Heart className="size-6 fill-berry" />
+        <span className="flex items-center gap-1 text-lg font-black text-berry">
+          <img src={rewardImg('heart')} alt="" className="size-7" />
           {unlimited ? <InfinityIcon className="size-5" /> : hearts}
         </span>
       </header>
@@ -159,16 +161,16 @@ export default function LessonPlayer() {
         </AnimatePresence>
       </main>
 
-      <footer className={clsx('safe-bottom border-t-2 px-5 pb-4 pt-4 transition-colors', checked === null ? 'border-line/15' : checked ? 'border-mint bg-mint/20' : 'border-berry bg-berry/15')}>
+      <footer className={clsx('safe-bottom border-t-2 px-5 pb-4 pt-4 transition-colors', checked === null ? 'border-line' : checked ? 'border-transparent bg-mint/15' : 'border-transparent bg-berry/12')}>
         <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center">
           {checked !== null && (
             <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-1 items-center gap-3">
-              <span className={clsx('grid size-12 place-items-center rounded-full border-2 border-line', checked ? 'bg-mint' : 'bg-berry text-white')}>
+              <span className={clsx('grid size-12 place-items-center rounded-full text-white', checked ? 'bg-mint' : 'bg-berry')}>
                 {checked ? <Check className="size-7" strokeWidth={3} /> : <X className="size-7" strokeWidth={3} />}
               </span>
               <div>
-                <p className="font-display text-xl font-extrabold">{checked ? ['Harika!', 'Süper!', 'Aynen böyle!', 'Mükemmel!'][done % 4] : 'Doğru cevap:'}</p>
-                {!checked && <p className="font-semibold">{correctText(ex)}</p>}
+                <p className={clsx('text-2xl font-black', checked ? 'text-mint-deep' : 'text-berry')}>{checked ? ['Harika!', 'Süper!', 'Aynen böyle!', 'Mükemmel!'][done % 4] : 'Doğru cevap:'}</p>
+                {!checked && <p className="text-lg font-bold text-berry">{correctText(ex)}</p>}
               </div>
             </motion.div>
           )}
@@ -187,7 +189,7 @@ export default function LessonPlayer() {
 
       <Modal open={outOfHearts} onClose={() => nav('/learn')} dismissable={false}>
         <div className="text-center">
-          <Heart className="mx-auto mb-3 size-16 fill-berry/20 text-berry" />
+          <img src={rewardImg('heart')} alt="" className="mx-auto mb-3 size-24 object-contain grayscale" />
           <h2 className="text-2xl font-extrabold">Canın bitti!</h2>
           <p className="mb-6 mt-2 text-ink-soft">Canlar her 30 dakikada bir yenilenir. Hemen devam etmek istersen elmasla doldurabilir ya da Premium ile sınırsız can alabilirsin.</p>
           <div className="grid gap-3">
@@ -214,10 +216,10 @@ export default function LessonPlayer() {
 function SpeakerButton({ text, rate, big }: { text: string; rate?: number; big?: boolean }) {
   return (
     <div className="flex gap-3">
-      <button type="button" onClick={() => speak(text, { rate: rate ?? 0.95 })} className={clsx('press grid place-items-center rounded-2xl border-2 border-line bg-sky text-white shadow-hard', big ? 'size-24' : 'size-14')} aria-label="Dinle">
+      <button type="button" onClick={() => speak(text, { rate: rate ?? 0.95 })} className={clsx('press grid place-items-center rounded-2xl bg-sky text-white shadow-[0_4px_0_0_var(--color-sky-deep)]', big ? 'size-24' : 'size-14')} aria-label="Dinle">
         <Volume2 className={big ? 'size-11' : 'size-7'} />
       </button>
-      <button type="button" onClick={() => speak(text, { rate: 0.6 })} className={clsx('press grid place-items-center self-end rounded-2xl border-2 border-line bg-card shadow-hard-sm', big ? 'size-14' : 'size-10')} aria-label="Yavaş dinle">
+      <button type="button" onClick={() => speak(text, { rate: 0.6 })} className={clsx('press grid place-items-center self-end rounded-2xl border-2 border-line bg-card text-sky shadow-hard', big ? 'size-14' : 'size-10')} aria-label="Yavaş dinle">
         <Snail className={big ? 'size-7' : 'size-5'} />
       </button>
     </div>
@@ -241,7 +243,7 @@ function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exercise; 
           ) : (
             <div className="mb-8 flex items-center gap-3">
               {ex.type === 'choice' && ex.audio && <SpeakerButton text={ex.audio} rate={ttsRate} />}
-              <p className="rounded-2xl border-2 border-line bg-card px-5 py-4 text-xl font-bold shadow-hard-sm">
+              <p className="rounded-2xl border-2 border-line bg-card px-5 py-4 text-xl font-bold">
                 {ex.prompt.split('___').map((part, i, arr) => (
                   <span key={i}>
                     {part}
@@ -253,8 +255,8 @@ function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exercise; 
           )}
           <div className="grid gap-3 sm:grid-cols-2">
             {ex.options.map((o, i) => (
-              <button key={i} disabled={locked} onClick={() => { sfx.tap(); setValue(i) }} className={clsx('press flex items-center gap-3 rounded-2xl border-2 border-line px-4 py-4 text-left text-lg font-bold shadow-hard', value === i ? 'bg-sky text-white' : 'bg-card hover:bg-paper-2')}>
-                <span className="grid size-7 place-items-center rounded-lg border-2 border-current font-mono text-xs">{i + 1}</span>
+              <button key={i} disabled={locked} onClick={() => { sfx.tap(); setValue(i) }} className={clsx('press flex items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left text-lg font-bold', value === i ? 'border-sky bg-sky/10 text-sky shadow-[0_3px_0_0_var(--color-sky)]' : 'border-line bg-card shadow-hard hover:bg-paper-2')}>
+                <span className="grid size-7 place-items-center rounded-lg border-2 border-current text-xs font-black opacity-70">{i + 1}</span>
                 {o}
               </button>
             ))}
@@ -292,14 +294,14 @@ function TileBuilder({ ex, value, setValue, locked }: { ex: Extract<Exercise, { 
 
   return (
     <div>
-      <p className="mb-6 rounded-2xl border-2 border-line bg-butter px-5 py-4 text-xl font-bold text-[#1B1F3B] shadow-hard-sm">{ex.prompt}</p>
+      <div className="mb-6 flex items-start gap-3"><Ada className="size-14" /><p className="relative rounded-2xl border-2 border-line bg-card px-5 py-4 text-xl font-bold">{ex.prompt}</p></div>
       {typing ? (
         <textarea value={(value as string) ?? ''} onChange={(e) => setValue(e.target.value)} disabled={locked} autoFocus placeholder="İngilizce yaz…" className="min-h-32 w-full rounded-2xl border-2 border-line bg-card p-4 text-lg font-semibold shadow-hard-sm focus:outline-none" />
       ) : (
         <>
           <div className="mb-6 flex min-h-[4.5rem] flex-wrap content-start gap-2 border-b-2 border-dashed border-line/30 pb-3">
             {picked.map((i) => (
-              <motion.button layoutId={`tile-${i}`} key={i} disabled={locked} onClick={() => setPicked((p) => p.filter((x) => x !== i))} className="rounded-xl border-2 border-line bg-card px-3 py-2 font-bold shadow-hard-sm">
+              <motion.button layoutId={`tile-${i}`} key={i} disabled={locked} onClick={() => setPicked((p) => p.filter((x) => x !== i))} className="rounded-xl border-2 border-line bg-card px-3 py-2 text-lg font-bold shadow-hard">
                 {ex.tiles[i]}
               </motion.button>
             ))}
@@ -307,9 +309,9 @@ function TileBuilder({ ex, value, setValue, locked }: { ex: Extract<Exercise, { 
           <div className="flex flex-wrap justify-center gap-2">
             {tiles.map(({ t, i }) =>
               picked.includes(i) ? (
-                <span key={i} className="rounded-xl border-2 border-line/20 bg-paper-2 px-3 py-2 font-bold text-transparent">{t}</span>
+                <span key={i} className="rounded-xl bg-line px-3 py-2 text-lg font-bold text-transparent">{t}</span>
               ) : (
-                <motion.button layoutId={`tile-${i}`} key={i} disabled={locked} onClick={() => { sfx.tap(); setPicked((p) => [...p, i]) }} className="press rounded-xl border-2 border-line bg-card px-3 py-2 font-bold shadow-hard-sm">
+                <motion.button layoutId={`tile-${i}`} key={i} disabled={locked} onClick={() => { sfx.tap(); setPicked((p) => [...p, i]) }} className="press rounded-xl border-2 border-line bg-card px-3 py-2 text-lg font-bold shadow-hard">
                   {t}
                 </motion.button>
               ),
@@ -359,7 +361,7 @@ function SpeakExercise({ ex, setValue, locked, value, ttsRate }: { ex: Extract<E
         </div>
       </div>
       {canListen() ? (
-        <button disabled={locked} onClick={toggle} className={clsx('press mx-auto flex w-full max-w-sm items-center justify-center gap-3 rounded-2xl border-2 border-line py-6 font-display text-lg font-extrabold uppercase shadow-hard', listening ? 'bg-flame text-white' : 'bg-card')}>
+        <button disabled={locked} onClick={toggle} className={clsx('press mx-auto flex w-full max-w-sm items-center justify-center gap-3 rounded-2xl border-2 py-6 text-lg font-black uppercase', listening ? 'border-flame bg-flame text-white shadow-[0_4px_0_0_var(--color-flame-deep)]' : 'border-line bg-card text-sky shadow-hard')}>
           {listening ? <><MicOff className="size-6" /> Dinliyorum… (bitir)</> : <><Mic className="size-6 text-flame" /> Konuşmak için dokun</>}
         </button>
       ) : (
@@ -405,7 +407,7 @@ function MatchGame({ ex, onDone }: { ex: Extract<Exercise, { type: 'match' }>; o
         animate={wrong === it.i && !isDone ? { x: [0, -6, 6, 0] } : {}}
         onClick={() => pick(side, it.i, it.t)}
         disabled={isDone}
-        className={clsx('press rounded-2xl border-2 border-line px-3 py-4 text-lg font-bold shadow-hard-sm', isDone ? 'border-line/20 bg-mint/20 text-ink-soft shadow-none' : isSel ? 'bg-sky text-white' : 'bg-card')}
+        className={clsx('press rounded-2xl border-2 px-3 py-4 text-lg font-bold', isDone ? 'border-transparent bg-paper-2 text-ink-soft/50' : isSel ? 'border-sky bg-sky/10 text-sky shadow-[0_3px_0_0_var(--color-sky)]' : 'border-line bg-card shadow-hard')}
       >
         {it.t}
       </motion.button>

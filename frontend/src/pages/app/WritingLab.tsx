@@ -47,7 +47,7 @@ export default function WritingLab() {
           <p className="mb-2 text-sm font-bold">Konu seç</p>
           <div className="mb-4 flex flex-wrap gap-2">
             {PROMPTS.map((p) => (
-              <button key={p} onClick={() => setTask(p)} className={clsx('rounded-xl border-2 px-3 py-1.5 text-left text-sm font-semibold', task === p ? 'border-line bg-butter text-[#1B1F3B] shadow-hard-sm' : 'border-line/20')}>{p}</button>
+              <button key={p} onClick={() => setTask(p)} className={clsx('rounded-xl border-2 px-3 py-1.5 text-left text-sm font-semibold', task === p ? 'border-line bg-butter text-ink shadow-hard-sm' : 'border-line/20')}>{p}</button>
             ))}
           </div>
           <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write here in English…" className="[&_textarea]:min-h-64 [&_textarea]:font-read [&_textarea]:text-lg" hint={`${words} kelime · en az 20 karakter`} />
@@ -64,7 +64,7 @@ export default function WritingLab() {
           ) : (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">
               <div className="ink-card flex items-center gap-5 p-5">
-                <div className="grid size-24 place-items-center rounded-2xl border-2 border-line bg-butter text-[#1B1F3B] shadow-hard">
+                <div className="grid size-24 place-items-center rounded-2xl border-2 border-line bg-butter text-ink shadow-hard">
                   <div className="text-center">
                     <p className="font-display text-4xl font-extrabold leading-none">{r.cefr_estimate}</p>
                     <p className="text-xs font-bold">tahmini</p>

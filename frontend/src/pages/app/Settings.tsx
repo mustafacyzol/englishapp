@@ -64,7 +64,7 @@ export default function Settings() {
         <p className="mb-2 text-sm font-bold">Hedefin</p>
         <div className="flex flex-wrap gap-2">
           {GOALS.map((g) => (
-            <button key={g.key} onClick={() => save.mutate({ learning_goal: g.key })} className={clsx('rounded-xl border-2 border-line px-3 py-1.5 font-bold', user.learning_goal === g.key ? 'bg-butter text-[#1B1F3B] shadow-hard-sm' : 'bg-card')}>{g.emoji} {g.label}</button>
+            <button key={g.key} onClick={() => save.mutate({ learning_goal: g.key })} className={clsx('rounded-xl border-2 border-line px-3 py-1.5 font-bold', user.learning_goal === g.key ? 'bg-butter text-ink shadow-hard-sm' : 'bg-card')}>{g.emoji} {g.label}</button>
           ))}
         </div>
       </Section>
@@ -73,7 +73,7 @@ export default function Settings() {
         <p className="mb-2 text-sm font-bold">Tema</p>
         <div className="mb-4 grid grid-cols-3 gap-2">
           {([['light', 'Açık', Sun], ['dark', 'Koyu', Moon], ['system', 'Sistem', Monitor]] as const).map(([v, l, I]) => (
-            <button key={v} onClick={() => save.mutate({ preferences: { theme: v } })} className={clsx('flex items-center justify-center gap-2 rounded-xl border-2 border-line py-2 font-bold', (prefs.theme ?? 'system') === v ? 'bg-[#1B1F3B] text-[#F6F1E7] dark:bg-[#F6F1E7] dark:text-[#1B1F3B]' : 'bg-card')}><I className="size-4" /> {l}</button>
+            <button key={v} onClick={() => save.mutate({ preferences: { theme: v } })} className={clsx('flex items-center justify-center gap-2 rounded-xl border-2 border-line py-2 font-bold', (prefs.theme ?? 'system') === v ? 'bg-ink text-paper ' : 'bg-card')}><I className="size-4" /> {l}</button>
           ))}
         </div>
         <div className="divide-y-2 divide-line/10">

@@ -43,7 +43,7 @@ export default function VerifyEmail() {
 
   return (
     <AuthShell title="E-postanı doğrula" subtitle={<><b className="text-ink">{user?.email}</b> adresine 6 haneli bir kod gönderdik.</>}>
-      <div className="mx-auto mb-8 grid size-20 place-items-center rounded-3xl border-2 border-line bg-butter text-[#1B1F3B] shadow-hard">
+      <div className="mx-auto mb-8 grid size-20 place-items-center rounded-full bg-sky/10 text-sky">
         <MailCheck className="size-10" />
       </div>
       <OtpInput onComplete={(c) => verify.mutate(c)} status={err ? 'error' : verify.isSuccess ? 'success' : 'idle'} disabled={verify.isPending || verify.isSuccess} resetKey={reset} />

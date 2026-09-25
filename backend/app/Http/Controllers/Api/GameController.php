@@ -59,6 +59,7 @@ class GameController extends Controller
                 'size' => count($standings['rows']),
                 'ends_at' => $standings['ends_at'],
             ],
+            'next_rewards' => $this->game->roadmap($user)['next'],
             'due_words' => $user->words()->where('due_at', '<=', now())->count(),
             'unread_notifications' => $user->unreadNotifications()->count(),
             'available_items' => $user->items()->where('status', 'available')->count(),
@@ -297,6 +298,11 @@ class GameController extends Controller
         });
     }
 
+    public function roadmap(Request $request): JsonResponse
+    {
+        return response()->json($this->game->roadmap($request->user()));
+    }
+
     public function referrals(Request $request): JsonResponse
     {
         $user = $request->user();
@@ -322,7 +328,7 @@ class GameController extends Controller
     public function profile(string $username): JsonResponse
     {
         $user = User::query()->where('username', $username)->where('is_banned', false)->firstOrFail();
-        $badges = $user->userAchievements()->with('achievement:id,key,title,tier,icon')->latest('unlocked_at')->limit(12)->get()->pluck('achievement');
+        $badges = $user->userAchievements()->with('achievement:id,key,title,tier,icon,category')->latest('unlocked_at')->limit(12)->get()->pluck('achievement');
 
         return response()->json(['user' => UserPresenter::public($user), 'badges' => $badges]);
     }

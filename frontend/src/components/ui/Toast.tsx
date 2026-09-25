@@ -25,12 +25,12 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           {items.map((t) => (
             <motion.div
               key={t.id}
-              initial={{ y: -30, opacity: 0, rotate: -2 }}
-              animate={{ y: 0, opacity: 1, rotate: 0 }}
+              initial={{ y: -30, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
               exit={{ y: -20, opacity: 0 }}
               className={clsx(
-                'pointer-events-auto max-w-md rounded-2xl border-2 border-line px-4 py-3 text-sm font-bold shadow-hard',
-                t.tone === 'success' ? 'bg-mint text-[#0f2e27]' : t.tone === 'error' ? 'bg-berry text-white' : 'bg-card text-ink',
+                'pointer-events-auto max-w-md rounded-2xl px-4 py-3 text-sm font-bold shadow-soft',
+                t.tone === 'success' ? 'bg-mint text-white' : t.tone === 'error' ? 'bg-berry text-white' : 'bg-card text-ink',
               )}
             >
               {t.text}

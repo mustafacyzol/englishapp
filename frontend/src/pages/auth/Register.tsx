@@ -90,7 +90,7 @@ export default function Register() {
     >
       <div className="mb-6 flex items-center gap-3">
         {step > 0 && (
-          <button onClick={() => setStep(step - 1)} aria-label="Geri" className="grid size-9 place-items-center rounded-xl border-2 border-line bg-card">
+          <button onClick={() => setStep(step - 1)} aria-label="Geri" className="grid size-9 place-items-center rounded-xl text-ink-soft hover:bg-paper-2">
             <ArrowLeft className="size-4" />
           </button>
         )}
@@ -98,8 +98,8 @@ export default function Register() {
       </div>
 
       {form.referral_code && step === 0 && (
-        <div className="mb-5 flex items-center gap-3 rounded-2xl border-2 border-line bg-butter p-3 text-sm font-bold text-[#1B1F3B] shadow-hard-sm">
-          <Gift className="size-5 shrink-0" /> Bir arkadaşın seni davet etti! E-postanı doğrulayınca 100 elmas senin.
+        <div className="mb-5 flex items-center gap-3 rounded-2xl bg-butter/20 p-3 text-sm font-bold">
+          <Gift className="size-5 shrink-0 text-butter-deep" /> Bir arkadaşın seni davet etti! E-postanı doğrulayınca 100 elmas senin.
         </div>
       )}
 
@@ -114,11 +114,11 @@ export default function Register() {
                     setGoal(g.key)
                     setStep(1)
                   }}
-                  className={clsx('press ink-card flex items-center gap-4 p-4 text-left', goal === g.key && 'bg-butter text-[#1B1F3B]')}
+                  className={clsx('press flex items-center gap-4 rounded-2xl border-2 p-4 text-left shadow-hard', goal === g.key ? 'border-sky bg-sky/10' : 'border-line bg-card hover:bg-paper-2')}
                 >
                   <span className="text-3xl">{g.emoji}</span>
                   <span>
-                    <span className="block font-display text-lg font-extrabold">{g.label}</span>
+                    <span className="block text-lg font-black">{g.label}</span>
                     <span className="block text-sm opacity-70">{g.text}</span>
                   </span>
                 </button>
@@ -130,8 +130,8 @@ export default function Register() {
             <div className="space-y-6">
               <div className="grid grid-cols-2 gap-3">
                 {DAILY.map((d) => (
-                  <button key={d.xp} onClick={() => setDaily(d.xp)} className={clsx('press ink-card p-4 text-left', daily === d.xp && 'bg-flame text-white')}>
-                    <span className="block font-display text-xl font-extrabold">{d.label}</span>
+                  <button key={d.xp} onClick={() => setDaily(d.xp)} className={clsx('press rounded-2xl border-2 p-4 text-left shadow-hard', daily === d.xp ? 'border-sky bg-sky/10' : 'border-line bg-card')}>
+                    <span className="block text-xl font-black">{d.label}</span>
                     <span className="block text-sm opacity-80">{d.text} · {d.xp} XP</span>
                   </button>
                 ))}
@@ -140,7 +140,7 @@ export default function Register() {
                 <p className="mb-2 font-bold">İngilizce seviyen {placed && <span className="text-mint-deep">(seviye testinden: {level})</span>}</p>
                 <div className="grid gap-2">
                   {LEVELS.map((l) => (
-                    <button key={l.v} onClick={() => setLevel(l.v)} className={clsx('flex items-center gap-3 rounded-2xl border-2 border-line px-4 py-3 text-left font-semibold', level === l.v ? 'bg-sky text-white shadow-hard-sm' : 'bg-card')}>
+                    <button key={l.v} onClick={() => setLevel(l.v)} className={clsx('flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left font-bold', level === l.v ? 'border-sky bg-sky/10 text-sky' : 'border-line bg-card')}>
                       <span className="font-mono font-bold">{l.v}</span> {l.t}
                     </button>
                   ))}
@@ -162,13 +162,13 @@ export default function Register() {
               {/* honeypot: hidden from humans */}
               <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
               <label className="flex gap-3 text-sm">
-                <input type="checkbox" checked={form.accept_terms} onChange={set('accept_terms')} className="mt-0.5 size-5 accent-[#FF5A36]" required />
+                <input type="checkbox" checked={form.accept_terms} onChange={set('accept_terms')} className="mt-0.5 size-5 accent-[#e8403a]" required />
                 <span>
                   <Link to="/terms" className="font-bold underline">Kullanım koşullarını</Link> ve <Link to="/privacy" className="font-bold underline">KVKK aydınlatma metnini</Link> okudum, kabul ediyorum.
                 </span>
               </label>
               <label className="flex gap-3 text-sm">
-                <input type="checkbox" checked={form.marketing_opt_in} onChange={set('marketing_opt_in')} className="mt-0.5 size-5 accent-[#FF5A36]" />
+                <input type="checkbox" checked={form.marketing_opt_in} onChange={set('marketing_opt_in')} className="mt-0.5 size-5 accent-[#e8403a]" />
                 <span>Kampanya ve öğrenme ipuçlarını e-postayla almak istiyorum.</span>
               </label>
               <Turnstile onToken={setCaptcha} />

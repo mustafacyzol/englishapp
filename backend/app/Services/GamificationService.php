@@ -6,6 +6,8 @@ use App\Models\Achievement;
 use App\Models\DailyActivity;
 use App\Models\LeagueMembership;
 use App\Models\Quest;
+use App\Models\RewardClaim;
+use App\Models\RewardItem;
 use App\Models\User;
 use App\Models\UserAchievement;
 use App\Models\UserItem;
@@ -73,6 +75,7 @@ class GamificationService
             $quests = $this->progressQuests($user, $metrics + ['xp' => $xp]);
             $achievements = $this->checkAchievements($user);
             $levelAfter = $user->level();
+            $rewards = $this->roadmapRewards($user, $goalJustMet, $levelBefore, $levelAfter);
 
             return [
                 'xp_gained' => $xp,
@@ -87,9 +90,101 @@ class GamificationService
                 'goal_met_now' => $goalJustMet,
                 'quests_completed' => $quests,
                 'achievements' => $achievements,
-                'gems' => $user->gems,
+                'rewards' => $rewards,
+                'gems' => $user->fresh()->gems,
             ];
         });
+    }
+
+    /**
+     * Grants the fixed reward roadmap: daily-goal gems, level-up gems (+ a chest
+     * every N levels) and streak milestones. Each is claimed at most once.
+     *
+     * @return list<array{title:string, icon:string, gems?:int, item?:string}>
+     */
+    public function roadmapRewards(User $user, bool $goalJustMet, int $levelBefore, int $levelAfter): array
+    {
+        $cfg = config('dilgo.rewards');
+        $out = [];
+
+        if ($goalJustMet && $this->claim($user, 'goal:'.Period::today())) {
+            $user->increment('gems', $cfg['daily_goal_gems']);
+            $out[] = ['title' => 'Günlük hedef bonusu', 'icon' => 'gem', 'gems' => $cfg['daily_goal_gems']];
+        }
+
+        for ($lvl = $levelBefore + 1; $lvl <= $levelAfter; $lvl++) {
+            if (! $this->claim($user, "level:{$lvl}")) {
+                continue;
+            }
+            $user->increment('gems', $cfg['level_up_gems']);
+            $out[] = ['title' => "Seviye {$lvl} ödülü", 'icon' => 'gem', 'gems' => $cfg['level_up_gems']];
+            if ($lvl % $cfg['level_chest_every'] === 0) {
+                $card = $this->rewards->grant($user, 'mystery_chest', 'level', ['level' => $lvl]);
+                $out[] = ['title' => "Seviye {$lvl}: Gizemli Sandık", 'icon' => 'chest', 'item' => $card->item->name];
+            }
+        }
+
+        foreach ($cfg['streak_milestones'] as $days => $reward) {
+            if ($user->streak_current < $days || ! $this->claim($user, "streak:{$days}")) {
+                continue;
+            }
+            if (! empty($reward['gems'])) {
+                $user->increment('gems', $reward['gems']);
+                $out[] = ['title' => "{$days} günlük seri", 'icon' => 'flame', 'gems' => $reward['gems']];
+            }
+            if (! empty($reward['item'])) {
+                $card = $this->rewards->grant($user, $reward['item'], 'streak', ['days' => $days]);
+                $out[] = ['title' => "{$days} günlük seri: {$card->item->name}", 'icon' => $card->item->icon, 'item' => $card->item->name];
+            }
+        }
+
+        return $out;
+    }
+
+    private function claim(User $user, string $key): bool
+    {
+        return RewardClaim::query()->firstOrCreate(['user_id' => $user->id, 'key' => $key])->wasRecentlyCreated;
+    }
+
+    /** Upcoming roadmap rewards with progress, for the dashboard and the Ödüller page. */
+    public function roadmap(User $user): array
+    {
+        $cfg = config('dilgo.rewards');
+        $claimed = RewardClaim::query()->where('user_id', $user->id)->pluck('key')->flip();
+        $items = RewardItem::query()->pluck('name', 'key');
+        $icons = RewardItem::query()->pluck('icon', 'key');
+        $streak = $this->effectiveStreak($user);
+
+        $milestones = collect($cfg['streak_milestones'])->map(fn ($r, $days) => [
+            'kind' => 'streak',
+            'days' => $days,
+            'title' => ! empty($r['item']) ? $items[$r['item']] ?? $r['item'] : "{$r['gems']} elmas",
+            'icon' => ! empty($r['item']) ? $icons[$r['item']] ?? 'chest' : 'gem',
+            'gems' => $r['gems'] ?? 0,
+            'claimed' => $claimed->has("streak:{$days}"),
+            'current' => min($streak, $days),
+            'target' => $days,
+            'unit' => 'gün',
+        ])->values();
+
+        $level = $user->level();
+        $nextChest = (int) (ceil(($level + 1) / $cfg['level_chest_every']) * $cfg['level_chest_every']);
+
+        $next = [];
+        if ($m = $milestones->firstWhere('claimed', false)) {
+            $next[] = $m;
+        }
+        $next[] = ['kind' => 'level', 'title' => "Seviye {$nextChest}: Gizemli Sandık", 'icon' => 'chest', 'current' => $user->xp_total, 'target' => User::xpForLevel($nextChest), 'unit' => 'XP'];
+
+        return [
+            'streak' => $streak,
+            'level' => $level,
+            'milestones' => $milestones,
+            'level_up_gems' => $cfg['level_up_gems'],
+            'level_chest_every' => $cfg['level_chest_every'],
+            'daily_goal_gems' => $cfg['daily_goal_gems'],
+            'next' => $next,
+        ];
     }
 
     public function xpMultiplier(User $user): float
@@ -261,7 +356,7 @@ class GamificationService
                 $this->rewards->grant($user, $achievement->reward_item_key, 'achievement');
             }
             $user->notify(new AchievementUnlocked($achievement));
-            $new[] = $achievement->only(['id', 'key', 'title', 'description', 'tier', 'icon', 'reward_gems']);
+            $new[] = $achievement->only(['id', 'key', 'title', 'description', 'tier', 'icon', 'category', 'reward_gems']);
         }
 
         return $new;

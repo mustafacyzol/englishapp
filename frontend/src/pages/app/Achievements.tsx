@@ -26,7 +26,7 @@ export default function Achievements() {
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
             {list.map((a, i) => (
               <motion.div key={a.id} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.04 }} className="ink-card flex flex-col items-center p-4 text-center">
-                <AchievementBadge tier={a.tier} icon={a.icon} size={88} locked={!a.unlocked_at} progress={(a.progress ?? 0) / (a.threshold ?? 1)} />
+                <AchievementBadge tier={a.tier} icon={a.icon} category={a.category} size={88} locked={!a.unlocked_at} progress={(a.progress ?? 0) / (a.threshold ?? 1)} />
                 <p className="mt-2 font-display font-extrabold leading-tight">{a.title}</p>
                 <p className="text-xs text-ink-soft">{a.description}</p>
                 {a.unlocked_at ? (

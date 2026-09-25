@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, Bookmark, BookmarkCheck, Crown, Languages, Pause, Play, Plus, Type, Volume2 } from 'lucide-react'
+import { ArrowLeft, Bookmark, BookmarkCheck, Languages, Pause, Play, Plus, Type, Volume2 } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { speak, stopSpeaking } from '@/lib/speech'
@@ -13,6 +13,7 @@ import { Progress, Spinner, Sticker } from '@/components/ui/Misc'
 import { useReward } from '@/components/game/RewardProvider'
 import { useToast } from '@/components/ui/Toast'
 import { StoryCover } from './StoryCover'
+import { rewardImg } from '@/lib/assets'
 
 interface Resp { story: Story; locked: boolean; read: { bookmarked: boolean; progress: number; completed_at: string | null } }
 
@@ -113,20 +114,20 @@ export default function StoryReader() {
       <div className="mb-6 flex items-center justify-between">
         <Link to="/stories" className="flex items-center gap-1 font-bold text-ink-soft hover:text-ink"><ArrowLeft className="size-5" /> Kütüphane</Link>
         <div className="flex gap-2">
-          <button onClick={() => setBig((b) => !b)} className="grid size-10 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm" aria-label="Yazı boyutu"><Type className="size-5" /></button>
-          <button onClick={() => bookmark.mutate()} className="grid size-10 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm" aria-label="Kaydet">{bookmarked ? <BookmarkCheck className="size-5 text-flame" /> : <Bookmark className="size-5" />}</button>
+          <button onClick={() => setBig((b) => !b)} className="grid size-10 place-items-center rounded-xl border-2 border-line bg-card" aria-label="Yazı boyutu"><Type className="size-5" /></button>
+          <button onClick={() => bookmark.mutate()} className="grid size-10 place-items-center rounded-xl border-2 border-line bg-card" aria-label="Kaydet">{bookmarked ? <BookmarkCheck className="size-5 text-flame" /> : <Bookmark className="size-5" />}</button>
         </div>
       </div>
 
-      <header className="ink-card mb-8 overflow-hidden">
-        <div className="h-40 border-b-2 border-line"><StoryCover story={story} /></div>
+      <header className="mb-8 overflow-hidden rounded-3xl border-2 border-line bg-card">
+        <div className="aspect-[16/8]"><StoryCover story={story} /></div>
         <div className="p-6">
-          <div className="mb-2 flex flex-wrap gap-2">
-            <Sticker color="bg-butter" rotate={-2}>{story.cefr_level}</Sticker>
-            {story.category && <Sticker color="bg-mint" rotate={2}>{story.category}</Sticker>}
-            <Sticker color="bg-card" rotate={-1}>{story.reading_minutes} dk · {story.word_count} kelime</Sticker>
+          <div className="mb-3 flex flex-wrap gap-2">
+            <Sticker color="bg-butter">{story.cefr_level}</Sticker>
+            {story.category && <Sticker color="bg-paper-2 text-ink">{story.category}</Sticker>}
+            <Sticker color="bg-paper-2 text-ink">{story.reading_minutes} dk · {story.word_count} kelime</Sticker>
           </div>
-          <h1 className="text-4xl font-extrabold leading-tight">{story.title}</h1>
+          <h1 className="text-4xl leading-tight">{story.title}</h1>
           {story.title_tr && <p className="text-lg text-ink-soft">{story.title_tr}</p>}
           <p className="mt-3">{story.summary}</p>
           <div className="mt-5 flex flex-wrap gap-3">
@@ -140,13 +141,13 @@ export default function StoryReader() {
 
       <div className={clsx('space-y-6 font-read', big ? 'text-[22px] leading-[1.85]' : 'text-[19px] leading-[1.8]')}>
         {story.paragraphs.map((p, i) => (
-          <div key={i} className={clsx('group relative rounded-2xl border-2 p-4 transition', playing === i ? 'border-line bg-butter/30' : 'border-transparent hover:border-line/15')}>
+          <div key={i} className={clsx('group relative rounded-2xl p-4 transition', playing === i ? 'bg-butter/15' : 'hover:bg-paper-2/60')}>
             <div className="absolute -left-2 top-4 flex flex-col gap-1 sm:-left-14">
-              <button onClick={() => { autoplay.current = false; playParagraph(i) }} className="grid size-9 place-items-center rounded-full border-2 border-line bg-card shadow-hard-sm" aria-label="Paragrafı dinle">
+              <button onClick={() => { autoplay.current = false; playParagraph(i) }} className="grid size-9 place-items-center rounded-full bg-sky text-white" aria-label="Paragrafı dinle">
                 {playing === i ? <Pause className="size-4" /> : <Play className="size-4" />}
               </button>
               {p.tr && (
-                <button onClick={() => setShowTr((s) => ({ ...s, [i]: !s[i] }))} className="grid size-9 place-items-center rounded-full border-2 border-line bg-card shadow-hard-sm" aria-label="Çeviri">
+                <button onClick={() => setShowTr((s) => ({ ...s, [i]: !s[i] }))} className="grid size-9 place-items-center rounded-full border-2 border-line bg-card text-ink-soft" aria-label="Çeviri">
                   <Languages className="size-4" />
                 </button>
               )}
@@ -166,10 +167,10 @@ export default function StoryReader() {
       </div>
 
       {locked ? (
-        <div className="ink-card relative mt-8 overflow-hidden bg-[#1B1F3B] p-8 text-center text-[#F6F1E7]">
-          <Crown className="mx-auto mb-3 size-12 text-butter" />
-          <h2 className="text-2xl font-extrabold">Hikayenin devamı Premium'da</h2>
-          <p className="mx-auto mb-6 mt-2 max-w-sm text-[#F6F1E7]/70">Tüm hikayeler, sesli okumalar ve sınırsız pratik için Premium'a geç.</p>
+        <div className="relative mt-8 overflow-hidden rounded-3xl bg-[#1f2433] p-8 text-center text-white">
+          <img src={rewardImg('crown')} alt="" className="mx-auto mb-3 size-20 object-contain" />
+          <h2 className="text-2xl">Hikayenin devamı Premium'da</h2>
+          <p className="mx-auto mb-6 mt-2 max-w-sm text-white/70">Tüm hikayeler, sesli okumalar ve sınırsız pratik için Premium'a geç.</p>
           <LinkButton to="/premium" variant="butter">Premium'u keşfet</LinkButton>
         </div>
       ) : (
@@ -179,13 +180,13 @@ export default function StoryReader() {
               <h2 className="mb-4 text-2xl font-extrabold">Hikayedeki kelimeler</h2>
               <div className="grid gap-2 sm:grid-cols-2">
                 {story.vocabulary.map((v) => (
-                  <div key={v.word} className="flex items-center gap-2 rounded-xl border-2 border-line/15 p-3">
+                  <div key={v.word} className="flex items-center gap-3 rounded-2xl border-2 border-line p-3">
                     <button onClick={() => speak(v.word)} className="text-sky" aria-label="Dinle"><Volume2 className="size-5" /></button>
                     <div className="min-w-0 flex-1">
                       <p className="font-bold">{v.word}</p>
                       <p className="truncate text-sm text-ink-soft">{v.meaning}</p>
                     </div>
-                    <button onClick={() => saveWord.mutate({ word: v.word, translation: v.meaning, example: v.example })} className="grid size-8 place-items-center rounded-lg border-2 border-line bg-butter text-[#1B1F3B]" aria-label="Kaydet"><Plus className="size-4" /></button>
+                    <button onClick={() => saveWord.mutate({ word: v.word, translation: v.meaning, example: v.example })} className="grid size-9 place-items-center rounded-xl bg-mint/15 text-mint-deep hover:bg-mint/25" aria-label="Kelime defterine ekle"><Plus className="size-5" /></button>
                   </div>
                 ))}
               </div>
@@ -201,7 +202,7 @@ export default function StoryReader() {
                   <p className="mb-2 font-bold">{qi + 1}. {q.q}</p>
                   <div className="grid gap-2">
                     {q.options.map((o, oi) => (
-                      <button key={oi} onClick={() => setQuiz((s) => ({ ...s, [qi]: oi }))} className={clsx('rounded-xl border-2 border-line px-4 py-2.5 text-left font-semibold', quiz[qi] === oi ? 'bg-sky text-white shadow-hard-sm' : 'bg-card hover:bg-paper-2')}>
+                      <button key={oi} onClick={() => setQuiz((s) => ({ ...s, [qi]: oi }))} className={clsx('rounded-xl border-2 px-4 py-3 text-left font-bold', quiz[qi] === oi ? 'border-sky bg-sky/10 text-sky' : 'border-line bg-card hover:bg-paper-2')}>
                         {o}
                       </button>
                     ))}
@@ -261,8 +262,8 @@ function WordCard({ word, meaning, onSave, saving }: { word: string; meaning?: s
   return (
     <div className="ink-card p-4 font-sans">
       <div className="mb-2 flex items-center justify-between">
-        <p className="font-display text-2xl font-extrabold">{word}</p>
-        <button onClick={() => speak(word)} className="grid size-9 place-items-center rounded-full border-2 border-line bg-sky text-white" aria-label="Dinle"><Volume2 className="size-4" /></button>
+        <p className="text-2xl font-black">{word}</p>
+        <button onClick={() => speak(word)} className="grid size-9 place-items-center rounded-full bg-sky text-white" aria-label="Dinle"><Volume2 className="size-4" /></button>
       </div>
       {meaning ? <p className="mb-3 font-semibold">{meaning}</p> : (
         <input value={t} onChange={(e) => setT(e.target.value)} placeholder="Türkçesi (isteğe bağlı)" className="mb-3 h-10 w-full rounded-xl border-2 border-line bg-paper-2 px-3 text-sm font-semibold focus:outline-none" />

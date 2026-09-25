@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Outlet } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { ArrowLeft, BookOpen, Boxes, ClipboardList, Crown, Gauge, GraduationCap, KeyRound, LayoutList, Layers, MessagesSquare, Receipt, ScrollText, Settings, ShieldCheck, Swords, Ticket, Trophy, Users } from 'lucide-react'
+import { ArrowLeft, BookOpen, Boxes, ClipboardList, Crown, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Receipt, ScrollText, Settings, ShieldCheck, Swords, Ticket, Trophy, Users } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import { ApiError, hasAdminToken, onApiError, post, setAdminToken } from '@/lib/api'
 import { Logo } from '@/components/game/Logo'
@@ -24,6 +24,8 @@ const GROUPS = [
     { to: '/admin/r/lessons', label: 'Dersler', icon: ClipboardList },
     { to: '/admin/r/stories', label: 'Hikayeler', icon: BookOpen },
     { to: '/admin/r/scenarios', label: 'AI senaryoları', icon: MessagesSquare },
+    { to: '/admin/r/blog-posts', label: 'Blog', icon: Newspaper },
+    { to: '/admin/r/contact-messages', label: 'İletişim mesajları', icon: Mail },
   ] },
   { title: 'Oyun & Büyüme', items: [
     { to: '/admin/r/achievements', label: 'Rozetler', icon: Trophy, admin: true },
@@ -68,7 +70,7 @@ function StepUp({ onDone }: { onDone: () => void }) {
   return (
     <div className="grid min-h-dvh place-items-center p-6">
       <div className="ink-card w-full max-w-md p-8 text-center">
-        <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl border-2 border-line bg-[#1B1F3B] text-butter shadow-hard">
+        <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl border-2 border-line bg-ink text-butter shadow-hard">
           <ShieldCheck className="size-8" />
         </div>
         <h1 className="text-2xl font-extrabold">Yönetici doğrulaması</h1>
@@ -123,14 +125,14 @@ export default function AdminLayout() {
 
   return (
     <div className="flex min-h-dvh bg-paper">
-      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 overflow-y-auto border-r-2 border-line bg-[#1B1F3B] px-3 py-5 text-[#F6F1E7] md:block">
+      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 overflow-y-auto border-r-2 border-line bg-ink px-3 py-5 text-paper md:block">
         <div className="mb-6 px-2">
           <Logo small />
           <p className="mt-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-butter">Yönetim paneli</p>
         </div>
         {GROUPS.map((g) => (
           <div key={g.title} className="mb-5">
-            <p className="mb-1.5 px-3 text-[10px] font-extrabold uppercase tracking-[0.2em] text-[#F6F1E7]/45">{g.title}</p>
+            <p className="mb-1.5 px-3 text-[10px] font-extrabold uppercase tracking-[0.2em] text-paper/45">{g.title}</p>
             {g.items.filter((i) => !('admin' in i) || isAdmin).map((i) => (
               <NavLink key={i.to} to={i.to} end={'end' in i} className={({ isActive }) => clsx('flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold', isActive ? 'bg-flame text-white' : 'hover:bg-white/10')}>
                 <i.icon className="size-4" />
@@ -144,7 +146,7 @@ export default function AdminLayout() {
             await setAdminToken(null)
             setUnlocked(false)
           }}
-          className="mt-4 w-full rounded-xl border border-white/20 px-3 py-2 text-left text-xs font-bold text-[#F6F1E7]/70 hover:bg-white/10"
+          className="mt-4 w-full rounded-xl border border-white/20 px-3 py-2 text-left text-xs font-bold text-paper/70 hover:bg-white/10"
         >
           Yönetici oturumunu kapat
         </button>

@@ -14,7 +14,7 @@ type Row = Record<string, unknown> & { id: number }
 type FieldType = 'text' | 'textarea' | 'number' | 'bool' | 'select' | 'json' | 'date' | 'list'
 interface Field { key: string; label: string; type: FieldType; options?: string[]; hint?: string; full?: boolean }
 interface Col { key: string; label: string; render?: (r: Row) => ReactNode }
-interface Cfg { title: string; cols: Col[]; fields: Field[]; defaults: Record<string, unknown> }
+interface Cfg { title: string; cols: Col[]; fields: Field[]; defaults: Record<string, unknown>; noCreate?: boolean; preview?: (r: Row) => ReactNode }
 
 const CEFR = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 const bool = (k: string) => (r: Row) => (r[k] ? <Pill tone="good">evet</Pill> : <Pill>hayır</Pill>)
@@ -90,6 +90,25 @@ const CONFIG: Record<string, Cfg> = {
     fields: [{ key: 'code', label: 'Kod', type: 'text' }, { key: 'type', label: 'Tür', type: 'select', options: ['percent', 'fixed'] }, { key: 'value', label: 'Değer (% veya TL)', type: 'number' }, { key: 'max_uses', label: 'Toplam kullanım limiti', type: 'number' }, { key: 'max_uses_per_user', label: 'Kişi başı limit', type: 'number' }, { key: 'min_amount', label: 'Min. tutar', type: 'number' }, { key: 'starts_at', label: 'Başlangıç', type: 'date' }, { key: 'expires_at', label: 'Bitiş', type: 'date' }, { key: 'first_order_only', label: 'Yalnızca ilk sipariş', type: 'bool' }, { key: 'is_active', label: 'Aktif', type: 'bool' }, { key: 'description', label: 'Açıklama', type: 'text', full: true }],
     defaults: { type: 'percent', value: 10, max_uses_per_user: 1, is_active: true, first_order_only: false },
   },
+  'blog-posts': {
+    title: 'Blog yazıları',
+    cols: [{ key: 'title', label: 'Başlık' }, { key: 'category', label: 'Kategori' }, { key: 'published_at', label: 'Yayın', render: (r) => (r.published_at ? String(r.published_at).slice(0, 10) : '—') }, { key: 'is_published', label: 'Yayında', render: bool('is_published') }],
+    fields: [{ key: 'title', label: 'Başlık', type: 'text' }, { key: 'slug', label: 'Slug', type: 'text' }, { key: 'category', label: 'Kategori', type: 'text' }, { key: 'author_name', label: 'Yazar', type: 'text' }, { key: 'cover_image', label: 'Kapak görseli URL', type: 'text' }, { key: 'reading_minutes', label: 'Okuma süresi (dk)', type: 'number' }, { key: 'published_at', label: 'Yayın tarihi', type: 'date' }, { key: 'is_published', label: 'Yayında', type: 'bool' }, { key: 'excerpt', label: 'Kısa özet', type: 'text', full: true }, { key: 'body', label: 'İçerik (markdown)', type: 'textarea', full: true }],
+    defaults: { category: 'İpuçları', author_name: 'Bayrak Dil Okulları', reading_minutes: 4, is_published: true },
+  },
+  'contact-messages': {
+    title: 'İletişim mesajları',
+    noCreate: true,
+    cols: [{ key: 'name', label: 'Ad' }, { key: 'email', label: 'E-posta' }, { key: 'topic', label: 'Konu' }, { key: 'created_at', label: 'Tarih', render: (r) => String(r.created_at ?? '').slice(0, 10) }, { key: 'status', label: 'Durum', render: (r) => <Pill tone={r.status === 'new' ? 'warn' : 'good'}>{r.status === 'new' ? 'yeni' : r.status === 'replied' ? 'yanıtlandı' : 'kapandı'}</Pill> }],
+    preview: (r) => (
+      <div className="mb-5 rounded-2xl bg-paper-2 p-4 text-sm">
+        <p className="font-bold">{String(r.name)} · <a className="text-sky underline" href={`mailto:${r.email}`}>{String(r.email)}</a>{r.phone ? ` · ${r.phone}` : ''}</p>
+        <p className="mt-2 whitespace-pre-line">{String(r.message)}</p>
+      </div>
+    ),
+    fields: [{ key: 'status', label: 'Durum', type: 'select', options: ['new', 'replied', 'closed'] }, { key: 'admin_note', label: 'İç not', type: 'textarea', full: true }],
+    defaults: { status: 'new' },
+  },
   'redeem-codes': {
     title: 'Hediye kodları',
     cols: [{ key: 'code', label: 'Kod' }, { key: 'type', label: 'Tür' }, { key: 'amount', label: 'Miktar' }, { key: 'batch', label: 'Parti' }, { key: 'used_count', label: 'Kullanım', render: (r) => `${r.used_count}/${r.max_uses}` }, { key: 'is_active', label: 'Aktif', render: bool('is_active') }],
@@ -121,7 +140,7 @@ export default function Resource() {
     <div>
       <AdminTitle title={cfg.title}>
         <Input placeholder="Ara…" value={q} onChange={(e) => { setQ(e.target.value); setPage(1) }} className="w-56" />
-        <Button onClick={() => setEditing('new')} icon={<Plus className="size-4" />}>Yeni</Button>
+        {!cfg.noCreate && <Button onClick={() => setEditing('new')} icon={<Plus className="size-4" />}>Yeni</Button>}
       </AdminTitle>
       {isLoading || !data ? <Spinner /> : (
         <>
@@ -179,6 +198,7 @@ function Editor({ resource, cfg, row, onClose }: { resource: string; cfg: Cfg; r
     <Modal open onClose={onClose} className="sm:max-w-3xl">
       <h2 className="mb-5 text-2xl font-extrabold">{row ? 'Düzenle' : 'Yeni kayıt'} · {cfg.title}</h2>
       {(err || jsonErr) && <div className="mb-4"><Alert tone="error">{jsonErr || err!.first()}</Alert></div>}
+      {row && cfg.preview?.(row)}
       <div className="grid gap-4 sm:grid-cols-2">
         {cfg.fields.map((f) => {
           const cls = f.full ? 'sm:col-span-2' : ''

@@ -25,7 +25,7 @@ export default function Stories() {
       <PageHeader kicker="Oku & dinle" title="Hikaye kütüphanesi">
         <label className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-ink-soft" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Hikaye ara…" className="h-11 w-full rounded-2xl border-2 border-line bg-card pl-10 pr-3 font-semibold shadow-hard-sm focus:outline-none" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Hikaye ara…" className="h-11 w-full rounded-2xl border-2 border-line bg-card pl-10 pr-3 font-semibold focus:border-sky focus:outline-none" />
         </label>
       </PageHeader>
 
@@ -35,10 +35,10 @@ export default function Stories() {
           <div className="grid gap-3 sm:grid-cols-3">
             {reading.map((r) => (
               <Link key={r.story.slug} to={`/stories/${r.story.slug}`} className="press ink-card flex items-center gap-3 p-3">
-                <div className="size-14 shrink-0 overflow-hidden rounded-xl border-2 border-line"><StoryCover story={r.story} /></div>
+                <div className="size-14 shrink-0 overflow-hidden rounded-xl"><StoryCover story={r.story} /></div>
                 <div className="min-w-0">
                   <p className="truncate font-bold">{r.story.title}</p>
-                  <div className="mt-1 h-2 overflow-hidden rounded-full border border-line bg-paper-2"><div className="h-full bg-mint" style={{ width: `${r.progress}%` }} /></div>
+                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-paper-2"><div className="h-full rounded-full bg-mint" style={{ width: `${r.progress}%` }} /></div>
                 </div>
               </Link>
             ))}
@@ -51,7 +51,7 @@ export default function Stories() {
       </div>
       <div className="no-scrollbar mb-6 flex gap-2 overflow-x-auto">
         {['', ...(cats.data?.data ?? [])].map((c) => (
-          <button key={c} onClick={() => setCategory(c)} className={clsx('shrink-0 rounded-full border-2 px-3 py-1 text-sm font-bold', category === c ? 'border-line bg-butter text-[#1B1F3B]' : 'border-line/20 hover:border-line')}>
+          <button key={c} onClick={() => setCategory(c)} className={clsx('shrink-0 rounded-full px-3.5 py-1.5 text-sm font-extrabold transition', category === c ? 'bg-ink text-card' : 'bg-paper-2 text-ink-soft hover:text-ink')}>
             {c || 'Tümü'}
           </button>
         ))}
@@ -64,20 +64,20 @@ export default function Stories() {
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
           {data.data.map((s, i) => (
-            <Link key={s.id} to={`/stories/${s.slug}`} className="press group ink-card overflow-hidden" style={{ transform: `rotate(${i % 2 ? 0.6 : -0.6}deg)` }}>
-              <div className="relative h-36 border-b-2 border-line">
-                <StoryCover story={s} />
+            <Link key={s.id} to={`/stories/${s.slug}`} className="group overflow-hidden rounded-3xl border-2 border-line bg-card transition hover:-translate-y-1 hover:shadow-soft" style={{ transitionDelay: `${(i % 6) * 0}ms` }}>
+              <div className="relative aspect-[16/10] overflow-hidden">
+                <StoryCover story={s} className="transition duration-700 group-hover:scale-105" />
                 <div className="absolute left-3 top-3 flex gap-1.5">
-                  <span className="rounded-lg border-2 border-line bg-card px-2 py-0.5 font-mono text-xs font-bold">{s.cefr_level}</span>
-                  {s.is_premium && <span className="grid size-7 place-items-center rounded-lg border-2 border-line bg-butter text-[#1B1F3B]"><Crown className="size-4" /></span>}
+                  <span className="rounded-lg bg-card/95 px-2 py-0.5 text-xs font-black">{s.cefr_level}</span>
+                  {s.is_premium && <span className="flex items-center gap-1 rounded-lg bg-butter px-2 py-0.5 text-xs font-black text-[#1f2433]"><Crown className="size-3.5" /> Premium</span>}
                 </div>
                 <div className="absolute right-3 top-3 flex gap-1.5">
-                  {s.completed && <CheckCircle2 className="size-7 rounded-full border-2 border-line bg-mint text-[#0f2e27]" />}
-                  {s.bookmarked && <Bookmark className="size-7 rounded-lg border-2 border-line bg-card p-1" />}
+                  {s.completed && <CheckCircle2 className="size-7 rounded-full bg-mint p-0.5 text-white" />}
+                  {s.bookmarked && <Bookmark className="size-7 rounded-lg bg-card p-1" />}
                 </div>
               </div>
-              <div className="p-4">
-                <h3 className="text-xl font-extrabold leading-tight group-hover:text-flame">{s.title}</h3>
+              <div className="p-5">
+                <h3 className="text-xl leading-tight group-hover:text-flame">{s.title}</h3>
                 {s.title_tr && <p className="text-sm text-ink-soft">{s.title_tr}</p>}
                 <p className="mt-2 line-clamp-2 text-sm">{s.summary}</p>
                 <div className="mt-3 flex items-center gap-3 text-xs font-bold text-ink-soft">
@@ -85,7 +85,7 @@ export default function Stories() {
                   <span className="flex items-center gap-1"><Headphones className="size-3.5" /> Sesli</span>
                   {s.category && <span>{s.category}</span>}
                 </div>
-                {!!s.progress && !s.completed && <div className="mt-3 h-2 overflow-hidden rounded-full border border-line bg-paper-2"><div className="h-full bg-mint" style={{ width: `${s.progress}%` }} /></div>}
+                {!!s.progress && !s.completed && <div className="mt-3 h-2 overflow-hidden rounded-full bg-paper-2"><div className="h-full rounded-full bg-mint" style={{ width: `${s.progress}%` }} /></div>}
               </div>
             </Link>
           ))}

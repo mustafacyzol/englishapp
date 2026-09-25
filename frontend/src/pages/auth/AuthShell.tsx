@@ -1,42 +1,33 @@
 import type { ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { Flame } from 'lucide-react'
+import { motion } from 'motion/react'
 import { Logo } from '@/components/game/Logo'
 import { Ada } from '@/components/game/Ada'
-import { AchievementBadge } from '@/components/game/AchievementBadge'
+import { PHOTO } from '@/lib/assets'
 
 export function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[1fr_1.1fr]">
-      <aside className="relative hidden overflow-hidden border-r-2 border-line bg-[#1B1F3B] p-12 text-[#F6F1E7] lg:flex lg:flex-col">
-        <Link to="/"><Logo /></Link>
-        <div className="relative my-auto">
-          <div className="absolute -left-6 -top-24 rotate-[-8deg]"><AchievementBadge tier="gold" icon="mic" size={90} /></div>
-          <div className="absolute -top-16 right-8 rotate-6 rounded-2xl border-2 border-line bg-flame px-4 py-2 text-white shadow-hard">
-            <span className="flex items-center gap-2 font-display text-xl font-extrabold"><Flame className="size-5 fill-butter text-butter" /> 12 gün</span>
+    <div className="grid min-h-dvh bg-card lg:grid-cols-[1fr_1.05fr]">
+      <aside className="relative hidden overflow-hidden lg:block">
+        <img src={PHOTO.auth} alt="" className="photo absolute inset-0" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/20" />
+        <Link to="/" className="absolute left-10 top-10 rounded-2xl bg-card/95 px-4 py-2"><Logo small /></Link>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="absolute inset-x-10 bottom-10 flex items-start gap-4 rounded-3xl bg-card/95 p-5 backdrop-blur">
+          <Ada className="size-14" />
+          <div>
+            <p className="font-black">Ada · AI İngilizce öğretmenin</p>
+            <p className="mt-1 text-ink-soft">Hatalarını Türkçe açıklarım, kaydettiğin kelimeleri sohbetlerimizde tekrar ederim. Hadi başlayalım!</p>
           </div>
-          <blockquote className="font-display text-4xl font-extrabold leading-tight">
-            “Bir dil, bir insan.
-            <br />
-            <span className="text-butter">İki dil, iki insan.”</span>
-          </blockquote>
-          <div className="mt-10 flex items-center gap-4 rounded-2xl border-2 border-[#F6F1E7]/15 bg-white/5 p-4">
-            <Ada className="size-14" />
-            <p className="text-sm text-[#F6F1E7]/80">
-              Ben Ada, senin AI İngilizce öğretmeninim. Hatalarını Türkçe açıklarım, kaydettiğin kelimeleri sohbetlerimizde tekrar ederim. Hadi başlayalım!
-            </p>
-          </div>
-        </div>
-        <p className="text-xs text-[#F6F1E7]/50">Bayrak Dil Okulları · DilGO</p>
+        </motion.div>
       </aside>
       <main className="flex flex-col px-5 py-8 sm:px-10">
         <Link to="/" className="mb-8 lg:hidden"><Logo small /></Link>
-        <div className="mx-auto my-auto w-full max-w-md">
-          <h1 className="text-4xl font-extrabold">{title}</h1>
-          {subtitle && <p className="mt-2 text-ink-soft">{subtitle}</p>}
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className="mx-auto my-auto w-full max-w-md">
+          <h1 className="text-4xl">{title}</h1>
+          {subtitle && <p className="mt-2 text-lg text-ink-soft">{subtitle}</p>}
           <div className="mt-8">{children}</div>
-          {footer && <div className="mt-8 text-center text-sm font-semibold text-ink-soft">{footer}</div>}
-        </div>
+          {footer && <div className="mt-8 text-center font-semibold text-ink-soft">{footer}</div>}
+        </motion.div>
       </main>
     </div>
   )

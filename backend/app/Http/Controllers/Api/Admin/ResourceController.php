@@ -158,6 +158,28 @@ class ResourceController extends Controller
                     'position' => ['integer'],
                 ],
             ],
+            'blog-posts' => [
+                'model' => Models\BlogPost::class, 'search' => ['title', 'slug'], 'order' => '-published_at', 'filters' => ['category', 'is_published'], 'role' => 'staff',
+                'rules' => [
+                    'slug' => ['required', 'alpha_dash', 'max:190', Rule::unique('blog_posts')->ignore($id)],
+                    'title' => ['required', 'string', 'max:190'],
+                    'excerpt' => ['nullable', 'string', 'max:400'],
+                    'body' => ['required', 'string'],
+                    'cover_image' => ['nullable', 'string', 'max:500'],
+                    'category' => ['nullable', 'string', 'max:40'],
+                    'author_name' => ['nullable', 'string', 'max:80'],
+                    'reading_minutes' => ['integer', 'min:1', 'max:60'],
+                    'is_published' => ['boolean'],
+                    'published_at' => ['nullable', 'date'],
+                ],
+            ],
+            'contact-messages' => [
+                'model' => Models\ContactMessage::class, 'search' => ['name', 'email', 'message'], 'order' => '-id', 'filters' => ['status', 'topic'], 'role' => 'staff',
+                'rules' => [
+                    'status' => ['required', 'in:new,replied,closed'],
+                    'admin_note' => ['nullable', 'string', 'max:2000'],
+                ],
+            ],
             'coupons' => [
                 'model' => Models\Coupon::class, 'search' => ['code', 'description'], 'order' => '-id', 'filters' => ['is_active'], 'role' => 'admin',
                 'rules' => [

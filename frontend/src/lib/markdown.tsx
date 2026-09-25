@@ -35,7 +35,7 @@ export function Markdown({ source }: { source: string }) {
       blocks.push(
         <div key={i} className="my-4 overflow-x-auto rounded-2xl border-2 border-line">
           <table className="w-full text-sm">
-            <thead className="bg-butter text-[#1B1F3B]"><tr>{head.map((h, j) => <th key={j} className="px-3 py-2 text-left font-extrabold">{inline(h)}</th>)}</tr></thead>
+            <thead className="bg-butter text-ink"><tr>{head.map((h, j) => <th key={j} className="px-3 py-2 text-left font-extrabold">{inline(h)}</th>)}</tr></thead>
             <tbody>{body.map((r, ri) => <tr key={ri} className="border-t-2 border-line/10">{r.map((c, j) => <td key={j} className="px-3 py-2">{inline(c)}</td>)}</tr>)}</tbody>
           </table>
         </div>,

@@ -48,6 +48,27 @@ return [
         ],
     ],
 
+    /*
+    | Reward roadmap. Every one-time reward is recorded in `reward_claims`, so
+    | it can never be granted twice. Card rewards land in the user's Ödül Kasası.
+    */
+    'rewards' => [
+        'daily_goal_gems' => 5,
+        'level_up_gems' => 20,
+        'level_chest_every' => 5,      // every 5th level also grants a mystery chest
+        'streak_milestones' => [
+            3 => ['gems' => 30],
+            7 => ['item' => 'streak_freeze'],
+            14 => ['item' => 'xp_boost_60'],
+            30 => ['item' => 'premium_3d'],
+            50 => ['item' => 'mystery_chest'],
+            100 => ['item' => 'live_lesson'],
+            200 => ['item' => 'premium_7d'],
+            365 => ['item' => 'live_lesson', 'gems' => 1000],
+        ],
+        'league_winner_item' => 'mystery_chest',
+    ],
+
     'referral' => [
         'referee_gems' => 100,       // new user gets on email verification
         'referrer_gems' => 150,      // inviter gets when friend verifies email

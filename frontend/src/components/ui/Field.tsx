@@ -3,7 +3,7 @@ import clsx from 'clsx'
 import { Eye, EyeOff } from 'lucide-react'
 
 const base =
-  'w-full rounded-2xl border-2 border-line bg-card px-4 text-[15px] text-ink placeholder:text-ink-soft/70 shadow-[inset_0_2px_0_rgba(0,0,0,0.04)] transition focus:outline-none focus:ring-4 focus:ring-sky/25 disabled:opacity-60'
+  'w-full rounded-2xl border-2 border-line bg-paper-2/60 px-4 text-[15px] font-semibold text-ink placeholder:font-normal placeholder:text-ink-soft/70 transition focus:border-sky focus:bg-card focus:outline-none focus:ring-4 focus:ring-sky/15 disabled:opacity-60'
 
 interface FieldProps {
   label?: string
@@ -80,8 +80,8 @@ export function Toggle({ checked, onChange, label, description }: { checked: boo
         <span className="block font-bold">{label}</span>
         {description && <span className="block text-sm text-ink-soft">{description}</span>}
       </span>
-      <span className={clsx('relative h-8 w-14 shrink-0 rounded-full border-2 border-line transition', checked ? 'bg-mint' : 'bg-paper-2')} role="switch" aria-checked={checked}>
-        <span className={clsx('absolute top-0.5 size-6 rounded-full border-2 border-line bg-card shadow-hard-sm transition-all', checked ? 'left-6' : 'left-0.5')} />
+      <span className={clsx('relative h-8 w-14 shrink-0 rounded-full transition', checked ? 'bg-mint' : 'bg-line')} role="switch" aria-checked={checked}>
+        <span className={clsx('absolute top-1 size-6 rounded-full bg-white shadow transition-all', checked ? 'left-7' : 'left-1')} />
       </span>
     </button>
   )

@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { Clock, Gem, Gift, Package } from 'lucide-react'
+import { Clock } from 'lucide-react'
+import { img } from '@/lib/assets'
 import { get, post } from '@/lib/api'
 import { timeLeft } from '@/lib/format'
 import { celebrate, sfx } from '@/lib/fx'
@@ -37,9 +38,9 @@ export default function Quests() {
       </div>
       <div className="grid gap-3">
         {data.data.filter((q) => q.period === period).map((q) => (
-          <div key={q.id} className={clsx('ink-card flex items-center gap-4 p-4', q.claimed && 'opacity-60')}>
-            <span className={clsx('grid size-14 shrink-0 place-items-center rounded-2xl border-2 border-line text-[#1B1F3B]', q.completed ? 'bg-butter' : 'bg-paper-2')}>
-              {q.reward_item_key ? <Package className="size-7" /> : <Gift className="size-7" />}
+          <div key={q.id} className={clsx('ink-card flex items-center gap-4 p-4 transition', q.claimed && 'opacity-60')}>
+            <span className={clsx('grid size-16 shrink-0 place-items-center rounded-2xl', q.completed ? 'bg-butter/25' : 'bg-paper-2')}>
+              <img src={img(q.reward_item_key ? 'rewards/chest.webp' : 'rewards/gems.webp')} alt="" className={clsx('size-12 object-contain', q.completed && !q.claimed && 'animate-bounce')} />
             </span>
             <div className="min-w-0 flex-1">
               <p className="font-display text-lg font-extrabold">{q.title}</p>
@@ -47,7 +48,7 @@ export default function Quests() {
                 <Progress value={q.progress} max={q.target} color={q.completed ? 'bg-flame' : 'bg-sky'} className="flex-1" />
                 <span className="font-mono text-xs font-bold">{q.progress}/{q.target}</span>
               </div>
-              <p className="mt-1 flex items-center gap-1 text-xs font-bold text-ink-soft"><Gem className="size-3.5 text-sky" /> {q.reward_gems}{q.reward_item_key && ' + ödül kartı'}</p>
+              <p className="mt-1 flex items-center gap-1 text-xs font-bold text-ink-soft"><img src={img('rewards/gems.webp')} alt="" className="size-4" /> {q.reward_gems} elmas{q.reward_xp ? ` · ${q.reward_xp} XP` : ''}{q.reward_item_key && ' + ödül kartı'}</p>
             </div>
             {q.completed && !q.claimed && <Button size="sm" variant="butter" loading={claim.isPending && claim.variables === q.id} onClick={() => claim.mutate(q.id)}>Al</Button>}
             {q.claimed && <span className="text-sm font-bold text-mint-deep">Alındı ✓</span>}

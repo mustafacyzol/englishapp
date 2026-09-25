@@ -14,17 +14,17 @@ export function Card({ className, children, as: As = 'div', ...rest }: { classNa
 export function Progress({ value, max = 100, color = 'bg-mint', className, tall }: { value: number; max?: number; color?: string; className?: string; tall?: boolean }) {
   const pct = Math.max(0, Math.min(100, (value / Math.max(1, max)) * 100))
   return (
-    <div className={clsx('relative overflow-hidden rounded-full border-2 border-line bg-paper-2', tall ? 'h-5' : 'h-3.5', className)} role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
+    <div className={clsx('relative overflow-hidden rounded-full bg-paper-2', tall ? 'h-4' : 'h-3', className)} role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
       <motion.div className={clsx('h-full rounded-full', color)} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ type: 'spring', stiffness: 120, damping: 20 }}>
-        <div className="mx-2 mt-[3px] h-[3px] rounded-full bg-white/45" />
+        <div className="mx-2 mt-[3px] h-[3px] rounded-full bg-white/35" />
       </motion.div>
     </div>
   )
 }
 
-export function Sticker({ children, color = 'bg-butter', rotate = -3, className }: { children: ReactNode; color?: string; rotate?: number; className?: string }) {
+export function Sticker({ children, color = 'bg-butter', className }: { children: ReactNode; color?: string; rotate?: number; className?: string }) {
   return (
-    <span style={{ transform: `rotate(${rotate}deg)` }} className={clsx('inline-flex items-center gap-1 rounded-lg border-2 border-line px-2 py-0.5 text-xs font-extrabold uppercase tracking-wide text-[#1B1F3B] shadow-hard-sm', color, className)}>
+    <span className={clsx('inline-flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-extrabold uppercase tracking-wider text-[#1f2433]', color, className)}>
       {children}
     </span>
   )
@@ -34,8 +34,8 @@ export function Spinner({ label = 'Yükleniyor' }: { label?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-16 text-ink-soft" role="status">
       <div className="flex gap-1.5">
-        {['bg-flame', 'bg-butter', 'bg-mint', 'bg-sky'].map((c, i) => (
-          <motion.span key={c} className={clsx('size-3.5 rounded-full border-2 border-line', c)} animate={{ y: [0, -10, 0] }} transition={{ repeat: Infinity, duration: 0.8, delay: i * 0.1 }} />
+        {['bg-flame', 'bg-butter', 'bg-mint'].map((c, i) => (
+          <motion.span key={c} className={clsx('size-3 rounded-full', c)} animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 0.7, delay: i * 0.12 }} />
         ))}
       </div>
       <span className="text-sm font-semibold">{label}…</span>
@@ -46,7 +46,7 @@ export function Spinner({ label = 'Yükleniyor' }: { label?: string }) {
 export function Empty({ icon, title, text, action }: { icon: ReactNode; title: string; text?: string; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
-      <div className="grid size-16 place-items-center rounded-2xl border-2 border-line bg-butter text-[#1B1F3B] shadow-hard">{icon}</div>
+      <div className="grid size-16 place-items-center rounded-2xl bg-paper-2 text-ink-soft">{icon}</div>
       <h3 className="text-xl font-extrabold">{title}</h3>
       {text && <p className="max-w-sm text-ink-soft">{text}</p>}
       {action}
@@ -69,16 +69,16 @@ export function Modal({ open, onClose, children, className, dismissable = true }
   return (
     <AnimatePresence>
       {open && (
-        <motion.div className="fixed inset-0 z-50 flex items-end justify-center bg-[#0b0d1c]/55 p-0 backdrop-blur-[2px] sm:items-center sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => dismissable && onClose()}>
+        <motion.div className="fixed inset-0 z-50 flex items-end justify-center bg-[#11141c]/50 p-0 backdrop-blur-sm sm:items-center sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => dismissable && onClose()}>
           <motion.div
             role="dialog"
             aria-modal="true"
             onClick={(e) => e.stopPropagation()}
-            initial={{ y: 60, opacity: 0, rotate: -1 }}
-            animate={{ y: 0, opacity: 1, rotate: 0 }}
+            initial={{ y: 40, opacity: 0, scale: 0.98 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
             exit={{ y: 40, opacity: 0 }}
             transition={{ type: 'spring', stiffness: 300, damping: 26 }}
-            className={clsx('ink-card safe-bottom relative max-h-[92dvh] w-full overflow-y-auto rounded-b-none p-6 sm:max-w-lg sm:rounded-[var(--radius-blob)]', className)}
+            className={clsx('safe-bottom relative max-h-[92dvh] w-full overflow-y-auto rounded-t-3xl bg-card p-6 shadow-soft sm:max-w-lg sm:rounded-3xl', className)}
           >
             {dismissable && (
               <button onClick={onClose} className="absolute right-4 top-4 grid size-9 place-items-center rounded-xl hover:bg-paper-2" aria-label="Kapat">
@@ -100,7 +100,7 @@ export function Tabs<T extends string>({ value, onChange, items }: { value: T; o
         <button
           key={it.value}
           onClick={() => onChange(it.value)}
-          className={clsx('press shrink-0 rounded-xl border-2 border-line px-3.5 py-1.5 text-sm font-bold', value === it.value ? 'bg-[#1B1F3B] text-[#F6F1E7] shadow-hard-sm dark:bg-[#F6F1E7] dark:text-[#1B1F3B]' : 'bg-card hover:bg-paper-2')}
+          className={clsx('shrink-0 rounded-full border-2 px-4 py-1.5 text-sm font-extrabold transition', value === it.value ? 'border-sky bg-sky/10 text-sky' : 'border-line bg-card text-ink-soft hover:text-ink')}
         >
           {it.label}
         </button>
@@ -113,8 +113,8 @@ export function PageHeader({ title, kicker, children, className }: { title: Reac
   return (
     <header className={clsx('mb-6 flex flex-wrap items-end justify-between gap-4', className)}>
       <div>
-        {kicker && <p className="mb-1 text-xs font-extrabold uppercase tracking-[0.18em] text-flame">{kicker}</p>}
-        <h1 className="text-3xl font-extrabold sm:text-4xl">{title}</h1>
+        {kicker && <p className="mb-1 text-xs font-extrabold uppercase tracking-[0.14em] text-ink-soft">{kicker}</p>}
+        <h1 className="text-3xl sm:text-4xl">{title}</h1>
       </div>
       {children}
     </header>

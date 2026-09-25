@@ -8,6 +8,7 @@ import { ApiError, get, post } from '@/lib/api'
 import { canListen, listen, speak, stopSpeaking } from '@/lib/speech'
 import type { RewardSummary } from '@/lib/types'
 import { Ada } from '@/components/game/Ada'
+import { scenarioImg } from '@/lib/assets'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
@@ -120,15 +121,15 @@ export default function AiChat() {
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-10rem)] max-w-5xl gap-6 lg:h-[calc(100dvh-7.5rem)]">
-      <div className="ink-card flex min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-3xl border-2 border-line bg-card">
         <header className="flex items-center gap-3 border-b-2 border-line px-4 py-3">
-          <Link to="/ai" aria-label="Geri"><ArrowLeft className="size-5" /></Link>
-          <Ada className="size-10" talking={talking} />
+          <Link to="/ai" aria-label="Geri" className="text-ink-soft hover:text-ink"><ArrowLeft className="size-5" /></Link>
+          <Ada className="size-11" talking={talking} />
           <div className="min-w-0 flex-1">
-            <p className="truncate font-display font-extrabold">{conv.title}</p>
+            <p className="truncate font-black">{conv.title}</p>
             <p className="text-xs text-ink-soft">{send.isPending ? 'Ada yazıyor…' : talking ? 'Ada konuşuyor…' : `Kalan mesaj: ${usage?.remaining ?? '-'}`}</p>
           </div>
-          <button onClick={() => { setVoice((v) => !v); stopSpeaking() }} className="grid size-10 place-items-center rounded-xl border-2 border-line" aria-label="Sesli yanıt">
+          <button onClick={() => { setVoice((v) => !v); stopSpeaking() }} className="grid size-10 place-items-center rounded-xl text-ink-soft hover:bg-paper-2" aria-label="Sesli yanıt">
             {voice ? <Volume2 className="size-5" /> : <VolumeX className="size-5 text-ink-soft" />}
           </button>
         </header>
@@ -136,14 +137,14 @@ export default function AiChat() {
         {goals.length > 0 && (
           <div className="no-scrollbar flex gap-2 overflow-x-auto border-b-2 border-line/10 px-4 py-2 lg:hidden">
             {goals.map((g, i) => (
-              <span key={i} className={clsx('flex shrink-0 items-center gap-1 rounded-full border-2 px-2 py-0.5 text-xs font-bold', goalsDone.includes(i) ? 'border-mint bg-mint/20' : 'border-line/20')}>
+              <span key={i} className={clsx('flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold', goalsDone.includes(i) ? 'bg-mint/15 text-mint-deep' : 'bg-paper-2 text-ink-soft')}>
                 {goalsDone.includes(i) ? <CheckCircle2 className="size-3.5" /> : <Circle className="size-3.5" />} {g}
               </span>
             ))}
           </div>
         )}
 
-        <div className="flex-1 space-y-4 overflow-y-auto p-4">
+        <div className="flex-1 space-y-4 overflow-y-auto bg-paper/60 p-4">
           {messages.map((m) => (
             <Bubble key={m.id} m={m} onSpeak={say} />
           ))}
@@ -163,7 +164,7 @@ export default function AiChat() {
 
         <form onSubmit={submit} className="flex items-end gap-2 border-t-2 border-line p-3">
           {canListen() && (
-            <button type="button" onClick={toggleMic} className={clsx('press grid size-12 shrink-0 place-items-center rounded-2xl border-2 border-line shadow-hard-sm', listening ? 'bg-flame text-white' : 'bg-butter text-[#1B1F3B]')} aria-label="Sesli konuş">
+            <button type="button" onClick={toggleMic} className={clsx('press grid size-12 shrink-0 place-items-center rounded-2xl text-white', listening ? 'bg-flame shadow-[0_3px_0_0_var(--color-flame-deep)] animate-pulse' : 'bg-sky shadow-[0_3px_0_0_var(--color-sky-deep)]')} aria-label="Sesli konuş">
               {listening ? <Square className="size-5" /> : <Mic className="size-5" />}
             </button>
           )}
@@ -174,9 +175,9 @@ export default function AiChat() {
             placeholder={listening ? 'Dinliyorum…' : 'İngilizce yaz…'}
             rows={1}
             maxLength={1000}
-            className="max-h-32 min-h-12 flex-1 resize-none rounded-2xl border-2 border-line bg-paper-2 px-4 py-3 font-semibold focus:outline-none"
+            className="max-h-32 min-h-12 flex-1 resize-none rounded-2xl border-2 border-line bg-paper-2/60 px-4 py-3 font-semibold focus:border-sky focus:bg-card focus:outline-none"
           />
-          <button type="submit" disabled={!text.trim() || send.isPending} className="press grid size-12 shrink-0 place-items-center rounded-2xl border-2 border-line bg-flame text-white shadow-hard-sm disabled:opacity-40" aria-label="Gönder">
+          <button type="submit" disabled={!text.trim() || send.isPending} className="press grid size-12 shrink-0 place-items-center rounded-2xl bg-flame text-white shadow-[0_3px_0_0_var(--color-flame-deep)] disabled:opacity-40" aria-label="Gönder">
             <Send className="size-5" />
           </button>
         </form>
@@ -184,8 +185,10 @@ export default function AiChat() {
 
       {goals.length > 0 && (
         <aside className="hidden w-72 shrink-0 lg:block">
-          <div className="ink-card sticky top-24 p-5">
-            <h3 className="mb-3 text-lg font-extrabold">Görevlerin</h3>
+          <div className="sticky top-24 overflow-hidden rounded-3xl border-2 border-line bg-card">
+            {conv.scenario_key && <img src={scenarioImg(conv.scenario_key)} alt="" className="aspect-[16/10] w-full object-cover" />}
+            <div className="p-5">
+            <h3 className="mb-3 text-lg">Görevlerin</h3>
             <ul className="space-y-3">
               {goals.map((g, i) => (
                 <li key={i} className="flex gap-2">
@@ -194,7 +197,8 @@ export default function AiChat() {
                 </li>
               ))}
             </ul>
-            {goalsDone.length === goals.length && <p className="mt-4 rounded-xl border-2 border-line bg-butter p-3 text-sm font-bold text-[#1B1F3B]">Tüm görevler tamam! 🎉</p>}
+            {goalsDone.length === goals.length && <p className="mt-4 rounded-xl bg-mint/15 p-3 text-sm font-bold text-mint-deep">Tüm görevler tamam!</p>}
+            </div>
           </div>
         </aside>
       )}
@@ -211,19 +215,21 @@ function Bubble({ m, onSpeak }: { m: Msg; onSpeak: (t: string) => void }) {
     onSuccess: () => { toast('Kelime defterine eklendi ✓', 'success'); qc.invalidateQueries({ queryKey: ['words'] }) },
   })
   if (m.role === 'user')
-    return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ml-auto w-fit max-w-[80%] rounded-2xl rounded-br-md border-2 border-line bg-sky px-4 py-2.5 font-semibold text-white">{m.content}</motion.div>
+    return <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="ml-auto w-fit max-w-[80%] rounded-2xl rounded-br-md bg-sky px-4 py-2.5 font-semibold text-white">{m.content}</motion.div>
 
   const f = m.feedback
   return (
-    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="max-w-[88%] space-y-2">
+    <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex max-w-[92%] gap-2.5">
+      <Ada className="mt-1 size-8" online={false} />
+      <div className="min-w-0 flex-1 space-y-2">
       {f?.correction && (
-        <div className="rounded-2xl border-2 border-dashed border-mint bg-mint/10 p-3 text-sm">
+        <div className="rounded-2xl bg-mint/12 p-3 text-sm">
           <p className="mb-1 flex items-center gap-1.5 text-xs font-extrabold uppercase tracking-wider text-mint-deep"><Lightbulb className="size-4" /> Küçük düzeltme</p>
           <p><s className="text-berry">{f.correction.original}</s> → <b>{f.correction.corrected}</b></p>
           <p className="mt-1 text-ink-soft">{f.correction.explanation_tr}</p>
         </div>
       )}
-      <div className="rounded-2xl rounded-bl-md border-2 border-line bg-card px-4 py-3">
+      <div className="rounded-2xl rounded-tl-md border-2 border-line bg-card px-4 py-3">
         <p className="font-semibold leading-relaxed">{m.content}</p>
         <AnimatePresence>{tr && f?.reply_tr && <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-2 border-t-2 border-line/10 pt-2 text-sm italic text-ink-soft">{f.reply_tr}</motion.p>}</AnimatePresence>
         <div className="mt-2 flex gap-3 text-ink-soft">
@@ -234,12 +240,13 @@ function Bubble({ m, onSpeak }: { m: Msg; onSpeak: (t: string) => void }) {
       {!!f?.new_words?.length && (
         <div className="flex flex-wrap gap-1.5">
           {f.new_words.map((w) => (
-            <button key={w.word} onClick={() => save.mutate(w)} className="flex items-center gap-1 rounded-full border-2 border-line bg-butter px-2.5 py-0.5 text-xs font-bold text-[#1B1F3B]">
+            <button key={w.word} onClick={() => save.mutate(w)} className="flex items-center gap-1 rounded-full bg-butter/25 px-2.5 py-1 text-xs font-bold hover:bg-butter/40">
               <Plus className="size-3" /> {w.word} · {w.meaning_tr}
             </button>
           ))}
         </div>
       )}
+      </div>
     </motion.div>
   )
 }

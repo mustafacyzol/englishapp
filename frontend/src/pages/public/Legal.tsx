@@ -1,6 +1,3 @@
-import { Link } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
-import { Logo } from '@/components/game/Logo'
 
 const TEXT = {
   terms: {
@@ -30,13 +27,9 @@ const TEXT = {
 export default function Legal({ kind }: { kind: 'terms' | 'privacy' }) {
   const t = TEXT[kind]
   return (
-    <div className="mx-auto max-w-3xl px-5 py-10">
-      <div className="mb-8 flex items-center justify-between">
-        <Link to="/"><Logo small /></Link>
-        <Link to="/" className="flex items-center gap-1 text-sm font-bold text-ink-soft"><ArrowLeft className="size-4" /> Ana sayfa</Link>
-      </div>
-      <article className="ink-card p-8">
-        <h1 className="mb-6 text-3xl font-extrabold">{t.title}</h1>
+    <div className="mx-auto max-w-3xl px-5 py-12">
+      <article>
+        <h1 className="mb-8 text-4xl">{t.title}</h1>
         {t.body.map(([h, p]) => (
           <section key={h} className="mb-5">
             <h2 className="mb-1 text-lg font-extrabold">{h}</h2>

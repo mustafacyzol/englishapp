@@ -1,25 +1,24 @@
 import { Link } from 'react-router-dom'
-import { Flame, Gem, Heart, Infinity as InfinityIcon } from 'lucide-react'
 import clsx from 'clsx'
 import type { Me } from '@/lib/types'
 import { num } from '@/lib/format'
+import { rewardImg } from '@/lib/assets'
 
-export function StatChips({ user, compact }: { user: Me; compact?: boolean }) {
-  const streakOn = user.stats.streak > 0
+function Chip({ to, src, value, dim, title }: { to: string; src: string; value: React.ReactNode; dim?: boolean; title: string }) {
   return (
-    <div className={clsx('flex items-center', compact ? 'gap-1.5' : 'gap-2')}>
-      <Link to="/profile" className="ink-chip press" title="Günlük seri">
-        <Flame className={clsx('size-[18px]', streakOn ? 'fill-flame text-flame animate-flicker' : 'text-ink-soft')} />
-        <span className={clsx('tabular-nums', !streakOn && 'text-ink-soft')}>{user.stats.streak}</span>
-      </Link>
-      <Link to="/shop" className="ink-chip press" title="Elmas">
-        <Gem className="size-[18px] fill-sky/30 text-sky" />
-        <span className="tabular-nums">{num(user.stats.gems)}</span>
-      </Link>
-      <Link to="/shop" className="ink-chip press" title="Can">
-        <Heart className="size-[18px] fill-berry text-berry" />
-        {user.hearts.unlimited ? <InfinityIcon className="size-4" /> : <span className="tabular-nums">{user.hearts.hearts}</span>}
-      </Link>
+    <Link to={to} title={title} className="flex items-center gap-1.5 rounded-xl px-2 py-1.5 font-extrabold tabular-nums transition hover:bg-paper-2">
+      <img src={src} alt="" className={clsx('size-7 object-contain', dim && 'opacity-40 grayscale')} />
+      <span className={clsx(dim && 'text-ink-soft')}>{value}</span>
+    </Link>
+  )
+}
+
+export function StatChips({ user }: { user: Me; compact?: boolean }) {
+  return (
+    <div className="flex items-center gap-0.5 sm:gap-1">
+      <Chip to="/profile" title="Günlük seri" src={rewardImg('flame')} value={user.stats.streak} dim={user.stats.streak === 0} />
+      <Chip to="/shop" title="Elmas" src={rewardImg('gem')} value={num(user.stats.gems)} />
+      <Chip to="/shop" title="Can" src={rewardImg('heart')} value={user.hearts.unlimited ? '∞' : user.hearts.hearts} />
     </div>
   )
 }

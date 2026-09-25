@@ -109,6 +109,9 @@ class LeagueService
                         $user->gems += $gems;
                     }
                     $user->save();
+                    if ($rank === 1 && $m->xp > 0 && ($item = config('dilgo.rewards.league_winner_item'))) {
+                        app(RewardService::class)->grant($user, $item, 'league', ['week' => $group->week_key]);
+                    }
                     $m->update(['final_rank' => $rank, 'result' => $result]);
                     if ($m->xp > 0) {
                         $user->notify(new LeagueResult($rank, $result, $this->tierName($user->league_tier), $gems));

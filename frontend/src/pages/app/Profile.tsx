@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { BookOpen, Brain, ChevronRight, Clock, Crown, Flame, Layers, Mic, Settings, Share2, Target, Zap } from 'lucide-react'
+import { BookOpen, Brain, ChevronRight, Clock, Flame, Layers, Mic, Settings, Share2, Target, Zap } from 'lucide-react'
 import { get } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { dateTR, num } from '@/lib/format'
@@ -9,11 +9,12 @@ import type { Achievement } from '@/lib/types'
 import { AchievementBadge } from '@/components/game/AchievementBadge'
 import { LeagueEmblem } from '@/components/game/LeagueEmblem'
 import { Progress } from '@/components/ui/Misc'
+import { img } from '@/lib/assets'
 import { useToast } from '@/components/ui/Toast'
 
 export function Avatar({ name, frame, size = 'size-24' }: { name: string; frame?: string; size?: string }) {
   return (
-    <span className={clsx('relative grid place-items-center rounded-[28px] border-[3px] border-line bg-sky font-display text-4xl font-extrabold text-white shadow-hard', size, frame === 'gold' && 'ring-4 ring-butter ring-offset-2 ring-offset-paper')}>
+    <span className={clsx('relative grid place-items-center rounded-[28px] border-4 border-card bg-sky font-display text-4xl font-extrabold text-white shadow-lg', size, frame === 'gold' && 'ring-4 ring-butter ring-offset-2 ring-offset-paper')}>
       {name[0]}
     </span>
   )
@@ -45,7 +46,7 @@ export default function Profile() {
   return (
     <div className="mx-auto max-w-3xl">
       <section className="ink-card relative mb-6 overflow-hidden p-6">
-        <div className="absolute inset-x-0 top-0 h-16 border-b-2 border-line bg-butter" style={{ backgroundImage: 'repeating-linear-gradient(-45deg, transparent 0 14px, rgba(27,31,59,.08) 14px 28px)' }} />
+        <img src={img('photos/classroom.webp')} alt="" className="absolute inset-x-0 top-0 h-20 w-full object-cover opacity-90" />
         <div className="relative flex flex-wrap items-end gap-5 pt-6">
           <Avatar name={user.name} frame={user.preferences.frame} />
           <div className="min-w-0 flex-1 pt-10 sm:pt-12">
@@ -54,7 +55,7 @@ export default function Profile() {
             <div className="mt-2 flex flex-wrap gap-2">
               <span className="ink-chip py-0.5">{user.cefr_level}</span>
               <span className="ink-chip py-0.5">Seviye {user.stats.level}</span>
-              {user.premium.active && <span className="ink-chip bg-butter py-0.5 text-[#1B1F3B]"><Crown className="size-3.5" /> Premium</span>}
+              {user.premium.active && <span className="ink-chip bg-butter/30 py-0.5 text-ink"><img src={img('rewards/crown.webp')} alt="" className="size-4" /> Premium</span>}
             </div>
           </div>
           <div className="flex gap-2">
@@ -105,7 +106,7 @@ export default function Profile() {
         <div className="flex flex-wrap gap-3">
           {(unlocked.length ? unlocked : ach.data?.data ?? []).slice(0, 8).map((a) => (
             <div key={a.id} className="w-20 text-center" title={a.description}>
-              <AchievementBadge tier={a.tier} icon={a.icon} size={72} locked={!a.unlocked_at} className="mx-auto" />
+              <AchievementBadge tier={a.tier} icon={a.icon} category={a.category} size={72} locked={!a.unlocked_at} className="mx-auto" />
               <p className="mt-1 line-clamp-2 text-[11px] font-bold leading-tight">{a.title}</p>
             </div>
           ))}
@@ -130,7 +131,7 @@ function StatTile({ icon, value, label }: { icon: React.ReactNode; value: React.
 function Skill({ icon: Icon, label, v, color }: { icon: typeof Mic; label: string; v?: number; color: string }) {
   return (
     <div className="flex items-center gap-3 rounded-2xl border-2 border-line/15 p-3">
-      <span className={clsx('grid size-10 place-items-center rounded-xl border-2 border-line text-[#1B1F3B]', color)}><Icon className="size-5" /></span>
+      <span className={clsx('grid size-10 place-items-center rounded-xl border-2 border-line text-ink', color)}><Icon className="size-5" /></span>
       <div>
         <p className="font-display text-xl font-extrabold leading-none">{v ?? '–'}</p>
         <p className="text-[11px] font-bold text-ink-soft">{label}</p>

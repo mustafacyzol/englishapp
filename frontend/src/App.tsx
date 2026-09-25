@@ -4,10 +4,15 @@ import { useAuth } from './lib/auth'
 import { Spinner } from './components/ui/Misc'
 import AppLayout from './layouts/AppLayout'
 import AdminLayout from './layouts/AdminLayout'
+import PublicLayout from './layouts/PublicLayout'
 import { setMuted } from './lib/fx'
 
 const Landing = lazy(() => import('./pages/public/Landing'))
 const Legal = lazy(() => import('./pages/public/Legal'))
+const About = lazy(() => import('./pages/public/About'))
+const Contact = lazy(() => import('./pages/public/Contact'))
+const BlogList = lazy(() => import('./pages/public/Blog').then((m) => ({ default: m.BlogList })))
+const BlogPost = lazy(() => import('./pages/public/Blog').then((m) => ({ default: m.BlogPost })))
 const Placement = lazy(() => import('./pages/public/Placement'))
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
@@ -61,9 +66,15 @@ export default function App() {
   return (
     <Suspense fallback={<Spinner />}>
       <Routes>
-        <Route path="/" element={user ? <Navigate to="/learn" replace /> : <Landing />} />
-        <Route path="/terms" element={<Legal kind="terms" />} />
-        <Route path="/privacy" element={<Legal kind="privacy" />} />
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={user ? <Navigate to="/learn" replace /> : <Landing />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/blog" element={<BlogList />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/terms" element={<Legal kind="terms" />} />
+          <Route path="/privacy" element={<Legal kind="privacy" />} />
+        </Route>
         <Route path="/placement" element={<Placement />} />
         <Route path="/r/:code" element={<Register />} />
         <Route path="/login" element={<Guard guest><Login /></Guard>} />

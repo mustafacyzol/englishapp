@@ -88,7 +88,7 @@ function Review() {
             <span className="font-display text-5xl font-extrabold">{w.word}</span>
             <span className="text-sm text-ink-soft">Çevirmek için dokun</span>
           </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-[22px] border-2 border-line bg-butter p-6 text-[#1B1F3B] shadow-hard-lg" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-[22px] border-2 border-line bg-butter p-6 text-ink shadow-hard-lg" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
             <span className="text-xs font-extrabold uppercase tracking-widest opacity-60">Türkçe</span>
             <span className="font-display text-4xl font-extrabold">{w.translation || '—'}</span>
             {w.example && <span className="line-clamp-3 text-center font-read text-sm italic">“{w.example}”</span>}
@@ -128,7 +128,7 @@ function WordList() {
     <div>
       {data && (
         <div className="mb-5 grid grid-cols-3 gap-3">
-          {[['Toplam', data.stats.total, 'bg-card'], ['Tekrar zamanı', data.stats.due, 'bg-butter text-[#1B1F3B]'], ['Ustalaşılan', data.stats.mastered, 'bg-mint text-[#0f2e27]']].map(([l, v, c]) => (
+          {[['Toplam', data.stats.total, 'bg-card'], ['Tekrar zamanı', data.stats.due, 'bg-butter text-ink'], ['Ustalaşılan', data.stats.mastered, 'bg-mint text-white']].map(([l, v, c]) => (
             <div key={l as string} className={clsx('rounded-2xl border-2 border-line p-4 shadow-hard-sm', c as string)}>
               <p className="font-display text-3xl font-extrabold">{v as number}</p>
               <p className="text-xs font-bold uppercase tracking-wide opacity-70">{l as string}</p>

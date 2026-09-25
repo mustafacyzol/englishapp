@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { AudioLines, Crown, Lock, MessageSquareText, PenLine } from 'lucide-react'
+import { AudioLines, ChevronRight, Lock, MessageSquareText, PenLine } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
-import { Ada } from '@/components/game/Ada'
+import { PHOTO, rewardImg, scenarioImg } from '@/lib/assets'
 import { PageHeader, Progress, Spinner } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { dateTR } from '@/lib/format'
@@ -11,7 +11,7 @@ import { dateTR } from '@/lib/format'
 interface Scenario { id: number; key: string; title: string; description: string; emoji: string; category: string; cefr_min: string; goals: string[]; is_premium: boolean; locked: boolean }
 interface Usage { used: number; limit: number; remaining: number }
 
-const CAT: Record<string, string> = { daily: 'Günlük hayat', travel: 'Seyahat', career: 'Kariyer', exam: 'Sınav', fun: 'Eğlence' }
+const CAT: Record<string, string> = { daily: 'Günlük hayat', travel: 'Seyahat', career: 'Kariyer', exam: 'Sınav', fun: 'Tartışma' }
 
 export default function AiHub() {
   const nav = useNavigate()
@@ -25,65 +25,66 @@ export default function AiHub() {
   })
 
   if (isLoading || !data) return <Spinner />
-  const groups = Object.entries(
-    data.data.reduce<Record<string, Scenario[]>>((acc, s) => {
-      ;(acc[s.category] ??= []).push(s)
-      return acc
-    }, {}),
-  )
-
   return (
     <div>
-      <PageHeader kicker="Konuş & yaz" title="Ada ile pratik" />
-      <section className="ink-card relative mb-8 overflow-hidden bg-sky p-6 text-white sm:p-8">
-        <div className="relative z-10 max-w-lg">
-          <h2 className="text-3xl font-extrabold">Merhaba, ben Ada 👋</h2>
-          <p className="mt-2 text-white/90">Seviyeni, hedefini ve kaydettiğin kelimeleri biliyorum. Hatalarını Türkçe açıklarım, seni asla yargılamam. Yaz ya da sesli konuş!</p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <button onClick={() => start.mutate({ mode: 'speaking' })} className="press flex items-center gap-2 rounded-2xl border-2 border-line bg-flame px-4 py-3 font-display font-extrabold uppercase shadow-hard"><AudioLines className="size-5" /> Sesli sohbet</button>
-            <button onClick={() => start.mutate({ mode: 'chat' })} className="press flex items-center gap-2 rounded-2xl border-2 border-line bg-card px-4 py-3 font-display font-extrabold uppercase text-ink shadow-hard"><MessageSquareText className="size-5" /> Yazılı sohbet</button>
-            <Link to="/ai/writing" className="press flex items-center gap-2 rounded-2xl border-2 border-line bg-butter px-4 py-3 font-display font-extrabold uppercase text-[#1B1F3B] shadow-hard"><PenLine className="size-5" /> Yazma atölyesi</Link>
+      <PageHeader kicker="Konuşma ve yazma" title="Ada ile pratik" />
+
+      <section className="mb-10 overflow-hidden rounded-3xl border-2 border-line bg-card">
+        <div className="grid md:grid-cols-[1.1fr_1fr]">
+          <div className="p-6 sm:p-8">
+            <h2 className="text-3xl">Merhaba, ben Ada.</h2>
+            <p className="mt-2 text-lg text-ink-soft">Seviyeni, hedefini ve kaydettiğin kelimeleri biliyorum. Hatanı Türkçe açıklarım. İster yaz, ister sesli konuş.</p>
+            <div className="mt-6 grid gap-3 sm:grid-cols-3 md:grid-cols-1 lg:grid-cols-3">
+              <ModeButton icon={AudioLines} label="Sesli sohbet" color="bg-flame" onClick={() => start.mutate({ mode: 'speaking' })} />
+              <ModeButton icon={MessageSquareText} label="Yazılı sohbet" color="bg-sky" onClick={() => start.mutate({ mode: 'chat' })} />
+              <ModeButton icon={PenLine} label="Yazma atölyesi" color="bg-mint" to="/ai/writing" />
+            </div>
+            <div className="mt-6 max-w-sm">
+              <div className="mb-1.5 flex justify-between text-sm font-bold"><span className="text-ink-soft">Bugünkü mesaj hakkın</span><span>{data.usage.remaining}/{data.usage.limit}</span></div>
+              <Progress value={data.usage.remaining} max={data.usage.limit} color="bg-sky" />
+            </div>
           </div>
-          <div className="mt-6 max-w-xs">
-            <div className="mb-1 flex justify-between text-xs font-bold"><span>Bugünkü mesaj hakkın</span><span>{data.usage.remaining}/{data.usage.limit}</span></div>
-            <Progress value={data.usage.remaining} max={data.usage.limit} color="bg-butter" />
-          </div>
+          <img src={PHOTO.adaWave} alt="Ada el sallıyor" className="h-full max-h-80 w-full object-cover md:max-h-none" />
         </div>
-        <Ada className="absolute -bottom-6 -right-6 size-48 opacity-95 sm:size-60" />
       </section>
 
-      <h2 className="mb-1 text-2xl font-extrabold">Rol yapma görevleri</h2>
+      <h2 className="text-2xl">Rol yapma görevleri</h2>
       <p className="mb-5 text-ink-soft">Gerçek hayattan sahneler. Görevleri tamamla, özgüvenini kazan.</p>
-      {groups.map(([cat, list]) => (
-        <section key={cat} className="mb-8">
-          <h3 className="mb-3 text-sm font-extrabold uppercase tracking-[0.18em] text-ink-soft">{CAT[cat] ?? cat}</h3>
-          <div className="grid gap-4 sm:grid-cols-2">
-            {list.map((s) => (
-              <button key={s.key} onClick={() => (s.locked ? nav('/premium') : start.mutate({ mode: 'roleplay', scenario_key: s.key }))} className={clsx('press ink-card flex gap-4 p-5 text-left', s.locked && 'opacity-80')}>
-                <span className="grid size-14 shrink-0 place-items-center rounded-2xl border-2 border-line bg-paper-2 text-3xl">{s.emoji}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="flex items-center gap-2">
-                    <span className="font-display text-lg font-extrabold">{s.title}</span>
-                    <span className="rounded-md border-2 border-line px-1.5 font-mono text-[10px] font-bold">{s.cefr_min}+</span>
-                    {s.is_premium && (s.locked ? <Lock className="size-4 text-ink-soft" /> : <Crown className="size-4 text-flame" />)}
-                  </span>
-                  <span className="mt-1 block text-sm text-ink-soft">{s.description}</span>
-                  <span className="mt-2 block text-xs font-bold text-mint-deep">{s.goals?.length ?? 0} görev</span>
+      <div className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
+        {data.data.map((s) => (
+          <button key={s.key} onClick={() => (s.locked ? nav('/premium') : start.mutate({ mode: 'roleplay', scenario_key: s.key }))} className="group overflow-hidden rounded-3xl border-2 border-line bg-card text-left transition hover:-translate-y-1 hover:shadow-soft">
+            <div className="relative aspect-[16/9] overflow-hidden">
+              <img src={scenarioImg(s.key)} alt="" loading="lazy" className={clsx('photo transition duration-700 group-hover:scale-105', s.locked && 'grayscale-[40%]')} />
+              <div className="absolute left-3 top-3 flex gap-1.5">
+                <span className="rounded-lg bg-card/95 px-2 py-0.5 text-xs font-black">{s.cefr_min}+</span>
+                <span className="rounded-lg bg-card/95 px-2 py-0.5 text-xs font-black">{CAT[s.category] ?? s.category}</span>
+              </div>
+              {s.is_premium && (
+                <span className="absolute right-3 top-3 flex items-center gap-1 rounded-lg bg-butter px-2 py-0.5 text-xs font-black text-[#1f2433]">
+                  {s.locked ? <Lock className="size-3.5" /> : <img src={rewardImg('crown')} alt="" className="size-4" />} Premium
                 </span>
-              </button>
-            ))}
-          </div>
-        </section>
-      ))}
+              )}
+            </div>
+            <div className="flex items-center gap-3 p-5">
+              <div className="min-w-0 flex-1">
+                <p className="text-lg font-black">{s.title}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-ink-soft">{s.description}</p>
+                <p className="mt-2 text-xs font-extrabold uppercase tracking-wide text-mint-deep">{s.goals?.length ?? 0} görev</p>
+              </div>
+              <ChevronRight className="size-5 text-ink-soft transition group-hover:translate-x-1" />
+            </div>
+          </button>
+        ))}
+      </div>
 
       {!!convs.data?.data.length && (
-        <section>
-          <h2 className="mb-3 text-xl font-extrabold">Son sohbetlerin</h2>
-          <div className="ink-card divide-y-2 divide-line/10">
-            {convs.data.data.slice(0, 8).map((c) => (
-              <Link key={c.id} to={`/ai/${c.id}`} className="flex items-center justify-between px-4 py-3 hover:bg-paper-2">
+        <section className="mt-12">
+          <h2 className="mb-3 text-xl">Son sohbetlerin</h2>
+          <div className="divide-y-2 divide-line overflow-hidden rounded-2xl border-2 border-line bg-card">
+            {convs.data.data.slice(0, 6).map((c) => (
+              <Link key={c.id} to={`/ai/${c.id}`} className="flex items-center justify-between px-5 py-3.5 hover:bg-paper-2">
                 <span className="font-bold">{c.title}</span>
-                <span className="text-xs text-ink-soft">{dateTR(c.updated_at)}</span>
+                <span className="text-sm text-ink-soft">{dateTR(c.updated_at)}</span>
               </Link>
             ))}
           </div>
@@ -91,4 +92,15 @@ export default function AiHub() {
       )}
     </div>
   )
+}
+
+function ModeButton({ icon: Icon, label, color, onClick, to }: { icon: typeof PenLine; label: string; color: string; onClick?: () => void; to?: string }) {
+  const cls = 'press flex items-center gap-3 rounded-2xl border-2 border-line bg-card p-3 text-left font-black shadow-hard hover:bg-paper-2'
+  const inner = (
+    <>
+      <span className={clsx('grid size-10 shrink-0 place-items-center rounded-xl text-white', color)}><Icon className="size-5" /></span>
+      {label}
+    </>
+  )
+  return to ? <Link to={to} className={cls}>{inner}</Link> : <button onClick={onClick} className={cls}>{inner}</button>
 }

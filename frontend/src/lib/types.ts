@@ -47,6 +47,7 @@ export interface RewardSummary {
   goal_met_now: boolean
   quests_completed: { id: number; title: string; reward_gems: number }[]
   achievements: Achievement[]
+  rewards?: { title: string; icon: string; gems?: number; item?: string }[]
   gems: number
 }
 

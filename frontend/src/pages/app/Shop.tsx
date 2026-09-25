@@ -1,12 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { Gem, Heart } from 'lucide-react'
+import { Gem } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { num } from '@/lib/format'
 import { sfx } from '@/lib/fx'
 import type { RewardItem } from '@/lib/types'
-import { iconFor } from '@/components/game/icons'
+import { rewardImg, img } from '@/lib/assets'
 import { RARITY } from '@/components/game/RewardCard'
 import { Button, LinkButton } from '@/components/ui/Button'
 import { PageHeader, Spinner } from '@/components/ui/Misc'
@@ -37,12 +37,12 @@ export default function Shop() {
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader kicker="Elmaslarını harca" title="Mağaza">
-        <span className="ink-chip bg-sky/15 text-lg"><Gem className="size-5 text-sky" /> {num(user.stats.gems)}</span>
+        <span className="ink-chip bg-sky/10 text-lg"><img src={img('rewards/gems.webp')} alt="" className="size-7" /> {num(user.stats.gems)}</span>
       </PageHeader>
 
       <section className="ink-card mb-8 flex flex-wrap items-center gap-5 p-5">
-        <div className="flex gap-1">
-          {Array.from({ length: 5 }, (_, i) => <Heart key={i} className={clsx('size-8', i < user.hearts.hearts || user.hearts.unlimited ? 'fill-berry text-berry' : 'text-ink-soft/40')} />)}
+        <div className="flex -space-x-2">
+          {Array.from({ length: 5 }, (_, i) => <img key={i} src={img('rewards/heart.webp')} alt="" className={clsx('size-11 transition', !(i < user.hearts.hearts || user.hearts.unlimited) && 'opacity-25 grayscale')} />)}
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-display text-xl font-extrabold">{user.hearts.unlimited ? 'Sınırsız can' : `${user.hearts.hearts}/5 can`}</p>
@@ -58,13 +58,14 @@ export default function Shop() {
 
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {data.items.map((it) => {
-          const Icon = iconFor(it.icon)
-          const r = RARITY[it.rarity]
+          const r = RARITY[it.rarity] ?? RARITY.common
           return (
-            <article key={it.id} className={clsx('ink-card flex flex-col overflow-hidden', r.bg)}>
-              <div className={clsx('border-b-2 border-line px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-widest text-[#1B1F3B]', r.band)}>{r.label}</div>
-              <div className="flex flex-1 flex-col items-center gap-2 p-5 text-center">
-                <span className="grid size-16 place-items-center rounded-2xl border-2 border-line bg-card shadow-hard"><Icon className="size-8" /></span>
+            <article key={it.id} className="ink-card flex flex-col overflow-hidden">
+              <div className={clsx('relative grid h-36 place-items-center bg-gradient-to-b to-transparent', r.glow)}>
+                <span className={clsx('absolute left-4 top-3 text-[11px] font-extrabold uppercase tracking-widest', r.text)}>{r.label}</span>
+                <img src={rewardImg(it.icon)} alt="" loading="lazy" className="size-28 object-contain drop-shadow-lg transition duration-300 hover:-translate-y-1 hover:scale-105" />
+              </div>
+              <div className="flex flex-1 flex-col items-center gap-2 px-5 pb-5 text-center">
                 <h3 className="font-display text-xl font-extrabold">{it.name}</h3>
                 <p className="flex-1 text-sm text-ink-soft">{it.description}</p>
                 <Button block className="mt-3" variant={user.stats.gems >= (it.price_gems ?? 0) ? 'primary' : 'secondary'} disabled={user.stats.gems < (it.price_gems ?? 0)} loading={buy.isPending && buy.variables === it.id} onClick={() => buy.mutate(it.id)} icon={<Gem className="size-4" />}>

@@ -7,23 +7,23 @@ type Variant = 'primary' | 'secondary' | 'ghost' | 'success' | 'danger' | 'butte
 type Size = 'sm' | 'md' | 'lg'
 
 const VARIANTS: Record<Variant, string> = {
-  primary: 'bg-flame text-white border-line shadow-hard hover:bg-flame-deep',
-  secondary: 'bg-card text-ink border-line shadow-hard hover:bg-paper-2',
-  ghost: 'bg-transparent text-ink border-transparent hover:bg-paper-2 shadow-none',
-  success: 'bg-mint text-[#0f2e27] border-line shadow-hard hover:brightness-95',
-  danger: 'bg-berry text-white border-line shadow-hard hover:brightness-95',
-  butter: 'bg-butter text-[#1B1F3B] border-line shadow-hard hover:brightness-95',
-  dark: 'bg-[#1B1F3B] text-[#F6F1E7] border-line shadow-hard hover:brightness-110 dark:bg-[#F6F1E7] dark:text-[#1B1F3B]',
+  primary: 'bg-flame text-white border-flame shadow-[0_4px_0_0_var(--color-flame-deep)] hover:brightness-105',
+  secondary: 'bg-card text-ink border-line shadow-[0_4px_0_0_var(--line)] hover:bg-paper-2',
+  ghost: 'bg-transparent text-ink-soft border-transparent hover:bg-paper-2 hover:text-ink shadow-none',
+  success: 'bg-mint text-white border-mint shadow-[0_4px_0_0_var(--color-mint-deep)] hover:brightness-105',
+  danger: 'bg-berry text-white border-berry shadow-[0_4px_0_0_var(--color-berry-deep)] hover:brightness-105',
+  butter: 'bg-butter text-[#1f2433] border-butter shadow-[0_4px_0_0_var(--color-butter-deep)] hover:brightness-105',
+  dark: 'bg-[#1f2433] text-white border-[#1f2433] shadow-[0_4px_0_0_#000] hover:brightness-125 dark:bg-white dark:text-[#1f2433] dark:border-white dark:shadow-[0_4px_0_0_#9aa1b2]',
 }
 const SIZES: Record<Size, string> = {
-  sm: 'h-9 px-3.5 text-sm rounded-xl gap-1.5',
+  sm: 'h-10 px-4 text-sm rounded-xl gap-1.5',
   md: 'h-12 px-5 text-[15px] rounded-2xl gap-2',
   lg: 'h-14 px-7 text-base rounded-2xl gap-2.5',
 }
 
 export const buttonClass = (variant: Variant = 'primary', size: Size = 'md', block?: boolean, className?: string) =>
   clsx(
-    'press inline-flex select-none items-center justify-center border-2 font-display font-extrabold tracking-tight uppercase',
+    'press inline-flex select-none items-center justify-center border-2 font-display font-extrabold tracking-wide uppercase',
     'disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none',
     VARIANTS[variant],
     SIZES[size],

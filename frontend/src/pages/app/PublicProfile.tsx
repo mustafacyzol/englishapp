@@ -8,7 +8,7 @@ import { LeagueEmblem } from '@/components/game/LeagueEmblem'
 import { Spinner } from '@/components/ui/Misc'
 import { Avatar } from './Profile'
 
-interface Pub { user: { name: string; username: string; cefr_level: string; xp_total: number; level: number; streak: number; league_tier: number; is_premium: boolean; joined_at: string }; badges: { id: number; title: string; tier: 'bronze' | 'silver' | 'gold' | 'legend'; icon: string }[] }
+interface Pub { user: { name: string; username: string; cefr_level: string; xp_total: number; level: number; streak: number; league_tier: number; is_premium: boolean; joined_at: string }; badges: { id: number; title: string; tier: 'bronze' | 'silver' | 'gold' | 'legend'; icon: string; category?: string }[] }
 
 export default function PublicProfile() {
   const { username } = useParams()
@@ -27,7 +27,7 @@ export default function PublicProfile() {
           <div className="grid place-items-center rounded-2xl border-2 border-line p-2"><LeagueEmblem tier={u.league_tier} size={34} /></div>
         </div>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          {data.badges.map((b) => <div key={b.id} className="w-20"><AchievementBadge tier={b.tier} icon={b.icon} size={64} className="mx-auto" /><p className="text-[11px] font-bold">{b.title}</p></div>)}
+          {data.badges.map((b) => <div key={b.id} className="w-20"><AchievementBadge tier={b.tier} icon={b.icon} category={b.category} size={64} className="mx-auto" /><p className="text-[11px] font-bold">{b.title}</p></div>)}
         </div>
       </div>
     </div>

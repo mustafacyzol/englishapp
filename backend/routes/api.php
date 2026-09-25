@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\LearnController;
 use App\Http\Controllers\Api\PlacementController;
 use App\Http\Controllers\Api\PublicController;
+use App\Http\Controllers\Api\SiteController;
 use App\Http\Controllers\Api\StoryController;
 use App\Http\Controllers\Api\WordController;
 use Illuminate\Support\Facades\Route;
@@ -24,6 +25,9 @@ Route::prefix('v1')->group(function () {
     Route::get('placement', [PlacementController::class, 'questions']);
     Route::post('placement', [PlacementController::class, 'submit'])->middleware('throttle:10,1');
     Route::get('u/{username}', [GameController::class, 'profile']);
+    Route::get('blog', [SiteController::class, 'blog']);
+    Route::get('blog/{slug}', [SiteController::class, 'post']);
+    Route::post('contact', [SiteController::class, 'contact'])->middleware('throttle:5,10');
 
     // Payment provider callbacks (no auth — verified server-to-server)
     Route::post('payments/iyzico/callback', [BillingController::class, 'iyzicoCallback'])->middleware('throttle:60,1');
@@ -109,6 +113,7 @@ Route::prefix('v1')->group(function () {
             Route::post('inventory/{userItem}/activate', [GameController::class, 'activate'])->middleware('throttle:30,1');
             Route::post('redeem', [GameController::class, 'redeem'])->middleware('throttle:redeem');
             Route::get('referrals', [GameController::class, 'referrals']);
+            Route::get('rewards/roadmap', [GameController::class, 'roadmap']);
 
             // Billing
             Route::post('checkout/quote', [BillingController::class, 'quote'])->middleware('throttle:redeem');
