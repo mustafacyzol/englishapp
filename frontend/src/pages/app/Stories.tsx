@@ -5,7 +5,7 @@ import clsx from 'clsx'
 import { Bookmark, CheckCircle2, Clock, Crown, Headphones, Search } from 'lucide-react'
 import { get } from '@/lib/api'
 import type { Paginated, StoryCard } from '@/lib/types'
-import { Empty, PageHeader, Spinner, Tabs } from '@/components/ui/Misc'
+import { Empty, PageHeader, SkeletonPage, Tabs } from '@/components/ui/Misc'
 import { StoryCover } from './StoryCover'
 
 const LEVELS = ['', 'A1', 'A2', 'B1', 'B2', 'C1']
@@ -58,7 +58,7 @@ export default function Stories() {
       </div>
 
       {isLoading ? (
-        <Spinner />
+        <SkeletonPage variant="cards" />
       ) : !data?.data.length ? (
         <Empty icon={<Search className="size-7" />} title="Hikaye bulunamadı" text="Filtreleri değiştirmeyi dene." />
       ) : (

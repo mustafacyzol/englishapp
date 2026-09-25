@@ -11,6 +11,7 @@ import { LeagueEmblem } from '@/components/game/LeagueEmblem'
 import { Progress } from '@/components/ui/Misc'
 import { img } from '@/lib/assets'
 import { useToast } from '@/components/ui/Toast'
+import { Img } from '@/components/ui/Img'
 
 export function Avatar({ name, frame, size = 'size-24' }: { name: string; frame?: string; size?: string }) {
   return (
@@ -46,7 +47,7 @@ export default function Profile() {
   return (
     <div className="mx-auto max-w-3xl">
       <section className="ink-card relative mb-6 overflow-hidden p-6">
-        <img src={img('photos/classroom.webp')} alt="" className="absolute inset-x-0 top-0 h-20 w-full object-cover opacity-90" />
+        <Img src={img('photos/classroom.webp')} alt="" className="absolute inset-x-0 top-0 h-20 w-full object-cover opacity-90" />
         <div className="relative flex flex-wrap items-end gap-5 pt-6">
           <Avatar name={user.name} frame={user.preferences.frame} />
           <div className="min-w-0 flex-1 pt-10 sm:pt-12">
@@ -55,7 +56,7 @@ export default function Profile() {
             <div className="mt-2 flex flex-wrap gap-2">
               <span className="ink-chip py-0.5">{user.cefr_level}</span>
               <span className="ink-chip py-0.5">Seviye {user.stats.level}</span>
-              {user.premium.active && <span className="ink-chip bg-butter/30 py-0.5 text-ink"><img src={img('rewards/crown.webp')} alt="" className="size-4" /> Premium</span>}
+              {user.premium.active && <span className="ink-chip bg-butter/30 py-0.5 text-ink"><Img src={img('rewards/crown.webp')} alt="" className="size-4" /> Premium</span>}
             </div>
           </div>
           <div className="flex gap-2">

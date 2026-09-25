@@ -6,7 +6,8 @@ import { img } from '@/lib/assets'
 import { get } from '@/lib/api'
 import { timeLeft } from '@/lib/format'
 import { LeagueEmblem } from '@/components/game/LeagueEmblem'
-import { Spinner } from '@/components/ui/Misc'
+import { SkeletonPage } from '@/components/ui/Misc'
+import { Img } from '@/components/ui/Img'
 
 interface Standings {
   week_key: string
@@ -23,7 +24,7 @@ const AV = ['bg-sky', 'bg-mint', 'bg-berry', 'bg-flame', 'bg-butter-deep']
 
 export default function Leagues() {
   const { data, isLoading } = useQuery({ queryKey: ['league'], queryFn: () => get<Standings>('/league'), refetchInterval: 30_000 })
-  if (isLoading || !data) return <Spinner />
+  if (isLoading || !data) return <SkeletonPage variant="list" />
   const n = data.rows.length
 
   return (
@@ -54,7 +55,7 @@ export default function Leagues() {
                 <span className={clsx('grid size-10 place-items-center rounded-full font-display font-extrabold text-white', AV[r.user_id % AV.length])}>{r.name?.[0]}</span>
                 <span className="flex-1 font-bold">
                   {r.is_me ? 'Sen' : r.name}
-                  {r.is_premium && <img src={img('rewards/crown.webp')} alt="Premium" className="ml-1 inline size-5 align-[-3px]" />}
+                  {r.is_premium && <Img src={img('rewards/crown.webp')} alt="Premium" className="ml-1 inline size-5 align-[-3px]" />}
                 </span>
                 <span className="font-mono text-sm font-bold">{r.xp} XP</span>
               </Link>

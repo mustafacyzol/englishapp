@@ -50,6 +50,41 @@ class CourseSeeder extends Seeder
         return ['type' => 'match', 'prompt' => 'Eşleştir', 'pairs' => $pairs];
     }
 
+    /**
+     * "Hata avı" — a sentence carrying a slip Turkish speakers really make. The learner
+     * taps the guilty word, picks the fix and reads why it was wrong, in Turkish.
+     */
+    private function err(string $sentence, int $errorIndex, array $options, int $answer, string $why): array
+    {
+        return [
+            'type' => 'spot_error',
+            'prompt' => 'Bu cümle bir Türk öğrencinin ağzından çıktı. Hatalı kelimeyi bul.',
+            'words' => explode(' ', $sentence),
+            'error_index' => $errorIndex,
+            'options' => $options,
+            'answer' => $answer,
+            'explanation_tr' => $why,
+        ];
+    }
+
+    /** "Sahne" — a real scene with the learner's line missing. */
+    private function dlg(string $prompt, ?string $scene, array $lines, array $options, int $answer, ?string $note = null): array
+    {
+        return array_filter([
+            'type' => 'dialogue', 'prompt' => $prompt, 'scene' => $scene,
+            'lines' => $lines, 'options' => $options, 'answer' => $answer, 'note_tr' => $note,
+        ], fn ($v) => $v !== null);
+    }
+
+    /** "Sıralama" — steps given in the right order; the player shuffles them on screen. */
+    private function seq(string $prompt, array $items, ?string $note = null): array
+    {
+        return array_filter([
+            'type' => 'sequence', 'prompt' => $prompt, 'items' => $items,
+            'answer' => range(0, count($items) - 1), 'note_tr' => $note,
+        ], fn ($v) => $v !== null);
+    }
+
     // -----------------------------------------------------------------------
 
     public function run(): void
@@ -79,7 +114,7 @@ class CourseSeeder extends Seeder
                                 $this->fl('She ___ my sister.', ['am', 'is', 'are'], 1),
                                 $this->fl('They ___ from Izmir.', ['am', 'is', 'are'], 2),
                                 $this->tr('O bir öğretmen.', 'She is a teacher', ['am', 'are', 'an'], ["She's a teacher", 'He is a teacher', "He's a teacher"]),
-                                $this->ch('Hangisi doğru?', ['I am agree.', 'I agree.', 'I agreeing.'], 1),
+                                $this->err('I am agree with you', 1, ['agree', 'am', 'agreeing'], 0, '"Agree" zaten bir fiil; Türkçedeki "katılıyorum" yapısına bakıp yanına "am" koymak en sık hatalardan biri. Doğrusu: I agree with you.'),
                                 $this->sp("I'm happy to be here.", 'Burada olduğum için mutluyum.'),
                                 $this->lc("We're friends", ["We're friends", 'Where friends', 'Were friends'], 0),
                             ]],
@@ -109,6 +144,10 @@ class CourseSeeder extends Seeder
                                 $this->lt('She works in a bank'),
                             ]],
                             ['title' => 'Yemek & İçecek', 'skill' => 'vocabulary', 'exercises' => [
+                                $this->dlg('Londra’da bir kafedesin. Sıra sende.', 'scenarios/order-at-a-cafe', [
+                                    ['who' => 'Barista', 'text' => 'Hi there! What can I get for you today?'],
+                                ], ['Give me one coffee.', "I'd like a coffee, please.", 'I want coffee now.'], 1,
+                                    'Siparişte "I want" biraz sert durur, "Give me" ise emir gibidir. Kibar hâli: I’d like … , please.'),
                                 $this->mt([['bread', 'ekmek'], ['cheese', 'peynir'], ['water', 'su'], ['egg', 'yumurta'], ['apple', 'elma']]),
                                 $this->ch('Kafede ne dersin?', ['Can I have a tea, please?', 'Give tea.', 'I want tea now.'], 0),
                                 $this->lc('A glass of water, please', ['A glass of water, please', 'A class of water, please', 'A glass of wine, please'], 0),
@@ -133,6 +172,12 @@ class CourseSeeder extends Seeder
                         'guidebook' => "## There is / There are\n\nBir yerde bir şeyin **var** olduğunu söyler.\n\n- Tekil: **There is** a bank near here.\n- Çoğul: **There are** two cafés on this street.\n\n## Yol tarifi\n**turn left** (sola dön) · **turn right** (sağa dön) · **go straight** (düz git) · **next to** (yanında) · **opposite** (karşısında)",
                         'lessons' => [
                             ['title' => 'Yol tarifi', 'skill' => 'listening', 'exercises' => [
+                                $this->seq('Birine yol tarifi veriyorsun. Adımları doğru sıraya diz.', [
+                                    'Go straight on for two hundred metres.',
+                                    'Turn left at the traffic lights.',
+                                    'Walk past the pharmacy.',
+                                    'The station is on your right.',
+                                ], 'İngilizcede yol tarifi hareket sırasına göre anlatılır; hedef en sona bırakılır.'),
                                 $this->lc('Turn left at the bank', ['Turn left at the bank', 'Turn right at the bank', 'Turn left at the park'], 0),
                                 $this->mt([['turn left', 'sola dön'], ['turn right', 'sağa dön'], ['go straight', 'düz git'], ['opposite', 'karşısında']]),
                                 $this->fl('There ___ a pharmacy next to the school.', ['is', 'are', 'am'], 0),
@@ -153,7 +198,7 @@ class CourseSeeder extends Seeder
                                 $this->fl('Kerem ___ football on Sundays.', ['play', 'plays', 'playing'], 1),
                                 $this->lc('Where is the bus stop?', ['Where is the bus stop?', 'Where is the bookshop?', 'When is the bus?'], 0),
                                 $this->tr('Kız kardeşim Ankara\'da yaşıyor.', 'My sister lives in Ankara', ['live', 'at'], []),
-                                $this->ch('Hangisi doğru?', ["He don't like fish.", "He doesn't like fish.", "He doesn't likes fish."], 1),
+                                $this->err('She don\'t like fish', 1, ["doesn't", 'not', "isn't"], 0, 'He / she / it ile olumsuzda "doesn\'t" kullanılır; "don\'t" I, you, we, they içindir.'),
                                 $this->sp('There is a café opposite the park.', 'Parkın karşısında bir kafe var.'),
                                 $this->lt('Can I have the bill please'),
                                 $this->mt([['always', 'her zaman'], ['never', 'asla'], ['often', 'sık sık'], ['sometimes', 'bazen']]),
@@ -178,6 +223,13 @@ class CourseSeeder extends Seeder
                                 $this->lc('Did you enjoy the concert?', ['Did you enjoy the concert?', 'Do you enjoy the concert?', 'Did you join the concert?'], 0),
                                 $this->sp('I visited my grandparents last weekend.', 'Geçen hafta sonu büyükanne ve büyükbabamı ziyaret ettim.'),
                                 $this->lt('She bought a new phone'),
+                                $this->err('Yesterday I didn\'t went to school', 3, ['go', 'gone', 'going'], 0, '"didn\'t" zaten geçmişi taşır; yanındaki fiil yalın kalır. Doğrusu: I didn\'t go.'),
+                                $this->seq('Dün akşamını anlat. Cümleleri olay sırasına diz.', [
+                                    'I finished work at six.',
+                                    'I met my friend at the metro station.',
+                                    'We had dinner at a small restaurant.',
+                                    'I got home just before midnight.',
+                                ]),
                             ]],
                             ['title' => 'Hikaye: The Cat Who Loved Tea', 'skill' => 'reading', 'kind' => 'story', 'story' => 'the-cat-who-loved-tea', 'xp_reward' => 25],
                             ['title' => 'Hafta sonunu anlat', 'skill' => 'speaking', 'kind' => 'ai_talk', 'scenario' => 'weekend-story', 'xp_reward' => 25],

@@ -37,12 +37,7 @@ class LearningLoopTest extends TestCase
     public function test_completing_a_perfect_lesson_awards_xp_streak_quests_and_badges(): void
     {
         $lesson = Lesson::query()->where('title', 'Ben kimim? (am / is / are)')->firstOrFail();
-        $answers = collect($lesson->exercises)->map(fn ($ex) => match ($ex['type']) {
-            'choice', 'fill', 'listen_choice' => $ex['answer'],
-            'translate', 'listen_type' => $ex['answer'],
-            'speak' => $ex['text'],
-            'match' => true,
-        })->all();
+        $answers = collect($lesson->exercises)->map(fn ($ex) => $this->correctAnswer($ex))->all();
 
         $res = $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertOk();
         $this->assertSame(100, $res->json('score'));
@@ -51,6 +46,18 @@ class LearningLoopTest extends TestCase
         $this->assertSame(1, $res->json('reward.streak'));
         $this->assertContains('lessons_1', collect($res->json('reward.achievements'))->pluck('key')->all());
         $this->assertContains('perfect_1', collect($res->json('reward.achievements'))->pluck('key')->all());
+    }
+
+    /** The answer the client would submit for a correct attempt, per exercise type. */
+    private function correctAnswer(array $ex): mixed
+    {
+        return match ($ex['type']) {
+            'speak' => $ex['text'],
+            'match' => true,
+            'spot_error' => $ex['error_index'].':'.$ex['answer'],
+            'sequence' => $ex['answer'],
+            default => $ex['answer'],
+        };
     }
 
     public function test_wrong_answers_cost_hearts(): void
@@ -138,7 +145,7 @@ class LearningLoopTest extends TestCase
     public function test_league_standings_and_weekly_close(): void
     {
         $lesson = Lesson::query()->where('title', 'Selamlaşma')->firstOrFail();
-        $answers = collect($lesson->exercises)->map(fn ($ex) => $ex['type'] === 'match' ? true : ($ex['type'] === 'speak' ? $ex['text'] : $ex['answer']))->all();
+        $answers = collect($lesson->exercises)->map(fn ($ex) => $this->correctAnswer($ex))->all();
         $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertOk();
 
         $league = $this->getJson('/api/v1/league')->assertOk();

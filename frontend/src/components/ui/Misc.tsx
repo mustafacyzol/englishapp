@@ -2,6 +2,7 @@ import { type ReactNode, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { X } from 'lucide-react'
+import { LogoMark } from '@/components/game/Logo'
 
 export function Card({ className, children, as: As = 'div', ...rest }: { className?: string; children: ReactNode; as?: 'div' | 'section' | 'article' } & Record<string, unknown>) {
   return (
@@ -30,15 +31,81 @@ export function Sticker({ children, color = 'bg-butter', className }: { children
   )
 }
 
-export function Spinner({ label = 'Yükleniyor' }: { label?: string }) {
+/**
+ * Branded loading state: the DilGO mark inside a sweeping ring. Used as the
+ * fallback wherever a page's shape isn't known ahead of time — where it is,
+ * prefer a <Skeleton> layout, which tells the reader what is coming.
+ */
+export function Spinner({ label = 'Yükleniyor', className }: { label?: string; className?: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 py-16 text-ink-soft" role="status">
-      <div className="flex gap-1.5">
-        {['bg-flame', 'bg-butter', 'bg-mint'].map((c, i) => (
-          <motion.span key={c} className={clsx('size-3 rounded-full', c)} animate={{ y: [0, -8, 0] }} transition={{ repeat: Infinity, duration: 0.7, delay: i * 0.12 }} />
-        ))}
+    <div className={clsx('flex flex-col items-center justify-center gap-4 py-20 text-ink-soft', className)} role="status" aria-live="polite">
+      <span className="relative grid size-16 place-items-center">
+        <span
+          className="absolute inset-0 animate-spin rounded-full"
+          style={{ background: 'conic-gradient(from 0deg, transparent 0deg, transparent 220deg, var(--color-flame) 340deg, transparent 360deg)', animationDuration: '1s' }}
+        />
+        <span className="absolute inset-[3px] rounded-full bg-paper" />
+        <LogoMark className="relative size-8" />
+      </span>
+      <span className="text-sm font-bold">{label}…</span>
+    </div>
+  )
+}
+
+/** A single shimmering placeholder block. */
+export function Skeleton({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={clsx('block animate-pulse rounded-xl bg-paper-2', className)}
+      style={{ animationDuration: '1.4s' }}
+    />
+  )
+}
+
+/**
+ * Page-shaped loading states. Showing the layout that is about to appear reads as
+ * progress rather than a hang, and stops the content from jumping when it lands.
+ */
+export function SkeletonPage({ variant = 'cards' }: { variant?: 'cards' | 'list' | 'path' | 'reader' }) {
+  if (variant === 'path') {
+    return (
+      <div className="mx-auto max-w-xl" role="status" aria-label="Yükleniyor">
+        <Skeleton className="h-14 w-full rounded-2xl" />
+        <Skeleton className="mt-5 h-32 w-full rounded-3xl" />
+        <div className="mt-8 flex flex-col items-center gap-6">
+          {[0, 1, 2, 3].map((i) => (
+            <Skeleton key={i} className={clsx('size-[72px] rounded-full', i % 2 ? 'translate-x-24' : '-translate-x-24')} />
+          ))}
+        </div>
       </div>
-      <span className="text-sm font-semibold">{label}…</span>
+    )
+  }
+  if (variant === 'reader') {
+    return (
+      <div className="mx-auto max-w-2xl" role="status" aria-label="Yükleniyor">
+        <Skeleton className="aspect-[16/9] w-full rounded-3xl" />
+        <Skeleton className="mt-6 h-8 w-2/3" />
+        <div className="mt-6 space-y-3">
+          {[...Array(8)].map((_, i) => <Skeleton key={i} className={clsx('h-4', i % 3 === 2 ? 'w-4/6' : 'w-full')} />)}
+        </div>
+      </div>
+    )
+  }
+  if (variant === 'list') {
+    return (
+      <div className="mx-auto max-w-2xl space-y-3" role="status" aria-label="Yükleniyor">
+        <Skeleton className="mb-6 h-10 w-52" />
+        {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-20 w-full rounded-2xl" />)}
+      </div>
+    )
+  }
+  return (
+    <div className="mx-auto max-w-5xl" role="status" aria-label="Yükleniyor">
+      <Skeleton className="mb-7 h-10 w-56" />
+      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        {[...Array(6)].map((_, i) => <Skeleton key={i} className="h-60 w-full rounded-3xl" />)}
+      </div>
     </div>
   )
 }

@@ -236,11 +236,13 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     const answers: Json[] = body.answers ?? []
     const results = exercises.map((ex: Json, i: number) => {
       const a = answers[i]
-      if (['choice', 'fill', 'listen_choice'].includes(ex.type)) return String(a) === String(ex.answer)
-      if (['translate', 'listen_type', 'order'].includes(ex.type)) {
+      if (['choice', 'fill', 'listen_choice', 'dialogue'].includes(ex.type)) return String(a) === String(ex.answer)
+      if (['translate', 'listen_type'].includes(ex.type)) {
         const norm = (s: string) => String(s ?? '').toLowerCase().replace(/[^a-z0-9' ]/g, '').replace(/\s+/g, ' ').trim()
         return [ex.answer, ...(ex.alternatives ?? [])].some((x: string) => norm(x) === norm(a))
       }
+      if (ex.type === 'spot_error') return a === `${ex.error_index}:${ex.answer}`
+      if (ex.type === 'sequence') return Array.isArray(a) && a.length === ex.answer.length && a.every((x: number, k: number) => x === ex.answer[k])
       return true
     })
     const total = results.length

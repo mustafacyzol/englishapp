@@ -7,6 +7,7 @@ import clsx from 'clsx'
 import type { UserItem } from '@/lib/types'
 import { rewardImg } from '@/lib/assets'
 import { dateTR } from '@/lib/format'
+import { Img } from '@/components/ui/Img'
 
 export const RARITY = {
   common: { bg: 'bg-card', glow: 'from-mint/15', text: 'text-mint-deep', label: 'Sıradan' },
@@ -31,7 +32,7 @@ export function RewardCard({ entry, flipped, back, onClick }: { entry: UserItem;
             <span className="rounded-full bg-paper-2 px-2 py-0.5 text-ink-soft">{STATUS[entry.status]}</span>
           </div>
           <div className="relative flex flex-1 flex-col items-center justify-center gap-2 px-5 text-center">
-            <img src={rewardImg(entry.item.icon)} alt="" className="size-24 object-contain drop-shadow-lg" />
+            <Img src={rewardImg(entry.item.icon)} alt="" className="size-24 object-contain drop-shadow-lg" />
             <h3 className="text-lg leading-tight">{entry.item.name}</h3>
             <p className="line-clamp-2 text-sm text-ink-soft">{entry.item.description}</p>
           </div>

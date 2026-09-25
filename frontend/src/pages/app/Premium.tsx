@@ -8,7 +8,7 @@ import { dateTR, tl } from '@/lib/format'
 import type { Plan } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
-import { Alert, Modal, PageHeader, Spinner } from '@/components/ui/Misc'
+import { Alert, Modal, PageHeader, SkeletonPage } from '@/components/ui/Misc'
 import { PlanCards } from '../public/Landing'
 
 interface Quote { amount: number; discount: number; total: number; currency: string; coupon: { code: string; description: string | null } | null }
@@ -54,7 +54,7 @@ export default function Premium() {
     q.mutate({ plan_id: p.id })
   }
 
-  if (isLoading || !data) return <Spinner />
+  if (isLoading || !data) return <SkeletonPage variant="cards" />
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader kicker="DilGO Premium" title={user?.premium.active ? 'Premium üyesisin 👑' : 'Sınırları kaldır'} />

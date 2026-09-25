@@ -1,5 +1,6 @@
 import clsx from 'clsx'
 import { badgeImg } from '@/lib/assets'
+import { Img } from '@/components/ui/Img'
 
 const TIERS = {
   bronze: { ring: '#D0874E', bg: '#FBEFE4', label: 'Bronz' },
@@ -22,7 +23,7 @@ export function AchievementBadge({ tier, category, locked, progress = 0, size = 
         <circle cx="50" cy="50" r={r} fill={locked ? 'var(--paper-2)' : t.bg} stroke={locked ? 'var(--line)' : t.ring} strokeWidth="5" />
         {locked && progress > 0 && <circle cx="50" cy="50" r={r} fill="none" stroke="var(--color-mint)" strokeWidth="5" strokeLinecap="round" strokeDasharray={`${c * Math.min(1, progress)} ${c}`} />}
       </svg>
-      <img src={badgeImg(category ?? 'xp')} alt="" loading="lazy" className={clsx('relative size-[78%] object-contain drop-shadow-md transition', locked && 'opacity-40 grayscale')} />
+      <Img src={badgeImg(category ?? 'xp')} alt="" loading="lazy" className={clsx('relative size-[78%] object-contain drop-shadow-md transition', locked && 'opacity-40 grayscale')} />
     </div>
   )
 }

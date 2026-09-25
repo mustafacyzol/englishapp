@@ -4,9 +4,10 @@ import clsx from 'clsx'
 import { AudioLines, ChevronRight, Lock, MessageSquareText, PenLine } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { PHOTO, rewardImg, scenarioImg } from '@/lib/assets'
-import { PageHeader, Progress, Spinner } from '@/components/ui/Misc'
+import { PageHeader, Progress, SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { dateTR } from '@/lib/format'
+import { Img } from '@/components/ui/Img'
 
 interface Scenario { id: number; key: string; title: string; description: string; emoji: string; category: string; cefr_min: string; goals: string[]; is_premium: boolean; locked: boolean }
 interface Usage { used: number; limit: number; remaining: number }
@@ -24,7 +25,7 @@ export default function AiHub() {
     onError: (e: ApiError) => (e.status === 402 ? nav('/premium') : toast(e.message, 'error')),
   })
 
-  if (isLoading || !data) return <Spinner />
+  if (isLoading || !data) return <SkeletonPage variant="cards" />
   return (
     <div>
       <PageHeader kicker="Konuşma ve yazma" title="Ada ile pratik" />
@@ -44,7 +45,7 @@ export default function AiHub() {
               <Progress value={data.usage.remaining} max={data.usage.limit} color="bg-sky" />
             </div>
           </div>
-          <img src={PHOTO.adaWave} alt="Ada el sallıyor" className="h-full max-h-80 w-full object-cover md:max-h-none" />
+          <Img src={PHOTO.adaWave} alt="Ada el sallıyor" className="h-full max-h-80 w-full object-cover md:max-h-none" />
         </div>
       </section>
 
@@ -54,14 +55,14 @@ export default function AiHub() {
         {data.data.map((s) => (
           <button key={s.key} onClick={() => (s.locked ? nav('/premium') : start.mutate({ mode: 'roleplay', scenario_key: s.key }))} className="group overflow-hidden rounded-3xl border-2 border-line bg-card text-left transition hover:-translate-y-1 hover:shadow-soft">
             <div className="relative aspect-[16/9] overflow-hidden">
-              <img src={scenarioImg(s.key)} alt="" loading="lazy" className={clsx('photo transition duration-700 group-hover:scale-105', s.locked && 'grayscale-[40%]')} />
+              <Img src={scenarioImg(s.key)} alt="" loading="lazy" className={clsx('photo transition duration-700 group-hover:scale-105', s.locked && 'grayscale-[40%]')} />
               <div className="absolute left-3 top-3 flex gap-1.5">
                 <span className="rounded-lg bg-card/95 px-2 py-0.5 text-xs font-black">{s.cefr_min}+</span>
                 <span className="rounded-lg bg-card/95 px-2 py-0.5 text-xs font-black">{CAT[s.category] ?? s.category}</span>
               </div>
               {s.is_premium && (
                 <span className="absolute right-3 top-3 flex items-center gap-1 rounded-lg bg-butter px-2 py-0.5 text-xs font-black text-[#1f2433]">
-                  {s.locked ? <Lock className="size-3.5" /> : <img src={rewardImg('crown')} alt="" className="size-4" />} Premium
+                  {s.locked ? <Lock className="size-3.5" /> : <Img src={rewardImg('crown')} alt="" className="size-4" />} Premium
                 </span>
               )}
             </div>

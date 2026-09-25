@@ -9,8 +9,9 @@ import type { RewardItem } from '@/lib/types'
 import { rewardImg, img } from '@/lib/assets'
 import { RARITY } from '@/components/game/RewardCard'
 import { Button, LinkButton } from '@/components/ui/Button'
-import { PageHeader, Spinner } from '@/components/ui/Misc'
+import { PageHeader, SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
+import { Img } from '@/components/ui/Img'
 
 export default function Shop() {
   const { user, setUser } = useAuth()
@@ -33,16 +34,16 @@ export default function Shop() {
     onError: (e: ApiError) => toast(e.first(), 'error'),
   })
 
-  if (isLoading || !data || !user) return <Spinner />
+  if (isLoading || !data || !user) return <SkeletonPage variant="cards" />
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader kicker="Elmaslarını harca" title="Mağaza">
-        <span className="ink-chip bg-sky/10 text-lg"><img src={img('rewards/gems.webp')} alt="" className="size-7" /> {num(user.stats.gems)}</span>
+        <span className="ink-chip bg-sky/10 text-lg"><Img src={img('rewards/gems.webp')} alt="" className="size-7" /> {num(user.stats.gems)}</span>
       </PageHeader>
 
       <section className="ink-card mb-8 flex flex-wrap items-center gap-5 p-5">
         <div className="flex -space-x-2">
-          {Array.from({ length: 5 }, (_, i) => <img key={i} src={img('rewards/heart.webp')} alt="" className={clsx('size-11 transition', !(i < user.hearts.hearts || user.hearts.unlimited) && 'opacity-25 grayscale')} />)}
+          {Array.from({ length: 5 }, (_, i) => <Img key={i} src={img('rewards/heart.webp')} alt="" className={clsx('size-11 transition', !(i < user.hearts.hearts || user.hearts.unlimited) && 'opacity-25 grayscale')} />)}
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-display text-xl font-extrabold">{user.hearts.unlimited ? 'Sınırsız can' : `${user.hearts.hearts}/5 can`}</p>
@@ -63,7 +64,7 @@ export default function Shop() {
             <article key={it.id} className="ink-card flex flex-col overflow-hidden">
               <div className={clsx('relative grid h-36 place-items-center bg-gradient-to-b to-transparent', r.glow)}>
                 <span className={clsx('absolute left-4 top-3 text-[11px] font-extrabold uppercase tracking-widest', r.text)}>{r.label}</span>
-                <img src={rewardImg(it.icon)} alt="" loading="lazy" className="size-28 object-contain drop-shadow-lg transition duration-300 hover:-translate-y-1 hover:scale-105" />
+                <Img src={rewardImg(it.icon)} alt="" loading="lazy" className="size-28 object-contain drop-shadow-lg transition duration-300 hover:-translate-y-1 hover:scale-105" />
               </div>
               <div className="flex flex-1 flex-col items-center gap-2 px-5 pb-5 text-center">
                 <h3 className="font-display text-xl font-extrabold">{it.name}</h3>

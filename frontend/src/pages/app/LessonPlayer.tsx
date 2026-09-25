@@ -4,23 +4,25 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { Check, Gem, Infinity as InfinityIcon, Keyboard, Mic, MicOff, Snail, Volume2, X } from 'lucide-react'
-import { rewardImg } from '@/lib/assets'
+import { img, rewardImg } from '@/lib/assets'
 import { Ada } from '@/components/game/Ada'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { canListen, listen, normalize, similarity, speak } from '@/lib/speech'
+import { ensureMic, micHelpText, readMicState, type MicState } from '@/lib/mic'
 import { sfx } from '@/lib/fx'
 import type { Exercise, RewardSummary } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
-import { Modal, Progress, Spinner } from '@/components/ui/Misc'
+import { Modal, Spinner } from '@/components/ui/Misc'
 import { useReward } from '@/components/game/RewardProvider'
 import { useToast } from '@/components/ui/Toast'
+import { Img } from '@/components/ui/Img'
 
 interface LessonData {
   lesson: { id: number; title: string; xp_reward: number; exercises: Exercise[] }
   hearts: { hearts: number; unlimited: boolean }
 }
-type Answer = number | string | boolean | null
+type Answer = number | string | boolean | number[] | null
 
 const shuffle = <T,>(a: T[]) => [...a].sort(() => Math.random() - 0.5)
 
@@ -38,11 +40,41 @@ function isCorrect(ex: Exercise, v: Answer): boolean {
       return typeof v === 'string' && similarity(v, ex.text) >= 0.6
     case 'match':
       return v === true
+    case 'spot_error':
+      return v === `${ex.error_index}:${ex.answer}`
+    case 'dialogue':
+      return v === ex.answer
+    case 'sequence':
+      return Array.isArray(v) && v.length === ex.answer.length && v.every((x, i) => x === ex.answer[i])
   }
 }
 
-const correctText = (ex: Exercise) =>
-  'options' in ex && typeof ex.answer === 'number' ? ex.options[ex.answer] : ex.type === 'translate' || ex.type === 'listen_type' ? ex.answer : ex.type === 'speak' ? ex.text : ''
+/** The sentence with the hunted mistake already put right. */
+const fixedSentence = (ex: Extract<Exercise, { type: 'spot_error' }>) =>
+  ex.words.map((w, i) => (i === ex.error_index ? ex.options[ex.answer] : w)).join(' ')
+
+const correctText = (ex: Exercise) => {
+  if (ex.type === 'spot_error') return fixedSentence(ex)
+  if (ex.type === 'sequence') return ex.answer.map((i) => ex.items[i]).join(' → ')
+  if ('options' in ex && typeof ex.answer === 'number') return ex.options[ex.answer]
+  if (ex.type === 'translate' || ex.type === 'listen_type') return ex.answer
+  if (ex.type === 'speak') return ex.text
+  return ''
+}
+
+/** Each drill gets its own name, colour and kicker so a lesson feels like a set of scenes. */
+const DRILL: Record<Exercise['type'], { label: string; title: string; accent: string; tint: string }> = {
+  choice: { label: 'Seçim', title: 'Doğru seçeneği seç', accent: 'text-sky', tint: 'from-sky/10' },
+  fill: { label: 'Boşluk', title: 'Boşluğu doldur', accent: 'text-sky', tint: 'from-sky/10' },
+  listen_choice: { label: 'Kulak', title: 'Ne duydun?', accent: 'text-lilac', tint: 'from-lilac/12' },
+  listen_type: { label: 'Dikte', title: 'Duyduğunu yaz', accent: 'text-lilac', tint: 'from-lilac/12' },
+  translate: { label: 'Çeviri', title: 'Bu cümleyi çevir', accent: 'text-mint-deep', tint: 'from-mint/10' },
+  speak: { label: 'Mikrofon', title: 'Bu cümleyi sesli söyle', accent: 'text-flame', tint: 'from-flame/10' },
+  match: { label: 'Eşleştir', title: 'Eşleşen çiftleri bul', accent: 'text-butter-deep', tint: 'from-butter/14' },
+  spot_error: { label: 'Hata avı', title: 'Bu cümlede bir hata var. Yakala.', accent: 'text-berry', tint: 'from-berry/12' },
+  dialogue: { label: 'Sahne', title: 'Sıra sende. Ne dersin?', accent: 'text-flame', tint: 'from-flame/10' },
+  sequence: { label: 'Sıralama', title: 'Doğru sıraya diz', accent: 'text-mint-deep', tint: 'from-mint/10' },
+}
 
 export default function LessonPlayer() {
   const { id } = useParams()
@@ -59,6 +91,7 @@ export default function LessonPlayer() {
   const [checked, setChecked] = useState<null | boolean>(null)
   const [hearts, setHearts] = useState(5)
   const [done, setDone] = useState(0)
+  const [combo, setCombo] = useState(0)
   const [outOfHearts, setOutOfHearts] = useState(false)
   const [quit, setQuit] = useState(false)
   const started = useRef(Date.now())
@@ -119,6 +152,7 @@ export default function LessonPlayer() {
     setChecked(ok)
     // first attempt is what the server grades
     if (answers[current] === undefined) setAnswers((a) => ({ ...a, [current]: ex.type === 'speak' && ok ? ex.text : value }))
+    setCombo((c) => (ok ? c + 1 : 0))
     if (ok) sfx.correct()
     else {
       sfx.wrong()
@@ -141,25 +175,62 @@ export default function LessonPlayer() {
   const canCheck = value !== null && value !== '' && checked === null
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-3xl flex-col">
-      <header className="safe-top flex items-center gap-4 px-5 pt-5">
-        <button onClick={() => setQuit(true)} aria-label="Dersten çık" className="text-ink-soft hover:text-ink">
-          <X className="size-7" />
-        </button>
-        <Progress value={done} max={total} color="bg-mint" tall className="flex-1" />
-        <span className="flex items-center gap-1 text-lg font-black text-berry">
-          <img src={rewardImg('heart')} alt="" className="size-7" />
-          {unlimited ? <InfinityIcon className="size-5" /> : hearts}
-        </span>
-      </header>
+    <div className="relative flex min-h-dvh flex-col">
+      {/* Each drill tints the stage, so the lesson reads as a set of scenes rather than a form. */}
+      <motion.div
+        key={ex.type}
+        aria-hidden
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className={clsx('pointer-events-none fixed inset-x-0 top-0 h-[55vh] bg-gradient-to-b to-transparent', DRILL[ex.type].tint)}
+      />
 
-      <main className="flex-1 px-5 py-8">
-        <AnimatePresence mode="wait">
-          <motion.div key={`${current}-${queue.length}`} initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} transition={{ duration: 0.2 }}>
-            <ExerciseView ex={ex} value={value} setValue={setValue} locked={checked !== null} ttsRate={user?.preferences?.tts_rate} />
-          </motion.div>
+      <div className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col">
+        <header className="safe-top flex items-center gap-4 px-5 pt-5">
+          <button onClick={() => setQuit(true)} aria-label="Dersten çık" className="text-ink-soft hover:text-ink">
+            <X className="size-7" />
+          </button>
+          {/* A film strip: one segment per drill, so progress is countable at a glance. */}
+          <div className="flex flex-1 gap-1" role="progressbar" aria-valuenow={done} aria-valuemin={0} aria-valuemax={total}>
+            {Array.from({ length: total }, (_, i) => (
+              <span key={i} className="h-2.5 flex-1 overflow-hidden rounded-full bg-line">
+                <motion.span
+                  className={clsx('block h-full rounded-full', i < done ? 'bg-mint' : 'bg-flame')}
+                  initial={false}
+                  animate={{ width: i < done ? '100%' : i === done ? '35%' : '0%' }}
+                  transition={{ type: 'spring', stiffness: 160, damping: 22 }}
+                />
+              </span>
+            ))}
+          </div>
+          <span className="flex items-center gap-1 text-lg font-black text-berry">
+            <Img src={rewardImg('heart')} alt="" className="size-7" />
+            {unlimited ? <InfinityIcon className="size-5" /> : hearts}
+          </span>
+        </header>
+
+        <AnimatePresence>
+          {combo >= 3 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="pointer-events-none absolute right-5 top-16 z-10 flex items-center gap-2 rounded-2xl bg-flame px-3 py-1.5 text-white shadow-soft"
+            >
+              <Img src={rewardImg('flame')} alt="" className="size-6" />
+              <span className="font-display text-sm font-black">{combo} doğru üst üste!</span>
+            </motion.div>
+          )}
         </AnimatePresence>
-      </main>
+
+        <main className="flex-1 px-5 py-8">
+          <AnimatePresence mode="wait">
+            <motion.div key={`${current}-${queue.length}`} initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} transition={{ duration: 0.2 }}>
+              <ExerciseView ex={ex} value={value} setValue={setValue} locked={checked !== null} ttsRate={user?.preferences?.tts_rate} />
+            </motion.div>
+          </AnimatePresence>
+        </main>
 
       <footer className={clsx('safe-bottom border-t-2 px-5 pb-4 pt-4 transition-colors', checked === null ? 'border-line' : checked ? 'border-transparent bg-mint/15' : 'border-transparent bg-berry/12')}>
         <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center">
@@ -186,10 +257,11 @@ export default function LessonPlayer() {
           </div>
         </div>
       </footer>
+      </div>
 
       <Modal open={outOfHearts} onClose={() => nav('/learn')} dismissable={false}>
         <div className="text-center">
-          <img src={rewardImg('heart')} alt="" className="mx-auto mb-3 size-24 object-contain grayscale" />
+          <Img src={rewardImg('heart')} alt="" className="mx-auto mb-3 size-24 object-contain grayscale" />
           <h2 className="text-2xl font-extrabold">Canın bitti!</h2>
           <p className="mb-6 mt-2 text-ink-soft">Canlar her 30 dakikada bir yenilenir. Hemen devam etmek istersen elmasla doldurabilir ya da Premium ile sınırsız can alabilirsin.</p>
           <div className="grid gap-3">
@@ -231,11 +303,12 @@ function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exercise; 
     if ('audio' in ex && ex.audio) setTimeout(() => speak(ex.audio!, { rate: ttsRate }), 250)
   }, [ex, ttsRate])
 
-  const title = { choice: 'Doğru seçeneği seç', fill: 'Boşluğu doldur', listen_choice: 'Ne duydun?', translate: 'Bu cümleyi çevir', listen_type: 'Duyduğunu yaz', speak: 'Bu cümleyi sesli söyle', match: 'Eşleşen çiftleri bul' }[ex.type]
+  const d = DRILL[ex.type]
 
   return (
     <div>
-      <h1 className="mb-6 text-2xl font-extrabold sm:text-3xl">{title}</h1>
+      <p className={clsx('mb-1.5 text-xs font-black uppercase tracking-[0.2em]', d.accent)}>{d.label}</p>
+      <h1 className="mb-7 text-2xl font-extrabold sm:text-3xl">{d.title}</h1>
       {(ex.type === 'choice' || ex.type === 'fill' || ex.type === 'listen_choice') && (
         <>
           {ex.type === 'listen_choice' ? (
@@ -279,6 +352,190 @@ function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exercise; 
       )}
       {ex.type === 'speak' && <SpeakExercise ex={ex} setValue={setValue} locked={locked} value={value} ttsRate={ttsRate} />}
       {ex.type === 'match' && <MatchGame ex={ex} onDone={() => setValue(true)} />}
+      {ex.type === 'spot_error' && <SpotError ex={ex} value={value} setValue={setValue} locked={locked} />}
+      {ex.type === 'dialogue' && <DialogueScene ex={ex} value={value} setValue={setValue} locked={locked} ttsRate={ttsRate} />}
+      {ex.type === 'sequence' && <SequenceTrack ex={ex} value={value} setValue={setValue} locked={locked} />}
+    </div>
+  )
+}
+
+/**
+ * Hata Avı — a sentence carrying the kind of slip a Turkish speaker actually makes.
+ * Tap the guilty word, then choose its replacement. The Turkish "why" lands with the result.
+ */
+function SpotError({ ex, value, setValue, locked }: { ex: Extract<Exercise, { type: 'spot_error' }>; value: Answer; setValue: (v: Answer) => void; locked: boolean }) {
+  const [picked, setPicked] = useState<number | null>(null)
+  const chosen = typeof value === 'string' ? Number(value.split(':')[1]) : null
+
+  const tapWord = (i: number) => {
+    if (locked) return
+    sfx.tap()
+    setPicked(i)
+    setValue(null)
+  }
+
+  return (
+    <div>
+      <p className="mb-6 text-ink-soft">{ex.prompt}</p>
+      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-3 rounded-2xl border-2 border-line bg-card p-5 text-2xl font-bold leading-relaxed">
+        {ex.words.map((w, i) => (
+          <button
+            key={i}
+            disabled={locked}
+            onClick={() => tapWord(i)}
+            className={clsx(
+              'rounded-lg px-1.5 py-0.5 transition',
+              picked === i ? 'bg-berry text-white' : 'hover:bg-paper-2',
+              locked && i === ex.error_index && 'bg-mint/25 text-mint-deep',
+            )}
+          >
+            {w}
+          </button>
+        ))}
+      </div>
+
+      <AnimatePresence>
+        {picked !== null && !locked && (
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-6">
+            <p className="mb-3 font-bold text-ink-soft">
+              “<span className="text-berry">{ex.words[picked]}</span>” yerine ne gelmeli?
+            </p>
+            <div className="grid gap-3 sm:grid-cols-3">
+              {ex.options.map((o, i) => (
+                <button
+                  key={i}
+                  onClick={() => { sfx.tap(); setValue(`${picked}:${i}`) }}
+                  className={clsx('press rounded-2xl border-2 px-4 py-4 text-lg font-bold', chosen === i ? 'border-berry bg-berry/10 text-berry shadow-[0_3px_0_0_var(--color-berry)]' : 'border-line bg-card shadow-hard hover:bg-paper-2')}
+                >
+                  {o}
+                </button>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {locked && (
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 flex gap-3 rounded-2xl bg-butter/15 p-4">
+          <Ada className="size-11 shrink-0" />
+          <p className="text-[15px] leading-relaxed">{ex.explanation_tr}</p>
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Sahne — a real scene from the scenario library with the learner's line missing.
+ * Choosing a reply is a conversation decision, not a grammar gap-fill.
+ */
+function DialogueScene({ ex, value, setValue, locked, ttsRate }: { ex: Extract<Exercise, { type: 'dialogue' }>; value: Answer; setValue: (v: Answer) => void; locked: boolean; ttsRate?: number }) {
+  return (
+    <div>
+      {ex.scene && (
+        <div className="relative mb-6 h-36 overflow-hidden rounded-3xl">
+          <Img src={img(`${ex.scene}.webp`)} alt="" className="photo" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
+          <p className="absolute inset-x-5 bottom-3 font-display text-lg font-black text-white">{ex.prompt}</p>
+        </div>
+      )}
+      {!ex.scene && <p className="mb-6 text-ink-soft">{ex.prompt}</p>}
+
+      <div className="space-y-3">
+        {ex.lines.map((l, i) => (
+          <div key={i} className={clsx('flex gap-3', l.who === 'Sen' && 'flex-row-reverse')}>
+            <span className={clsx('grid size-10 shrink-0 place-items-center rounded-2xl font-display text-sm font-black text-white', l.who === 'Sen' ? 'bg-flame' : 'bg-sky')}>{l.who[0]}</span>
+            <div className={clsx('max-w-[80%] rounded-2xl px-4 py-3', l.who === 'Sen' ? 'bg-flame/10' : 'bg-paper-2')}>
+              <p className="text-[11px] font-black uppercase tracking-widest text-ink-soft">{l.who}</p>
+              <p className="text-lg font-semibold">{l.text}</p>
+              {l.tr && <p className="mt-0.5 text-sm text-ink-soft">{l.tr}</p>}
+              {!l.tr && (
+                <button type="button" onClick={() => speak(l.text, { rate: ttsRate })} className="mt-1 text-ink-soft hover:text-sky" aria-label="Dinle">
+                  <Volume2 className="size-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        ))}
+
+        <div className="flex flex-row-reverse gap-3">
+          <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-flame font-display text-sm font-black text-white">S</span>
+          <div className={clsx('min-h-14 min-w-[60%] rounded-2xl border-2 border-dashed px-4 py-3 text-lg font-semibold', typeof value === 'number' ? 'border-flame bg-flame/10' : 'border-line text-ink-soft')}>
+            {typeof value === 'number' ? ex.options[value] : 'Cevabını seç…'}
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-7 grid gap-3">
+        {ex.options.map((o, i) => (
+          <button
+            key={i}
+            disabled={locked}
+            onClick={() => { sfx.tap(); setValue(i) }}
+            className={clsx('press rounded-2xl border-2 px-4 py-4 text-left text-lg font-bold', value === i ? 'border-flame bg-flame/10 text-flame shadow-[0_3px_0_0_var(--color-flame)]' : 'border-line bg-card shadow-hard hover:bg-paper-2')}
+          >
+            {o}
+          </button>
+        ))}
+      </div>
+
+      {locked && ex.note_tr && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 flex gap-3 rounded-2xl bg-butter/15 p-4">
+          <Ada className="size-11 shrink-0" />
+          <p className="text-[15px] leading-relaxed">{ex.note_tr}</p>
+        </motion.div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Sıralama — put the steps of a story or a real-life task in order. Tap to add a stop
+ * to the track, tap again to take it off.
+ */
+function SequenceTrack({ ex, value, setValue, locked }: { ex: Extract<Exercise, { type: 'sequence' }>; value: Answer; setValue: (v: Answer) => void; locked: boolean }) {
+  const order = Array.isArray(value) ? value : []
+  const toggle = (i: number) => {
+    if (locked) return
+    sfx.tap()
+    const next = order.includes(i) ? order.filter((x) => x !== i) : [...order, i]
+    setValue(next.length === ex.items.length ? next : next.length ? next : null)
+  }
+  // Shown in a fresh random order each time, otherwise the answer is just the list order.
+  const pool = useMemo(() => shuffle(ex.items.map((_, i) => i)), [ex])
+  const left = pool.filter((i) => !order.includes(i))
+
+  return (
+    <div>
+      <p className="mb-6 text-ink-soft">{ex.prompt}</p>
+
+      <ol className="relative mb-7 space-y-2.5 pl-8">
+        <span className="absolute bottom-3 left-[13px] top-3 w-0.5 rounded-full bg-line" />
+        {order.map((idx, pos) => (
+          <motion.li key={idx} layout initial={{ opacity: 0, x: -14 }} animate={{ opacity: 1, x: 0 }} className="relative">
+            <span className="absolute -left-8 top-3 grid size-7 place-items-center rounded-full bg-mint font-display text-sm font-black text-white ring-4 ring-paper">{pos + 1}</span>
+            <button disabled={locked} onClick={() => toggle(idx)} className="w-full rounded-2xl border-2 border-mint/40 bg-mint/10 px-4 py-3 text-left text-lg font-semibold">
+              {ex.items[idx]}
+            </button>
+          </motion.li>
+        ))}
+        {order.length < ex.items.length && (
+          <li className="relative">
+            <span className="absolute -left-8 top-3 grid size-7 place-items-center rounded-full bg-paper-2 font-display text-sm font-black text-ink-soft ring-4 ring-paper">{order.length + 1}</span>
+            <div className="rounded-2xl border-2 border-dashed border-line px-4 py-3 text-lg font-semibold text-ink-soft">Sıradaki adımı seç…</div>
+          </li>
+        )}
+      </ol>
+
+      <div className="grid gap-3">
+        {left.map((i) => (
+          <motion.button key={i} layout disabled={locked} onClick={() => toggle(i)} className="press rounded-2xl border-2 border-line bg-card px-4 py-3.5 text-left text-lg font-bold shadow-hard hover:bg-paper-2">
+            {ex.items[i]}
+          </motion.button>
+        ))}
+      </div>
+
+      {locked && ex.note_tr && <p className="mt-6 rounded-2xl bg-butter/15 p-4 text-[15px]">{ex.note_tr}</p>}
     </div>
   )
 }
@@ -330,17 +587,39 @@ function SpeakExercise({ ex, setValue, locked, value, ttsRate }: { ex: Extract<E
   const [listening, setListening] = useState(false)
   const [partial, setPartial] = useState('')
   const [err, setErr] = useState('')
+  const [mic, setMic] = useState<MicState>('unknown')
   const stop = useRef<() => void>(() => {})
 
-  const toggle = () => {
+  // Ask the moment the drill opens, so the system dialog is already answered by the
+  // time the learner reaches for the button.
+  useEffect(() => {
+    let alive = true
+    readMicState().then((s) => {
+      if (!alive) return
+      setMic(s)
+      if (s !== 'granted' && s !== 'denied') ensureMic().then((r) => alive && setMic(r))
+    })
+    return () => {
+      alive = false
+      stop.current()
+    }
+  }, [ex])
+
+  const toggle = async () => {
     if (listening) return stop.current()
     setErr('')
     setPartial('')
+    const state = await ensureMic()
+    setMic(state)
+    if (state === 'denied') return
     setListening(true)
     stop.current = listen({
       onPartial: setPartial,
       onFinal: (t) => setValue(t),
-      onError: (e) => setErr(e === 'not-allowed' ? 'Mikrofon izni gerekli.' : e === 'unsupported' ? 'Bu cihaz konuşma tanımayı desteklemiyor.' : 'Seni duyamadım, tekrar dene.'),
+      onError: (e) => {
+        if (e === 'not-allowed') setMic('denied')
+        else setErr(e === 'unsupported' ? 'Bu cihaz konuşma tanımayı desteklemiyor.' : 'Seni duyamadım, tekrar dene.')
+      },
       onEnd: () => setListening(false),
     })
   }
@@ -360,15 +639,46 @@ function SpeakExercise({ ex, setValue, locked, value, ttsRate }: { ex: Extract<E
           {ex.translation && <p className="mt-1 text-ink-soft">{ex.translation}</p>}
         </div>
       </div>
-      {canListen() ? (
-        <button disabled={locked} onClick={toggle} className={clsx('press mx-auto flex w-full max-w-sm items-center justify-center gap-3 rounded-2xl border-2 py-6 text-lg font-black uppercase', listening ? 'border-flame bg-flame text-white shadow-[0_4px_0_0_var(--color-flame-deep)]' : 'border-line bg-card text-sky shadow-hard')}>
-          {listening ? <><MicOff className="size-6" /> Dinliyorum… (bitir)</> : <><Mic className="size-6 text-flame" /> Konuşmak için dokun</>}
-        </button>
+
+      {mic === 'denied' ? (
+        <MicBlocked onRetry={async () => setMic(await ensureMic())} />
+      ) : canListen() ? (
+        <>
+          <button
+            disabled={locked}
+            onClick={toggle}
+            className={clsx(
+              'press relative mx-auto flex w-full max-w-sm items-center justify-center gap-3 overflow-hidden rounded-2xl border-2 py-6 text-lg font-black uppercase',
+              listening ? 'border-flame bg-flame text-white shadow-[0_4px_0_0_var(--color-flame-deep)]' : 'border-line bg-card text-sky shadow-hard',
+            )}
+          >
+            {listening && (
+              <span aria-hidden className="absolute inset-0 -z-0">
+                <span className="absolute inset-0 animate-ping rounded-2xl bg-white/20" />
+              </span>
+            )}
+            {listening ? <><MicOff className="relative size-6" /> Dinliyorum… (bitir)</> : <><Mic className="size-6 text-flame" /> Konuşmak için dokun</>}
+          </button>
+          {mic === 'prompt' && <p className="mt-3 text-center text-sm font-semibold text-ink-soft">Tarayıcı mikrofon izni isteyecek — “İzin ver”e dokun.</p>}
+        </>
       ) : (
-        <p className="rounded-2xl border-2 border-dashed border-line/40 p-4 text-center text-sm text-ink-soft">Bu tarayıcı konuşma tanımayı desteklemiyor. Chrome veya uygulamamızı kullan ya da “Şu an konuşamıyorum”a bas.</p>
+        <p className="rounded-2xl border-2 border-dashed border-line/40 p-4 text-center text-sm text-ink-soft">Bu tarayıcı konuşma tanımayı desteklemiyor. Chrome ya da uygulamamızı kullan veya “Şu an konuşamıyorum”a bas.</p>
       )}
+
       {(partial || value) && <p className="mt-4 text-center font-semibold text-ink-soft">“{(value as string) || partial}”</p>}
       {err && <p className="mt-3 text-center font-bold text-berry">{err}</p>}
+    </div>
+  )
+}
+
+/** Shown when the site is blocked: says exactly where to turn the microphone back on. */
+export function MicBlocked({ onRetry }: { onRetry: () => void }) {
+  return (
+    <div className="mx-auto max-w-sm rounded-2xl border-2 border-berry/30 bg-berry/8 p-5 text-center">
+      <MicOff className="mx-auto mb-2 size-8 text-berry" />
+      <p className="font-extrabold">Mikrofon izni kapalı</p>
+      <p className="mt-1 text-sm text-ink-soft">{micHelpText()}</p>
+      <Button variant="secondary" size="sm" className="mt-4" onClick={onRetry}>Tekrar dene</Button>
     </div>
   )
 }

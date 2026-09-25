@@ -11,13 +11,19 @@ import { Alert } from '@/components/ui/Misc'
 import { Reveal } from '@/components/motion/Page'
 import { useToast } from '@/components/ui/Toast'
 import { Turnstile } from '../auth/Turnstile'
+import { Img } from '@/components/ui/Img'
+import { useLocation } from 'react-router-dom'
+
+const TOPICS = ['general', 'course', 'corporate', 'support', 'partnership']
 
 interface Cfg { support_email: string; school_whatsapp: string | null }
 
 export default function Contact() {
   const toast = useToast()
   const cfg = useQuery({ queryKey: ['config'], queryFn: () => get<Cfg>('/config') })
-  const [f, setF] = useState({ name: '', email: '', phone: '', topic: 'general', message: '', kvkk: false })
+  // /contact?konu=corporate lands with the right subject already chosen.
+  const preset = new URLSearchParams(useLocation().search).get('konu') ?? ''
+  const [f, setF] = useState({ name: '', email: '', phone: '', topic: TOPICS.includes(preset) ? preset : 'general', message: '', kvkk: false })
   const [captcha, setCaptcha] = useState('')
   const m = useMutation({ mutationFn: () => post<{ message: string }>('/contact', { ...f, captcha }) })
   const err = m.error as ApiError | null
@@ -41,7 +47,7 @@ export default function Contact() {
         <h1 className="text-[clamp(2.3rem,5vw,3.6rem)] leading-[1.05]">Sorun mu var? Yazman yeterli.</h1>
         <p className="mt-5 text-lg text-ink-soft">Kurslarımız, kurumsal eğitim, üyelik ya da teknik bir konu. Ekibimiz mesajını okuyup en geç 1 iş günü içinde dönüş yapar.</p>
         <div className="mt-8 overflow-hidden rounded-3xl">
-          <img src={PHOTO.reception} alt="Bayrak Dil Okulları karşılama" className="aspect-[4/3] w-full object-cover" />
+          <Img src={PHOTO.reception} alt="Bayrak Dil Okulları karşılama" className="aspect-[4/3] w-full object-cover" />
         </div>
         <div className="mt-6 grid gap-3">
           <button onClick={copy} className="flex items-center gap-4 rounded-2xl border-2 border-line bg-card p-4 text-left hover:bg-paper-2">

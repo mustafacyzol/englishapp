@@ -9,11 +9,12 @@ import { useAuth } from '@/lib/auth'
 import { speak, stopSpeaking } from '@/lib/speech'
 import type { RewardSummary, Story } from '@/lib/types'
 import { Button, LinkButton } from '@/components/ui/Button'
-import { Progress, Spinner, Sticker } from '@/components/ui/Misc'
+import { Progress, SkeletonPage, Sticker } from '@/components/ui/Misc'
 import { useReward } from '@/components/game/RewardProvider'
 import { useToast } from '@/components/ui/Toast'
 import { StoryCover } from './StoryCover'
 import { rewardImg } from '@/lib/assets'
+import { Img } from '@/components/ui/Img'
 
 interface Resp { story: Story; locked: boolean; read: { bookmarked: boolean; progress: number; completed_at: string | null } }
 
@@ -103,14 +104,14 @@ export default function StoryReader() {
     })
   }
 
-  if (isLoading) return <Spinner />
+  if (isLoading) return <SkeletonPage variant="reader" />
   if (error || !data) return <p className="p-8 text-center font-bold">{(error as ApiError)?.message ?? 'Hikaye bulunamadı.'}</p>
   const { story, locked } = data
   const questions = story.questions ?? []
   const allAnswered = questions.every((_, i) => quiz[i] !== undefined)
 
   return (
-    <article className="mx-auto max-w-2xl pb-16">
+    <article className="mx-auto max-w-3xl pb-16">
       <div className="mb-6 flex items-center justify-between">
         <Link to="/stories" className="flex items-center gap-1 font-bold text-ink-soft hover:text-ink"><ArrowLeft className="size-5" /> Kütüphane</Link>
         <div className="flex gap-2">
@@ -139,7 +140,7 @@ export default function StoryReader() {
 
       <p className="mb-4 text-sm font-semibold text-ink-soft">💡 Bilmediğin bir kelimeye dokun: anlamını gör, sesini dinle, kelime defterine ekle.</p>
 
-      <div className={clsx('space-y-6 font-read', big ? 'text-[22px] leading-[1.85]' : 'text-[19px] leading-[1.8]')}>
+      <div className={clsx('mx-auto max-w-[42rem] space-y-6 font-read', big ? 'text-[22px] leading-[1.85]' : 'text-[19px] leading-[1.8]')}>
         {story.paragraphs.map((p, i) => (
           <div key={i} className={clsx('group relative rounded-2xl p-4 transition', playing === i ? 'bg-butter/15' : 'hover:bg-paper-2/60')}>
             <div className="absolute -left-2 top-4 flex flex-col gap-1 sm:-left-14">
@@ -168,7 +169,7 @@ export default function StoryReader() {
 
       {locked ? (
         <div className="relative mt-8 overflow-hidden rounded-3xl bg-[#1f2433] p-8 text-center text-white">
-          <img src={rewardImg('crown')} alt="" className="mx-auto mb-3 size-20 object-contain" />
+          <Img src={rewardImg('crown')} alt="" className="mx-auto mb-3 size-20 object-contain" />
           <h2 className="text-2xl">Hikayenin devamı Premium'da</h2>
           <p className="mx-auto mb-6 mt-2 max-w-sm text-white/70">Tüm hikayeler, sesli okumalar ve sınırsız pratik için Premium'a geç.</p>
           <LinkButton to="/premium" variant="butter">Premium'u keşfet</LinkButton>

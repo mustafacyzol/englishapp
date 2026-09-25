@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Outlet } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { ArrowLeft, BookOpen, Boxes, ClipboardList, Crown, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Receipt, ScrollText, Settings, ShieldCheck, Swords, Ticket, Trophy, Users } from 'lucide-react'
+import { ArrowLeft, BookOpen, Boxes, ClipboardList, Crown, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Quote, Receipt, ScrollText, Settings, ShieldCheck, Swords, Ticket, Trophy, Users } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import { ApiError, hasAdminToken, onApiError, post, setAdminToken } from '@/lib/api'
 import { Logo } from '@/components/game/Logo'
@@ -25,6 +25,7 @@ const GROUPS = [
     { to: '/admin/r/stories', label: 'Hikayeler', icon: BookOpen },
     { to: '/admin/r/scenarios', label: 'AI senaryoları', icon: MessagesSquare },
     { to: '/admin/r/blog-posts', label: 'Blog', icon: Newspaper },
+    { to: '/admin/r/testimonials', label: 'Öğrenci yorumları', icon: Quote },
     { to: '/admin/r/contact-messages', label: 'İletişim mesajları', icon: Mail },
   ] },
   { title: 'Oyun & Büyüme', items: [

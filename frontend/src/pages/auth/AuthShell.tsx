@@ -4,12 +4,13 @@ import { motion } from 'motion/react'
 import { Logo } from '@/components/game/Logo'
 import { Ada } from '@/components/game/Ada'
 import { PHOTO } from '@/lib/assets'
+import { Img } from '@/components/ui/Img'
 
 export function AuthShell({ title, subtitle, children, footer }: { title: string; subtitle?: ReactNode; children: ReactNode; footer?: ReactNode }) {
   return (
     <div className="grid min-h-dvh bg-card lg:grid-cols-[1fr_1.05fr]">
       <aside className="relative hidden overflow-hidden lg:block">
-        <img src={PHOTO.auth} alt="" className="photo absolute inset-0" />
+        <Img src={PHOTO.auth} alt="" className="photo absolute inset-0" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-black/20" />
         <Link to="/" className="absolute left-10 top-10 rounded-2xl bg-card/95 px-4 py-2"><Logo small /></Link>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="absolute inset-x-10 bottom-10 flex items-start gap-4 rounded-3xl bg-card/95 p-5 backdrop-blur">

@@ -173,6 +173,21 @@ class ResourceController extends Controller
                     'published_at' => ['nullable', 'date'],
                 ],
             ],
+            'testimonials' => [
+                'model' => Models\Testimonial::class, 'search' => ['name', 'quote'], 'order' => 'position', 'filters' => ['is_published'], 'role' => 'staff',
+                'rules' => [
+                    'name' => ['required', 'string', 'max:80'],
+                    'role' => ['nullable', 'string', 'max:120'],
+                    'avatar' => ['nullable', 'string', 'max:500'],
+                    'quote' => ['required', 'string', 'max:600'],
+                    'highlight' => ['nullable', 'string', 'max:120'],
+                    'rating' => ['integer', 'between:1,5'],
+                    'cefr_level' => ['nullable', 'in:A1,A2,B1,B2,C1,C2'],
+                    'streak' => ['nullable', 'integer', 'min:0', 'max:5000'],
+                    'is_published' => ['boolean'],
+                    'position' => ['integer', 'min:0'],
+                ],
+            ],
             'contact-messages' => [
                 'model' => Models\ContactMessage::class, 'search' => ['name', 'email', 'message'], 'order' => '-id', 'filters' => ['status', 'topic'], 'role' => 'staff',
                 'rules' => [

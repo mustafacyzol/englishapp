@@ -1,6 +1,7 @@
 import { PHOTO } from '@/lib/assets'
 import { LinkButton } from '@/components/ui/Button'
 import { Reveal } from '@/components/motion/Page'
+import { Img } from '@/components/ui/Img'
 
 const VALUES = [
   ['Önce konuşmak', 'Dil, konuşulmak için vardır. Her dersimiz ve her uygulama ekranımız öğrencinin ağzını açmasını hedefler.'],
@@ -22,7 +23,7 @@ export default function About() {
 
       <Reveal className="mx-auto max-w-6xl px-5">
         <div className="overflow-hidden rounded-[36px]">
-          <img src={PHOTO.team} alt="Bayrak Dil Okulları öğretmen ekibi" className="aspect-[16/8] w-full object-cover" />
+          <Img src={PHOTO.team} alt="Bayrak Dil Okulları öğretmen ekibi" className="aspect-[16/8] w-full object-cover" />
         </div>
       </Reveal>
 
@@ -52,9 +53,9 @@ export default function About() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-24 lg:grid-cols-2">
+      <section id="okul" className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-24 lg:grid-cols-2">
         <Reveal>
-          <div className="overflow-hidden rounded-[32px]"><img src={PHOTO.classroom} alt="Sınıfta ders" loading="lazy" className="aspect-[4/3] w-full object-cover" /></div>
+          <div className="overflow-hidden rounded-[32px]"><Img src={PHOTO.classroom} alt="Sınıfta ders" loading="lazy" className="aspect-[4/3] w-full object-cover" /></div>
         </Reveal>
         <Reveal delay={0.08}>
           <h2 className="text-4xl leading-tight">Uygulama ve sınıf birlikte çalışır.</h2>

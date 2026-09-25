@@ -8,6 +8,7 @@ import { AchievementBadge } from './AchievementBadge'
 import { celebrate, sfx } from '@/lib/fx'
 import { useAuth } from '@/lib/auth'
 import type { RewardSummary } from '@/lib/types'
+import { Img } from '@/components/ui/Img'
 
 const Ctx = createContext<(r: RewardSummary, title?: string) => void>(() => {})
 
@@ -39,9 +40,9 @@ export function RewardProvider({ children }: { children: ReactNode }) {
             <h2 className="mb-5 mt-1 text-4xl">+{r.xp_gained} XP {r.multiplier > 1 && <span className="text-flame">×{r.multiplier}</span>}</h2>
 
             <div className="mb-5 grid grid-cols-3 gap-2">
-              <Stat icon={<img src={rewardImg('flame')} alt="" className="size-7" />} label="Seri" value={`${r.streak} gün`} highlight={r.streak_extended} />
+              <Stat icon={<Img src={rewardImg('flame')} alt="" className="size-7" />} label="Seri" value={`${r.streak} gün`} highlight={r.streak_extended} />
               <Stat icon={<Target className="size-7 text-mint" />} label="Bugün" value={`${r.daily_xp}/${r.daily_goal}`} highlight={r.goal_met_now} />
-              <Stat icon={<img src={rewardImg('gem')} alt="" className="size-7" />} label="Elmas" value={String(r.gems)} />
+              <Stat icon={<Img src={rewardImg('gem')} alt="" className="size-7" />} label="Elmas" value={String(r.gems)} />
             </div>
 
             {r.goal_met_now && <Banner icon={<Zap className="size-4" />}>Günlük hedefini tamamladın!</Banner>}
@@ -55,7 +56,7 @@ export function RewardProvider({ children }: { children: ReactNode }) {
               <div className="mt-4 grid gap-2">
                 {r.rewards.map((w, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + i * 0.12 }} className="flex items-center gap-3 rounded-2xl bg-butter/15 px-3 py-2 text-left">
-                    <img src={rewardImg(w.icon)} alt="" className="size-10 object-contain" />
+                    <Img src={rewardImg(w.icon)} alt="" className="size-10 object-contain" />
                     <span className="flex-1 text-sm font-bold">{w.title}</span>
                     <span className="text-sm font-extrabold text-butter-deep">{w.gems ? `+${w.gems} elmas` : 'Kasana eklendi'}</span>
                   </motion.div>

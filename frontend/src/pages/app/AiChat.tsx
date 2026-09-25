@@ -6,14 +6,16 @@ import clsx from 'clsx'
 import { ArrowLeft, CheckCircle2, Circle, Languages, Lightbulb, Mic, Plus, Send, Square, Volume2, VolumeX } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { canListen, listen, speak, stopSpeaking } from '@/lib/speech'
+import { ensureMic, micHelpText } from '@/lib/mic'
 import type { RewardSummary } from '@/lib/types'
 import { Ada } from '@/components/game/Ada'
 import { scenarioImg } from '@/lib/assets'
 import { Button } from '@/components/ui/Button'
-import { Spinner } from '@/components/ui/Misc'
+import { Modal, Spinner } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { useReward } from '@/components/game/RewardProvider'
 import { useAuth } from '@/lib/auth'
+import { Img } from '@/components/ui/Img'
 
 interface Msg {
   id: number
@@ -40,6 +42,7 @@ export default function AiChat() {
   const [text, setText] = useState('')
   const [listening, setListening] = useState(false)
   const [voice, setVoice] = useState(true)
+  const [micBlocked, setMicBlocked] = useState(false)
   const [talking, setTalking] = useState(false)
   const stopRef = useRef<() => void>(() => {})
   const endRef = useRef<HTMLDivElement>(null)
@@ -102,14 +105,20 @@ export default function AiChat() {
     send.mutate({ text: t, spoken })
   }
 
-  const toggleMic = () => {
+  const toggleMic = async () => {
     if (listening) return stopRef.current()
     stopSpeaking()
+    // Raise the system dialog here rather than letting recognition fail silently.
+    const state = await ensureMic()
+    if (state === 'denied') {
+      setMicBlocked(true)
+      return
+    }
     setListening(true)
     stopRef.current = listen({
       onPartial: setText,
       onFinal: (t) => submit(undefined, true, t),
-      onError: (err) => toast(err === 'not-allowed' ? 'Mikrofon izni gerekli.' : 'Seni duyamadım, tekrar dene.', 'error'),
+      onError: (err) => (err === 'not-allowed' ? setMicBlocked(true) : toast('Seni duyamadım, tekrar dene.', 'error')),
       onEnd: () => setListening(false),
     })
   }
@@ -120,7 +129,7 @@ export default function AiChat() {
   const userCount = messages.filter((m) => m.role === 'user').length
 
   return (
-    <div className="mx-auto flex h-[calc(100dvh-10rem)] max-w-5xl gap-6 lg:h-[calc(100dvh-7.5rem)]">
+    <div className="mx-auto flex h-[calc(100dvh-10rem)] max-w-6xl gap-6 lg:h-[calc(100dvh-7.5rem)]">
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-3xl border-2 border-line bg-card">
         <header className="flex items-center gap-3 border-b-2 border-line px-4 py-3">
           <Link to="/ai" aria-label="Geri" className="text-ink-soft hover:text-ink"><ArrowLeft className="size-5" /></Link>
@@ -186,7 +195,7 @@ export default function AiChat() {
       {goals.length > 0 && (
         <aside className="hidden w-72 shrink-0 lg:block">
           <div className="sticky top-24 overflow-hidden rounded-3xl border-2 border-line bg-card">
-            {conv.scenario_key && <img src={scenarioImg(conv.scenario_key)} alt="" className="aspect-[16/10] w-full object-cover" />}
+            {conv.scenario_key && <Img src={scenarioImg(conv.scenario_key)} alt="" className="aspect-[16/10] w-full object-cover" />}
             <div className="p-5">
             <h3 className="mb-3 text-lg">Görevlerin</h3>
             <ul className="space-y-3">
@@ -202,6 +211,18 @@ export default function AiChat() {
           </div>
         </aside>
       )}
+
+      <Modal open={micBlocked} onClose={() => setMicBlocked(false)}>
+        <div className="text-center">
+          <span className="mx-auto mb-3 grid size-16 place-items-center rounded-2xl bg-berry/10"><Mic className="size-8 text-berry" /></span>
+          <h2 className="text-2xl font-extrabold">Mikrofon izni kapalı</h2>
+          <p className="mb-6 mt-2 text-ink-soft">{micHelpText()}</p>
+          <div className="grid gap-3">
+            <Button onClick={async () => { const s = await ensureMic(); if (s === 'granted') setMicBlocked(false) }}>Tekrar dene</Button>
+            <Button variant="ghost" onClick={() => setMicBlocked(false)}>Yazarak devam et</Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }

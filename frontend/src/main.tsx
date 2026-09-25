@@ -28,6 +28,16 @@ if (Capacitor.isNativePlatform()) {
   CapApp.addListener('backButton', ({ canGoBack }) => (canGoBack ? history.back() : CapApp.exitApp()))
 }
 
+/** Fade out the HTML boot splash once the first React frame is on screen. */
+function dismissBootSplash() {
+  const el = document.getElementById('boot')
+  if (!el) return
+  requestAnimationFrame(() => {
+    el.classList.add('done')
+    setTimeout(() => el.remove(), 400)
+  })
+}
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
@@ -43,3 +53,5 @@ createRoot(document.getElementById('root')!).render(
     </QueryClientProvider>
   </StrictMode>,
 )
+
+dismissBootSplash()

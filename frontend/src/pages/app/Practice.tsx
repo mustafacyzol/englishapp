@@ -8,7 +8,7 @@ import { del, get, post } from '@/lib/api'
 import { speak } from '@/lib/speech'
 import type { RewardSummary } from '@/lib/types'
 import { Button, LinkButton } from '@/components/ui/Button'
-import { Empty, PageHeader, Progress, Spinner, Tabs } from '@/components/ui/Misc'
+import { Empty, PageHeader, Progress, SkeletonPage, Tabs } from '@/components/ui/Misc'
 import { useReward } from '@/components/game/RewardProvider'
 import { useAuth } from '@/lib/auth'
 
@@ -53,7 +53,7 @@ function Review() {
     },
   })
 
-  if (isLoading) return <Spinner />
+  if (isLoading) return <SkeletonPage variant="list" />
   const words = data?.data ?? []
   if (!words.length)
     return (
@@ -143,7 +143,7 @@ function WordList() {
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Ara…" className="h-9 rounded-xl border-2 border-line bg-card pl-9 pr-3 text-sm font-semibold focus:outline-none" />
         </label>
       </div>
-      {isLoading ? <Spinner /> : !data?.data.length ? (
+      {isLoading ? <SkeletonPage variant="list" /> : !data?.data.length ? (
         <Empty icon={<Layers className="size-8" />} title="Henüz kelime yok" text="Hikayelerde kelimelere dokunarak defterini doldur." action={<Link to="/stories" className="font-bold text-flame">Hikayelere git →</Link>} />
       ) : (
         <ul className="ink-card divide-y-2 divide-line/10">

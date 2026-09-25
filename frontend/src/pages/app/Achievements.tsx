@@ -4,13 +4,13 @@ import { get } from '@/lib/api'
 import { dateTR } from '@/lib/format'
 import type { Achievement } from '@/lib/types'
 import { AchievementBadge, tierLabel } from '@/components/game/AchievementBadge'
-import { PageHeader, Progress, Spinner } from '@/components/ui/Misc'
+import { PageHeader, Progress, SkeletonPage } from '@/components/ui/Misc'
 
 const CAT: Record<string, string> = { streak: 'Seri', xp: 'XP', lessons: 'Dersler', stories: 'Okuma', words: 'Kelimeler', mastery: 'Hafıza', speaking: 'Konuşma', ai: 'Ada ile sohbet', perfect: 'Kusursuzluk', social: 'Arkadaşlar', league: 'Lig', secret: 'Gizli' }
 
 export default function Achievements() {
   const { data, isLoading } = useQuery({ queryKey: ['achievements'], queryFn: () => get<{ data: Achievement[] }>('/achievements') })
-  if (isLoading || !data) return <Spinner />
+  if (isLoading || !data) return <SkeletonPage variant="cards" />
   const groups = Object.entries(data.data.reduce<Record<string, Achievement[]>>((a, x) => ((a[x.category ?? 'other'] ??= []).push(x), a), {}))
   const total = data.data.length
   const got = data.data.filter((a) => a.unlocked_at).length

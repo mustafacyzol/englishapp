@@ -73,6 +73,10 @@ export type Exercise =
   | { type: 'listen_type'; prompt: string; audio: string; answer: string }
   | { type: 'speak'; prompt: string; text: string; translation?: string }
   | { type: 'match'; prompt: string; pairs: [string, string][] }
+  // DilGO-specific drills, built around the mistakes Turkish speakers actually make.
+  | { type: 'spot_error'; prompt: string; words: string[]; error_index: number; options: string[]; answer: number; explanation_tr: string; audio?: string }
+  | { type: 'dialogue'; prompt: string; scene?: string; lines: { who: string; text: string; tr?: string }[]; options: string[]; answer: number; note_tr?: string }
+  | { type: 'sequence'; prompt: string; items: string[]; answer: number[]; note_tr?: string }
 
 export interface PathLesson {
   id: number

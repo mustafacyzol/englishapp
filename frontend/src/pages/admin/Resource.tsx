@@ -19,7 +19,7 @@ interface Cfg { title: string; cols: Col[]; fields: Field[]; defaults: Record<st
 const CEFR = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 const bool = (k: string) => (r: Row) => (r[k] ? <Pill tone="good">evet</Pill> : <Pill>hayır</Pill>)
 
-const EX_HINT = 'Alıştırma dizisi. Tipler: choice, fill, listen_choice (options+answer index) · translate (prompt, answer, alternatives[], tiles[]) · listen_type (audio, answer) · speak (text, translation) · match (pairs [[en,tr],…])'
+const EX_HINT = 'Alıştırma dizisi. Tipler: choice, fill, listen_choice (options+answer index) · translate (prompt, answer, alternatives[], tiles[]) · listen_type (audio, answer) · speak (text, translation) · match (pairs [[en,tr],…]) · spot_error (words[], error_index, options[], answer, explanation_tr) · dialogue (scene, lines[{who,text}], options[], answer, note_tr) · sequence (items[] doğru sırada, answer [0,1,2,…])'
 
 const CONFIG: Record<string, Cfg> = {
   courses: {
@@ -95,6 +95,12 @@ const CONFIG: Record<string, Cfg> = {
     cols: [{ key: 'title', label: 'Başlık' }, { key: 'category', label: 'Kategori' }, { key: 'published_at', label: 'Yayın', render: (r) => (r.published_at ? String(r.published_at).slice(0, 10) : '—') }, { key: 'is_published', label: 'Yayında', render: bool('is_published') }],
     fields: [{ key: 'title', label: 'Başlık', type: 'text' }, { key: 'slug', label: 'Slug', type: 'text' }, { key: 'category', label: 'Kategori', type: 'text' }, { key: 'author_name', label: 'Yazar', type: 'text' }, { key: 'cover_image', label: 'Kapak görseli URL', type: 'text' }, { key: 'reading_minutes', label: 'Okuma süresi (dk)', type: 'number' }, { key: 'published_at', label: 'Yayın tarihi', type: 'date' }, { key: 'is_published', label: 'Yayında', type: 'bool' }, { key: 'excerpt', label: 'Kısa özet', type: 'text', full: true }, { key: 'body', label: 'İçerik (markdown)', type: 'textarea', full: true }],
     defaults: { category: 'İpuçları', author_name: 'Bayrak Dil Okulları', reading_minutes: 4, is_published: true },
+  },
+  testimonials: {
+    title: 'Öğrenci yorumları',
+    cols: [{ key: 'name', label: 'Ad' }, { key: 'role', label: 'Ünvan' }, { key: 'highlight', label: 'Vurgu' }, { key: 'position', label: 'Sıra' }, { key: 'is_published', label: 'Yayında', render: bool('is_published') }],
+    fields: [{ key: 'name', label: 'Ad', type: 'text' }, { key: 'role', label: 'Ünvan / meslek', type: 'text' }, { key: 'avatar', label: 'Fotoğraf URL', type: 'text' }, { key: 'highlight', label: 'Vurgu cümlesi (kayan şeritte görünür)', type: 'text', full: true }, { key: 'quote', label: 'Yorum', type: 'textarea', full: true }, { key: 'rating', label: 'Puan (1-5)', type: 'number' }, { key: 'cefr_level', label: 'Seviye', type: 'select', options: ['', ...CEFR] }, { key: 'streak', label: 'Seri (gün)', type: 'number' }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'is_published', label: 'Yayında', type: 'bool' }],
+    defaults: { rating: 5, is_published: true, position: 0 },
   },
   'contact-messages': {
     title: 'İletişim mesajları',

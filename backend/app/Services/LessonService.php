@@ -26,7 +26,10 @@ class LessonService
         foreach (array_values($lesson->exercises ?? []) as $i => $ex) {
             $given = $answers[$i] ?? null;
             $results[] = match ($ex['type'] ?? '') {
-                'choice', 'fill', 'listen_choice' => (string) $given === (string) ($ex['answer'] ?? ''),
+                'choice', 'fill', 'listen_choice', 'dialogue' => (string) $given === (string) ($ex['answer'] ?? ''),
+                // "Hata avı": the answer carries both the word tapped and the fix chosen.
+                'spot_error' => is_string($given) && $given === ($ex['error_index'] ?? '').':'.($ex['answer'] ?? ''),
+                'sequence' => is_array($given) && array_map('intval', array_values($given)) === array_map('intval', array_values($ex['answer'] ?? [])),
                 'translate', 'listen_type', 'order' => is_string($given) && TextMatch::equals($given, array_merge([(string) ($ex['answer'] ?? '')], $ex['alternatives'] ?? [])),
                 'speak' => is_string($given) && TextMatch::similarity($given, (string) ($ex['text'] ?? '')) >= 0.6,
                 'match' => $given === true,

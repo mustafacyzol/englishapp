@@ -45,6 +45,9 @@
   --radius-blob: 20px;
   --animate-float: float 6s ease-in-out infinite;
   --animate-flicker: flicker 1.6s ease-in-out infinite;
+  --animate-marquee: marquee 44s linear infinite;
+  --animate-orbit: orbit 18s linear infinite;
+  --animate-shine: shine 2.6s ease-in-out infinite;
 }
 
 :root {
@@ -72,6 +75,32 @@
     -webkit-tap-highlight-color: transparent;
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+  }
+  /* A slim brand scrollbar instead of the OS default slab. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--ink-soft) 40%, transparent) transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: color-mix(in oklab, var(--ink-soft) 34%, transparent);
+    border: 3.5px solid transparent;
+    border-radius: 99px;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: color-mix(in oklab, var(--color-flame) 62%, var(--ink-soft));
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
   body {
     @apply bg-paper text-ink font-sans antialiased;
@@ -131,6 +160,40 @@
   .no-scrollbar {
     scrollbar-width: none;
   }
+  /* Edge-to-edge fade for horizontal rails, so cut-off cards read as "more this way". */
+  .fade-x {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+    mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent);
+  }
+  .marquee-track {
+    display: flex;
+    width: max-content;
+    animation: var(--animate-marquee);
+  }
+  .marquee:hover .marquee-track {
+    animation-play-state: paused;
+  }
+  /* A soft tinted glow used behind hero art and feature modules. */
+  .glow {
+    position: absolute;
+    border-radius: 999px;
+    filter: blur(70px);
+    opacity: 0.5;
+    pointer-events: none;
+  }
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@keyframes orbit {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+@keyframes shine {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 0.9; }
 }
 
 @keyframes float {

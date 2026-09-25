@@ -13,8 +13,9 @@ import type { Me, UserItem } from '@/lib/types'
 import { RewardCard } from '@/components/game/RewardCard'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
-import { Empty, PageHeader, Progress, Spinner, Tabs } from '@/components/ui/Misc'
+import { Empty, PageHeader, Progress, SkeletonPage, Tabs } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
+import { Img } from '@/components/ui/Img'
 
 type Tab = 'vault' | 'yol' | 'redeem' | 'invite'
 
@@ -59,7 +60,7 @@ function Vault() {
     onError: (err: ApiError) => toast(err.first(), 'error'),
   })
 
-  if (isLoading || !data) return <Spinner />
+  if (isLoading || !data) return <SkeletonPage variant="cards" />
   const open = data.data.filter((i) => i.status === 'available' || i.status === 'active')
   const history = data.data.filter((i) => i.status === 'used' || i.status === 'expired')
   const list = filter === 'open' ? open : history
@@ -71,7 +72,7 @@ function Vault() {
         <Tabs value={filter} onChange={setFilter} items={[{ value: 'open', label: `Hazır (${open.length})` }, { value: 'history', label: 'Geçmiş' }]} />
       </div>
       {!list.length ? (
-        <Empty icon={<img src={rewardImg('chest')} alt="" className="size-12 object-contain opacity-60" />} title="Kasan şimdilik boş" text="Günlük hedefini tamamla, serini sürdür, görevleri bitir. Kartlar burada birikecek." />
+        <Empty icon={<Img src={rewardImg('chest')} alt="" className="size-12 object-contain opacity-60" />} title="Kasan şimdilik boş" text="Günlük hedefini tamamla, serini sürdür, görevleri bitir. Kartlar burada birikecek." />
       ) : (
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((e, i) => {
@@ -125,7 +126,7 @@ interface RoadmapData {
 
 function Roadmap() {
   const { data, isLoading } = useQuery({ queryKey: ['roadmap'], queryFn: () => get<RoadmapData>('/rewards/roadmap') })
-  if (isLoading || !data) return <Spinner />
+  if (isLoading || !data) return <SkeletonPage variant="cards" />
   const WAYS = [
     { icon: 'gem', title: 'Günlük hedef', text: `Her gün hedefini tamamla: +${data.daily_goal_gems} elmas.` },
     { icon: 'crown', title: 'Seviye atla', text: `Her seviyede +${data.level_up_gems} elmas, her ${data.level_chest_every}. seviyede Gizemli Sandık.` },
@@ -141,7 +142,7 @@ function Roadmap() {
             <p className="text-ink-soft">Serin büyüdükçe kasana özel kartlar düşer.</p>
           </div>
           <div className="flex items-center gap-2 rounded-2xl bg-flame/10 px-4 py-2">
-            <img src={rewardImg('flame')} alt="" className="size-7" />
+            <Img src={rewardImg('flame')} alt="" className="size-7" />
             <span className="text-xl font-black text-flame">{data.streak} gün</span>
           </div>
         </div>
@@ -154,7 +155,7 @@ function Roadmap() {
                   <p className="text-2xl font-black leading-none">{m.days}</p>
                   <p className="text-xs font-bold text-ink-soft">gün</p>
                 </div>
-                <img src={rewardImg(m.icon)} alt="" className={clsx('size-14 object-contain', !reached && 'opacity-50 grayscale')} />
+                <Img src={rewardImg(m.icon)} alt="" className={clsx('size-14 object-contain', !reached && 'opacity-50 grayscale')} />
                 <div className="min-w-0 flex-1">
                   <p className="font-black">{m.title}{m.gems > 0 && m.icon !== 'gem' && ` + ${m.gems} elmas`}</p>
                   {!m.claimed && <Progress value={m.current} max={m.target} color="bg-flame" className="mt-2 max-w-xs" />}
@@ -174,7 +175,7 @@ function Roadmap() {
         <div className="grid gap-4 sm:grid-cols-2">
           {WAYS.map((w) => (
             <div key={w.title} className="flex items-center gap-4 rounded-2xl border-2 border-line bg-card p-4">
-              <img src={rewardImg(w.icon)} alt="" className="size-14 object-contain" />
+              <Img src={rewardImg(w.icon)} alt="" className="size-14 object-contain" />
               <div>
                 <p className="font-black">{w.title}</p>
                 <p className="text-sm text-ink-soft">{w.text}</p>
@@ -203,7 +204,7 @@ function Redeem() {
   return (
     <div className="mx-auto max-w-lg">
       <form onSubmit={(e: FormEvent) => { e.preventDefault(); m.mutate() }} className="rounded-3xl border-2 border-line bg-card p-8 text-center">
-        <img src={rewardImg('coupon')} alt="" className="mx-auto mb-2 size-24 object-contain" />
+        <Img src={rewardImg('coupon')} alt="" className="mx-auto mb-2 size-24 object-contain" />
         <h2 className="text-2xl">Hediye kodunu kullan</h2>
         <p className="mb-6 mt-1 text-ink-soft">Bayrak Dil Okulları kampanyalarından ya da hediye kartlarından gelen kodu gir.</p>
         <Input id="redeem-code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="DG-XXXX-XXXX" className="[&_input]:text-center [&_input]:font-mono [&_input]:text-xl [&_input]:tracking-widest" error={(m.error as ApiError | null)?.first('code')} />
@@ -219,7 +220,7 @@ interface Ref { code: string; link: string; rewards: { referee_gems: number; ref
 function Invite() {
   const toast = useToast()
   const { data, isLoading } = useQuery({ queryKey: ['referrals'], queryFn: () => get<Ref>('/referrals') })
-  if (isLoading || !data) return <Spinner />
+  if (isLoading || !data) return <SkeletonPage variant="cards" />
   const share = async () => {
     try {
       if (navigator.share) await navigator.share({ title: 'DilGO', text: `DilGO ile İngilizce öğreniyorum! Bu bağlantıyla katıl, ${data.rewards.referee_gems} elmas kazan:`, url: data.link })
@@ -238,8 +239,8 @@ function Invite() {
       <section className="rounded-3xl bg-flame p-7 text-white">
         <h2 className="text-3xl">Arkadaşını getir, birlikte kazanın</h2>
         <div className="mt-5 space-y-3">
-          <div className="flex items-center gap-3 rounded-2xl bg-white/15 p-3"><img src={rewardImg('gem')} alt="" className="size-10" /><p className="font-bold">Arkadaşın e-postasını doğrulayınca: sana {data.rewards.referrer_gems}, ona {data.rewards.referee_gems} elmas</p></div>
-          <div className="flex items-center gap-3 rounded-2xl bg-white/15 p-3"><img src={rewardImg('crown')} alt="" className="size-10" /><p className="font-bold">İlk Premium alışverişinde: sana {data.rewards.referrer_premium_days} gün Premium kartı</p></div>
+          <div className="flex items-center gap-3 rounded-2xl bg-white/15 p-3"><Img src={rewardImg('gem')} alt="" className="size-10" /><p className="font-bold">Arkadaşın e-postasını doğrulayınca: sana {data.rewards.referrer_gems}, ona {data.rewards.referee_gems} elmas</p></div>
+          <div className="flex items-center gap-3 rounded-2xl bg-white/15 p-3"><Img src={rewardImg('crown')} alt="" className="size-10" /><p className="font-bold">İlk Premium alışverişinde: sana {data.rewards.referrer_premium_days} gün Premium kartı</p></div>
         </div>
         <div className="mt-6 flex items-center gap-2 rounded-2xl bg-card p-2 text-ink">
           <span className="flex-1 truncate px-2 font-mono text-sm font-bold">{data.link}</span>

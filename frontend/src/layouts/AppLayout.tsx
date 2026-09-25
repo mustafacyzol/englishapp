@@ -10,6 +10,7 @@ import { Logo } from '@/components/game/Logo'
 import { StatChips } from '@/components/game/StatChips'
 import { PageTransition } from '@/components/motion/Page'
 import { SideRail, type Dashboard } from './SideRail'
+import { Img } from '@/components/ui/Img'
 
 const NAV = [
   { to: '/learn', label: 'Öğren', icon: Home },
@@ -37,11 +38,13 @@ export default function AppLayout() {
   const outlet = useOutlet()
   const { data } = useQuery({ queryKey: ['dashboard'], queryFn: () => get<Dashboard>('/dashboard'), refetchInterval: 60_000 })
   if (!user) return null
-  const focusPage = /^\/(ai|stories)\/.+/.test(loc.pathname)
+  // The dashboard rail belongs to the home screen only; every other page gets the
+  // full column so reading, chat and pricing have room to breathe.
+  const withRail = loc.pathname === '/learn'
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[1320px]">
-      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r-2 border-line px-3 py-6 lg:flex">
+    <div className="mx-auto flex min-h-dvh max-w-[1700px]">
+      <aside className="sticky top-0 hidden h-dvh w-[248px] shrink-0 flex-col border-r-2 border-line px-3 py-6 lg:flex">
         <Link to="/learn" className="mb-7 px-3"><Logo /></Link>
         <nav className="flex flex-1 flex-col gap-1">
           {NAV.map((n) => (
@@ -62,7 +65,7 @@ export default function AppLayout() {
         </nav>
         {!user.premium.active && (
           <Link to="/premium" className="press group mt-4 flex items-center gap-3 rounded-2xl border-2 border-line bg-card p-3 shadow-hard">
-            <img src={rewardImg('crown')} alt="" className="size-12 object-contain transition group-hover:scale-110" />
+            <Img src={rewardImg('crown')} alt="" className="size-12 object-contain transition group-hover:scale-110" />
             <span>
               <span className="block font-black leading-tight">Premium'a geç</span>
               <span className="block text-xs text-ink-soft">Sınırsız can, tüm hikayeler</span>
@@ -91,13 +94,13 @@ export default function AppLayout() {
           </div>
         </header>
 
-        <div className="flex flex-1 gap-8 px-4 pb-28 pt-6 sm:px-6 lg:pb-10">
+        <div className="flex flex-1 gap-10 px-4 pb-28 pt-7 sm:px-8 lg:pb-12">
           <main className="min-w-0 flex-1">
             <AnimatePresence mode="wait" initial={false}>
               <PageTransition key={loc.pathname}>{outlet}</PageTransition>
             </AnimatePresence>
           </main>
-          {!focusPage && data && <SideRail data={data} />}
+          {withRail && data && <SideRail data={data} />}
         </div>
       </div>
 

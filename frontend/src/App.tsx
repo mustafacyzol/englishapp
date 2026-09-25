@@ -67,7 +67,7 @@ export default function App() {
   useEffect(() => setMuted(user?.preferences?.sound === false), [user?.preferences?.sound])
 
   return (
-    <Suspense fallback={<Spinner />}>
+    <Suspense fallback={<Spinner className="min-h-[60vh]" />}>
       {DEMO && <DemoBar />}
       <Routes>
         <Route element={<PublicLayout />}>
@@ -78,6 +78,9 @@ export default function App() {
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/terms" element={<Legal kind="terms" />} />
           <Route path="/privacy" element={<Legal kind="privacy" />} />
+          <Route path="/cookies" element={<Legal kind="cookies" />} />
+          <Route path="/distance-sales" element={<Legal kind="distance" />} />
+          <Route path="/refund" element={<Legal kind="refund" />} />
         </Route>
         <Route path="/placement" element={<Placement />} />
         <Route path="/r/:code" element={<Register />} />

@@ -15,12 +15,19 @@ export const PHOTO = {
   write: img('photos/skill-write.webp'),
 }
 
-/** 3D objects used for currencies and reward cards, keyed by the item's `icon`. */
-const REWARD_ICON: Record<string, string> = {
+/**
+ * One cohesive 3D icon set lives in public/img/rewards. These are the file names;
+ * REWARD_ICON maps the `icon` values the API uses for reward items onto them.
+ */
+const REWARD_FILES = ['flame', 'heart', 'gems', 'boost', 'freeze', 'chest', 'crown', 'voucher', 'coupon', 'frame', 'star', 'trophy'] as const
+export type RewardIcon = (typeof REWARD_FILES)[number]
+
+const REWARD_ICON: Record<string, RewardIcon> = {
   snowflake: 'freeze',
   bolt: 'boost',
   heart: 'heart',
   gem: 'gems',
+  gems: 'gems',
   crown: 'crown',
   school: 'voucher',
   ticket: 'coupon',
@@ -28,9 +35,17 @@ const REWARD_ICON: Record<string, string> = {
   chest: 'chest',
   gift: 'chest',
   flame: 'flame',
-  star: 'chest',
+  star: 'star',
+  trophy: 'trophy',
+  diamond: 'gems',
+  moon: 'star',
 }
-export const rewardImg = (icon: string) => img(`rewards/${REWARD_ICON[icon] ?? 'chest'}.webp`)
+
+/** Accepts either an API icon key ("snowflake") or a file name ("freeze"). */
+export function rewardImg(icon: string) {
+  const mapped = REWARD_ICON[icon] ?? ((REWARD_FILES as readonly string[]).includes(icon) ? (icon as RewardIcon) : 'chest')
+  return img(`rewards/${mapped}.webp`)
+}
 
 const BADGES = ['streak', 'xp', 'lessons', 'stories', 'words', 'mastery', 'speaking', 'ai', 'perfect', 'social', 'league', 'secret']
 export const badgeImg = (category: string) => img(`badges/${BADGES.includes(category) ? category : 'xp'}.webp`)

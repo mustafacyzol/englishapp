@@ -6,6 +6,7 @@ import { LeagueEmblem } from '@/components/game/LeagueEmblem'
 import { PHOTO, rewardImg } from '@/lib/assets'
 import { timeLeft } from '@/lib/format'
 import type { Me } from '@/lib/types'
+import { Img } from '@/components/ui/Img'
 
 export interface NextReward { kind: string; title: string; icon: string; current: number; target: number; unit: string }
 
@@ -66,7 +67,7 @@ export function SideRail({ data }: { data: Dashboard }) {
 
       {next && (
         <Link to="/rewards#yol" className="ink-card press flex items-center gap-3 p-4">
-          <img src={rewardImg(next.icon)} alt="" className="size-14 object-contain" />
+          <Img src={rewardImg(next.icon)} alt="" className="size-14 object-contain" />
           <div className="min-w-0 flex-1">
             <p className="text-xs font-extrabold uppercase tracking-widest text-ink-soft">Sıradaki ödül</p>
             <p className="font-black leading-tight">{next.title}</p>
@@ -84,7 +85,7 @@ export function SideRail({ data }: { data: Dashboard }) {
         <ul className="space-y-4">
           {quests.slice(0, 3).map((q) => (
             <li key={q.id} className="flex items-center gap-3">
-              <img src={rewardImg(q.completed ? 'chest' : 'gem')} alt="" className={clsx('size-9 object-contain', !q.completed && 'opacity-80')} />
+              <Img src={rewardImg(q.completed ? 'chest' : 'gem')} alt="" className={clsx('size-9 object-contain', !q.completed && 'opacity-80')} />
               <div className="min-w-0 flex-1">
                 <p className="mb-1 truncate text-sm font-bold">{q.title}</p>
                 <Progress value={q.progress} max={q.target} color={q.completed ? 'bg-mint' : 'bg-butter'} />
@@ -95,7 +96,7 @@ export function SideRail({ data }: { data: Dashboard }) {
       </section>
 
       <Link to="/rewards" className="group relative block h-40 overflow-hidden rounded-[var(--radius-blob)]">
-        <img src={PHOTO.classroom} alt="" className="photo transition duration-500 group-hover:scale-105" />
+        <Img src={PHOTO.classroom} alt="" className="photo transition duration-500 group-hover:scale-105" />
         <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
         <div className="absolute inset-x-4 bottom-3 text-white">
           <p className="text-xs font-extrabold uppercase tracking-widest text-butter">Bayrak Dil Okulları</p>
