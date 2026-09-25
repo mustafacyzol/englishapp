@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { get, hasToken, loadTokens, post, setToken } from './api'
+import { setTheme } from './theme'
 import type { Me } from './types'
 
 interface AuthState {
@@ -57,17 +58,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     qc.clear()
   }, [qc])
 
-  // keep theme preference in sync with the account
+  // Adopt the account's saved theme once it loads (the local ThemeToggle owns it after).
   useEffect(() => {
     const t = user?.preferences?.theme
-    if (!t) return
-    const dark = t === 'dark' || (t === 'system' && matchMedia('(prefers-color-scheme: dark)').matches)
-    document.documentElement.classList.toggle('dark', dark)
-    try {
-      localStorage.setItem('dilgo.theme', t)
-    } catch {
-      /* ignore */
-    }
+    if (t) setTheme(t)
   }, [user?.preferences?.theme])
 
   const value = useMemo(() => ({ user, ready, setUser, refresh, signIn, signOut }), [user, ready, refresh, signIn, signOut])

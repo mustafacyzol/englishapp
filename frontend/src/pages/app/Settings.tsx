@@ -2,6 +2,7 @@ import { useState, type FormEvent, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { LogOut, Monitor, Moon, Smartphone, Sun, Trash2 } from 'lucide-react'
+import { setTheme, useTheme } from '@/lib/theme'
 import { ApiError, del, get, patch, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { dateTR, GOALS, tl } from '@/lib/format'
@@ -23,6 +24,7 @@ function Section({ title, children, danger }: { title: string; children: ReactNo
 }
 
 export default function Settings() {
+  const [theme] = useTheme()
   const { user, setUser, signOut } = useAuth()
   const toast = useToast()
   const save = useMutation({
@@ -73,7 +75,7 @@ export default function Settings() {
         <p className="mb-2 text-sm font-bold">Tema</p>
         <div className="mb-4 grid grid-cols-3 gap-2">
           {([['light', 'Açık', Sun], ['dark', 'Koyu', Moon], ['system', 'Sistem', Monitor]] as const).map(([v, l, I]) => (
-            <button key={v} onClick={() => save.mutate({ preferences: { theme: v } })} className={clsx('flex items-center justify-center gap-2 rounded-xl border-2 border-line py-2 font-bold', (prefs.theme ?? 'system') === v ? 'bg-ink text-paper ' : 'bg-card')}><I className="size-4" /> {l}</button>
+            <button key={v} onClick={() => { setTheme(v); save.mutate({ preferences: { theme: v } }) }} className={clsx('flex items-center justify-center gap-2 rounded-xl border-2 py-2 font-bold transition', theme === v ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:bg-paper-2')}><I className="size-4" /> {l}</button>
           ))}
         </div>
         <div className="divide-y-2 divide-line/10">

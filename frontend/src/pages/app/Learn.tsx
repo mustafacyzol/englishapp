@@ -1,15 +1,16 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { motion } from 'motion/react'
+import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { BookOpen, BookText, Check, ChevronDown, ChevronRight, Dumbbell, Headphones, Lock, MessageCircle, Mic, PenLine, RotateCcw, Star, Trophy } from 'lucide-react'
+import { BookOpen, BookText, Check, ChevronDown, Dumbbell, Headphones, Lock, MessageCircle, Mic, PenLine, Star, Trophy } from 'lucide-react'
 import { rewardImg, unitImg } from '@/lib/assets'
 import { get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { SKILL_LABEL } from '@/lib/format'
 import { Markdown } from '@/lib/markdown'
 import type { PathLesson, PathUnit } from '@/lib/types'
+import { Button } from '@/components/ui/Button'
 import { Modal, SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
@@ -86,6 +87,7 @@ const courseOffset = (lvl: string) => ({ A1: 0, A2: 3, B1: 5 } as Record<string,
 
 function UnitSection({ unit, index, photoIndex, onGuide }: { unit: PathUnit; index: number; photoIndex: number; onGuide: () => void }) {
   const color = unit.color ?? '#e8403a'
+  const [openId, setOpenId] = useState<number | null>(null)
   return (
     <section className="mb-12">
       <div className="relative mb-10 overflow-hidden rounded-3xl text-white" style={{ background: color }}>
@@ -107,26 +109,29 @@ function UnitSection({ unit, index, photoIndex, onGuide }: { unit: PathUnit; ind
           <Img src={unitImg(photoIndex)} alt="" loading="lazy" className="hidden w-40 object-cover sm:block" />
         </div>
       </div>
-      {/* A chapter spine: every lesson is a stop on the rail, with its own title,
-          skill and reward visible — no guessing what a bare bubble hides. */}
-      <ol className="relative ml-[26px] space-y-3 border-l-2 border-dashed border-line pl-7">
+      {/* A meandering path — clearer than a Duolingo clone because each stop carries a
+          readable label and a shape that matches what it is (lesson, story, chat, checkpoint). */}
+      <div className="relative flex flex-col items-center gap-9 py-2">
         {unit.lessons.map((l, i) => (
-          <LessonRow key={l.id} lesson={l} color={color} index={i} />
+          <LessonNode key={l.id} lesson={l} index={i} count={unit.lessons.length} color={color} openId={openId} setOpenId={setOpenId} />
         ))}
-      </ol>
+      </div>
     </section>
   )
 }
 
 const KIND_LABEL: Record<string, string> = { story: 'Hikâye', ai_talk: 'Ada ile konuşma', checkpoint: 'Kontrol noktası' }
+// Curve amplitude: gentle S so the path reads as a route, never a rigid column.
+const wave = (i: number) => Math.sin(i * 0.9) * 74
 
-function LessonRow({ lesson, color, index }: { lesson: PathLesson; color: string; index: number }) {
+function LessonNode({ lesson, index, count, color, openId, setOpenId }: { lesson: PathLesson; index: number; count: number; color: string; openId: number | null; setOpenId: (v: number | null) => void }) {
   const nav = useNavigate()
   const toast = useToast()
   const { user } = useAuth()
   const locked = lesson.state === 'locked'
   const done = lesson.state === 'completed'
   const current = lesson.state === 'current'
+  const open = openId === lesson.id
   const Icon = lesson.kind === 'story' ? BookOpen : lesson.kind === 'ai_talk' ? MessageCircle : lesson.kind === 'checkpoint' ? Trophy : SKILL_ICON[lesson.skill] ?? Star
 
   const startAi = useMutation({
@@ -136,7 +141,6 @@ function LessonRow({ lesson, color, index }: { lesson: PathLesson; color: string
   })
 
   const start = () => {
-    if (locked) return toast('Önceki dersleri tamamlayınca açılır.')
     if (lesson.premium_locked) return nav('/premium')
     if (lesson.kind === 'story' && lesson.story) return nav(`/stories/${lesson.story.slug}?lesson=${lesson.id}`)
     if (lesson.kind === 'ai_talk') return startAi.mutate()
@@ -144,67 +148,74 @@ function LessonRow({ lesson, color, index }: { lesson: PathLesson; color: string
     nav(`/lesson/${lesson.id}`)
   }
 
+  const x = wave(index)
+  const nextX = wave(index + 1)
+  // squircle for lessons, circle for milestones — shape signals kind before you read.
+  const shape = lesson.kind === 'checkpoint' || lesson.kind === 'story' || lesson.kind === 'ai_talk' ? 'rounded-full' : 'rounded-[26px]'
+
   return (
-    <motion.li
-      initial={{ opacity: 0, x: -12 }}
-      whileInView={{ opacity: 1, x: 0 }}
-      viewport={{ once: true, amount: 0.4 }}
-      transition={{ delay: Math.min(index, 6) * 0.05, duration: 0.35 }}
-      className="relative"
-    >
-      {/* the stop on the rail */}
-      <span
-        className={clsx(
-          'absolute -left-[53px] top-4 grid size-[52px] place-items-center rounded-2xl ring-4 ring-paper transition',
-          locked ? 'bg-paper-2 text-ink-soft' : 'text-white',
-        )}
-        style={!locked ? { background: done ? '#d99a00' : color } : undefined}
-      >
-        {locked ? <Lock className="size-6" /> : done ? <Check className="size-7" strokeWidth={3.5} /> : <Icon className="size-6" strokeWidth={2.6} />}
-      </span>
+    <div className="relative" style={{ transform: `translateX(${x}px)` }}>
+      {/* connector to the next node — a soft neutral guide that runs behind labels */}
+      {index < count - 1 && (
+        <svg className="pointer-events-none absolute left-1/2 top-[76px] -z-10 h-[104px] overflow-visible" width="2" aria-hidden>
+          <line x1="1" y1="0" x2={nextX - x + 1} y2="104" stroke="var(--line)" strokeWidth="5" strokeLinecap="round" strokeDasharray="1 12" />
+        </svg>
+      )}
 
-      <button
-        onClick={start}
-        disabled={locked}
-        className={clsx(
-          'press w-full rounded-2xl border-2 p-4 text-left transition',
-          current ? 'border-transparent bg-card shadow-soft ring-2' : done ? 'border-line bg-card/60' : locked ? 'cursor-not-allowed border-line/60 bg-paper-2/50' : 'border-line bg-card hover:bg-paper-2',
-        )}
-        style={current ? ({ '--tw-ring-color': color } as React.CSSProperties) : undefined}
-      >
-        <div className="flex items-center gap-3">
-          <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-black uppercase tracking-[0.18em]" style={{ color: locked ? undefined : color }}>
-              <span className={clsx(locked && 'text-ink-soft')}>{KIND_LABEL[lesson.kind] ?? SKILL_LABEL[lesson.skill]}</span>
-            </p>
-            <h3 className={clsx('truncate font-display text-lg font-black leading-tight', locked && 'text-ink-soft')}>{lesson.title}</h3>
-            <p className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-semibold text-ink-soft">
-              <span>+{lesson.xp_reward} XP</span>
-              {done && <span className="text-mint-deep">En iyi %{lesson.best_score}</span>}
-              {done && lesson.crowns > 0 && (
-                <span className="flex items-center gap-1">
-                  <Img src={rewardImg('star')} alt="" className="size-4" /> ×{lesson.crowns}
-                </span>
-              )}
-              {lesson.is_premium && (
-                <span className="flex items-center gap-1 text-butter-deep">
-                  <Img src={rewardImg('crown')} alt="" className="size-4" /> Premium
-                </span>
-              )}
-            </p>
-          </div>
+      {current && (
+        <motion.div className="absolute -top-12 left-1/2 z-20 -translate-x-1/2" initial={{ y: 4 }} animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 1.5 }}>
+          <span className="relative block whitespace-nowrap rounded-xl px-3.5 py-1.5 font-display text-sm font-black uppercase tracking-wide text-white shadow-soft" style={{ background: color }}>
+            Başla
+            <span className="absolute -bottom-[6px] left-1/2 size-3 -translate-x-1/2 rotate-45" style={{ background: color }} />
+          </span>
+        </motion.div>
+      )}
 
-          {current ? (
-            <span className="shrink-0 rounded-xl px-4 py-2.5 text-sm font-black uppercase tracking-wide text-white" style={{ background: color }}>
-              {startAi.isPending ? '…' : 'Başla'}
-            </span>
-          ) : done ? (
-            <RotateCcw className="size-5 shrink-0 text-ink-soft" />
-          ) : locked ? null : (
-            <ChevronRight className="size-5 shrink-0 text-ink-soft" />
-          )}
-        </div>
-      </button>
-    </motion.li>
+      <motion.button
+        initial={{ opacity: 0, scale: 0.7 }}
+        whileInView={{ opacity: 1, scale: 1 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ type: 'spring', stiffness: 260, damping: 18, delay: Math.min(index, 6) * 0.04 }}
+        onClick={() => (locked ? toast('Önceki dersleri tamamlayınca açılır 🔒') : setOpenId(open ? null : lesson.id))}
+        aria-label={lesson.title}
+        className={clsx('relative z-10 grid size-[76px] place-items-center transition-transform active:translate-y-[6px]', shape, locked ? 'bg-paper-2 text-ink-soft' : 'text-white')}
+        style={!locked ? { background: done ? '#d99a00' : color, boxShadow: `0 7px 0 0 ${done ? '#a97700' : 'color-mix(in oklab, ' + color + ' 68%, #000)'}` } : { boxShadow: '0 7px 0 0 color-mix(in oklab, var(--line) 55%, #000 10%)' }}
+      >
+        {current && <span className="absolute -inset-2.5 animate-ping rounded-full opacity-30" style={{ border: `4px solid ${color}` }} />}
+        {locked ? <Lock className="size-7" /> : done ? <Check className="size-9" strokeWidth={3.5} /> : <Icon className="size-8" strokeWidth={2.5} />}
+        {lesson.is_premium && !done && <Img src={rewardImg('crown')} alt="Premium" className="absolute -right-3 -top-3 size-8 object-contain drop-shadow" />}
+        {/* crowns earned, as pips */}
+        {done && lesson.crowns > 0 && (
+          <span className="absolute -bottom-2.5 left-1/2 flex -translate-x-1/2 gap-0.5 rounded-full bg-card px-1.5 py-0.5 shadow-hard-sm">
+            {Array.from({ length: Math.min(3, lesson.crowns) }, (_, k) => <Img key={k} src={rewardImg('star')} alt="" className="size-3.5" />)}
+          </span>
+        )}
+      </motion.button>
+
+      {/* readable label under every node — an opaque chip so the guide line stays behind it */}
+      <p className={clsx('relative z-10 mx-auto mt-3 w-max max-w-[150px] truncate rounded-full bg-paper px-2.5 py-0.5 text-center text-xs font-extrabold', locked ? 'text-ink-soft/70' : 'text-ink')}>{lesson.title}</p>
+
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            className="absolute left-1/2 top-[104px] z-30 w-72 -translate-x-1/2"
+          >
+            <div className="ink-card p-4 text-left shadow-soft">
+              <p className="text-xs font-black uppercase tracking-widest" style={{ color }}>
+                {KIND_LABEL[lesson.kind] ?? SKILL_LABEL[lesson.skill]}
+              </p>
+              <h3 className="mb-1 text-xl leading-tight">{lesson.title}</h3>
+              <p className="mb-4 text-sm text-ink-soft">{done ? `En iyi skor: %${lesson.best_score} · tekrar ederek taç kazan` : `+${lesson.xp_reward} XP`}</p>
+              <Button block onClick={start} loading={startAi.isPending} variant={lesson.premium_locked ? 'butter' : done ? 'secondary' : 'primary'}>
+                {lesson.premium_locked ? 'Premium ile aç' : done ? 'Tekrar et' : 'Başla'}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   )
 }

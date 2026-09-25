@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, ArrowRight, Check, Quote, Star } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BookOpen, Check, Headphones, Mic, PenLine, Quote, Star } from 'lucide-react'
 import { get } from '@/lib/api'
 import { tl } from '@/lib/format'
 import type { Plan } from '@/lib/types'
@@ -48,12 +48,37 @@ export default function Landing() {
 
 /* ------------------------------------------------------------------ hero */
 
-const HERO_WORDS = [
-  { w: 'Oku.', c: 'text-butter-deep' },
-  { w: 'Dinle.', c: 'text-sky' },
-  { w: 'Konuş.', c: 'text-flame' },
-  { w: 'Yaz.', c: 'text-mint-deep' },
-]
+const ROTATING = ['okuyarak', 'dinleyerek', 'konuşarak', 'yazarak']
+
+/** The accent verb in the headline swaps on a timer, so the promise (all four skills)
+ *  plays out in a single confident colour instead of a four-colour rainbow. */
+function RotatingVerb() {
+  const [i, setI] = useState(0)
+  const reduced = useReducedMotion()
+  useEffect(() => {
+    if (reduced) return
+    const t = setInterval(() => setI((x) => (x + 1) % ROTATING.length), 2200)
+    return () => clearInterval(t)
+  }, [reduced])
+  return (
+    <span className="relative inline-grid">
+      {/* reserve the widest word's width so the line never reflows */}
+      <span className="invisible col-start-1 row-start-1" aria-hidden>dinleyerek</span>
+      <AnimatePresence mode="wait">
+        <motion.span
+          key={i}
+          initial={reduced ? false : { y: '0.5em', opacity: 0, filter: 'blur(4px)' }}
+          animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }}
+          exit={reduced ? undefined : { y: '-0.5em', opacity: 0, filter: 'blur(4px)' }}
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="col-start-1 row-start-1 text-flame"
+        >
+          {ROTATING[i]}
+        </motion.span>
+      </AnimatePresence>
+    </span>
+  )
+}
 
 function Hero() {
   const ref = useRef<HTMLElement>(null)
@@ -64,8 +89,10 @@ function Hero() {
 
   return (
     <section ref={ref} className="relative overflow-hidden">
-      <span className="glow left-[-10%] top-[-12%] size-[420px] bg-flame/25" />
-      <span className="glow right-[-8%] top-[18%] size-[380px] bg-sky/20" />
+      {/* Refined backdrop: a faint dotted grid, one warm wash — editorial, not a toy. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.5] [background-image:radial-gradient(var(--line)_1.4px,transparent_1.4px)] [background-size:26px_26px] [mask-image:radial-gradient(120%_80%_at_70%_0%,#000_35%,transparent_75%)]" />
+      <span className="glow left-[-12%] top-[-14%] size-[440px] bg-flame/18" />
+      <span className="glow right-[-6%] top-[24%] size-[360px] bg-sky/14" />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-12 lg:grid-cols-[1.05fr_1fr] lg:pb-28 lg:pt-20">
         <div>
@@ -81,30 +108,29 @@ function Hero() {
             Bayrak Dil Okulları güvencesiyle
           </motion.p>
 
-          <h1 className="font-display text-[clamp(2.8rem,7.5vw,5rem)] font-black leading-[0.98] tracking-tight">
-            {HERO_WORDS.map((x, i) => (
-              <motion.span
-                key={x.w}
-                initial={reduced ? false : { opacity: 0, y: 26, rotate: -3 }}
-                animate={{ opacity: 1, y: 0, rotate: 0 }}
-                transition={{ delay: 0.08 + i * 0.09, type: 'spring', stiffness: 220, damping: 18 }}
-                className={clsx('mr-3 inline-block', x.c)}
-              >
-                {x.w}
-              </motion.span>
-            ))}
-          </h1>
+          <motion.h1
+            initial={reduced ? false : { opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            className="font-display text-[clamp(2.6rem,6.6vw,4.6rem)] font-black leading-[1.02] tracking-tight"
+          >
+            İngilizceyi
+            <br />
+            <RotatingVerb />
+            <br />
+            öğren.
+          </motion.h1>
 
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.45 }}
+            transition={{ delay: 0.2 }}
             className="mt-6 max-w-md text-lg leading-relaxed text-ink-soft"
           >
-            Dört beceri tek uygulamada. Seviyene göre hikâyeler, 5 dakikalık dersler ve seni tanıyan yapay zekâ öğretmenin&nbsp;Ada.
+            Oku, dinle, konuş, yaz — dört beceri tek uygulamada. Seviyene göre hikâyeler, 5 dakikalık dersler ve seni tanıyan yapay zekâ öğretmenin&nbsp;Ada.
           </motion.p>
 
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.52 }} className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-9 flex flex-col gap-3 sm:flex-row">
             <LinkButton to="/register" size="lg">Ücretsiz başla</LinkButton>
             <LinkButton to="/placement" size="lg" variant="secondary">Seviyemi bul</LinkButton>
           </motion.div>
@@ -187,17 +213,65 @@ function Ticker({ reviews }: { reviews: Review[] }) {
 /* -------------------------------------------------------- skill switcher */
 
 const SKILLS = [
-  { key: 'read', title: 'Oku', photo: PHOTO.read, accent: 'butter', line: 'Seviyene uygun kısa hikâyeler.', text: 'Bilmediğin kelimeye dokun; anlamını gör, sesini dinle, kelime defterine ekle. Her hikâyenin sonunda kısa bir anlama testi var.' },
-  { key: 'listen', title: 'Dinle', photo: PHOTO.listen, accent: 'sky', line: 'Her cümle doğal sesle okunur.', text: 'Hızı yavaşlat, kelime kelime takip et, dinleyerek yaz. Kulağın İngilizceye gerçek cümlelerle alışır.' },
-  { key: 'speak', title: 'Konuş', photo: PHOTO.speak, accent: 'flame', line: 'Mikrofona konuş, anında düzelt.', text: 'Kafede sipariş ver, havalimanında check-in yap, mülakata gir. Ada rolü üstlenir, telaffuzunu ve cümleni anında kontrol eder.' },
-  { key: 'write', title: 'Yaz', photo: PHOTO.write, accent: 'mint', line: 'Yazdığın metin puanlanır.', text: 'Yazma atölyesi seviyeni tahmin eder, hatalarını Türkçe açıklar ve düzeltilmiş metni yan yana gösterir.' },
+  { key: 'read', title: 'Oku', photo: PHOTO.read, accent: 'butter', icon: BookOpen, line: 'Seviyene uygun kısa hikâyeler.', text: 'Bilmediğin kelimeye dokun; anlamını gör, sesini dinle, kelime defterine ekle. Her hikâyenin sonunda kısa bir anlama testi var.' },
+  { key: 'listen', title: 'Dinle', photo: PHOTO.listen, accent: 'sky', icon: Headphones, line: 'Her cümle doğal sesle okunur.', text: 'Hızı yavaşlat, kelime kelime takip et, dinleyerek yaz. Kulağın İngilizceye gerçek cümlelerle alışır.' },
+  { key: 'speak', title: 'Konuş', photo: PHOTO.speak, accent: 'flame', icon: Mic, line: 'Mikrofona konuş, anında düzelt.', text: 'Kafede sipariş ver, havalimanında check-in yap, mülakata gir. Ada rolü üstlenir, telaffuzunu ve cümleni anında kontrol eder.' },
+  { key: 'write', title: 'Yaz', photo: PHOTO.write, accent: 'mint', icon: PenLine, line: 'Yazdığın metin puanlanır.', text: 'Yazma atölyesi seviyeni tahmin eder, hatalarını Türkçe açıklar ve düzeltilmiş metni yan yana gösterir.' },
 ] as const
 
-const ACCENT: Record<string, { text: string; bg: string; bar: string; ring: string }> = {
-  butter: { text: 'text-butter-deep', bg: 'bg-butter/12', bar: 'bg-butter', ring: 'ring-butter/40' },
-  sky: { text: 'text-sky', bg: 'bg-sky/10', bar: 'bg-sky', ring: 'ring-sky/40' },
-  flame: { text: 'text-flame', bg: 'bg-flame/10', bar: 'bg-flame', ring: 'ring-flame/40' },
-  mint: { text: 'text-mint-deep', bg: 'bg-mint/10', bar: 'bg-mint', ring: 'ring-mint/40' },
+const ACCENT: Record<string, { text: string; bg: string; bar: string; ring: string; solid: string }> = {
+  butter: { text: 'text-butter-deep', bg: 'bg-butter/12', bar: 'bg-butter', ring: 'ring-butter/40', solid: 'bg-butter-deep' },
+  sky: { text: 'text-sky', bg: 'bg-sky/10', bar: 'bg-sky', ring: 'ring-sky/40', solid: 'bg-sky' },
+  flame: { text: 'text-flame', bg: 'bg-flame/10', bar: 'bg-flame', ring: 'ring-flame/40', solid: 'bg-flame' },
+  mint: { text: 'text-mint-deep', bg: 'bg-mint/10', bar: 'bg-mint', ring: 'ring-mint/40', solid: 'bg-mint' },
+}
+
+/** A small live demo of each skill, floating over its photo — so the promise is shown, not told. */
+function SkillDemo({ skill }: { skill: (typeof SKILLS)[number] }) {
+  if (skill.key === 'read')
+    return (
+      <div className="rounded-2xl bg-card/95 p-3.5 shadow-soft backdrop-blur">
+        <p className="font-read text-[15px] leading-relaxed">
+          She opened the{' '}
+          <span className="relative rounded bg-butter/40 px-1 font-bold">
+            umbrella
+            <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} transition={{ delay: 0.4, type: 'spring' }} className="absolute -right-1.5 -top-1.5 grid size-4 place-items-center rounded-full bg-butter-deep text-[9px] font-black text-white">+</motion.span>
+          </span>{' '}
+          and smiled.
+        </p>
+        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mt-1 text-xs font-bold text-butter-deep">umbrella · şemsiye — deftere eklendi</motion.p>
+      </div>
+    )
+  if (skill.key === 'listen')
+    return (
+      <div className="flex items-center gap-3 rounded-2xl bg-card/95 p-3.5 shadow-soft backdrop-blur">
+        <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-sky text-white"><Headphones className="size-5" /></span>
+        <div className="flex flex-1 items-center gap-[3px]">
+          {[10, 18, 26, 16, 22, 12, 28, 20, 14, 24, 10, 18, 26, 14].map((h, i) => (
+            <motion.span key={i} className="w-[3px] rounded-full bg-sky/70" animate={{ height: [h * 0.5, h, h * 0.6] }} transition={{ repeat: Infinity, duration: 0.9, delay: i * 0.06, ease: 'easeInOut' }} />
+          ))}
+        </div>
+      </div>
+    )
+  if (skill.key === 'speak')
+    return (
+      <div className="flex items-center gap-3 rounded-2xl bg-card/95 p-3.5 shadow-soft backdrop-blur">
+        <span className="relative grid size-11 shrink-0 place-items-center rounded-full bg-flame text-white">
+          <span className="absolute inset-0 animate-ping rounded-full bg-flame/40" />
+          <Mic className="relative size-5" />
+        </span>
+        <p className="text-[15px] font-semibold">
+          <span className="text-mint-deep underline decoration-mint decoration-2 underline-offset-2">I'd like a coffee</span>, please.
+        </p>
+      </div>
+    )
+  return (
+    <div className="rounded-2xl bg-card/95 p-3.5 shadow-soft backdrop-blur">
+      <p className="text-[15px]"><s className="text-berry">I have 25 years.</s></p>
+      <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="text-[15px] font-bold text-mint-deep">→ I'm 25 years old.</motion.p>
+      <p className="mt-1 text-xs text-ink-soft">Yaşı "have" ile değil "be" ile söyleriz.</p>
+    </div>
+  )
 }
 
 function SkillSwitcher() {
@@ -234,27 +308,32 @@ function SkillSwitcher() {
                   onClick={() => setActive(i)}
                   aria-current={on}
                   className={clsx(
-                    'relative w-full overflow-hidden rounded-2xl border-2 p-5 text-left transition',
+                    'relative flex w-full items-start gap-4 overflow-hidden rounded-2xl border-2 p-4 text-left transition',
                     on ? clsx('border-transparent ring-2', ac.bg, ac.ring) : 'border-line bg-card hover:bg-paper-2',
                   )}
                 >
-                  <div className="flex items-baseline gap-3">
-                    <span className={clsx('font-display text-2xl font-black', on ? ac.text : 'text-ink')}>{x.title}</span>
-                    <span className="text-sm font-bold text-ink-soft">{x.line}</span>
+                  <span className={clsx('grid size-11 shrink-0 place-items-center rounded-xl transition', on ? clsx(ac.solid, 'text-white') : 'bg-paper-2 text-ink-soft')}>
+                    <x.icon className="size-5" strokeWidth={2.4} />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline gap-2">
+                      <span className={clsx('font-display text-xl font-black', on ? ac.text : 'text-ink')}>{x.title}</span>
+                      <span className="truncate text-sm font-bold text-ink-soft">{x.line}</span>
+                    </div>
+                    <AnimatePresence initial={false}>
+                      {on && (
+                        <motion.p
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                          className="overflow-hidden text-[15px] leading-relaxed text-ink-soft"
+                        >
+                          <span className="mt-1.5 block">{x.text}</span>
+                        </motion.p>
+                      )}
+                    </AnimatePresence>
                   </div>
-                  <AnimatePresence initial={false}>
-                    {on && (
-                      <motion.p
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-                        className="overflow-hidden text-[15px] leading-relaxed text-ink-soft"
-                      >
-                        <span className="mt-2 block">{x.text}</span>
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
                   {on && !reduced && (
                     <motion.span
                       key={active}
@@ -271,19 +350,36 @@ function SkillSwitcher() {
           })}
         </ul>
 
-        <div className="relative min-h-[380px] overflow-hidden rounded-[32px] bg-paper-2 lg:min-h-0">
-          <AnimatePresence mode="popLayout" initial={false}>
+        <div className="relative min-h-[420px] overflow-hidden rounded-[32px] bg-paper-2 lg:min-h-0">
+          <AnimatePresence initial={false}>
             <motion.div
-              key={s.key}
-              initial={reduced ? false : { opacity: 0, scale: 1.04 }}
+              key={s.key + '-img'}
+              initial={reduced ? false : { opacity: 0, scale: 1.06 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+              transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
               className="absolute inset-0"
             >
               <Img src={s.photo} alt={s.title} className="photo" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-              <p className="absolute inset-x-6 bottom-5 font-display text-2xl font-black text-white">{s.line}</p>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
+            </motion.div>
+          </AnimatePresence>
+
+          {/* label + live demo slide in together on each change */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={s.key + '-ov'}
+              initial={reduced ? false : { opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={reduced ? undefined : { opacity: 0, y: -16 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="absolute inset-x-5 bottom-5"
+            >
+              <div className="mb-3 flex items-center gap-2 text-white">
+                <span className={clsx('grid size-9 place-items-center rounded-xl', ACCENT[s.accent].solid)}><s.icon className="size-5" strokeWidth={2.4} /></span>
+                <span className="font-display text-2xl font-black drop-shadow">{s.title}</span>
+              </div>
+              <SkillDemo skill={s} />
             </motion.div>
           </AnimatePresence>
         </div>

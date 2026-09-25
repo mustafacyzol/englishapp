@@ -30,22 +30,29 @@ export default function AiHub() {
     <div>
       <PageHeader kicker="Konuşma ve yazma" title="Ada ile pratik" />
 
-      <section className="mb-10 overflow-hidden rounded-3xl border-2 border-line bg-card">
-        <div className="grid md:grid-cols-[1.1fr_1fr]">
-          <div className="p-6 sm:p-8">
-            <h2 className="text-3xl">Merhaba, ben Ada.</h2>
-            <p className="mt-2 text-lg text-ink-soft">Seviyeni, hedefini ve kaydettiğin kelimeleri biliyorum. Hatanı Türkçe açıklarım. İster yaz, ister sesli konuş.</p>
-            <div className="mt-6 grid gap-2.5 sm:grid-cols-3 md:grid-cols-1 xl:max-w-sm">
-              <ModeButton icon={AudioLines} label="Sesli sohbet" color="bg-flame" onClick={() => start.mutate({ mode: 'speaking' })} />
-              <ModeButton icon={MessageSquareText} label="Yazılı sohbet" color="bg-sky" onClick={() => start.mutate({ mode: 'chat' })} />
-              <ModeButton icon={PenLine} label="Yazma atölyesi" color="bg-mint" to="/ai/writing" />
-            </div>
-            <div className="mt-6 max-w-sm">
-              <div className="mb-1.5 flex justify-between text-sm font-bold"><span className="text-ink-soft">Bugünkü mesaj hakkın</span><span>{data.usage.remaining}/{data.usage.limit}</span></div>
-              <Progress value={data.usage.remaining} max={data.usage.limit} color="bg-sky" />
-            </div>
+      {/* Ada portrait on the left, three clear mode cards on the right. */}
+      <section className="mb-10 grid gap-6 lg:grid-cols-[300px_1fr]">
+        <div className="relative overflow-hidden rounded-3xl">
+          <Img src={PHOTO.adaWave} alt="Ada, yapay zekâ İngilizce öğretmenin" className="photo min-h-64" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+          <div className="absolute inset-x-4 bottom-4 text-white">
+            <p className="flex items-center gap-1.5 text-sm font-black">
+              <span className="size-2 rounded-full bg-mint ring-4 ring-mint/30" /> Ada · çevrim içi
+            </p>
+            <p className="mt-1 text-sm text-white/85">Seviyeni, hedefini ve kaydettiğin kelimeleri bilir. Hatanı Türkçe açıklar.</p>
           </div>
-          <Img src={PHOTO.adaWave} alt="Ada el sallıyor" className="h-full max-h-80 w-full object-cover md:max-h-none" />
+        </div>
+
+        <div className="flex flex-col gap-4">
+          <div className="grid gap-4 sm:grid-cols-3">
+            <ModeCard icon={AudioLines} title="Sesli sohbet" text="Konuş, telaffuzun düzeltilsin" color="flame" onClick={() => start.mutate({ mode: 'speaking' })} loading={start.isPending} />
+            <ModeCard icon={MessageSquareText} title="Yazılı sohbet" text="Serbest sohbet, anında düzeltme" color="sky" onClick={() => start.mutate({ mode: 'chat' })} loading={start.isPending} />
+            <ModeCard icon={PenLine} title="Yazma atölyesi" text="Metnini puanla, hataları gör" color="mint" to="/ai/writing" />
+          </div>
+          <div className="mt-auto rounded-2xl border-2 border-line bg-card p-4">
+            <div className="mb-1.5 flex justify-between text-sm font-bold"><span className="text-ink-soft">Bugünkü mesaj hakkın</span><span>{data.usage.remaining}/{data.usage.limit}</span></div>
+            <Progress value={data.usage.remaining} max={data.usage.limit} color="bg-sky" />
+          </div>
         </div>
       </section>
 
@@ -95,13 +102,25 @@ export default function AiHub() {
   )
 }
 
-function ModeButton({ icon: Icon, label, color, onClick, to }: { icon: typeof PenLine; label: string; color: string; onClick?: () => void; to?: string }) {
-  const cls = 'press flex items-center gap-3 rounded-2xl border-2 border-line bg-card px-3 py-2.5 text-left font-extrabold shadow-hard hover:bg-paper-2'
+const MODE_ACCENT: Record<string, { solid: string; tint: string; ring: string }> = {
+  flame: { solid: 'bg-flame', tint: 'from-flame/10', ring: 'hover:border-flame/40' },
+  sky: { solid: 'bg-sky', tint: 'from-sky/10', ring: 'hover:border-sky/40' },
+  mint: { solid: 'bg-mint', tint: 'from-mint/10', ring: 'hover:border-mint/40' },
+}
+
+function ModeCard({ icon: Icon, title, text, color, onClick, to, loading }: { icon: typeof PenLine; title: string; text: string; color: string; onClick?: () => void; to?: string; loading?: boolean }) {
+  const a = MODE_ACCENT[color]
+  const cls = clsx('press group relative flex h-full flex-col overflow-hidden rounded-2xl border-2 border-line bg-card p-5 text-left transition hover:-translate-y-1 hover:shadow-soft', a.ring)
   const inner = (
     <>
-      <span className={clsx('grid size-10 shrink-0 place-items-center rounded-xl text-white', color)}><Icon className="size-5" /></span>
-      {label}
+      <span aria-hidden className={clsx('pointer-events-none absolute inset-0 bg-gradient-to-b to-transparent opacity-0 transition group-hover:opacity-100', a.tint)} />
+      <span className={clsx('relative grid size-12 place-items-center rounded-2xl text-white shadow-hard-sm transition group-hover:scale-110', a.solid)}>
+        <Icon className="size-6" />
+      </span>
+      <p className="relative mt-4 font-display text-lg font-black leading-tight">{title}</p>
+      <p className="relative mt-1 text-sm text-ink-soft">{text}</p>
+      {loading && <span className="absolute right-4 top-4 size-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-40" />}
     </>
   )
-  return to ? <Link to={to} className={cls}>{inner}</Link> : <button onClick={onClick} className={cls}>{inner}</button>
+  return to ? <Link to={to} className={cls}>{inner}</Link> : <button onClick={onClick} disabled={loading} className={cls}>{inner}</button>
 }

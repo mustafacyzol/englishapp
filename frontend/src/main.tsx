@@ -9,9 +9,12 @@ import App from './App'
 import { AuthProvider } from './lib/auth'
 import { ToastProvider } from './components/ui/Toast'
 import { RewardProvider } from './components/game/RewardProvider'
+import { initTheme } from './lib/theme'
 
 // The demo build is a single static file, so it routes with the URL hash.
 const Router = import.meta.env.VITE_DEMO ? HashRouter : BrowserRouter
+
+initTheme()
 
 const queryClient = new QueryClient({
   defaultOptions: {

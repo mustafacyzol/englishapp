@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth'
 import { get } from '@/lib/api'
 import { Logo } from '@/components/game/Logo'
+import { ThemeButton } from '@/components/ui/ThemeToggle'
 import { LinkButton } from '@/components/ui/Button'
 import { PageTransition } from '@/components/motion/Page'
 
@@ -47,14 +48,21 @@ export default function PublicLayout() {
       <header className={clsx('safe-top sticky top-0 z-40 transition', scrolled ? 'border-b-2 border-line bg-card/95 backdrop-blur-md' : 'bg-card')}>
         <div className="mx-auto flex h-18 max-w-6xl items-center justify-between px-5 py-3">
           <Link to="/" aria-label="DilGO ana sayfa"><Logo /></Link>
-          <nav className="hidden items-center gap-1 md:flex">
+          {/* Pill nav: a single sliding highlight tracks the active link instead of a bare colour swap. */}
+          <nav className="hidden items-center rounded-full border-2 border-line bg-paper-2/60 p-1 md:flex">
             {LINKS.map((l) => (
-              <NavLink key={l.to} to={l.to} end={l.end} className={({ isActive }) => clsx('rounded-xl px-4 py-2 text-[15px] font-extrabold transition', isActive ? 'text-flame' : 'text-ink-soft hover:text-ink')}>
-                {l.label}
+              <NavLink key={l.to} to={l.to} end={l.end} className="group relative rounded-full px-4 py-1.5 text-[15px] font-extrabold transition">
+                {({ isActive }) => (
+                  <>
+                    {isActive && <motion.span layoutId="nav-pill" transition={{ type: 'spring', stiffness: 380, damping: 32 }} className="absolute inset-0 rounded-full bg-card shadow-hard-sm" />}
+                    <span className={clsx('relative', isActive ? 'text-flame' : 'text-ink-soft group-hover:text-ink')}>{l.label}</span>
+                  </>
+                )}
               </NavLink>
             ))}
           </nav>
-          <div className="hidden items-center gap-3 md:flex">
+          <div className="hidden items-center gap-2 md:flex">
+            <ThemeButton />
             {user ? (
               <LinkButton to="/learn" size="sm">Uygulamaya git</LinkButton>
             ) : (
@@ -64,9 +72,12 @@ export default function PublicLayout() {
               </>
             )}
           </div>
-          <button className="grid size-11 place-items-center rounded-xl md:hidden" onClick={() => setOpen((o) => !o)} aria-label="Menü" aria-expanded={open}>
-            {open ? <X className="size-6" /> : <Menu className="size-6" />}
-          </button>
+          <div className="flex items-center gap-1 md:hidden">
+            <ThemeButton />
+            <button className="grid size-11 place-items-center rounded-xl" onClick={() => setOpen((o) => !o)} aria-label="Menü" aria-expanded={open}>
+              {open ? <X className="size-6" /> : <Menu className="size-6" />}
+            </button>
+          </div>
         </div>
         <AnimatePresence>
           {open && (
@@ -75,10 +86,14 @@ export default function PublicLayout() {
                 {LINKS.map((l) => (
                   <NavLink key={l.to} to={l.to} end={l.end} className={({ isActive }) => clsx('rounded-xl px-3 py-3 text-lg font-extrabold', isActive ? 'bg-flame/10 text-flame' : 'text-ink')}>{l.label}</NavLink>
                 ))}
-                <div className="mt-3 grid grid-cols-2 gap-3">
-                  <LinkButton to="/login" variant="secondary">Giriş</LinkButton>
-                  <LinkButton to="/register">Başla</LinkButton>
-                </div>
+                {user ? (
+                  <LinkButton to="/learn" className="mt-3">Uygulamaya git</LinkButton>
+                ) : (
+                  <div className="mt-3 grid grid-cols-2 gap-3">
+                    <LinkButton to="/login" variant="secondary">Giriş</LinkButton>
+                    <LinkButton to="/register">Başla</LinkButton>
+                  </div>
+                )}
               </div>
             </motion.nav>
           )}
