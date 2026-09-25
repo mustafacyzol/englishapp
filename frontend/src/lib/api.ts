@@ -57,7 +57,19 @@ export const onApiError = (fn: (e: ApiError) => void) => {
   }
 }
 
+export const DEMO = !!import.meta.env.VITE_DEMO
+
 export async function api<T = unknown>(path: string, opts: Opts = {}): Promise<T> {
+  if (DEMO) {
+    const { demoApi, DemoError } = await import('../demo')
+    try {
+      return await demoApi<T>(opts.method ?? (opts.body !== undefined ? 'POST' : 'GET'), path, opts.body, !!opts.admin)
+    } catch (e) {
+      const err = e instanceof DemoError ? new ApiError(e.status, e.message, e.errors) : new ApiError(500, 'Bir şeyler ters gitti.')
+      listeners.forEach((l) => l(err))
+      throw err
+    }
+  }
   const headers: Record<string, string> = { Accept: 'application/json', 'X-Client': 'dilgo-app' }
   const bearer = opts.admin ? adminToken : token
   if (bearer) headers.Authorization = `Bearer ${bearer}`

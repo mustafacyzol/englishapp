@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, HashRouter } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { App as CapApp } from '@capacitor/app'
 import { Capacitor } from '@capacitor/core'
@@ -9,6 +9,9 @@ import App from './App'
 import { AuthProvider } from './lib/auth'
 import { ToastProvider } from './components/ui/Toast'
 import { RewardProvider } from './components/game/RewardProvider'
+
+// The demo build is a single static file, so it routes with the URL hash.
+const Router = import.meta.env.VITE_DEMO ? HashRouter : BrowserRouter
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,7 +31,7 @@ if (Capacitor.isNativePlatform()) {
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <Router>
         <ToastProvider>
           <AuthProvider>
             <RewardProvider>
@@ -36,7 +39,7 @@ createRoot(document.getElementById('root')!).render(
             </RewardProvider>
           </AuthProvider>
         </ToastProvider>
-      </BrowserRouter>
+      </Router>
     </QueryClientProvider>
   </StrictMode>,
 )

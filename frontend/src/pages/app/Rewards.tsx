@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'motion/react'
+import { useLocation } from 'react-router-dom'
 import clsx from 'clsx'
 import { Check, Copy, Lock, Share2 } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
@@ -18,12 +19,11 @@ import { useToast } from '@/components/ui/Toast'
 type Tab = 'vault' | 'yol' | 'redeem' | 'invite'
 
 export default function Rewards() {
-  const [tab, setTab] = useState<Tab>(() => (location.hash === '#yol' ? 'yol' : 'vault'))
+  const { hash } = useLocation()
+  const [tab, setTab] = useState<Tab>(() => (hash === '#yol' ? 'yol' : 'vault'))
   useEffect(() => {
-    const on = () => location.hash === '#yol' && setTab('yol')
-    window.addEventListener('hashchange', on)
-    return () => window.removeEventListener('hashchange', on)
-  }, [])
+    if (hash === '#yol') setTab('yol')
+  }, [hash])
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader kicker="Kazandıkların" title="Ödüller" />

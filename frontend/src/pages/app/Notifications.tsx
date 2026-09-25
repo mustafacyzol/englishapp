@@ -26,7 +26,7 @@ export default function Notifications() {
             const Icon = iconFor(n.data.icon ?? 'bell')
             return (
               <li key={n.id}>
-                <Link to={n.data.link ?? '#'} className={clsx('ink-card flex items-center gap-4 p-4', !n.read && 'bg-butter/30')}>
+                <Link to={n.data.link ?? '#'} className={clsx('ink-card flex items-center gap-4 p-4', !n.read && 'border-sky/40 bg-sky/5')}>
                   <span className="grid size-11 shrink-0 place-items-center rounded-xl border-2 border-line bg-card"><Icon className="size-5" /></span>
                   <div className="min-w-0 flex-1">
                     <p className="font-bold">{n.data.title}</p>

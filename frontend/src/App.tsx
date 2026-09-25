@@ -6,6 +6,9 @@ import AppLayout from './layouts/AppLayout'
 import AdminLayout from './layouts/AdminLayout'
 import PublicLayout from './layouts/PublicLayout'
 import { setMuted } from './lib/fx'
+import { DEMO } from './lib/api'
+
+const DemoBar = lazy(() => import('./demo/DemoBar').then((m) => ({ default: m.DemoBar })))
 
 const Landing = lazy(() => import('./pages/public/Landing'))
 const Legal = lazy(() => import('./pages/public/Legal'))
@@ -65,6 +68,7 @@ export default function App() {
 
   return (
     <Suspense fallback={<Spinner />}>
+      {DEMO && <DemoBar />}
       <Routes>
         <Route element={<PublicLayout />}>
           <Route path="/" element={user ? <Navigate to="/learn" replace /> : <Landing />} />

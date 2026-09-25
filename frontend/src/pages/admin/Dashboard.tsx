@@ -4,7 +4,7 @@ import { Crown, GraduationCap, Receipt, UserCheck, Users, Wallet, Activity, Book
 import { get } from '@/lib/api'
 import { dateTR, num, tl } from '@/lib/format'
 import { Spinner } from '@/components/ui/Misc'
-import { AdminTitle, BarChart, Pill, Table } from './kit'
+import { AdminTitle, BarChart, Pill, Table, ORDER_STATUS } from './kit'
 
 interface D {
   kpis: Record<string, number>
@@ -59,7 +59,7 @@ export default function Dashboard() {
           <h2 className="mb-3 text-lg font-extrabold">Son siparişler</h2>
           <Table head={['Kullanıcı', 'Paket', 'Tutar', 'Durum']} empty={!data.recent_orders.length}>
             {data.recent_orders.map((o) => (
-              <tr key={o.uuid}><td className="px-4 py-2.5">{o.user?.email}</td><td className="px-4">{o.plan?.name}</td><td className="px-4 font-mono">{tl(o.total)}</td><td className="px-4"><Pill tone={o.status === 'paid' ? 'good' : o.status === 'failed' ? 'bad' : 'default'}>{o.status}</Pill></td></tr>
+              <tr key={o.uuid}><td className="px-4 py-2.5">{o.user?.email}</td><td className="px-4">{o.plan?.name}</td><td className="px-4 font-mono">{tl(o.total)}</td><td className="px-4"><Pill tone={o.status === 'paid' ? 'good' : o.status === 'failed' ? 'bad' : 'default'}>{ORDER_STATUS[o.status] ?? o.status}</Pill></td></tr>
             ))}
           </Table>
         </section>

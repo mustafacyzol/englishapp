@@ -11,6 +11,7 @@ HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyun
 - [Ne var?](#ne-var)
 - [Mimari](#mimari)
 - [Yerelde çalıştırma](#yerelde-çalıştırma)
+- [Demo önizleme (sunucusuz)](#demo-önizleme-sunucusuz)
 - [Klasör yapısı](#klasör-yapısı)
 - [Güvenlik](#güvenlik)
 - [Mobil uygulama (iOS / Android)](#mobil-uygulama-ios--android)
@@ -30,6 +31,9 @@ HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyun
 | **Büyüme** | Paketler, kupon kodları (yüzde/tutar, ilk sipariş, paket kısıtı, limitler), toplu hediye kodu üretimi (CSV), referans sistemi (doğrulamada elmas, ilk alışverişte Premium kartı), paylaşılabilir profil |
 | **Ödeme** | iyzico Checkout Form (3D Secure), sandbox desteği, geliştirme için sahte ödeme ağ geçidi, %100 kuponla ücretsiz sipariş |
 | **Yönetim paneli** | Adım-yukarı (step-up) OTP / TOTP korumalı; pano (KPI + 30 günlük grafikler), kullanıcı yönetimi (rol, askı, elmas, Premium, kart verme, kilit açma, 2FA sıfırlama), sipariş/iade, canlı ders kuponu doğrulama, tüm içerik ve oyun tablolarının CRUD'u, ayarlar (bakım modu, duyuru, limitler), denetim kaydı |
+| **Ödül yolu** | Tek seferlik, çift verilmeyen ödüller (`reward_claims`): günlük hedef +5 elmas, her seviye +20 elmas ve her 5 seviyede gizemli sandık, seri kilometre taşları (3 gün 30 elmas → 7 dondurucu → 14 XP takviyesi → 30 Premium 3 gün → 50 sandık → 100 canlı ders → 200 Premium 7 gün → 365 canlı ders + 1000 elmas), lig birincisine sandık. Ödüller sayfasındaki "Nasıl kazanırım?" sekmesi ilerlemeyi gösterir |
+| **Tanıtım sayfaları** | Ana sayfa, Hakkımızda, Blog (yönetimden yazılır), İletişim formu (KVKK onayı, bal küpü, isteğe bağlı Turnstile; mesajlar yönetim paneline düşer ve destek adresine e-postalanır) |
+| **Görseller** | Tüm fotoğraflar ve 3B ödül/rozet/lig objeleri Magnific ile üretildi (`frontend/public/img`). Çizim/ikon illüstrasyonu yok |
 | **Hesap** | Kayıt (3 adımlı onboarding), e-posta OTP doğrulama, şifre sıfırlama (OTP), oturum listesi/kapatma, şifre değiştirme, tema (açık/koyu), ses, okuma hızı, KVKK uyumlu hesap silme (OTP onaylı) |
 
 ## Mimari
@@ -83,6 +87,10 @@ Demo hesaplar (yalnızca yerelde oluşturulur):
 - Ada için `.env` dosyasına `ANTHROPIC_API_KEY` ekleyin; anahtar yoksa AI ekranları "bakımda" mesajı gösterir, uygulamanın geri kalanı çalışır.
 
 Testler: `cd backend && php artisan test` (kayıt/OTP, kilitleme, admin 2FA, ders→XP→seri→rozet, lig kapanışı, mağaza, sandık, canlı ders kuponu, kupon+ödeme, hediye kodu, seviye testi, seri dondurucu).
+
+## Demo önizleme (sunucusuz)
+
+`cd frontend && VITE_DEMO=1 npx vite build` → `dist-demo/index.html` + `dist-demo/img/`. Bu derleme API yerine gerçek backend'den kaydedilmiş yanıtları (`src/demo/fixture.json`) kullanır; ders/hikaye tamamlama, görev ödülü, mağaza, kart açma ve Ada sohbeti tarayıcıda simüle edilir. Sol alttaki **Demo** çubuğundan öğrenci ya da yönetim paneline geçilir (yönetim doğrulama kodu olarak 6 haneli herhangi bir sayı yeterli).
 
 ## Klasör yapısı
 

@@ -115,3 +115,5 @@ export function BarChart({ title, data, color, format = (v) => String(v) }: { ti
     </figure>
   )
 }
+
+export const ORDER_STATUS: Record<string, string> = { paid: 'ödendi', pending: 'bekliyor', failed: 'başarısız', refunded: 'iade', cancelled: 'iptal' }

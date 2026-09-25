@@ -34,7 +34,7 @@ export default function AiHub() {
           <div className="p-6 sm:p-8">
             <h2 className="text-3xl">Merhaba, ben Ada.</h2>
             <p className="mt-2 text-lg text-ink-soft">Seviyeni, hedefini ve kaydettiğin kelimeleri biliyorum. Hatanı Türkçe açıklarım. İster yaz, ister sesli konuş.</p>
-            <div className="mt-6 grid gap-3 sm:grid-cols-3 md:grid-cols-1 lg:grid-cols-3">
+            <div className="mt-6 grid gap-2.5 sm:grid-cols-3 md:grid-cols-1 xl:max-w-sm">
               <ModeButton icon={AudioLines} label="Sesli sohbet" color="bg-flame" onClick={() => start.mutate({ mode: 'speaking' })} />
               <ModeButton icon={MessageSquareText} label="Yazılı sohbet" color="bg-sky" onClick={() => start.mutate({ mode: 'chat' })} />
               <ModeButton icon={PenLine} label="Yazma atölyesi" color="bg-mint" to="/ai/writing" />
@@ -95,7 +95,7 @@ export default function AiHub() {
 }
 
 function ModeButton({ icon: Icon, label, color, onClick, to }: { icon: typeof PenLine; label: string; color: string; onClick?: () => void; to?: string }) {
-  const cls = 'press flex items-center gap-3 rounded-2xl border-2 border-line bg-card p-3 text-left font-black shadow-hard hover:bg-paper-2'
+  const cls = 'press flex items-center gap-3 rounded-2xl border-2 border-line bg-card px-3 py-2.5 text-left font-extrabold shadow-hard hover:bg-paper-2'
   const inner = (
     <>
       <span className={clsx('grid size-10 shrink-0 place-items-center rounded-xl text-white', color)}><Icon className="size-5" /></span>
