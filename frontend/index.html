@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F6F1E7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14172B" media="(prefers-color-scheme: dark)" />
+    <title>DilGO — Oku, dinle, konuş, yaz. İngilizce tek uygulamada.</title>
+    <meta name="description" content="Bayrak Dil Okulları'nın oyunlaştırılmış İngilizce platformu: hikayelerle okuma ve dinleme, AI öğretmen Ada ile konuşma ve yazma, seriler, ligler ve gerçek canlı ders ödülleri." />
+    <meta property="og:title" content="DilGO — Dört beceri, tek uygulama" />
+    <meta property="og:description" content="Hikayelerle oku ve dinle, AI öğretmen Ada ile konuş ve yaz. Bayrak Dil Okulları güvencesiyle." />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="tr_TR" />
+    <script>
+      // apply saved theme before paint to avoid flashes
+      try {
+        var t = localStorage.getItem('dilgo.theme');
+        if (t === 'dark' || (t !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches)) document.documentElement.classList.add('dark');
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

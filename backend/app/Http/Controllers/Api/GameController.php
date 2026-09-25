@@ -97,7 +97,7 @@ class GameController extends Controller
         $u = $request->user();
         $metrics = ['lessons_completed', 'stories_read', 'words_saved', 'words_mastered', 'ai_messages', 'speaking', 'perfect_lessons', 'goal_days'];
 
-        return response()->json(['data' => collect($metrics)->mapWithKeys(fn ($m) => [$m => $this->game->metricValue($u, $m)])
+        return response()->json(['data' => collect($metrics)->mapWithKeys(fn ($m) => [$m => $this->game->metricValue($u, $m)])->all()
             + ['minutes' => (int) $u->dailyActivities()->sum('minutes'), 'xp_total' => $u->xp_total]]);
     }
 
@@ -145,7 +145,7 @@ class GameController extends Controller
         $unlocked = $user->userAchievements()->get()->keyBy('achievement_id');
         $cache = [];
 
-        $data = Achievement::query()->orderBy('category')->orderBy('position')->orderBy('threshold')->get()
+        $data = Achievement::query()->orderBy('position')->orderBy('threshold')->get()
             ->map(function (Achievement $a) use ($unlocked, $user, &$cache) {
                 $ua = $unlocked->get($a->id);
                 $value = $cache[$a->metric] ??= $this->game->metricValue($user, $a->metric);

@@ -29,7 +29,7 @@ class LearnController extends Controller
         $course ??= Course::query()->where('is_published', true)->where('cefr_level', $user->cefr_level)->orderBy('position')->first()
             ?? Course::query()->where('is_published', true)->orderBy('position')->firstOrFail();
 
-        $course->load(['units.lessons' => fn ($q) => $q->select(['id', 'unit_id', 'title', 'skill', 'kind', 'position', 'xp_reward', 'is_premium', 'story_id', 'scenario_key'])]);
+        $course->load(['units.lessons' => fn ($q) => $q->select(['id', 'unit_id', 'title', 'skill', 'kind', 'position', 'xp_reward', 'is_premium', 'story_id', 'scenario_key'])->with('story:id,slug')]);
         $progress = LessonProgress::query()->where('user_id', $user->id)
             ->whereIn('lesson_id', $course->units->flatMap->lessons->pluck('id'))
             ->get()->keyBy('lesson_id');

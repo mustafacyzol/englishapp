@@ -1,0 +1,10 @@
+{
+  "name": "DilGO — Bayrak Dil Okulları",
+  "short_name": "DilGO",
+  "start_url": "/learn",
+  "display": "standalone",
+  "background_color": "#F6F1E7",
+  "theme_color": "#FF5A36",
+  "lang": "tr",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

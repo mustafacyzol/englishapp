@@ -1,0 +1,157 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource-variable/figtree';
+@import '@fontsource-variable/literata';
+@import '@fontsource/jetbrains-mono/500.css';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+  DilGO design language — "Defter & Bayrak"
+  A tactile sticker-book: warm paper, confident ink outlines, hard offset
+  shadows that squash when pressed, one flame-red signal colour from the flag.
+*/
+@theme {
+  --font-display: 'Bricolage Grotesque Variable', ui-serif, sans-serif;
+  --font-sans: 'Figtree Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-read: 'Literata Variable', Georgia, serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-card: var(--card);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-flame: #ff5a36;
+  --color-flame-deep: #d9401f;
+  --color-mint: #2ec4a0;
+  --color-mint-deep: #1f9c7e;
+  --color-butter: #ffd23f;
+  --color-sky: #3a6ff7;
+  --color-berry: #e23d78;
+  --color-lilac: #b8a6ff;
+  --color-sand: #efe4cf;
+
+  --shadow-hard: 4px 4px 0 0 var(--ink);
+  --shadow-hard-sm: 2px 2px 0 0 var(--ink);
+  --shadow-hard-lg: 7px 7px 0 0 var(--ink);
+
+  --radius-blob: 22px;
+  --animate-wiggle: wiggle 0.5s ease-in-out;
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-flicker: flicker 1.6s ease-in-out infinite;
+}
+
+:root {
+  --paper: #f6f1e7;
+  --paper-2: #efe7d6;
+  --card: #fffdf8;
+  --ink: #1b1f3b;
+  --ink-soft: #5b5d74;
+  --line: #1b1f3b;
+  color-scheme: light;
+}
+
+.dark {
+  --paper: #14172b;
+  --paper-2: #1b1f3b;
+  --card: #20254a;
+  --ink: #f6f1e7;
+  --ink-soft: #a9abc6;
+  --line: #0b0d1c;
+  color-scheme: dark;
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    background-image: radial-gradient(color-mix(in oklab, var(--ink) 9%, transparent) 1px, transparent 1px);
+    background-size: 22px 22px;
+    min-height: 100dvh;
+  }
+  h1, h2, h3, h4 {
+    @apply font-display tracking-tight;
+    font-variation-settings: 'wdth' 90;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-sky);
+    outline-offset: 2px;
+    border-radius: 10px;
+  }
+  ::selection {
+    background: var(--color-butter);
+    color: #1b1f3b;
+  }
+}
+
+@layer components {
+  /* the signature tactile surface */
+  .ink-card {
+    @apply bg-card rounded-[var(--radius-blob)] border-2 border-line shadow-hard;
+  }
+  .ink-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border-2 border-line bg-card px-3 py-1 text-sm font-bold shadow-hard-sm;
+  }
+  .press {
+    @apply transition-[transform,box-shadow] duration-100 ease-out;
+  }
+  .press:active:not(:disabled) {
+    transform: translate(3px, 3px);
+    box-shadow: 0 0 0 0 var(--ink);
+  }
+  .scribble-underline {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8 C 40 2, 80 12, 120 6 S 180 4, 198 7' fill='none' stroke='%23FF5A36' stroke-width='4' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: 0 100%;
+    background-size: 100% 0.35em;
+    padding-bottom: 0.12em;
+  }
+  .grain::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.07;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    mix-blend-mode: multiply;
+    border-radius: inherit;
+  }
+  .safe-bottom {
+    padding-bottom: max(env(safe-area-inset-bottom), 0.5rem);
+  }
+  .safe-top {
+    padding-top: env(safe-area-inset-top);
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-6deg); }
+  75% { transform: rotate(6deg); }
+}
+@keyframes float {
+  0%, 100% { transform: translateY(0) rotate(var(--r, 0deg)); }
+  50% { transform: translateY(-10px) rotate(var(--r, 0deg)); }
+}
+@keyframes flicker {
+  0%, 100% { transform: scale(1) rotate(-2deg); }
+  50% { transform: scale(1.08) rotate(3deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
