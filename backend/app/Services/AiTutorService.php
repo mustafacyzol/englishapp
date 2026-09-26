@@ -86,19 +86,31 @@ TXT;
                 'items' => [
                     'type' => 'object',
                     'properties' => [
-                        'original' => ['type' => 'string'],
-                        'fix' => ['type' => 'string'],
-                        'rule_tr' => ['type' => 'string'],
+                        'original' => ['type' => 'string', 'description' => 'The mistaken words copied EXACTLY from the learner text (a short span, 1-8 words) so the app can highlight them in place.'],
+                        'fix' => ['type' => 'string', 'description' => 'The corrected replacement for exactly that span.'],
+                        'rule_tr' => ['type' => 'string', 'description' => 'One or two sentences in Turkish explaining the rule.'],
                         'category' => ['type' => 'string', 'enum' => ['grammar', 'vocabulary', 'spelling', 'word_order', 'style']],
                     ],
                     'required' => ['original', 'fix', 'rule_tr', 'category'],
                     'additionalProperties' => false,
                 ],
             ],
+            'rubric' => [
+                'type' => 'object',
+                'description' => 'Sub-scores 0-100 for the learner level.',
+                'properties' => [
+                    'task' => ['type' => 'integer', 'description' => 'Did the text do what the task asked?'],
+                    'grammar' => ['type' => 'integer'],
+                    'vocabulary' => ['type' => 'integer'],
+                    'organisation' => ['type' => 'integer', 'description' => 'Flow, linking words and paragraphing.'],
+                ],
+                'required' => ['task', 'grammar', 'vocabulary', 'organisation'],
+                'additionalProperties' => false,
+            ],
             'strengths_tr' => ['type' => 'string'],
             'next_steps_tr' => ['type' => 'string'],
         ],
-        'required' => ['cefr_estimate', 'score', 'corrected_text', 'mistakes', 'strengths_tr', 'next_steps_tr'],
+        'required' => ['cefr_estimate', 'score', 'corrected_text', 'mistakes', 'rubric', 'strengths_tr', 'next_steps_tr'],
         'additionalProperties' => false,
     ];
 
@@ -157,12 +169,15 @@ TXT;
         return $assistant;
     }
 
-    public function checkWriting(User $user, string $text, ?string $task = null): array
+    /** @param  list<string>  $targetWords  vocabulary the task asked the learner to use */
+    public function checkWriting(User $user, string $text, ?string $task = null, array $targetWords = []): array
     {
         $this->assertCanUse($user);
         $system = self::PERSONA."\n\nYou are now grading a piece of writing. Learner level: {$user->cefr_level}. "
             .'List at most 8 of the most useful mistakes. Keep corrected_text as close to the original as possible.';
-        $prompt = ($task ? "Writing task: {$task}\n\n" : '')."Learner text:\n\"\"\"\n{$text}\n\"\"\"";
+        $prompt = ($task ? "Writing task: {$task}\n" : '')
+            .($targetWords ? 'Target words the learner tried to use: '.implode(', ', $targetWords).". Mention in strengths_tr which ones were used well.\n" : '')
+            ."\nLearner text:\n\"\"\"\n{$text}\n\"\"\"";
 
         return $this->call($system, [['role' => 'user', 'content' => $prompt]], self::WRITING_SCHEMA);
     }

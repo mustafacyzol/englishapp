@@ -333,7 +333,16 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   if (path === '/ai/writing') {
     await wait(1200)
     const text: string = body.text ?? ''
-    const mistakes = text.split(/(?<=[.!?])\s+/).map((s) => correct(s)).filter(Boolean).map((c: Json) => ({ original: c.original, fix: c.corrected, rule_tr: c.explanation_tr, category: 'grammar' }))
+    // Exact spans, like the real API returns, so the lab can mark them in place.
+    const mistakes: Json[] = []
+    for (const [re, rep, why] of FIXES) {
+      for (const hit of text.matchAll(new RegExp(re.source, 'gi'))) {
+        const span = hit[0]
+        const fix = span.replace(new RegExp(re.source, 'i'), rep).replace('__PAST__', PAST[hit[1]?.toLowerCase()] ?? hit[1]).replace('__BASE__', BASE[hit[1]?.toLowerCase()] ?? hit[1])
+        mistakes.push({ original: span, fix, rule_tr: why, category: 'grammar', at: hit.index })
+      }
+    }
+    mistakes.sort((a, b) => a.at - b.at)
     const words = text.split(/\s+/).length
     const score = Math.max(45, Math.min(96, 70 + Math.min(20, words / 6) - mistakes.length * 8))
     let fixed = text
@@ -341,6 +350,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     return {
       result: {
         cefr_estimate: words > 120 ? 'B1' : 'A2', score: Math.round(score), corrected_text: fixed, mistakes,
+        rubric: { task: Math.min(95, 60 + words), grammar: Math.max(40, 92 - mistakes.length * 12), vocabulary: Math.min(90, 55 + words / 3), organisation: /because|however|so|then/i.test(text) ? 82 : 64 },
         strengths_tr: 'Fikirlerini sıralı anlatıyorsun ve günlük kelimeleri doğru yerde kullanıyorsun.',
         next_steps_tr: 'Cümlelerini "because", "however", "so" gibi bağlaçlarla birleştirmeyi dene; metnin daha akıcı olur.',
       },

@@ -97,9 +97,11 @@ class AiController extends Controller
         $data = $request->validate([
             'text' => ['required', 'string', 'min:20', 'max:4000'],
             'task' => ['nullable', 'string', 'max:300'],
+            'target_words' => ['nullable', 'array', 'max:6'],
+            'target_words.*' => ['string', 'max:40'],
         ]);
         $user = $request->user();
-        $result = $this->tutor->checkWriting($user, strip_tags($data['text']), $data['task'] ?? null);
+        $result = $this->tutor->checkWriting($user, strip_tags($data['text']), $data['task'] ?? null, $data['target_words'] ?? []);
         $summary = $game->record($user, 15, 'writing', null, ['ai_messages' => 1], ['writing' => 1]);
 
         return response()->json(['result' => $result, 'reward' => $summary, 'usage' => $this->tutor->usageToday($user)]);
