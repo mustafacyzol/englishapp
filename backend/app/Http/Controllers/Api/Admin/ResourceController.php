@@ -188,6 +188,22 @@ class ResourceController extends Controller
                     'position' => ['integer', 'min:0'],
                 ],
             ],
+            'institutions' => [
+                'model' => Models\Institution::class, 'search' => ['name', 'city', 'contact_email', 'join_code'], 'order' => '-id', 'filters' => ['type', 'is_active'], 'role' => 'admin',
+                'rules' => [
+                    'name' => ['required', 'string', 'max:160'],
+                    'type' => ['required', 'in:school,course,company'],
+                    'city' => ['nullable', 'string', 'max:80'],
+                    'contact_name' => ['nullable', 'string', 'max:120'],
+                    'contact_email' => ['nullable', 'email', 'max:190'],
+                    'contact_phone' => ['nullable', 'string', 'max:40'],
+                    'seats' => ['required', 'integer', 'min:0', 'max:100000'],
+                    'starts_at' => ['nullable', 'date'],
+                    'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
+                    'is_active' => ['boolean'],
+                    'notes' => ['nullable', 'string', 'max:2000'],
+                ],
+            ],
             'contact-messages' => [
                 'model' => Models\ContactMessage::class, 'search' => ['name', 'email', 'message'], 'order' => '-id', 'filters' => ['status', 'topic'], 'role' => 'staff',
                 'rules' => [

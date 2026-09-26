@@ -8,7 +8,7 @@ class DailyActivity extends Model
 {
     protected $guarded = ['id'];
 
-    protected $attributes = ['xp' => 0, 'lessons' => 0, 'stories' => 0, 'reviews' => 0, 'ai_messages' => 0, 'speaking' => 0, 'perfect_lessons' => 0, 'minutes' => 0, 'goal_met' => false, 'freeze_used' => false];
+    protected $attributes = ['xp' => 0, 'lessons' => 0, 'stories' => 0, 'reviews' => 0, 'ai_messages' => 0, 'speaking' => 0, 'perfect_lessons' => 0, 'minutes' => 0, 'xp_reading' => 0, 'xp_listening' => 0, 'xp_speaking' => 0, 'xp_writing' => 0, 'goal_met' => false, 'freeze_used' => false];
 
     public $timestamps = false;
 

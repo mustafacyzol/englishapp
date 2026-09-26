@@ -86,7 +86,7 @@ export default function Profile() {
           <Skill icon={BookOpen} label="Okunan hikaye" v={s?.stories_read} color="bg-butter" />
           <Skill icon={Layers} label="Kelime" v={s?.words_saved} color="bg-mint" />
           <Skill icon={Mic} label="Konuşma" v={s?.speaking} color="bg-flame" />
-          <Skill icon={Brain} label="Ada mesajı" v={s?.ai_messages} color="bg-sky" />
+          <Skill icon={Brain} label="Defne mesajı" v={s?.ai_messages} color="bg-sky" />
           <Skill icon={Target} label="Ders" v={s?.lessons_completed} color="bg-lilac" />
           <Skill icon={Zap} label="Hatasız ders" v={s?.perfect_lessons} color="bg-butter" />
           <Skill icon={Brain} label="Ustalaşılan kelime" v={s?.words_mastered} color="bg-mint" />

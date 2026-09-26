@@ -52,14 +52,14 @@ export default function WritingLab() {
           </div>
           <Textarea value={text} onChange={(e) => setText(e.target.value)} placeholder="Write here in English…" className="[&_textarea]:min-h-64 [&_textarea]:font-read [&_textarea]:text-lg" hint={`${words} kelime · en az 20 karakter`} />
           {m.error && <div className="mt-3"><Alert tone="error">{(m.error as ApiError).first()}</Alert></div>}
-          <Button block className="mt-4" loading={m.isPending} disabled={text.trim().length < 20} onClick={() => m.mutate()} icon={<Sparkles className="size-5" />}>Ada değerlendirsin</Button>
+          <Button block className="mt-4" loading={m.isPending} disabled={text.trim().length < 20} onClick={() => m.mutate()} icon={<Sparkles className="size-5" />}>Defne değerlendirsin</Button>
         </section>
 
         <section>
           {!r ? (
             <div className="ink-card flex h-full flex-col items-center justify-center gap-3 border-dashed p-10 text-center text-ink-soft">
               <PenLine className="size-10" />
-              <p className="font-bold">Yazını gönder; Ada seviyeni tahmin etsin, hatalarını Türkçe açıklasın ve düzeltilmiş halini göstersin.</p>
+              <p className="font-bold">Yazını gönder; Defne seviyeni tahmin etsin, hatalarını Türkçe açıklasın ve düzeltilmiş halini göstersin.</p>
             </div>
           ) : (
             <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="space-y-4">

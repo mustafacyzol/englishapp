@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * "Ada" — the AI English teacher. Unlike generic chatbots she knows the learner's
+ * "Defne" — the AI English teacher. Unlike generic chatbots she knows the learner's
  * CEFR level, goal and the exact words they saved while reading stories, and
  * recycles that vocabulary in conversation. Explanations are given in Turkish,
  * targeting the typical mistakes Turkish speakers make.
@@ -26,7 +26,7 @@ use Symfony\Component\HttpKernel\Exception\HttpException;
 class AiTutorService
 {
     private const PERSONA = <<<'TXT'
-You are Ada, a warm, witty English teacher working for Bayrak Dil Okulları, a Turkish language school.
+You are Defne, a warm, witty English teacher working for Bayrak Dil Okulları, a Turkish language school.
 You teach Turkish-speaking learners through the DilGO app.
 
 Teaching principles:
@@ -176,7 +176,13 @@ TXT;
 
         $words = $user->words()->latest()->limit(15)->pluck('word')->implode(', ');
 
-        $prompt = self::PERSONA."\n\nLearner profile:\n- Name: {$user->name}\n- CEFR level: {$user->cefr_level}\n- Goal: {$goalLabel}\n- Recently saved words: ".($words ?: 'none yet');
+        $interestLabels = ['travel' => 'travel', 'career' => 'work and business', 'movies' => 'films and TV series', 'music' => 'music', 'games' => 'video games', 'sports' => 'sports', 'tech' => 'technology', 'food' => 'food and cooking'];
+        $interests = collect($user->interests ?? [])->map(fn ($i) => $interestLabels[$i] ?? null)->filter()->implode(', ');
+        $focus = ['reading' => 'reading', 'listening' => 'listening', 'speaking' => 'speaking', 'writing' => 'writing'][$user->focus_skill] ?? null;
+
+        $prompt = self::PERSONA."\n\nLearner profile:\n- Name: {$user->name}\n- CEFR level: {$user->cefr_level}\n- Goal: {$goalLabel}\n- Recently saved words: ".($words ?: 'none yet')
+            .($interests ? "\n- Interests: {$interests} (pick examples and small-talk topics from these)" : '')
+            .($focus ? "\n- Wants to improve most: {$focus}" : '');
 
         if ($scenario) {
             $goals = collect($scenario->goals ?? [])->map(fn ($g, $i) => "  {$i}. {$g}")->implode("\n");

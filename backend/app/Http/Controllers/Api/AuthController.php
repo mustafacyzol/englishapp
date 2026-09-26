@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\UserPresenter;
 use App\Models\User;
+use App\Services\InstitutionService;
 use App\Services\OtpService;
 use App\Services\ReferralService;
 use App\Support\Audit;
@@ -36,6 +37,12 @@ class AuthController extends Controller
             'cefr_level' => ['nullable', 'in:A1,A2,B1,B2,C1,C2'],
             'learning_goal' => ['nullable', 'in:travel,career,exam,school,fun'],
             'daily_goal_xp' => ['nullable', 'integer', 'in:10,20,30,50'],
+            'focus_skill' => ['nullable', 'in:reading,listening,speaking,writing'],
+            'interests' => ['nullable', 'array', 'max:8'],
+            'interests.*' => ['string', 'in:travel,career,movies,music,games,sports,tech,food'],
+            'study_time' => ['nullable', 'in:morning,lunch,evening,night'],
+            'motivation' => ['nullable', 'in:confidence,job,abroad,exam,kids,hobby'],
+            'invite' => ['nullable', 'string', 'max:64'],
             'marketing_opt_in' => ['boolean'],
             'accept_terms' => ['accepted'],
             'captcha' => ['nullable', 'string'],
@@ -57,11 +64,18 @@ class AuthController extends Controller
             'cefr_level' => $data['cefr_level'] ?? 'A1',
             'learning_goal' => $data['learning_goal'] ?? null,
             'daily_goal_xp' => $data['daily_goal_xp'] ?? 20,
+            'focus_skill' => $data['focus_skill'] ?? null,
+            'interests' => array_values(array_unique($data['interests'] ?? [])) ?: null,
+            'study_time' => $data['study_time'] ?? null,
+            'motivation' => $data['motivation'] ?? null,
             'marketing_opt_in' => $data['marketing_opt_in'] ?? false,
             'onboarded' => isset($data['learning_goal']),
         ]);
 
         $this->referrals->attach($user, $data['referral_code'] ?? null);
+        if (! empty($data['invite'])) {
+            app(InstitutionService::class)->acceptToken($user, $data['invite']);
+        }
         $this->otp->send($user->email, 'verify_email', $user);
         Audit::log('auth.register', $user);
 

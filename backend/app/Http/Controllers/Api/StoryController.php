@@ -73,7 +73,7 @@ class StoryController extends Controller
     {
         $user = $request->user();
         abort_if($story->is_premium && ! $user->isPremium(), 402, 'Bu hikaye Premium üyelere özel.');
-        $data = $request->validate(['answers' => ['nullable', 'array'], 'minutes' => ['nullable', 'integer', 'max:180']]);
+        $data = $request->validate(['answers' => ['nullable', 'array'], 'minutes' => ['nullable', 'integer', 'max:180'], 'listened' => ['boolean']]);
 
         $questions = $story->questions ?? [];
         $correct = 0;
@@ -89,7 +89,9 @@ class StoryController extends Controller
         $read->update(['progress' => 100, 'completed_at' => $read->completed_at ?? now(), 'quiz_score' => max($read->quiz_score ?? 0, $score)]);
 
         $xp = $first ? 10 + (int) round($story->reading_minutes * 2) + (int) round($score / 10) : 5;
-        $summary = $game->record($user, $xp, 'story', $story->id, ['stories' => $first ? 1 : 0, 'minutes' => $data['minutes'] ?? $story->reading_minutes]);
+        // Stories are read and, when the narration was played, listened to as well.
+        $skills = ($data['listened'] ?? false) ? ['reading' => 0.6, 'listening' => 0.4] : ['reading' => 1];
+        $summary = $game->record($user, $xp, 'story', $story->id, ['stories' => $first ? 1 : 0, 'minutes' => $data['minutes'] ?? $story->reading_minutes], $skills);
 
         return response()->json(['score' => $score, 'correct' => $correct, 'total' => count($questions), 'reward' => $summary]);
     }

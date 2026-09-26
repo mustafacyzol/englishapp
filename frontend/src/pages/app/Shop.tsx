@@ -21,7 +21,7 @@ export default function Shop() {
   const buy = useMutation({
     mutationFn: (id: number) => post<{ user: typeof user }>(`/shop/${id}/buy`),
     onSuccess: (r) => {
-      sfx.fanfare()
+      sfx.reward()
       setUser(r.user)
       toast('Satın alındı! Kartın Ödül Kasası\'nda seni bekliyor.', 'success')
       qc.invalidateQueries({ queryKey: ['inventory'] })

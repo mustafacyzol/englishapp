@@ -22,7 +22,9 @@ export function RewardProvider({ children }: { children: ReactNode }) {
       setState({ r, title })
       const big = r.level_up || r.achievements.length > 0 || r.goal_met_now || !!r.rewards?.length
       celebrate(big)
-      sfx.fanfare()
+      if (r.level_up) sfx.levelup()
+      else if (r.rewards?.length) sfx.reward()
+      else sfx.complete()
       refresh()
     },
     [refresh],

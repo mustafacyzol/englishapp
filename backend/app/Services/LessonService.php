@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\User;
+use App\Support\Skills;
 use App\Support\TextMatch;
 
 class LessonService
@@ -24,17 +25,7 @@ class LessonService
     {
         $results = [];
         foreach (array_values($lesson->exercises ?? []) as $i => $ex) {
-            $given = $answers[$i] ?? null;
-            $results[] = match ($ex['type'] ?? '') {
-                'choice', 'fill', 'listen_choice', 'dialogue' => (string) $given === (string) ($ex['answer'] ?? ''),
-                // "Hata avı": the answer carries both the word tapped and the fix chosen.
-                'spot_error' => is_string($given) && $given === ($ex['error_index'] ?? '').':'.($ex['answer'] ?? ''),
-                'sequence' => is_array($given) && array_map('intval', array_values($given)) === array_map('intval', array_values($ex['answer'] ?? [])),
-                'translate', 'listen_type', 'order' => is_string($given) && TextMatch::equals($given, array_merge([(string) ($ex['answer'] ?? '')], $ex['alternatives'] ?? [])),
-                'speak' => is_string($given) && TextMatch::similarity($given, (string) ($ex['text'] ?? '')) >= 0.6,
-                'match' => $given === true,
-                default => true,
-            };
+            $results[] = self::gradeOne($ex, $answers[$i] ?? null);
         }
         if (! $results) {
             // story / AI-talk lessons are validated by their own endpoints
@@ -50,6 +41,21 @@ class LessonService
             'mistakes' => $total - $correct,
             'score' => (int) round($correct / $total * 100),
         ];
+    }
+
+    /** Grades one exercise against the learner's answer. Shared by lessons and duels. */
+    public static function gradeOne(array $ex, mixed $given): bool
+    {
+        return match ($ex['type'] ?? '') {
+            'choice', 'fill', 'listen_choice', 'dialogue' => (string) $given === (string) ($ex['answer'] ?? ''),
+            // "Hata avı": the answer carries both the word tapped and the fix chosen.
+            'spot_error' => is_string($given) && $given === ($ex['error_index'] ?? '').':'.($ex['answer'] ?? ''),
+            'sequence' => is_array($given) && array_map('intval', array_values($given)) === array_map('intval', array_values($ex['answer'] ?? [])),
+            'translate', 'listen_type', 'order' => is_string($given) && TextMatch::equals($given, array_merge([(string) ($ex['answer'] ?? '')], $ex['alternatives'] ?? [])),
+            'speak' => is_string($given) && TextMatch::similarity($given, (string) ($ex['text'] ?? '')) >= 0.6,
+            'match' => $given === true,
+            default => true,
+        };
     }
 
     public function complete(User $user, Lesson $lesson, array $answers, int $seconds = 0): array
@@ -81,7 +87,7 @@ class LessonService
             'perfect_lessons' => $perfect ? 1 : 0,
             'speaking' => $speaking,
             'minutes' => (int) ceil($seconds / 60),
-        ]));
+        ]), Skills::weightsFor($lesson->exercises ?? [], $lesson->skill));
 
         return $grade + ['passed' => $passed, 'perfect' => $perfect, 'first_time' => $firstTime, 'reward' => $summary, 'hearts' => $this->hearts->sync($user->fresh())];
     }

@@ -14,7 +14,13 @@ export interface Me {
   learning_goal: string | null
   daily_goal_xp: number
   onboarded: boolean
-  preferences: { email_reminders?: boolean; sound?: boolean; tts_rate?: number; tts_voice?: string; theme?: 'light' | 'dark' | 'system'; frame?: string }
+  preferences: { email_reminders?: boolean; sound?: boolean; tts_rate?: number; tts_voice?: string; theme?: 'light' | 'dark' | 'system'; frame?: string; tour_done?: boolean }
+  focus_skill: SkillKey | null
+  interests: string[]
+  study_time: 'morning' | 'lunch' | 'evening' | 'night' | null
+  motivation: string | null
+  institution: { id: number; name: string; type: string } | null
+  institution_role: 'student' | 'manager' | null
   marketing_opt_in: boolean
   two_factor_enabled: boolean
   referral_code: string
@@ -29,13 +35,17 @@ export interface Me {
     streak_longest: number
     league_tier: number
     league_name: string
+    duel_trophies: number
   }
   hearts: { hearts: number; unlimited: boolean; next_heart_at: string | null }
   created_at: string
 }
 
+export type SkillKey = 'reading' | 'listening' | 'speaking' | 'writing'
+
 export interface RewardSummary {
   xp_gained: number
+  skill_xp?: Partial<Record<SkillKey, number>>
   multiplier: number
   xp_total: number
   level: number

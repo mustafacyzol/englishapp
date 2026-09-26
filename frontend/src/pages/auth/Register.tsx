@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert } from '@/components/ui/Misc'
 import { Logo } from '@/components/game/Logo'
-import { Ada } from '@/components/game/Ada'
+import { Defne } from '@/components/game/Defne'
 import { Img } from '@/components/ui/Img'
 import { ThemeButton } from '@/components/ui/ThemeToggle'
 import { Turnstile } from './Turnstile'
@@ -226,9 +226,9 @@ function PlanPreview({ goalObj, level, daily, weeks, firstName, step }: { goalOb
 
       <div className="relative z-10 flex flex-1 flex-col justify-center px-12 pb-12">
         <div className="mb-6 flex items-center gap-3">
-          <Ada className="size-14" online />
+          <Defne className="size-14" online />
           <div>
-            <p className="font-display text-lg font-black leading-tight">Ben Ada 👋</p>
+            <p className="font-display text-lg font-black leading-tight">Ben Defne 👋</p>
             <p className="text-ink-soft">{firstName ? `Tanıştığımıza sevindim, ${firstName}!` : 'Öğretmenin olacağım.'}</p>
           </div>
         </div>

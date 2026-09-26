@@ -15,7 +15,7 @@ class TestimonialSeeder extends Seeder
     {
         $rows = [
             ['name' => 'Selin A.', 'role' => 'Üniversite öğrencisi', 'cefr_level' => 'B1', 'streak' => 96, 'highlight' => 'Erasmus mülakatımı İngilizce geçtim.',
-                'quote' => 'Ada ile mülakat senaryosunu on kere çalıştım. Gerçek mülakatta ilk defa heyecanlanmadan konuştum. Hikâyelerden topladığım kelimeler de işime yaradı.'],
+                'quote' => 'Defne ile mülakat senaryosunu on kere çalıştım. Gerçek mülakatta ilk defa heyecanlanmadan konuştum. Hikâyelerden topladığım kelimeler de işime yaradı.'],
             ['name' => 'Mert K.', 'role' => 'Yazılım geliştirici', 'cefr_level' => 'B2', 'streak' => 210, 'highlight' => 'Toplantılarda artık susmuyorum.',
                 'quote' => 'Günde 10 dakika ayırıyorum, o kadar. Altı ayın sonunda yabancı ekiple toplantılarda fikir söyleyebilir hale geldim. Seri bozulmasın diye her akşam açıyorum.'],
             ['name' => 'Ayşe D.', 'role' => 'Öğretmen', 'cefr_level' => 'A2', 'streak' => 45, 'highlight' => 'Hataları Türkçe açıklaması çok iyi.',
@@ -23,7 +23,7 @@ class TestimonialSeeder extends Seeder
             ['name' => 'Burak Ç.', 'role' => 'Lise öğrencisi', 'cefr_level' => 'A2', 'streak' => 61, 'highlight' => 'Sınav notum 55’ten 84’e çıktı.',
                 'quote' => 'Ders çalışmak gibi değil, oyun gibi. Lig sıralamasında arkadaşlarımı geçmek için her gün giriyorum. Not ortalamam da kendiliğinden yükseldi.'],
             ['name' => 'Zeynep Y.', 'role' => 'Hemşire', 'cefr_level' => 'B1', 'streak' => 123, 'highlight' => 'Vardiya aralarında 5 dakika yetiyor.',
-                'quote' => 'Kursa gidecek vaktim yok. Vardiya arasında bir hikâye okuyup Ada ile iki cümle konuşuyorum. Kazandığım canlı ders kuponunu da şubede kullandım.'],
+                'quote' => 'Kursa gidecek vaktim yok. Vardiya arasında bir hikâye okuyup Defne ile iki cümle konuşuyorum. Kazandığım canlı ders kuponunu da şubede kullandım.'],
             ['name' => 'Emre T.', 'role' => 'İhracat uzmanı', 'cefr_level' => 'B2', 'streak' => 180, 'highlight' => 'Telefonda konuşmaktan korkmuyorum.',
                 'quote' => 'En çok sesli sohbet işime yaradı. Telaffuzumu anında düzeltiyor. Müşterilerle telefonda konuşurken eskisi gibi donup kalmıyorum.'],
         ];

@@ -1,7 +1,7 @@
 /**
  * Demo mode: replays responses recorded from a seeded DilGO backend so the whole app can be
  * explored without a server (used for the shareable preview build, VITE_DEMO=1).
- * Mutations update an in-memory copy, and Ada's replies come from a small rule-based script.
+ * Mutations update an in-memory copy, and Defne's replies come from a small rule-based script.
  */
 import fixture from './fixture.json'
 
@@ -88,7 +88,7 @@ function unlockNext(lessonId: number) {
   }
 }
 
-// ---------------------------------------------------------------- Ada (rule-based)
+// ---------------------------------------------------------------- Defne (rule-based)
 const FIXES: [RegExp, string, string][] = [
   [/\bI am agree\b/i, 'I agree', '"Agree" bir fiildir; "am" gerekmez. Türkçedeki "katılıyorum" yapısına kanma.'],
   [/\bI have (\d+) years\b/i, "I'm $1 years old", 'Yaş söylerken "have" değil "be" kullanılır: I\'m 25 years old.'],
@@ -293,7 +293,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   if (path === '/ai/conversations') {
     const sc = db['/admin/scenarios?page=1']?.data.find((s: Json) => s.key === body.scenario_key)
     const id = nextConv++
-    const opening = sc?.opening_line ?? `Hi ${me().name.split(' ')[0]}! I'm Ada, your English teacher. How's your day going?`
+    const opening = sc?.opening_line ?? `Hi ${me().name.split(' ')[0]}! I'm Defne, your English teacher. How's your day going?`
     convs[id] = {
       id, mode: body.mode, scenario_key: sc?.key ?? null, title: sc?.title ?? (body.mode === 'speaking' ? 'Konuşma pratiği' : 'Serbest sohbet'),
       meta: { goals: sc?.goals ?? [], goals_completed: [] },

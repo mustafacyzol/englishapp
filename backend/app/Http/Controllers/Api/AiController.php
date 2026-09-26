@@ -50,7 +50,7 @@ class AiController extends Controller
             'meta' => ['goals' => $scenario?->goals ?? [], 'goals_completed' => []],
         ]);
 
-        $opening = $scenario?->opening_line ?? "Hi {$user->name}! I'm Ada, your English teacher. How's your day going?";
+        $opening = $scenario?->opening_line ?? "Hi {$user->name}! I'm Defne, your English coach. How's your day going?";
         $conversation->messages()->create(['role' => 'assistant', 'content' => $opening, 'feedback' => ['new_words' => [], 'correction' => null]]);
 
         return response()->json(['conversation' => $conversation->load('messages'), 'usage' => $this->tutor->usageToday($user)], 201);
@@ -69,10 +69,12 @@ class AiController extends Controller
         $data = $request->validate(['text' => ['required', 'string', 'min:1', 'max:1000'], 'spoken' => ['boolean']]);
 
         $message = $this->tutor->reply($conversation, strip_tags($data['text']));
-        $summary = $game->record($request->user(), 3, 'ai', $conversation->id, array_filter([
+        $spoken = (bool) ($data['spoken'] ?? false);
+        // A spoken reply trains speaking (and listening to Defne's answer); a typed one trains writing.
+        $summary = $game->record($request->user(), $spoken ? 4 : 3, 'ai', $conversation->id, array_filter([
             'ai_messages' => 1,
-            'speaking' => ($data['spoken'] ?? false) ? 1 : 0,
-        ]));
+            'speaking' => $spoken ? 1 : 0,
+        ]), $spoken ? ['speaking' => 0.75, 'listening' => 0.25] : ['writing' => 0.75, 'reading' => 0.25]);
 
         return response()->json([
             'message' => $message,
@@ -98,7 +100,7 @@ class AiController extends Controller
         ]);
         $user = $request->user();
         $result = $this->tutor->checkWriting($user, strip_tags($data['text']), $data['task'] ?? null);
-        $summary = $game->record($user, 15, 'writing', null, ['ai_messages' => 1]);
+        $summary = $game->record($user, 15, 'writing', null, ['ai_messages' => 1], ['writing' => 1]);
 
         return response()->json(['result' => $result, 'reward' => $summary, 'usage' => $this->tutor->usageToday($user)]);
     }

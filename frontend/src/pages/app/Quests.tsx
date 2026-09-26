@@ -22,7 +22,7 @@ export default function Quests() {
     mutationFn: (id: number) => post<{ gems: number; item: { item: { name: string } } | null }>(`/quests/${id}/claim`),
     onSuccess: (r) => {
       celebrate()
-      sfx.fanfare()
+      sfx.reward()
       toast(`+${r.gems} elmas${r.item ? ` ve ${r.item.item.name} kartı` : ''}!`, 'success')
       qc.invalidateQueries({ queryKey: ['quests'] })
       qc.invalidateQueries({ queryKey: ['dashboard'] })

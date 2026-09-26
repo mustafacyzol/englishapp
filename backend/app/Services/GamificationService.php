@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Achievement;
 use App\Models\DailyActivity;
+use App\Models\Duel;
 use App\Models\LeagueMembership;
 use App\Models\Quest;
 use App\Models\RewardClaim;
@@ -15,6 +16,7 @@ use App\Models\UserQuest;
 use App\Models\XpEvent;
 use App\Notifications\AchievementUnlocked;
 use App\Support\Period;
+use App\Support\Skills;
 use Illuminate\Support\Facades\DB;
 
 class GamificationService
@@ -32,10 +34,11 @@ class GamificationService
      * league, quests and achievements always stay consistent.
      *
      * @param  array<string,int>  $metrics  e.g. ['lessons' => 1, 'perfect_lessons' => 1]
+     * @param  array<string,float>  $skills  how the XP splits across the four skills, e.g. ['reading' => .5, 'listening' => .5]
      */
-    public function record(User $user, int $baseXp, string $source, ?int $sourceId = null, array $metrics = []): array
+    public function record(User $user, int $baseXp, string $source, ?int $sourceId = null, array $metrics = [], array $skills = []): array
     {
-        return DB::transaction(function () use ($user, $baseXp, $source, $sourceId, $metrics) {
+        return DB::transaction(function () use ($user, $baseXp, $source, $sourceId, $metrics, $skills) {
             $user->refresh();
             $levelBefore = $user->level();
             $multiplier = $this->xpMultiplier($user);
@@ -55,6 +58,10 @@ class GamificationService
 
             $activity = DailyActivity::query()->firstOrCreate(['user_id' => $user->id, 'date' => $today]);
             $activity->xp += $xp;
+            $skillXp = Skills::split($xp, $skills);
+            foreach ($skillXp as $skill => $amount) {
+                $activity->{"xp_{$skill}"} += $amount;
+            }
             foreach ($metrics as $metric => $amount) {
                 if (in_array($metric, self::METRICS, true)) {
                     $activity->{$metric} += $amount;
@@ -79,6 +86,7 @@ class GamificationService
 
             return [
                 'xp_gained' => $xp,
+                'skill_xp' => (object) $skillXp,
                 'multiplier' => $multiplier,
                 'xp_total' => $user->xp_total,
                 'level' => $levelAfter,
@@ -327,6 +335,9 @@ class GamificationService
             'referrals' => $user->referrals()->where('status', '!=', 'pending')->count(),
             'league_top3' => $user->hasMany(LeagueMembership::class)->where('final_rank', '<=', 3)->count(),
             'league_tier' => $user->league_tier,
+            'duel_wins' => $user->hasMany(Duel::class)->where('result', 'win')->count(),
+            'duel_trophies' => $user->duel_best,
+            'skills_balanced' => $this->balancedSkillLevel($user),
             default => 0,
         };
     }
@@ -360,5 +371,55 @@ class GamificationService
         }
 
         return $new;
+    }
+
+    /**
+     * Per-skill XP totals, levels and a 7-day trend — the four-skill report card.
+     *
+     * @return array{skills: list<array>, weakest: string, strongest: string, balance: int}
+     */
+    public function skillReport(User $user): array
+    {
+        $cols = array_map(fn ($s) => "xp_{$s}", Skills::ALL);
+        $totals = DB::table('daily_activities')->where('user_id', $user->id)
+            ->selectRaw(implode(', ', array_map(fn ($c) => "COALESCE(SUM({$c}),0) as {$c}", $cols)))->first();
+        $since = Period::now()->subDays(6)->toDateString();
+        $recent = DailyActivity::query()->where('user_id', $user->id)->where('date', '>=', $since)->get()->keyBy(fn ($a) => substr((string) $a->date, 0, 10));
+        $days = collect(range(6, 0))->map(fn ($i) => Period::now()->subDays($i)->toDateString());
+
+        $skills = [];
+        foreach (Skills::ALL as $s) {
+            $xp = (int) ($totals->{"xp_{$s}"} ?? 0);
+            $level = Skills::level($xp);
+            $floor = Skills::levelFloor($level);
+            $ceil = Skills::levelFloor($level + 1);
+            $trend = $days->map(fn ($d) => (int) ($recent[$d]->{"xp_{$s}"} ?? 0))->all();
+            $skills[] = [
+                'key' => $s,
+                'label' => Skills::LABELS[$s],
+                'xp' => $xp,
+                'level' => $level,
+                'progress' => $ceil > $floor ? round(($xp - $floor) / ($ceil - $floor), 3) : 0,
+                'to_next' => $ceil - $xp,
+                'week_xp' => array_sum($trend),
+                'trend' => $trend,
+            ];
+        }
+        $byXp = collect($skills)->sortBy('xp');
+        $weakest = $byXp->first()['key'];
+        // When everything is tied (a new learner) start from the skill they told us to focus on.
+        if ($byXp->first()['xp'] === $byXp->last()['xp'] && $user->focus_skill) {
+            $weakest = $user->focus_skill;
+        }
+        $max = max(1, $byXp->last()['xp']);
+        $balance = (int) round(collect($skills)->avg(fn ($s) => $s['xp'] / $max) * 100);
+
+        return ['skills' => $skills, 'weakest' => $weakest, 'strongest' => $byXp->last()['key'], 'balance' => $byXp->last()['xp'] === 0 ? 0 : $balance];
+    }
+
+    /** The lowest of the four skill levels — a badge family rewards keeping all four up together. */
+    public function balancedSkillLevel(User $user): int
+    {
+        return (int) collect($this->skillReport($user)['skills'])->min('level');
     }
 }

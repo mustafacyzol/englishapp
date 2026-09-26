@@ -19,8 +19,8 @@ DilGO, HikayeGO'nun hikaye DNA'sını korur ve onu **dört becerili, oyunlaştı
 
 ## 7 farkımız (reklam mesajları için)
 
-1. **Dört beceri tek döngüde:** okuduğun hikayedeki kelime → kelime defterine → aralıklı tekrara → Ada'yla sohbette tekrar kullanılır. Beceriler birbirini besler.
-2. **Ada seni tanıyor:** seviyeni, hedefini ve kaydettiğin kelimeleri bilen AI öğretmen.
+1. **Dört beceri tek döngüde:** okuduğun hikayedeki kelime → kelime defterine → aralıklı tekrara → Defne'yla sohbette tekrar kullanılır. Beceriler birbirini besler.
+2. **Defne seni tanıyor:** seviyeni, hedefini ve kaydettiğin kelimeleri bilen AI öğretmen.
 3. **Türkçe konuşanlara özel:** hatalar Türk öğrencilerin tipik yanlışlarına (a/the, "I am agree", zamanlar, edatlar) göre Türkçe açıklanır; ünite rehberleri Türkçe.
 4. **Gerçek ödüller:** Ödül Kasası'ndaki canlı ders kuponları Bayrak Dil Okulları'nda gerçek öğretmenle kullanılır — dijital motivasyon fiziksel okula köprü olur (ve okula öğrenci kazandırır).
 5. **Tam oyunlaştırma:** seri + dondurucu, 10 kademeli lig, 38 rozet, günlük/haftalık görevler, elmas ekonomisi, sandıklar.
@@ -49,4 +49,4 @@ DilGO, HikayeGO'nun hikaye DNA'sını korur ve onu **dört becerili, oyunlaştı
 - Nihai marka adı ve alan adı (şu an çalışma adı: **DilGO**).
 - Canlı ders kuponlarının operasyonu: hangi şubeler / online ders takvimi / kupon başına ders süresi.
 - Fiyatlar (seed verisi: 149 / 349 / 999 TL) ve Premium'a dahil edilecek canlı ders sayısı.
-- Gerçek logo/maskot illüstrasyonları: mevcut SVG kimlik (DilGO logosu, Ada, rozetler, lig amblemleri) koddan üretilmiştir; bir illüstratörle ya da Magnific üzerinden stok/üretim görsellerle zenginleştirilebilir.
+- Gerçek logo/maskot illüstrasyonları: mevcut SVG kimlik (DilGO logosu, Defne, rozetler, lig amblemleri) koddan üretilmiştir; bir illüstratörle ya da Magnific üzerinden stok/üretim görsellerle zenginleştirilebilir.

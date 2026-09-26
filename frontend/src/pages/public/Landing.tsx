@@ -11,7 +11,7 @@ import { PHOTO, rewardImg, leagueImg, storyImg } from '@/lib/assets'
 import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
 import { Reveal } from '@/components/motion/Page'
-import { Ada } from '@/components/game/Ada'
+import { Defne } from '@/components/game/Defne'
 
 export interface Review {
   id: number
@@ -35,7 +35,7 @@ export default function Landing() {
       <Hero />
       <Ticker reviews={reviews} />
       <SkillSwitcher />
-      <MeetAda />
+      <MeetDefne />
       <RewardTrack />
       <Reviews reviews={reviews} />
       <School />
@@ -91,8 +91,6 @@ function Hero() {
     <section ref={ref} className="relative overflow-hidden">
       {/* Refined backdrop: a faint dotted grid, one warm wash — editorial, not a toy. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.5] [background-image:radial-gradient(var(--line)_1.4px,transparent_1.4px)] [background-size:26px_26px] [mask-image:radial-gradient(120%_80%_at_70%_0%,#000_35%,transparent_75%)]" />
-      <span className="glow left-[-12%] top-[-14%] size-[440px] bg-flame/18" />
-      <span className="glow right-[-6%] top-[24%] size-[360px] bg-sky/14" />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-12 lg:grid-cols-[1.05fr_1fr] lg:pb-28 lg:pt-20">
         <div>
@@ -127,7 +125,7 @@ function Hero() {
             transition={{ delay: 0.2 }}
             className="mt-6 max-w-md text-lg leading-relaxed text-ink-soft"
           >
-            Oku, dinle, konuş, yaz — dört beceri tek uygulamada. Seviyene göre hikâyeler, 5 dakikalık dersler ve seni tanıyan yapay zekâ öğretmenin&nbsp;Ada.
+            Oku, dinle, konuş, yaz — dört beceri tek uygulamada. Seviyene göre hikâyeler, 5 dakikalık dersler ve seni tanıyan yapay zekâ öğretmenin&nbsp;Defne.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -174,8 +172,8 @@ function Hero() {
             className="absolute -right-1 top-8 max-w-[264px] rounded-2xl bg-card p-3.5 shadow-soft ring-1 ring-line sm:-right-7"
           >
             <div className="mb-2 flex items-center gap-2">
-              <Ada className="size-8" />
-              <p className="text-sm font-black">Ada</p>
+              <Defne className="size-8" />
+              <p className="text-sm font-black">Defne</p>
               <span className="ml-auto text-[10px] font-extrabold uppercase tracking-wider text-mint-deep">düzeltti</span>
             </div>
             <p className="text-sm"><s className="text-berry">I am agree</s> → <b className="text-mint-deep">I agree</b></p>
@@ -215,7 +213,7 @@ function Ticker({ reviews }: { reviews: Review[] }) {
 const SKILLS = [
   { key: 'read', title: 'Oku', photo: PHOTO.read, accent: 'butter', icon: BookOpen, line: 'Seviyene uygun kısa hikâyeler.', text: 'Bilmediğin kelimeye dokun; anlamını gör, sesini dinle, kelime defterine ekle. Her hikâyenin sonunda kısa bir anlama testi var.' },
   { key: 'listen', title: 'Dinle', photo: PHOTO.listen, accent: 'sky', icon: Headphones, line: 'Her cümle doğal sesle okunur.', text: 'Hızı yavaşlat, kelime kelime takip et, dinleyerek yaz. Kulağın İngilizceye gerçek cümlelerle alışır.' },
-  { key: 'speak', title: 'Konuş', photo: PHOTO.speak, accent: 'flame', icon: Mic, line: 'Mikrofona konuş, anında düzelt.', text: 'Kafede sipariş ver, havalimanında check-in yap, mülakata gir. Ada rolü üstlenir, telaffuzunu ve cümleni anında kontrol eder.' },
+  { key: 'speak', title: 'Konuş', photo: PHOTO.speak, accent: 'flame', icon: Mic, line: 'Mikrofona konuş, anında düzelt.', text: 'Kafede sipariş ver, havalimanında check-in yap, mülakata gir. Defne rolü üstlenir, telaffuzunu ve cümleni anında kontrol eder.' },
   { key: 'write', title: 'Yaz', photo: PHOTO.write, accent: 'mint', icon: PenLine, line: 'Yazdığın metin puanlanır.', text: 'Yazma atölyesi seviyeni tahmin eder, hatalarını Türkçe açıklar ve düzeltilmiş metni yan yana gösterir.' },
 ] as const
 
@@ -388,7 +386,7 @@ function SkillSwitcher() {
   )
 }
 
-/* ------------------------------------------------------------------- Ada */
+/* ------------------------------------------------------------------- Defne */
 
 const CHAT: { role: 'ada' | 'me'; text: string; note?: string; fix?: [string, string] }[] = [
   { role: 'ada', text: "Hi! Welcome to Bean & Leaf. What can I get for you?" },
@@ -396,7 +394,7 @@ const CHAT: { role: 'ada' | 'me'; text: string; note?: string; fix?: [string, st
   { role: 'ada', text: "Sure — a latte and a slice of cake. For here or to take away?", fix: ['I want a latte and one cake', "I'd like a latte and a slice of cake"], note: 'Siparişte "I\'d like" daha kibar; kek dilimle istenir.' },
 ]
 
-function MeetAda() {
+function MeetDefne() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { amount: 0.4, once: true })
   const [step, setStep] = useState(0)
@@ -408,12 +406,11 @@ function MeetAda() {
   }, [inView, step])
 
   return (
-    <section id="ada" className="relative overflow-hidden bg-sky/6 py-24">
-      <span className="glow left-1/3 top-0 size-[420px] bg-sky/20" />
+    <section id="defne" className="relative overflow-hidden bg-sky/6 py-24">
       <div ref={ref} className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 lg:grid-cols-2">
         <Reveal>
           <p className="mb-2 font-extrabold uppercase tracking-widest text-sky">Yapay zekâ öğretmenin</p>
-          <h2 className="text-4xl leading-tight sm:text-5xl">Ada seni tanıyor.</h2>
+          <h2 className="text-4xl leading-tight sm:text-5xl">Defne seni tanıyor.</h2>
           <ul className="mt-8 space-y-4 text-lg">
             {[
               'Seviyeni, hedefini ve kaydettiğin kelimeleri bilir.',
@@ -427,15 +424,15 @@ function MeetAda() {
               </li>
             ))}
           </ul>
-          <LinkButton to="/register" className="mt-9" size="lg">Ada ile konuşmaya başla</LinkButton>
+          <LinkButton to="/register" className="mt-9" size="lg">Defne ile konuşmaya başla</LinkButton>
         </Reveal>
 
         <Reveal delay={0.1}>
           <div className="relative overflow-hidden rounded-[32px] bg-card p-5 shadow-soft ring-1 ring-line">
             <div className="mb-4 flex items-center gap-3 border-b-2 border-line pb-4">
-              <Ada className="size-11" online />
+              <Defne className="size-11" online />
               <div>
-                <p className="font-display text-lg font-black leading-tight">Ada</p>
+                <p className="font-display text-lg font-black leading-tight">Defne</p>
                 <p className="text-xs font-bold text-mint-deep">Kafede sipariş · rol yapma</p>
               </div>
             </div>
@@ -497,7 +494,7 @@ function RewardTrack() {
 
       <div ref={ref} className="relative">
         <div className="absolute left-0 right-0 top-[58px] hidden h-1 rounded-full bg-line md:block">
-          <motion.div className="h-full rounded-full bg-gradient-to-r from-butter via-flame to-berry" initial={{ scaleX: 0 }} animate={inView ? { scaleX: 1 } : {}} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} style={{ transformOrigin: 'left' }} />
+          <motion.div className="h-full rounded-full bg-flame" initial={{ scaleX: 0 }} animate={inView ? { scaleX: 1 } : {}} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} style={{ transformOrigin: 'left' }} />
         </div>
         <ol className="grid grid-cols-2 gap-x-4 gap-y-9 md:grid-cols-6">
           {TRACK.map((t, i) => (
@@ -564,7 +561,6 @@ function Reviews({ reviews }: { reviews: Review[] }) {
 
   return (
     <section id="yorumlar" className="relative overflow-hidden bg-paper py-24">
-      <span className="glow right-[-6%] top-10 size-[360px] bg-berry/18" />
       <div className="relative mx-auto max-w-5xl px-5">
         <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-5">
           <div className="max-w-lg">
@@ -753,7 +749,6 @@ function FinalCta() {
   return (
     <section className="px-5 pb-24">
       <Reveal className="relative mx-auto flex max-w-6xl flex-col items-center gap-8 overflow-hidden rounded-[36px] bg-flame px-6 py-16 text-center text-white md:flex-row md:text-left">
-        <span className="glow left-1/4 top-0 size-[320px] bg-white/25" />
         <div className="relative flex -space-x-6">
           {['the-cat-who-loved-tea', 'mias-first-day-in-london', 'the-red-umbrella'].map((s, i) => (
             <motion.div key={s} initial={{ opacity: 0, y: 20, rotate: -6 }} whileInView={{ opacity: 1, y: i % 2 ? 12 : 0, rotate: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, type: 'spring', stiffness: 160, damping: 16 }}>

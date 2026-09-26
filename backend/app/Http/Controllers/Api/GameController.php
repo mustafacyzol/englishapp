@@ -10,6 +10,7 @@ use App\Models\Quest;
 use App\Models\RedeemCode;
 use App\Models\RedeemCodeUse;
 use App\Models\RewardItem;
+use App\Models\Story;
 use App\Models\User;
 use App\Models\UserItem;
 use App\Models\UserQuest;
@@ -39,6 +40,7 @@ class GameController extends Controller
         $today = DailyActivity::query()->where('user_id', $user->id)->where('date', Period::today())->first();
         $standings = $leagues->standings($user);
         $me = collect($standings['rows'])->firstWhere('is_me', true);
+        $skills = $this->game->skillReport($user);
 
         return response()->json([
             'user' => UserPresenter::me($user),
@@ -50,6 +52,8 @@ class GameController extends Controller
                 'minutes' => $today->minutes ?? 0,
             ],
             'week' => $this->week($user),
+            'skills' => $skills,
+            'plan' => $this->dailyPlan($user, $today, $skills),
             'quests' => $this->questList($user, 'daily'),
             'league' => [
                 'tier' => $standings['tier'],
@@ -65,6 +69,45 @@ class GameController extends Controller
             'available_items' => $user->items()->where('status', 'available')->count(),
             'announcement' => Settings::get('announcement'),
         ]);
+    }
+
+    /** Four-skill report card: totals, levels, 7-day trends and the skill to work on next. */
+    public function skills(Request $request): JsonResponse
+    {
+        return response()->json($this->game->skillReport($request->user()));
+    }
+
+    /**
+     * Today's plan: one small task per skill, the weakest (or the learner's chosen
+     * focus) first — so no skill is ever left behind and there's always a next step.
+     */
+    private function dailyPlan(User $user, ?DailyActivity $today, array $skills): array
+    {
+        $interests = $user->interests ?? [];
+        $story = Story::query()->where('is_published', true)
+            ->where('cefr_level', '<=', $user->cefr_level)
+            ->whereNotIn('id', $user->storyReads()->whereNotNull('completed_at')->pluck('story_id'))
+            ->when($interests, fn ($q) => $q->orderByRaw('CASE WHEN category IN ('.implode(',', array_fill(0, count($interests), '?')).') THEN 0 ELSE 1 END', $interests))
+            ->orderBy('cefr_level', 'desc')->first(['slug', 'title', 'reading_minutes']);
+
+        $tasks = [
+            'reading' => ['title' => $story ? "Oku: {$story->title}" : 'Bir hikâye oku', 'detail' => $story ? "{$story->reading_minutes} dk · seviyene göre" : 'Kütüphaneden seç', 'to' => $story ? "/stories/{$story->slug}" : '/stories', 'minutes' => $story->reading_minutes ?? 4],
+            'listening' => ['title' => 'Dinle ve yakala', 'detail' => 'Bir hikâyeyi sesli dinle ya da dinleme turu yap', 'to' => $story ? "/stories/{$story->slug}?listen=1" : '/practice', 'minutes' => 3],
+            'speaking' => ['title' => 'Defne ile 3 dakika konuş', 'detail' => 'Sesli arama · telaffuzun anında düzelir', 'to' => '/ai?call=1', 'minutes' => 3],
+            'writing' => ['title' => 'Yazma atölyesi', 'detail' => 'Kısa bir metin yaz, Defne işaretlesin', 'to' => '/ai/writing', 'minutes' => 5],
+        ];
+        $order = collect($skills['skills'])->sortBy('xp')->pluck('key')->all();
+        if ($user->focus_skill && ($i = array_search($user->focus_skill, $order, true)) !== false) {
+            array_splice($order, $i, 1);
+            array_unshift($order, $user->focus_skill);
+        }
+
+        return array_map(fn ($s) => $tasks[$s] + [
+            'skill' => $s,
+            'done' => (int) ($today?->{"xp_{$s}"} ?? 0) > 0,
+            'focus' => $s === $user->focus_skill,
+            'weakest' => $s === $skills['weakest'],
+        ], $order);
     }
 
     private function week(User $user): array

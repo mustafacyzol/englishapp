@@ -82,7 +82,7 @@ class WordController extends Controller
                 $count++;
             }
         }
-        $summary = $game->record($user, min(30, $count * 2), 'review', null, ['reviews' => $count]);
+        $summary = $game->record($user, min(30, $count * 2), 'review', null, ['reviews' => $count], ['reading' => 0.7, 'listening' => 0.3]);
 
         return response()->json(['reviewed' => $count, 'reward' => $summary]);
     }

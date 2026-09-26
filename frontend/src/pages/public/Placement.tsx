@@ -19,7 +19,7 @@ const LEVEL_TEXT: Record<string, string> = {
   B1: 'Bağımsız bir kullanıcısın! Akıcılık ve deneyim anlatımı üzerine çalışacağız.',
   B2: 'Çok iyisin. İnce nüanslar, fikir savunma ve iş İngilizcesi seni bekliyor.',
   C1: 'Neredeyse akıcısın. Üst düzey hikayeler ve münazara senaryoları seni zorlayacak.',
-  C2: 'Etkileyici! Ustalık seviyesindesin — Ada ile zor konularda tartışmaya hazır ol.',
+  C2: 'Etkileyici! Ustalık seviyesindesin — Defne ile zor konularda tartışmaya hazır ol.',
 }
 
 export default function Placement() {

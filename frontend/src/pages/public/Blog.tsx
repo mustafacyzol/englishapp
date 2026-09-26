@@ -70,7 +70,7 @@ export function BlogPost() {
       <div className="prose-dilgo text-lg leading-relaxed"><Markdown source={p.body ?? ''} /></div>
       <div className="mt-12 rounded-3xl bg-flame/8 p-8 text-center">
         <h2 className="text-2xl">Okuduklarını pratiğe dök</h2>
-        <p className="mt-2 text-ink-soft">DilGO'da hikayelerle oku, Ada ile konuş. Ücretsiz.</p>
+        <p className="mt-2 text-ink-soft">DilGO'da hikayelerle oku, Defne ile konuş. Ücretsiz.</p>
         <LinkButton to="/register" className="mt-5">Ücretsiz başla</LinkButton>
       </div>
       {!!data.related.length && (

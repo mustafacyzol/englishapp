@@ -1,29 +1,45 @@
 import { useEffect, useState } from 'react'
-import { Link, NavLink, useLocation, useOutlet } from 'react-router-dom'
+import { Link, useLocation, useOutlet } from 'react-router-dom'
 import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowUp, Clock, Mail, Menu, ShieldCheck, Smartphone, X, type LucideIcon } from 'lucide-react'
+import { ArrowUp, ArrowUpRight, Clock, Mail, Menu, ShieldCheck, Smartphone, X, type LucideIcon } from 'lucide-react'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '@/lib/auth'
 import { get } from '@/lib/api'
 import { Logo } from '@/components/game/Logo'
-import { ThemeButton } from '@/components/ui/ThemeToggle'
+import { ThemeButton, ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LinkButton } from '@/components/ui/Button'
 import { PageTransition } from '@/components/motion/Page'
 
+/** Primary sections — the full row shows from lg; below that everything lives in the sheet. */
 const LINKS = [
-  { to: '/', label: 'Ana sayfa', end: true },
-  { to: '/about', label: 'Hakkımızda' },
+  { to: '/#beceriler', label: 'Yöntem' },
+  { to: '/#defne', label: 'Defne' },
+  { to: '/#duello', label: 'Düello' },
+  { to: '/#kurumlar', label: 'Kurumlar' },
+  { to: '/#paketler', label: 'Fiyatlar' },
   { to: '/blog', label: 'Blog' },
+]
+const MORE = [
+  { to: '/about', label: 'Hakkımızda' },
+  { to: '/placement', label: 'Seviye testi' },
   { to: '/contact', label: 'İletişim' },
 ]
 
+/** A link is active when its path matches and, for section links, the hash matches too. */
+function useIsActive() {
+  const loc = useLocation()
+  return (to: string) => {
+    const [path, hash] = to.split('#')
+    if (hash) return loc.pathname === (path || '/') && loc.hash === `#${hash}`
+    return loc.pathname === path || loc.pathname.startsWith(`${path}/`)
+  }
+}
+
 export default function PublicLayout() {
-  const { user } = useAuth()
   const loc = useLocation()
   const outlet = useOutlet()
   const [open, setOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
     setOpen(false)
@@ -36,70 +52,11 @@ export default function PublicLayout() {
     const t = setTimeout(() => document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 120)
     return () => clearTimeout(t)
   }, [loc.pathname, loc.hash])
-  useEffect(() => {
-    const on = () => setScrolled(window.scrollY > 8)
-    on()
-    window.addEventListener('scroll', on, { passive: true })
-    return () => window.removeEventListener('scroll', on)
-  }, [])
 
   return (
     <div className="min-h-dvh bg-card">
-      <header className={clsx('safe-top sticky top-0 z-40 transition', scrolled ? 'border-b-2 border-line bg-card/95 backdrop-blur-md' : 'bg-card')}>
-        <div className="mx-auto flex h-18 max-w-6xl items-center justify-between px-5 py-3">
-          <Link to="/" aria-label="DilGO ana sayfa"><Logo /></Link>
-          {/* Pill nav: a single sliding highlight tracks the active link instead of a bare colour swap. */}
-          <nav className="hidden items-center rounded-full border-2 border-line bg-paper-2/60 p-1 md:flex">
-            {LINKS.map((l) => (
-              <NavLink key={l.to} to={l.to} end={l.end} className="group relative rounded-full px-4 py-1.5 text-[15px] font-extrabold transition">
-                {({ isActive }) => (
-                  <>
-                    {isActive && <motion.span layoutId="nav-pill" transition={{ type: 'spring', stiffness: 380, damping: 32 }} className="absolute inset-0 rounded-full bg-card shadow-hard-sm" />}
-                    <span className={clsx('relative', isActive ? 'text-flame' : 'text-ink-soft group-hover:text-ink')}>{l.label}</span>
-                  </>
-                )}
-              </NavLink>
-            ))}
-          </nav>
-          <div className="hidden items-center gap-2 md:flex">
-            <ThemeButton />
-            {user ? (
-              <LinkButton to="/learn" size="sm">Uygulamaya git</LinkButton>
-            ) : (
-              <>
-                <LinkButton to="/login" variant="secondary" size="sm">Giriş yap</LinkButton>
-                <LinkButton to="/register" size="sm">Ücretsiz başla</LinkButton>
-              </>
-            )}
-          </div>
-          <div className="flex items-center gap-1 md:hidden">
-            <ThemeButton />
-            <button className="grid size-11 place-items-center rounded-xl" onClick={() => setOpen((o) => !o)} aria-label="Menü" aria-expanded={open}>
-              {open ? <X className="size-6" /> : <Menu className="size-6" />}
-            </button>
-          </div>
-        </div>
-        <AnimatePresence>
-          {open && (
-            <motion.nav initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden border-t-2 border-line bg-card md:hidden">
-              <div className="flex flex-col gap-1 px-5 py-4">
-                {LINKS.map((l) => (
-                  <NavLink key={l.to} to={l.to} end={l.end} className={({ isActive }) => clsx('rounded-xl px-3 py-3 text-lg font-extrabold', isActive ? 'bg-flame/10 text-flame' : 'text-ink')}>{l.label}</NavLink>
-                ))}
-                {user ? (
-                  <LinkButton to="/learn" className="mt-3">Uygulamaya git</LinkButton>
-                ) : (
-                  <div className="mt-3 grid grid-cols-2 gap-3">
-                    <LinkButton to="/login" variant="secondary">Giriş</LinkButton>
-                    <LinkButton to="/register">Başla</LinkButton>
-                  </div>
-                )}
-              </div>
-            </motion.nav>
-          )}
-        </AnimatePresence>
-      </header>
-
+      <SiteHeader onMenu={() => setOpen(true)} />
+      <MenuSheet open={open} onClose={() => setOpen(false)} />
       <ScrollProgress />
 
       <AnimatePresence mode="wait" initial={false}>
@@ -111,11 +68,154 @@ export default function PublicLayout() {
   )
 }
 
-/** A hairline reading-progress bar pinned under the header. */
+/**
+ * The header sits flush at the top, then lifts into a floating, rounded bar once
+ * the page scrolls — so it never covers content with a heavy slab.
+ */
+function SiteHeader({ onMenu }: { onMenu: () => void }) {
+  const { user } = useAuth()
+  const isActive = useIsActive()
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 12)
+    on()
+    window.addEventListener('scroll', on, { passive: true })
+    return () => window.removeEventListener('scroll', on)
+  }, [])
+
+  return (
+    <header className="safe-top sticky top-0 z-40 px-3 pt-2 sm:px-4 lg:pt-3">
+      <div
+        className={clsx(
+          'mx-auto flex h-16 max-w-6xl items-center gap-3 rounded-2xl pl-3 pr-2 transition-[background-color,box-shadow,border-color] duration-300 sm:pl-4',
+          scrolled ? 'border-2 border-line bg-card/92 shadow-soft backdrop-blur-md' : 'border-2 border-transparent',
+        )}
+      >
+        <Link to="/" aria-label="DilGO ana sayfa" className="shrink-0"><Logo /></Link>
+
+        <nav aria-label="Ana menü" className="mx-auto hidden items-center gap-1 lg:flex">
+          {LINKS.map((l) => {
+            const active = isActive(l.to)
+            return (
+              <Link key={l.to} to={l.to} className={clsx('relative rounded-xl px-3.5 py-2 text-[15px] font-extrabold transition-colors', active ? 'text-ink' : 'text-ink-soft hover:bg-paper-2 hover:text-ink')}>
+                {l.label}
+                {active && <motion.span layoutId="nav-dot" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="absolute inset-x-3.5 -bottom-0.5 h-[3px] rounded-full bg-flame" />}
+              </Link>
+            )
+          })}
+        </nav>
+
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 lg:ml-0">
+          <ThemeButton className="hidden sm:grid" />
+          {user ? (
+            <span className="hidden sm:block"><LinkButton to="/learn" size="sm">Uygulamaya git</LinkButton></span>
+          ) : (
+            <>
+              <Link to="/login" className="hidden rounded-xl px-3 py-2 text-[15px] font-extrabold text-ink-soft transition hover:bg-paper-2 hover:text-ink lg:block">Giriş yap</Link>
+              <span className="hidden min-[400px]:block"><LinkButton to="/register" size="sm">Ücretsiz başla</LinkButton></span>
+            </>
+          )}
+          <button
+            onClick={onMenu}
+            aria-label="Menüyü aç"
+            className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm lg:hidden"
+          >
+            <Menu className="size-5" />
+          </button>
+        </div>
+      </div>
+    </header>
+  )
+}
+
+/**
+ * Full-screen menu for phones and tablets: large, numbered links with room to
+ * breathe, account actions pinned to the bottom, and the page locked behind it.
+ */
+function MenuSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { user } = useAuth()
+  const isActive = useIsActive()
+
+  useEffect(() => {
+    if (!open) return
+    const html = document.documentElement
+    const prev = html.style.overflow
+    html.style.overflow = 'hidden'
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose()
+    window.addEventListener('keydown', onKey)
+    return () => {
+      html.style.overflow = prev
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open, onClose])
+
+  return (
+    <AnimatePresence>
+      {open && (
+        <motion.div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Menü"
+          className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-card lg:hidden"
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -12 }}
+          transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <div className="safe-top px-3 pt-2 sm:px-4">
+            <div className="mx-auto flex h-16 max-w-6xl items-center justify-between pl-3 pr-2 sm:pl-4">
+              <Link to="/" onClick={onClose} aria-label="DilGO ana sayfa"><Logo /></Link>
+              <button onClick={onClose} aria-label="Menüyü kapat" className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm">
+                <X className="size-5" />
+              </button>
+            </div>
+          </div>
+
+          <nav aria-label="Ana menü" className="mx-auto w-full max-w-2xl flex-1 px-6 pt-6 sm:px-10">
+            <ul>
+              {LINKS.map((l, i) => (
+                <motion.li key={l.to} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.04 + i * 0.035, duration: 0.3 }}>
+                  <Link to={l.to} onClick={onClose} className="group flex items-center gap-4 border-b-2 border-line py-4">
+                    <span className="w-7 font-mono text-xs text-ink-soft">{String(i + 1).padStart(2, '0')}</span>
+                    <span className={clsx('flex-1 font-display text-[28px] font-black leading-none tracking-tight sm:text-4xl', isActive(l.to) ? 'text-flame' : 'text-ink')}>{l.label}</span>
+                    <ArrowUpRight className="size-6 text-ink-soft transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-flame" />
+                  </Link>
+                </motion.li>
+              ))}
+            </ul>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-6 flex flex-wrap gap-2">
+              {MORE.map((l) => (
+                <Link key={l.to} to={l.to} onClick={onClose} className="rounded-full border-2 border-line px-4 py-2 text-sm font-extrabold text-ink-soft hover:border-ink/30 hover:text-ink">{l.label}</Link>
+              ))}
+            </motion.div>
+          </nav>
+
+          <div className="safe-bottom mx-auto w-full max-w-2xl px-6 pb-6 pt-8 sm:px-10">
+            <div className="mb-4 flex items-center justify-between">
+              <span className="text-sm font-extrabold text-ink-soft">Görünüm</span>
+              <ThemeToggle />
+            </div>
+            {user ? (
+              <LinkButton to="/learn" block size="lg" onClick={onClose}>Uygulamaya git</LinkButton>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                <LinkButton to="/register" block size="lg" onClick={onClose}>Ücretsiz başla</LinkButton>
+                <LinkButton to="/login" block size="lg" variant="secondary" onClick={onClose}>Giriş yap</LinkButton>
+              </div>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  )
+}
+
+/** A hairline reading-progress bar — one solid brand colour, no gradient. */
 function ScrollProgress() {
   const { scrollYProgress } = useScroll()
-  const width = useSpring(scrollYProgress, { stiffness: 120, damping: 24, restDelta: 0.001 })
-  return <motion.div aria-hidden className="fixed inset-x-0 top-0 z-50 h-[3px] origin-left bg-gradient-to-r from-flame via-berry to-sky" style={{ scaleX: width }} />
+  const width = useSpring(scrollYProgress, { stiffness: 140, damping: 26, restDelta: 0.001 })
+  return <motion.div aria-hidden className="fixed inset-x-0 top-0 z-50 h-[3px] origin-left bg-flame" style={{ scaleX: width }} />
 }
 
 /**
@@ -131,7 +231,7 @@ const COLS: { title: string; links: [string, string][] }[] = [
       ['/register', 'Ücretsiz başla'],
       ['/placement', 'Seviye testi'],
       ['/#beceriler', 'Dört beceri'],
-      ['/#ada', 'AI öğretmen Ada'],
+      ['/#defne', 'AI öğretmen Defne'],
       ['/#oduller', 'Ödül sistemi'],
       ['/#paketler', 'Paketler ve fiyatlar'],
       ['/login', 'Giriş yap'],
@@ -175,8 +275,6 @@ function Footer() {
 
   return (
     <footer className="relative overflow-hidden border-t-2 border-line bg-paper">
-      <span className="glow left-[-6%] top-[-30%] size-[360px] bg-flame/10" />
-
       <div className="relative mx-auto max-w-6xl px-5 py-16">
         <div className="grid gap-12 lg:grid-cols-[1.5fr_2.5fr]">
           <div>

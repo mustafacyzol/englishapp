@@ -6,7 +6,9 @@ use App\Http\Controllers\Api\Admin\ResourceController;
 use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BillingController;
+use App\Http\Controllers\Api\DuelController;
 use App\Http\Controllers\Api\GameController;
+use App\Http\Controllers\Api\InstitutionController;
 use App\Http\Controllers\Api\LearnController;
 use App\Http\Controllers\Api\PlacementController;
 use App\Http\Controllers\Api\PublicController;
@@ -28,6 +30,7 @@ Route::prefix('v1')->group(function () {
     Route::get('blog', [SiteController::class, 'blog']);
     Route::get('blog/{slug}', [SiteController::class, 'post']);
     Route::post('contact', [SiteController::class, 'contact'])->middleware('throttle:5,10');
+    Route::get('invites/{token}', [InstitutionController::class, 'invitation'])->middleware('throttle:30,1');
 
     // Payment provider callbacks (no auth — verified server-to-server)
     Route::post('payments/iyzico/callback', [BillingController::class, 'iyzicoCallback'])->middleware('throttle:60,1');
@@ -60,6 +63,13 @@ Route::prefix('v1')->group(function () {
         Route::post('account/delete/request', [AccountController::class, 'requestDeletion'])->middleware('throttle:otp');
         Route::post('account/delete', [AccountController::class, 'destroy'])->middleware('throttle:auth');
         Route::get('notifications', [AccountController::class, 'notifications']);
+
+        // Institutions (B2B seats)
+        Route::post('invites/{token}/accept', [InstitutionController::class, 'accept'])->middleware('throttle:10,1');
+        Route::post('institution/join', [InstitutionController::class, 'join'])->middleware('throttle:10,1');
+        Route::get('institution', [InstitutionController::class, 'show']);
+        Route::post('institution/invite', [InstitutionController::class, 'invite'])->middleware('throttle:20,1');
+        Route::delete('institution/members/{member}', [InstitutionController::class, 'removeMember']);
         Route::post('notifications/read', [AccountController::class, 'readNotifications']);
 
         // Everything below requires a verified e-mail
@@ -100,6 +110,7 @@ Route::prefix('v1')->group(function () {
             // Gamification
             Route::get('me/calendar', [GameController::class, 'calendar']);
             Route::get('me/stats', [GameController::class, 'stats']);
+            Route::get('me/skills', [GameController::class, 'skills']);
             Route::get('quests', [GameController::class, 'quests']);
             Route::post('quests/{userQuest}/claim', [GameController::class, 'claimQuest']);
             Route::get('achievements', [GameController::class, 'achievements']);
@@ -114,6 +125,11 @@ Route::prefix('v1')->group(function () {
             Route::post('redeem', [GameController::class, 'redeem'])->middleware('throttle:redeem');
             Route::get('referrals', [GameController::class, 'referrals']);
             Route::get('rewards/roadmap', [GameController::class, 'roadmap']);
+
+            // Gölge Düellosu
+            Route::get('duel', [DuelController::class, 'index']);
+            Route::post('duel', [DuelController::class, 'start'])->middleware('throttle:20,1');
+            Route::post('duel/{duel}/finish', [DuelController::class, 'finish'])->middleware('throttle:30,1');
 
             // Billing
             Route::post('checkout/quote', [BillingController::class, 'quote'])->middleware('throttle:redeem');
@@ -137,6 +153,9 @@ Route::prefix('v1')->group(function () {
                 Route::post('orders/{order}/refund', [AdminController::class, 'refundOrder']);
                 Route::get('audit', [AdminController::class, 'audit']);
                 Route::post('redeem-codes/generate', [ResourceController::class, 'generateCodes']);
+                Route::get('institutions/{institution}/report', [AdminController::class, 'institutionReport']);
+                Route::post('institutions/{institution}/invite', [AdminController::class, 'institutionInvite']);
+                Route::delete('institution-members/{member}', [AdminController::class, 'institutionRemove']);
             });
 
             Route::get('{resource}', [ResourceController::class, 'index']);

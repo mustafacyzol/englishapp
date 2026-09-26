@@ -28,7 +28,7 @@ function Showcase() {
   const bubbles = [
     { t: '🔥 97 gün seri', c: 'text-flame', pos: 'left-8 top-28', d: 0 },
     { t: '⭐ Elmas Lig', c: 'text-butter-deep', pos: 'right-10 top-40', d: 0.6 },
-    { t: '💬 Ada ile mülakat', c: 'text-sky', pos: 'left-12 top-[46%]', d: 1.2 },
+    { t: '💬 Defne ile mülakat', c: 'text-sky', pos: 'left-12 top-[46%]', d: 1.2 },
     { t: '✅ B2 seviye', c: 'text-mint-deep', pos: 'right-8 top-[54%]', d: 1.8 },
   ]
 

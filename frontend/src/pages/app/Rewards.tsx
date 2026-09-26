@@ -53,7 +53,7 @@ function Vault() {
       const prizeIcon = r.extra?.prize?.item?.item.icon
       setFlipped((f) => ({ ...f, [e.id]: { message: r.message, code: r.extra?.code, img: rewardImg(prizeIcon ?? (e.item.type === 'chest' ? 'gem' : e.item.icon)) } }))
       celebrate()
-      sfx.fanfare()
+      sfx.reward()
       setUser(r.user)
       setTimeout(() => qc.invalidateQueries({ queryKey: ['inventory'] }), 5000)
     },

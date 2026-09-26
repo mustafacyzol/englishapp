@@ -120,7 +120,7 @@ function UnitSection({ unit, index, photoIndex, onGuide }: { unit: PathUnit; ind
   )
 }
 
-const KIND_LABEL: Record<string, string> = { story: 'Hikâye', ai_talk: 'Ada ile konuşma', checkpoint: 'Kontrol noktası' }
+const KIND_LABEL: Record<string, string> = { story: 'Hikâye', ai_talk: 'Defne ile konuşma', checkpoint: 'Kontrol noktası' }
 // Curve amplitude: gentle S so the path reads as a route, never a rigid column.
 const wave = (i: number) => Math.sin(i * 0.9) * 74
 

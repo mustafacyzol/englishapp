@@ -16,7 +16,7 @@ const TEXT: Record<LegalKind, Doc> = {
       ['Ödüller ve kuponlar', 'Oyun içi elmas, kart ve kuponların nakit karşılığı yoktur, devredilemez ve satılamaz. Canlı ders kuponları üzerinde belirtilen süre içinde kullanılmalıdır.'],
       ['Adil kullanım', 'Hileli XP kazanımı, otomasyon, çoklu hesap ve diğer kullanıcılara zarar veren davranışlar hesabın askıya alınmasına neden olabilir.'],
       ['İçerik hakları', 'Uygulamadaki hikâyeler, dersler, görseller ve sesler Bayrak Dil Okulları’na aittir; izinsiz çoğaltılamaz ve ticari olarak kullanılamaz.'],
-      ['Yapay zekâ', 'AI öğretmen Ada eğitim amaçlıdır; yanıtları hata içerebilir ve profesyonel tavsiye yerine geçmez.'],
+      ['Yapay zekâ', 'AI öğretmen Defne eğitim amaçlıdır; yanıtları hata içerebilir ve profesyonel tavsiye yerine geçmez.'],
       ['Değişiklikler', 'Koşullarda değişiklik olursa uygulama içinde duyurulur. Değişiklikten sonra kullanmaya devam etmen kabul anlamına gelir.'],
     ],
   },

@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Presenters\UserPresenter;
 use App\Models\AuditLog;
 use App\Models\DailyActivity;
+use App\Models\Institution;
+use App\Models\InstitutionMember;
 use App\Models\Order;
 use App\Models\RewardItem;
 use App\Models\Story;
 use App\Models\User;
 use App\Models\UserItem;
+use App\Services\InstitutionService;
 use App\Services\RewardService;
 use App\Support\Audit;
 use App\Support\Settings;
@@ -227,5 +230,30 @@ class AdminController extends Controller
         }
 
         return response()->json(['voucher' => $item->fresh(['user:id,name,email', 'item:id,name,type'])]);
+    }
+
+    public function institutionReport(Institution $institution, InstitutionService $service): JsonResponse
+    {
+        return response()->json($service->report($institution));
+    }
+
+    public function institutionInvite(Request $request, Institution $institution, InstitutionService $service): JsonResponse
+    {
+        $data = $request->validate([
+            'role' => ['required', 'in:student,manager'],
+            'rows' => ['required', 'array', 'min:1', 'max:1000'],
+            'rows.*.email' => ['required', 'string', 'max:190'],
+            'rows.*.name' => ['nullable', 'string', 'max:80'],
+            'rows.*.class_name' => ['nullable', 'string', 'max:60'],
+        ]);
+
+        return response()->json($service->invite($institution, $data['rows'], $data['role'], $request->user()));
+    }
+
+    public function institutionRemove(InstitutionMember $member, InstitutionService $service): JsonResponse
+    {
+        $service->remove($member);
+
+        return response()->json(['ok' => true]);
     }
 }

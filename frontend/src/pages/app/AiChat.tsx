@@ -3,12 +3,12 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, CheckCircle2, Circle, Languages, Lightbulb, Mic, Plus, Send, Square, Volume2, VolumeX } from 'lucide-react'
+import { ArrowLeft, CheckCircle2, Circle, Languages, Lightbulb, Mic, Phone, Plus, Send, Square, Volume2, VolumeX } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { canListen, listen, speak, stopSpeaking } from '@/lib/speech'
 import { ensureMic, micHelpText } from '@/lib/mic'
 import type { RewardSummary } from '@/lib/types'
-import { Ada } from '@/components/game/Ada'
+import { Defne } from '@/components/game/Defne'
 import { scenarioImg } from '@/lib/assets'
 import { Button } from '@/components/ui/Button'
 import { Modal, Spinner } from '@/components/ui/Misc'
@@ -16,6 +16,7 @@ import { useToast } from '@/components/ui/Toast'
 import { useReward } from '@/components/game/RewardProvider'
 import { useAuth } from '@/lib/auth'
 import { Img } from '@/components/ui/Img'
+import { VoiceCall } from '@/components/game/VoiceCall'
 
 interface Msg {
   id: number
@@ -44,6 +45,9 @@ export default function AiChat() {
   const [voice, setVoice] = useState(true)
   const [micBlocked, setMicBlocked] = useState(false)
   const [talking, setTalking] = useState(false)
+  const [call, setCall] = useState(params.get('call') === '1')
+  const callRef = useRef(call)
+  callRef.current = call
   const stopRef = useRef<() => void>(() => {})
   const endRef = useRef<HTMLDivElement>(null)
   const spokenRef = useRef(false)
@@ -54,6 +58,8 @@ export default function AiChat() {
     setUsage(data.usage)
     setGoalsDone(data.conversation.meta?.goals_completed ?? [])
     setVoice(data.conversation.mode === 'speaking' || data.conversation.mode === 'roleplay')
+    // Voice conversations open straight into the call.
+    if (data.conversation.mode === 'speaking' && data.conversation.messages.length === 1) setCall(true)
   }, [data])
   useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), [messages])
   useEffect(() => () => stopSpeaking(), [])
@@ -64,7 +70,7 @@ export default function AiChat() {
   }
   // read the opening line aloud once
   useEffect(() => {
-    if (data && voice && !spokenRef.current && data.conversation.messages.length === 1) {
+    if (data && voice && !callRef.current && !spokenRef.current && data.conversation.messages.length === 1) {
       spokenRef.current = true
       setTimeout(() => say(data.conversation.messages[0].content), 400)
     }
@@ -78,7 +84,7 @@ export default function AiChat() {
       setMessages((m) => [...m, r.message])
       setUsage(r.usage)
       setGoalsDone(r.goals_completed)
-      if (voice) say(r.message.content)
+      if (voice && !callRef.current) say(r.message.content)
       refresh()
     },
     onError: (e: ApiError) => {
@@ -133,11 +139,14 @@ export default function AiChat() {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden rounded-3xl border-2 border-line bg-card">
         <header className="flex items-center gap-3 border-b-2 border-line px-4 py-3">
           <Link to="/ai" aria-label="Geri" className="text-ink-soft hover:text-ink"><ArrowLeft className="size-5" /></Link>
-          <Ada className="size-11" talking={talking} />
+          <Defne className="size-11" talking={talking} />
           <div className="min-w-0 flex-1">
             <p className="truncate font-black">{conv.title}</p>
-            <p className="text-xs text-ink-soft">{send.isPending ? 'Ada yazıyor…' : talking ? 'Ada konuşuyor…' : `Kalan mesaj: ${usage?.remaining ?? '-'}`}</p>
+            <p className="text-xs text-ink-soft">{send.isPending ? 'Defne yazıyor…' : talking ? 'Defne konuşuyor…' : `Kalan mesaj: ${usage?.remaining ?? '-'}`}</p>
           </div>
+          <button onClick={() => { stopSpeaking(); setCall(true) }} className="press flex h-10 items-center gap-1.5 rounded-xl bg-sage px-3 text-sm font-extrabold text-white shadow-[0_3px_0_0_var(--color-sage-deep)]" aria-label="Defne ile sesli ara">
+            <Phone className="size-4" /> <span className="hidden sm:inline">Ara</span>
+          </button>
           <button onClick={() => { setVoice((v) => !v); stopSpeaking() }} className="grid size-10 place-items-center rounded-xl text-ink-soft hover:bg-paper-2" aria-label="Sesli yanıt">
             {voice ? <Volume2 className="size-5" /> : <VolumeX className="size-5 text-ink-soft" />}
           </button>
@@ -212,6 +221,21 @@ export default function AiChat() {
         </aside>
       )}
 
+      <AnimatePresence>
+        {call && (
+          <VoiceCall
+            title={conv.title}
+            messages={messages}
+            pending={send.isPending}
+            rate={user?.preferences?.tts_rate ?? 0.95}
+            greet={conv.mode === 'speaking' && !conv.scenario_key && messages.length === 1}
+            onSend={(t) => submit(undefined, true, t)}
+            onClose={() => setCall(false)}
+            onMicBlocked={() => setMicBlocked(true)}
+          />
+        )}
+      </AnimatePresence>
+
       <Modal open={micBlocked} onClose={() => setMicBlocked(false)}>
         <div className="text-center">
           <span className="mx-auto mb-3 grid size-16 place-items-center rounded-2xl bg-berry/10"><Mic className="size-8 text-berry" /></span>
@@ -241,7 +265,7 @@ function Bubble({ m, onSpeak }: { m: Msg; onSpeak: (t: string) => void }) {
   const f = m.feedback
   return (
     <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex max-w-[92%] gap-2.5">
-      <Ada className="mt-1 size-8" online={false} />
+      <Defne className="mt-1 size-8" online={false} />
       <div className="min-w-0 flex-1 space-y-2">
       {f?.correction && (
         <div className="rounded-2xl bg-mint/12 p-3 text-sm">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Presenters;
 
+use App\Models\InstitutionMember;
 use App\Models\User;
 use App\Services\GamificationService;
 use App\Services\HeartService;
@@ -28,6 +29,12 @@ class UserPresenter
             'learning_goal' => $user->learning_goal,
             'daily_goal_xp' => $user->daily_goal_xp,
             'onboarded' => $user->onboarded,
+            'focus_skill' => $user->focus_skill,
+            'interests' => $user->interests ?? [],
+            'study_time' => $user->study_time,
+            'motivation' => $user->motivation,
+            'institution' => $user->institution_id ? $user->institution?->only(['id', 'name', 'type']) : null,
+            'institution_role' => $user->institution_id ? InstitutionMember::query()->where('user_id', $user->id)->where('status', 'active')->value('role') : null,
             'preferences' => $user->preferences ?? (object) [],
             'marketing_opt_in' => $user->marketing_opt_in,
             'two_factor_enabled' => $user->hasTwoFactor(),
@@ -46,6 +53,7 @@ class UserPresenter
                 'streak_longest' => $user->streak_longest,
                 'league_tier' => $user->league_tier,
                 'league_name' => app(LeagueService::class)->tierName($user->league_tier),
+                'duel_trophies' => $user->duel_trophies,
             ],
             'hearts' => app(HeartService::class)->sync($user),
             'created_at' => $user->created_at?->toIso8601String(),

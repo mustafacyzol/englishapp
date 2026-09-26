@@ -1,7 +1,7 @@
 # DilGO — Bayrak Dil Okulları
 
 **Oku · Dinle · Konuş · Yaz.** Dört beceriyi tek uygulamada birleştiren, tamamen oyunlaştırılmış İngilizce öğrenme platformu.
-HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyunlaştırmayla, yapay zekâ öğretmen **Ada** ile konuşma/yazma pratiğiyle ve Bayrak Dil Okulları'nın gerçek öğretmenleriyle birleştirir.
+HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyunlaştırmayla, yapay zekâ öğretmen **Defne** ile konuşma/yazma pratiğiyle ve Bayrak Dil Okulları'nın gerçek öğretmenleriyle birleştirir.
 
 > "DilGO" çalışma adıdır; marka adı tek yerden değişir (bkz. [Adı değiştirmek](#adı-değiştirmek)).
 
@@ -24,7 +24,7 @@ HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyun
 |---|---|
 | **Okuma + Dinleme** | Seviyeli (A1–C2) hikaye kütüphanesi, dokun-çevir kelime kartı, paragraf/tüm hikaye sesli okuma (kelime kelime vurgulu), Türkçe çeviri katmanı, kavrama quizi, kaldığın yerden devam, yer imi |
 | **Ders yolu** | Kurs → ünite → ders; 7 alıştırma tipi (seçmeli, boşluk doldurma, dinle-seç, kutucukla çeviri, dinle-yaz, sesli söyle, eşleştir), yanlışlar sona tekrar gelir, ünite rehberleri (Türkçe dilbilgisi notları), kontrol noktaları, tekrarla taç kazanma |
-| **Konuşma + Yazma (AI)** | Ada: seviyeni, hedefini ve **kaydettiğin kelimeleri bilen** AI öğretmen. Sesli/yazılı sohbet, 8 rol-yapma senaryosu (görev listeli), tek önemli hatayı Türkçe açıklayan düzeltme kartı, yeni kelimeleri tek dokunuşla deftere ekleme, Yazma Atölyesi (CEFR tahmini + puan + hata listesi + düzeltilmiş metin) |
+| **Konuşma + Yazma (AI)** | Defne: seviyeni, hedefini ve **kaydettiğin kelimeleri bilen** AI öğretmen. Sesli/yazılı sohbet, 8 rol-yapma senaryosu (görev listeli), tek önemli hatayı Türkçe açıklayan düzeltme kartı, yeni kelimeleri tek dokunuşla deftere ekleme, Yazma Atölyesi (CEFR tahmini + puan + hata listesi + düzeltilmiş metin) |
 | **Kelime** | Kelime defteri, SM-2 aralıklı tekrar kartları, ustalık seviyeleri, tekrarla can kazanma |
 | **Oyunlaştırma** | XP ve seviyeler, günlük hedef, seri + seri dondurucu, 5 can (30 dk'da yenilenir), 10 kademeli haftalık lig (terfi/düşme), 38 rozet (bronz→efsane, gizli rozetler), günlük/haftalık görevler, elmas ekonomisi, mağaza, XP takviyesi, gizemli sandık, profil ısı haritası |
 | **Ödül Kasası** | Kazanılan her şey bir kart olarak birikir ve kullanıcı istediğinde "açar": Premium günleri, elmas, XP takviyesi, indirim kuponu, **Bayrak Dil Okulları canlı ders kuponu** (BDO-XXXX kodu, şubede/online doğrulanır) |
@@ -34,7 +34,7 @@ HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyun
 | **Özgün alıştırmalar** | 10 alıştırma tipi. Duolingo'da olmayan üçü: **Hata Avı** (Türk öğrencilerin tipik hatasını taşıyan cümlede hatalı kelimeye dokun, düzeltmeyi seç, Türkçe açıklamayı oku), **Sahne** (gerçek bir senaryoda senin repliğin eksik; doğru cevabı seç) ve **Sıralama** (bir işin ya da hikâyenin adımlarını doğru sıraya diz). Her tip kendi rengi, etiketi ve sahne tonuyla gelir; üst üste doğru yapınca kombo rozeti çıkar |
 | **Ders yolu tasarımı** | Baloncuk patikası yerine "bölüm şeridi": her ders rayda bir durak; başlık, beceri, XP, en iyi skor ve taç sayısı doğrudan görünür |
 | **Ödül yolu** | Tek seferlik, çift verilmeyen ödüller (`reward_claims`): günlük hedef +5 elmas, her seviye +20 elmas ve her 5 seviyede gizemli sandık, seri kilometre taşları (3 gün 30 elmas → 7 dondurucu → 14 XP takviyesi → 30 Premium 3 gün → 50 sandık → 100 canlı ders → 200 Premium 7 gün → 365 canlı ders + 1000 elmas), lig birincisine sandık. Ödüller sayfasındaki "Nasıl kazanırım?" sekmesi ilerlemeyi gösterir |
-| **Tanıtım sayfaları** | Ana sayfa (otomatik dönen dört beceri modülü, canlanan Ada sohbeti, ödül yolu animasyonu, öğrenci yorumları kaydırıcısı, kayan yorum şeridi), Hakkımızda, Blog, İletişim formu (KVKK onayı, bal küpü, isteğe bağlı Turnstile). Kurumsal footer + 5 yasal belge (kullanım, gizlilik/KVKK, çerez, mesafeli satış, iptal-iade) |
+| **Tanıtım sayfaları** | Ana sayfa (otomatik dönen dört beceri modülü, canlanan Defne sohbeti, ödül yolu animasyonu, öğrenci yorumları kaydırıcısı, kayan yorum şeridi), Hakkımızda, Blog, İletişim formu (KVKK onayı, bal küpü, isteğe bağlı Turnstile). Kurumsal footer + 5 yasal belge (kullanım, gizlilik/KVKK, çerez, mesafeli satış, iptal-iade) |
 | **Öğrenci yorumları** | Yönetim panelinden yönetilir (`testimonials`); ana sayfadaki kaydırıcı ve kayan şerit buradan beslenir. Kurulumda gelen örnek yorumlar yayına almadan önce gerçekleriyle değiştirilmelidir |
 | **Görseller** | Tüm fotoğraflar ve 3B objeler Magnific ile üretildi (`frontend/public/img`). 12 parçalık ödül/para ikonu seti tek bir görselden bölünerek üretildi; hepsi aynı malzeme, ışık ve açıda. Her görselin 20px bulanık ön izlemesi pakete gömülüdür (`scripts/gen-lqip.mjs` → `src/lib/lqip.ts`), bu yüzden yavaş bağlantıda boş kutu yerine bulanık görsel çıkar |
 | **Yükleme durumları** | HTML açılış ekranı (React yüklenmeden boyanır), markalı spinner ve sayfa iskeletleri (yol, liste, kart, okuma) |
@@ -48,7 +48,7 @@ HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyun
 │ frontend/  React 19 +    │  ─────────────────────────────────────▶  │ backend/  Laravel 12 API     │
 │ Vite + Tailwind 4        │                                           │ Sanctum · MySQL · SMTP       │
 │ ─ Web (public_html)      │                                           │ Scheduler (cron) · Queue(DB) │
-│ ─ iOS/Android (Capacitor)│                                           │ Anthropic (Ada) · iyzico     │
+│ ─ iOS/Android (Capacitor)│                                           │ Anthropic (Defne) · iyzico     │
 └──────────────────────────┘                                           └──────────────────────────────┘
 ```
 
@@ -89,13 +89,13 @@ Demo hesaplar (yalnızca yerelde oluşturulur):
 
 - Yerelde e-postalar `storage/logs/laravel-*.log` dosyasına yazılır (OTP kodlarını oradan görebilirsiniz).
 - Ödemeler yerelde `PAYMENT_GATEWAY=fake` ile anında "ödendi" olur.
-- Ada için `.env` dosyasına `ANTHROPIC_API_KEY` ekleyin; anahtar yoksa AI ekranları "bakımda" mesajı gösterir, uygulamanın geri kalanı çalışır.
+- Defne için `.env` dosyasına `ANTHROPIC_API_KEY` ekleyin; anahtar yoksa AI ekranları "bakımda" mesajı gösterir, uygulamanın geri kalanı çalışır.
 
 Testler: `cd backend && php artisan test` (kayıt/OTP, kilitleme, admin 2FA, ders→XP→seri→rozet, lig kapanışı, mağaza, sandık, canlı ders kuponu, kupon+ödeme, hediye kodu, seviye testi, seri dondurucu).
 
 ## Demo önizleme (sunucusuz)
 
-`cd frontend && VITE_DEMO=1 npx vite build` → `dist-demo/index.html` + `dist-demo/img/`. Bu derleme API yerine gerçek backend'den kaydedilmiş yanıtları (`src/demo/fixture.json`) kullanır; ders/hikaye tamamlama, görev ödülü, mağaza, kart açma ve Ada sohbeti tarayıcıda simüle edilir. Sol alttaki **Demo** çubuğundan öğrenci ya da yönetim paneline geçilir (yönetim doğrulama kodu olarak 6 haneli herhangi bir sayı yeterli).
+`cd frontend && VITE_DEMO=1 npx vite build` → `dist-demo/index.html` + `dist-demo/img/`. Bu derleme API yerine gerçek backend'den kaydedilmiş yanıtları (`src/demo/fixture.json`) kullanır; ders/hikaye tamamlama, görev ödülü, mağaza, kart açma ve Defne sohbeti tarayıcıda simüle edilir. Sol alttaki **Demo** çubuğundan öğrenci ya da yönetim paneline geçilir (yönetim doğrulama kodu olarak 6 haneli herhangi bir sayı yeterli).
 
 ## Klasör yapısı
 
@@ -103,7 +103,7 @@ Testler: `cd backend && php artisan test` (kayıt/OTP, kilitleme, admin 2FA, der
 backend/
   app/Services/          GamificationService (XP, seri, görev, rozet), LeagueService, RewardService (Ödül Kasası),
                          CheckoutService + Payments/ (iyzico, fake), CouponService, ReferralService,
-                         AiTutorService (Ada), LessonService (sunucu tarafı puanlama), SrsService, OtpService
+                         AiTutorService (Defne), LessonService (sunucu tarafı puanlama), SrsService, OtpService
   app/Http/Controllers/Api/   Auth, Account, Learn, Story, Word, Ai, Game, Billing, Placement, Public, Admin/*
   app/Support/           Settings (panelden düzenlenebilir), Audit, Totp, Turnstile, TextMatch, Period
   config/dilgo.php       Tüm iş kuralları (ödüller, limitler, lig, güvenlik) tek dosyada

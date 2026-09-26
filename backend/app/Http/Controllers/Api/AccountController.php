@@ -29,7 +29,13 @@ class AccountController extends Controller
             'daily_goal_xp' => ['sometimes', 'integer', Rule::in(config('dilgo.gamification.daily_goal_options'))],
             'marketing_opt_in' => ['sometimes', 'boolean'],
             'onboarded' => ['sometimes', 'boolean'],
+            'focus_skill' => ['sometimes', 'nullable', 'in:reading,listening,speaking,writing'],
+            'interests' => ['sometimes', 'nullable', 'array', 'max:8'],
+            'interests.*' => ['string', 'in:travel,career,movies,music,games,sports,tech,food'],
+            'study_time' => ['sometimes', 'nullable', 'in:morning,lunch,evening,night'],
+            'motivation' => ['sometimes', 'nullable', 'in:confidence,job,abroad,exam,kids,hobby'],
             'preferences' => ['sometimes', 'array'],
+            'preferences.tour_done' => ['sometimes', 'boolean'],
             'preferences.email_reminders' => ['sometimes', 'boolean'],
             'preferences.sound' => ['sometimes', 'boolean'],
             'preferences.tts_voice' => ['sometimes', 'nullable', 'string', 'max:80'],
@@ -39,7 +45,7 @@ class AccountController extends Controller
 
         if (isset($data['preferences'])) {
             // merge and whitelist; never let the client overwrite server-owned keys (frame)
-            $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'sound', 'tts_voice', 'tts_rate', 'theme']));
+            $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'sound', 'tts_voice', 'tts_rate', 'theme', 'tour_done']));
             $data['preferences'] = array_merge($user->preferences ?? [], $allowed);
         }
         if (isset($data['name'])) {

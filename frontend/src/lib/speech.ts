@@ -38,14 +38,29 @@ function pickVoice(preferred?: string) {
   )
 }
 
-export function speak(text: string, opts: { rate?: number; voice?: string; onEnd?: () => void; onBoundary?: (charIndex: number) => void } = {}) {
-  if (!canSpeak()) return
+export function speak(text: string, opts: { rate?: number; voice?: string; onStart?: () => void; onEnd?: () => void; onBoundary?: (charIndex: number) => void } = {}) {
+  if (!canSpeak()) {
+    // No synthesis (some WebViews, headless): still drive the UI for a natural reading time.
+    opts.onStart?.()
+    const words = text.split(/\s+/).length
+    let i = 0
+    const t = setInterval(() => {
+      const idx = text.split(/\s+/).slice(0, ++i).join(' ').length
+      opts.onBoundary?.(idx)
+      if (i >= words) {
+        clearInterval(t)
+        opts.onEnd?.()
+      }
+    }, 330)
+    return
+  }
   speechSynthesis.cancel()
   const u = new SpeechSynthesisUtterance(text)
   const voice = pickVoice(opts.voice)
   if (voice) u.voice = voice
   u.lang = voice?.lang ?? 'en-GB'
   u.rate = opts.rate ?? 0.95
+  u.onstart = () => opts.onStart?.()
   u.onend = () => opts.onEnd?.()
   u.onerror = () => opts.onEnd?.()
   if (opts.onBoundary) u.onboundary = (e) => opts.onBoundary?.(e.charIndex)

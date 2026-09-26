@@ -35,6 +35,10 @@
   --color-berry: #ef4e7b;
   --color-berry-deep: #c93460;
   --color-lilac: #8f7cf8;
+  /* Defne's colour — the sage of her blazer, with the gold of her laurel pin. */
+  --color-sage: #4f8a6e;
+  --color-sage-deep: #3a6b54;
+  --color-laurel: #c9a23f;
   --color-sand: #f1ede6;
 
   --shadow-hard: 0 3px 0 0 var(--line);
@@ -67,6 +71,29 @@
   --ink: #eef0f4;
   --ink-soft: #9aa1b2;
   --line: #2b3242;
+  color-scheme: dark;
+}
+
+/*
+  Page-level colour, font and background are deliberately UNLAYERED.
+  Hosts that embed the app (the claude.ai preview shell, some WebViews, CMS
+  embeds) ship their own unlayered `body { font; color; background }`, and
+  unlayered CSS always beats anything inside @layer — which left body text dark
+  on dark cards and swapped Nunito for the system font. `html body` outranks a
+  bare `body` selector, so the app owns its own canvas wherever it runs.
+*/
+html body {
+  margin: 0;
+  min-height: 100dvh;
+  background-color: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+html.dark {
   color-scheme: dark;
 }
 

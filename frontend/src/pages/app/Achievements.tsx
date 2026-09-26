@@ -6,7 +6,7 @@ import type { Achievement } from '@/lib/types'
 import { AchievementBadge, tierLabel } from '@/components/game/AchievementBadge'
 import { PageHeader, Progress, SkeletonPage } from '@/components/ui/Misc'
 
-const CAT: Record<string, string> = { streak: 'Seri', xp: 'XP', lessons: 'Dersler', stories: 'Okuma', words: 'Kelimeler', mastery: 'Hafıza', speaking: 'Konuşma', ai: 'Ada ile sohbet', perfect: 'Kusursuzluk', social: 'Arkadaşlar', league: 'Lig', secret: 'Gizli' }
+const CAT: Record<string, string> = { streak: 'Seri', xp: 'XP', lessons: 'Dersler', stories: 'Okuma', words: 'Kelimeler', mastery: 'Hafıza', speaking: 'Konuşma', ai: 'Defne ile sohbet', perfect: 'Kusursuzluk', social: 'Arkadaşlar', league: 'Lig', secret: 'Gizli' }
 
 export default function Achievements() {
   const { data, isLoading } = useQuery({ queryKey: ['achievements'], queryFn: () => get<{ data: Achievement[] }>('/achievements') })

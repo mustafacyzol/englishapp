@@ -43,6 +43,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'username', 'email', 'password', 'avatar', 'locale', 'timezone',
         'cefr_level', 'learning_goal', 'daily_goal_xp', 'onboarded', 'marketing_opt_in', 'preferences',
+        'focus_skill', 'interests', 'study_time', 'motivation',
     ];
 
     protected $hidden = [
@@ -59,6 +60,7 @@ class User extends Authenticatable
             'marketing_opt_in' => 'boolean',
             'is_banned' => 'boolean',
             'preferences' => 'array',
+            'interests' => 'array',
             'streak_last_date' => 'date',
             'premium_until' => 'datetime',
             'locked_until' => 'datetime',
@@ -119,7 +121,12 @@ class User extends Authenticatable
 
     public function isPremium(): bool
     {
-        return $this->premium_until !== null && $this->premium_until->isFuture();
+        if ($this->premium_until !== null && $this->premium_until->isFuture()) {
+            return true;
+        }
+
+        // Students on an active institution seat get the full product.
+        return $this->institution_id !== null && (bool) $this->institution?->isCurrent();
     }
 
     public function isLocked(): bool
@@ -203,6 +210,16 @@ class User extends Authenticatable
     public function subscriptions(): HasMany
     {
         return $this->hasMany(Subscription::class);
+    }
+
+    public function duels(): HasMany
+    {
+        return $this->hasMany(Duel::class);
+    }
+
+    public function institution(): BelongsTo
+    {
+        return $this->belongsTo(Institution::class);
     }
 
     public function conversations(): HasMany

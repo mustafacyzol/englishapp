@@ -49,10 +49,12 @@ class GameSeeder extends Seeder
             ['words', 'words_saved', 'cards', 'Kelime Avcısı', 'kelime kaydet', [[10, 'bronze', 10], [100, 'silver', 60], [500, 'gold', 200]]],
             ['mastery', 'words_mastered', 'brain', 'Hafıza Ustası', 'kelimeyi uzun süreli hafızaya al', [[10, 'silver', 50], [100, 'gold', 250]]],
             ['speaking', 'speaking', 'mic', 'Bülbül', 'konuşma egzersizi yap', [[5, 'bronze', 15], [50, 'silver', 80], [250, 'gold', 250, 'live_lesson']]],
-            ['ai', 'ai_messages', 'chat', 'Sohbet Kuşu', 'mesajla Ada ile konuş', [[10, 'bronze', 15], [100, 'silver', 80], [500, 'gold', 250]]],
+            ['ai', 'ai_messages', 'chat', 'Sohbet Kuşu', 'mesajla Defne ile konuş', [[10, 'bronze', 15], [100, 'silver', 80], [500, 'gold', 250]]],
             ['perfect', 'perfect_lessons', 'target', 'Keskin Nişancı', 'hatasız ders bitir', [[1, 'bronze', 10], [10, 'silver', 50], [50, 'gold', 200]]],
             ['social', 'referrals', 'users', 'Elçi', 'arkadaşını davet et', [[1, 'bronze', 50], [5, 'silver', 200, 'premium_7d'], [20, 'gold', 800, 'live_lesson']]],
             ['league', 'league_top3', 'trophy', 'Kürsü', 'kez ligde ilk 3\'e gir', [[1, 'silver', 50], [10, 'gold', 300]]],
+            ['duel', 'duel_wins', 'swords', 'Düellocu', 'Gölge Düellosu kazan', [[1, 'bronze', 10], [10, 'silver', 60], [50, 'gold', 250, 'mystery_chest'], [200, 'legend', 800, 'live_lesson']]],
+            ['balance', 'skills_balanced', 'compass', 'Dört Dörtlük', '. seviyeye dört becerinin hepsinde ulaş', [[2, 'bronze', 20], [5, 'silver', 100], [10, 'gold', 400, 'premium_7d']]],
         ];
         $roman = ['I', 'II', 'III', 'IV', 'V'];
         $pos = 0;
@@ -83,7 +85,9 @@ class GameSeeder extends Seeder
             ['key' => 'daily_speak_5', 'title' => '5 cümle sesli söyle', 'metric' => 'speaking', 'target' => 5, 'period' => 'daily', 'reward_gems' => 15],
             ['key' => 'daily_review_10', 'title' => '10 kelime tekrar et', 'metric' => 'reviews', 'target' => 10, 'period' => 'daily', 'reward_gems' => 10],
             ['key' => 'weekly_story_3', 'title' => '3 hikaye bitir', 'metric' => 'stories', 'target' => 3, 'period' => 'weekly', 'reward_gems' => 60, 'reward_item_key' => 'xp_boost_15'],
-            ['key' => 'weekly_ai_20', 'title' => 'Ada ile 20 mesajlaş', 'metric' => 'ai_messages', 'target' => 20, 'period' => 'weekly', 'reward_gems' => 60],
+            ['key' => 'daily_duel', 'title' => 'Bir Gölge Düellosu yap', 'metric' => 'duels', 'target' => 1, 'period' => 'daily', 'reward_gems' => 15],
+            ['key' => 'weekly_duel_wins_5', 'title' => '5 düello kazan', 'metric' => 'duel_wins', 'target' => 5, 'period' => 'weekly', 'reward_gems' => 70, 'reward_item_key' => 'mystery_chest'],
+            ['key' => 'weekly_ai_20', 'title' => 'Defne ile 20 mesajlaş', 'metric' => 'ai_messages', 'target' => 20, 'period' => 'weekly', 'reward_gems' => 60],
             ['key' => 'weekly_perfect_5', 'title' => '5 hatasız ders', 'metric' => 'perfect_lessons', 'target' => 5, 'period' => 'weekly', 'reward_gems' => 80, 'reward_item_key' => 'mystery_chest'],
         ];
         foreach ($quests as $q) {

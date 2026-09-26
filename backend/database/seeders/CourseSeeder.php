@@ -127,7 +127,7 @@ class CourseSeeder extends Seeder
                                 $this->sp("I'm from Turkey. And you?", "Türkiye'denim. Ya sen?"),
                             ]],
                             ['title' => 'Hikaye: The Red Umbrella', 'skill' => 'reading', 'kind' => 'story', 'story' => 'the-red-umbrella', 'xp_reward' => 20],
-                            ['title' => 'Ada ile tanış', 'skill' => 'speaking', 'kind' => 'ai_talk', 'scenario' => 'meet-a-new-friend', 'xp_reward' => 20],
+                            ['title' => 'Defne ile tanış', 'skill' => 'speaking', 'kind' => 'ai_talk', 'scenario' => 'meet-a-new-friend', 'xp_reward' => 20],
                         ],
                     ],
                     [

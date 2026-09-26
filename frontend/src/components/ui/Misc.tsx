@@ -136,7 +136,7 @@ export function Modal({ open, onClose, children, className, dismissable = true }
   return (
     <AnimatePresence>
       {open && (
-        <motion.div className="fixed inset-0 z-50 flex items-end justify-center bg-[#11141c]/50 p-0 backdrop-blur-sm sm:items-center sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => dismissable && onClose()}>
+        <motion.div className="fixed inset-0 z-[70] flex items-end justify-center bg-[#11141c]/50 p-0 backdrop-blur-sm sm:items-center sm:p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => dismissable && onClose()}>
           <motion.div
             role="dialog"
             aria-modal="true"
