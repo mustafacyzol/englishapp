@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Link, NavLink, Navigate, Outlet } from 'react-router-dom'
+import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { ArrowLeft, BookOpen, Boxes, ClipboardList, Crown, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Quote, Receipt, ScrollText, Settings, ShieldCheck, Swords, Ticket, Trophy, Users } from 'lucide-react'
+import { ArrowLeft, Building2, Menu, X, BookOpen, Boxes, ClipboardList, Crown, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Quote, Receipt, ScrollText, Settings, ShieldCheck, Swords, Ticket, Trophy, Users } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import { ApiError, hasAdminToken, onApiError, post, setAdminToken } from '@/lib/api'
 import { Logo } from '@/components/game/Logo'
@@ -17,6 +17,9 @@ const GROUPS = [
     { to: '/admin/users', label: 'Kullanıcılar', icon: Users, admin: true },
     { to: '/admin/orders', label: 'Siparişler', icon: Receipt, admin: true },
     { to: '/admin/vouchers', label: 'Canlı ders kuponları', icon: GraduationCap },
+  ] },
+  { title: 'Kurumlar', items: [
+    { to: '/admin/r/institutions', label: 'Okul, kurs ve şirketler', icon: Building2, admin: true },
   ] },
   { title: 'İçerik', items: [
     { to: '/admin/r/courses', label: 'Kurslar', icon: Layers },
@@ -110,6 +113,9 @@ function StepUp({ onDone }: { onDone: () => void }) {
 export default function AdminLayout() {
   const { user } = useAuth()
   const [unlocked, setUnlocked] = useState(hasAdminToken())
+  const [drawer, setDrawer] = useState(false)
+  const loc = useLocation()
+  useEffect(() => setDrawer(false), [loc.pathname])
   // expired / revoked step-up token → ask for the code again
   useEffect(
     () =>
@@ -123,50 +129,67 @@ export default function AdminLayout() {
   if (!user?.is_staff) return <Navigate to="/learn" replace />
   if (!unlocked) return <StepUp onDone={() => setUnlocked(true)} />
   const isAdmin = user.role === 'admin' || user.role === 'super_admin'
+  const lock = async () => {
+    await setAdminToken(null)
+    setUnlocked(false)
+  }
 
   return (
     <div className="flex min-h-dvh bg-paper">
-      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 overflow-y-auto border-r-2 border-line bg-ink px-3 py-5 text-paper md:block">
-        <div className="mb-6 px-2">
-          <Logo small />
-          <p className="mt-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-butter">Yönetim paneli</p>
-        </div>
-        {GROUPS.map((g) => (
-          <div key={g.title} className="mb-5">
-            <p className="mb-1.5 px-3 text-[10px] font-extrabold uppercase tracking-[0.2em] text-paper/45">{g.title}</p>
-            {g.items.filter((i) => !('admin' in i) || isAdmin).map((i) => (
-              <NavLink key={i.to} to={i.to} end={'end' in i} className={({ isActive }) => clsx('flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold', isActive ? 'bg-flame text-white' : 'hover:bg-white/10')}>
-                <i.icon className="size-4" />
-                {i.label}
-              </NavLink>
-            ))}
-          </div>
-        ))}
-        <button
-          onClick={async () => {
-            await setAdminToken(null)
-            setUnlocked(false)
-          }}
-          className="mt-4 w-full rounded-xl border border-white/20 px-3 py-2 text-left text-xs font-bold text-paper/70 hover:bg-white/10"
-        >
-          Yönetici oturumunu kapat
-        </button>
+      <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 overflow-y-auto border-r-2 border-line bg-[#171b26] px-3 py-5 text-white md:block">
+        <AdminNav isAdmin={isAdmin} onLock={lock} />
       </aside>
+
+      {/* phones: a slide-in drawer instead of a cramped select */}
+      {drawer && (
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Yönetim menüsü">
+          <button className="absolute inset-0 bg-black/45" aria-label="Kapat" onClick={() => setDrawer(false)} />
+          <aside className="absolute inset-y-0 left-0 w-[82%] max-w-xs overflow-y-auto bg-[#171b26] px-3 py-5 text-white shadow-soft">
+            <button onClick={() => setDrawer(false)} className="absolute right-3 top-4 grid size-9 place-items-center rounded-xl hover:bg-white/10" aria-label="Menüyü kapat"><X className="size-5" /></button>
+            <AdminNav isAdmin={isAdmin} onLock={lock} />
+          </aside>
+        </div>
+      )}
       <div className="min-w-0 flex-1">
         <header className="flex h-14 items-center justify-between border-b-2 border-line/15 px-5">
           <Link to="/learn" className="flex items-center gap-1.5 text-sm font-bold text-ink-soft hover:text-ink">
             <ArrowLeft className="size-4" /> Uygulama
           </Link>
-          <select className="rounded-lg border-2 border-line bg-card px-2 py-1 text-sm md:hidden" onChange={(e) => (window.location.href = e.target.value)} defaultValue="">
-            <option value="" disabled>Menü</option>
-            {GROUPS.flatMap((g) => g.items).filter((i) => !('admin' in i) || isAdmin).map((i) => <option key={i.to} value={i.to}>{i.label}</option>)}
-          </select>
-          <span className="text-sm font-bold">{user.name} · <span className="text-flame">{user.role}</span></span>
+<button onClick={() => setDrawer(true)} className="grid size-10 place-items-center rounded-xl border-2 border-line bg-card md:hidden" aria-label="Yönetim menüsü"><Menu className="size-5" /></button>
+          <span className="hidden text-sm font-bold sm:inline">{user.name} · <span className="text-flame">{user.role}</span></span>
         </header>
-        <main className="p-5 sm:p-8">
+        <main className="p-4 sm:p-8">
           <Outlet />
         </main>
       </div>
     </div>
+  )
+}
+
+function AdminNav({ isAdmin, onLock }: { isAdmin: boolean; onLock: () => void }) {
+  return (
+    <>
+      <div className="mb-6 px-2">
+        <Logo small />
+        <p className="mt-1 text-[11px] font-extrabold uppercase tracking-[0.2em] text-butter">Yönetim paneli</p>
+      </div>
+      {GROUPS.map((g) => (
+        <div key={g.title} className="mb-5">
+          <p className="mb-1.5 px-3 text-[10px] font-extrabold uppercase tracking-[0.2em] text-white/45">{g.title}</p>
+          {g.items.filter((i) => !('admin' in i) || isAdmin).map((i) => (
+            <NavLink key={i.to} to={i.to} end={'end' in i} className={({ isActive }) => clsx('flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-semibold', isActive ? 'bg-flame text-white' : 'hover:bg-white/10')}>
+              <i.icon className="size-4" />
+              {i.label}
+            </NavLink>
+          ))}
+        </div>
+      ))}
+      <button
+        onClick={onLock}
+        className="mt-4 w-full rounded-xl border border-white/20 px-3 py-2 text-left text-xs font-bold text-white/70 hover:bg-white/10"
+      >
+        Yönetici oturumunu kapat
+      </button>
+    </>
   )
 }

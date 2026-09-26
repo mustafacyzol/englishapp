@@ -103,6 +103,8 @@ export default function Settings() {
         </div>
       </Section>
 
+      <JoinInstitution />
+
       <Section title="Görünüm, ses ve bildirimler">
         <p className="mb-2 text-sm font-bold">Tema</p>
         <div className="mb-4 grid grid-cols-3 gap-2">
@@ -260,5 +262,30 @@ function DeleteAccount() {
         )}
       </Modal>
     </>
+  )
+}
+
+/** Students of a partner school can join with the code their teacher shares. */
+function JoinInstitution() {
+  const { user, setUser } = useAuth()
+  const toast = useToast()
+  const [code, setCode] = useState('')
+  const join = useMutation({
+    mutationFn: () => post<{ user: Me }>('/institution/join', { code }),
+    onSuccess: (r) => { setUser(r.user); toast('Kuruma katıldın ✓', 'success'); setCode('') },
+    onError: (e: ApiError) => toast(e.first(), 'error'),
+  })
+  if (!user) return null
+  return (
+    <Section title="Okul / kurum">
+      {user.institution ? (
+        <p className="font-bold">{user.institution.name} <span className="font-normal text-ink-soft">— {user.institution_role === 'manager' ? 'kurum yöneticisi' : 'öğrenci koltuğun aktif'}</span></p>
+      ) : (
+        <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); join.mutate() }}>
+          <Input label="Kurum katılım kodu" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="ör. ABC-1234" className="min-w-48 flex-1" />
+          <Button type="submit" loading={join.isPending} disabled={code.length < 4}>Katıl</Button>
+        </form>
+      )}
+    </Section>
   )
 }

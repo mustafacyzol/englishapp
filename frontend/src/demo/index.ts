@@ -439,20 +439,21 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   }
 
   // --- institutions
-  if (path === '/institution/invite') {
-    const rep = db['/institution']
+  if (path === '/institution/invite' || /^\/admin\/institutions\/\d+\/invite$/.test(path)) {
+    const rep = path.startsWith('/admin') ? db[path.replace('/invite', '/report')] : db['/institution']
     const rows: Json[] = body.rows ?? []
     for (const row of rows) {
-      rep.members.push({ id: nextMsg++, name: row.name ?? null, email: row.email, class_name: row.class_name ?? null, role: 'student', status: 'invited', invited_at: new Date().toISOString(), joined_at: null, last_active_at: null, cefr_level: null, xp_total: 0, week_xp: 0, streak: 0, lessons: 0, skills: null })
+      rep.members.push({ id: nextMsg++, name: row.name ?? null, email: row.email, class_name: row.class_name ?? null, role: body.role ?? 'student', status: 'invited', invited_at: new Date().toISOString(), joined_at: null, last_active_at: null, cefr_level: null, xp_total: 0, week_xp: 0, streak: 0, lessons: 0, skills: null })
     }
     rep.summary.students += rows.length
     rep.summary.invited += rows.length
     rep.institution.seats_used += rows.length
     return { invited: rows.length, skipped: [] }
   }
-  if ((m = path.match(/^\/institution\/members\/(\d+)$/)) && method === 'DELETE') {
-    const rep = db['/institution']
-    rep.members = rep.members.filter((x: Json) => x.id !== +m![1])
+  if ((m = path.match(/^\/(?:institution\/members|admin\/institution-members)\/(\d+)$/)) && method === 'DELETE') {
+    for (const rep of [db['/institution'], ...Object.keys(db).filter((k) => /^\/admin\/institutions\/\d+\/report$/.test(k)).map((k) => db[k])]) {
+      if (rep) rep.members = rep.members.filter((x: Json) => x.id !== +m![1])
+    }
     return ok('ok')
   }
   if (path === '/institution/join' || /^\/invites\/[^/]+\/accept$/.test(path)) return { ok: true, user: me() }

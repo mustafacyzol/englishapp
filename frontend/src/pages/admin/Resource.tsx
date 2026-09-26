@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Pencil, Plus, Trash2 } from 'lucide-react'
+import { BarChart3, Pencil, Plus, Trash2 } from 'lucide-react'
 import { ApiError, del, get, post, put } from '@/lib/api'
 import type { Paginated } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
@@ -14,7 +14,7 @@ type Row = Record<string, unknown> & { id: number }
 type FieldType = 'text' | 'textarea' | 'number' | 'bool' | 'select' | 'json' | 'date' | 'list'
 interface Field { key: string; label: string; type: FieldType; options?: string[]; hint?: string; full?: boolean }
 interface Col { key: string; label: string; render?: (r: Row) => ReactNode }
-interface Cfg { title: string; cols: Col[]; fields: Field[]; defaults: Record<string, unknown>; noCreate?: boolean; preview?: (r: Row) => ReactNode }
+interface Cfg { title: string; cols: Col[]; fields: Field[]; defaults: Record<string, unknown>; noCreate?: boolean; preview?: (r: Row) => ReactNode; action?: (r: Row) => ReactNode; intro?: ReactNode }
 
 const CEFR = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 const bool = (k: string) => (r: Row) => (r[k] ? <Pill tone="good">evet</Pill> : <Pill>hayır</Pill>)
@@ -115,6 +115,18 @@ const CONFIG: Record<string, Cfg> = {
     fields: [{ key: 'status', label: 'Durum', type: 'select', options: ['new', 'replied', 'closed'] }, { key: 'admin_note', label: 'İç not', type: 'textarea', full: true }],
     defaults: { status: 'new' },
   },
+  institutions: {
+    title: 'Kurumlar',
+    intro: (
+      <p className="mb-5 max-w-2xl text-sm text-ink-soft">
+        Anlaşma yaptığın okul, kurs ve şirketler. Koltuk sayısını belirle; kurum öğrencilerini e-postayla davet eder ya da katılım koduyla ekler. Her kurumun raporunu ve yöneticisini <b>Rapor</b> sayfasından yönet.
+      </p>
+    ),
+    cols: [{ key: 'name', label: 'Kurum' }, { key: 'type', label: 'Tür', render: (r) => ({ school: 'Okul', course: 'Kurs', company: 'Şirket' } as Record<string, string>)[String(r.type)] ?? String(r.type) }, { key: 'city', label: 'Şehir' }, { key: 'seats', label: 'Koltuk' }, { key: 'join_code', label: 'Katılım kodu', render: (r) => <code className="rounded bg-paper-2 px-1.5 py-0.5 text-xs font-bold">{String(r.join_code ?? '—')}</code> }, { key: 'ends_at', label: 'Bitiş', render: (r) => (r.ends_at ? String(r.ends_at).slice(0, 10) : '—') }, { key: 'is_active', label: 'Aktif', render: bool('is_active') }],
+    action: (r) => <Link to={`/admin/institutions/${r.id}`} className="inline-flex items-center gap-1 rounded-lg bg-sage/15 px-2 py-1 text-xs font-extrabold text-sage-deep hover:bg-sage/25 dark:text-sage"><BarChart3 className="size-3.5" /> Rapor</Link>,
+    fields: [{ key: 'name', label: 'Kurum adı', type: 'text', full: true }, { key: 'type', label: 'Tür', type: 'select', options: ['school', 'course', 'company'] }, { key: 'city', label: 'Şehir', type: 'text' }, { key: 'seats', label: 'Koltuk (öğrenci) sayısı', type: 'number' }, { key: 'is_active', label: 'Aktif', type: 'bool' }, { key: 'starts_at', label: 'Sözleşme başlangıcı', type: 'date' }, { key: 'ends_at', label: 'Sözleşme bitişi', type: 'date' }, { key: 'contact_name', label: 'Yetkili', type: 'text' }, { key: 'contact_email', label: 'Yetkili e-posta', type: 'text' }, { key: 'contact_phone', label: 'Telefon', type: 'text' }, { key: 'notes', label: 'Notlar', type: 'textarea', full: true }],
+    defaults: { type: 'school', seats: 30, is_active: true },
+  },
   'redeem-codes': {
     title: 'Hediye kodları',
     cols: [{ key: 'code', label: 'Kod' }, { key: 'type', label: 'Tür' }, { key: 'amount', label: 'Miktar' }, { key: 'batch', label: 'Parti' }, { key: 'used_count', label: 'Kullanım', render: (r) => `${r.used_count}/${r.max_uses}` }, { key: 'is_active', label: 'Aktif', render: bool('is_active') }],
@@ -145,22 +157,45 @@ export default function Resource() {
   return (
     <div>
       <AdminTitle title={cfg.title}>
-        <Input placeholder="Ara…" value={q} onChange={(e) => { setQ(e.target.value); setPage(1) }} className="w-56" />
+        <Input placeholder="Ara…" value={q} onChange={(e) => { setQ(e.target.value); setPage(1) }} className="w-full sm:w-56" />
         {!cfg.noCreate && <Button onClick={() => setEditing('new')} icon={<Plus className="size-4" />}>Yeni</Button>}
       </AdminTitle>
+      {cfg.intro}
       {isLoading || !data ? <Spinner /> : (
         <>
+          {/* phones: one card per record */}
+          <div className="grid gap-2 md:hidden">
+            {data.data.map((r) => (
+              <div key={r.id} className="rounded-2xl border-2 border-line bg-card p-4">
+                <div className="flex items-start gap-2">
+                  <p className="min-w-0 flex-1 font-bold">{cfg.cols[0].render ? cfg.cols[0].render(r) : String(r[cfg.cols[0].key] ?? '—')}</p>
+                  {cfg.action?.(r)}
+                  <button onClick={() => setEditing(r)} className="grid size-8 place-items-center rounded-lg text-ink-soft hover:bg-paper-2" aria-label="Düzenle"><Pencil className="size-4" /></button>
+                  <button onClick={() => confirm('Silinsin mi? Bu işlem geri alınamaz.') && remove.mutate(r.id)} className="grid size-8 place-items-center rounded-lg text-ink-soft hover:text-berry" aria-label="Sil"><Trash2 className="size-4" /></button>
+                </div>
+                <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                  {cfg.cols.slice(1).map((c) => (
+                    <div key={c.key} className="min-w-0"><dt className="text-[11px] font-bold uppercase tracking-wider text-ink-soft">{c.label}</dt><dd className="truncate">{c.render ? c.render(r) : String(r[c.key] ?? '—')}</dd></div>
+                  ))}
+                </dl>
+              </div>
+            ))}
+            {!data.data.length && <p className="p-6 text-center text-ink-soft">Kayıt yok.</p>}
+          </div>
+          <div className="hidden md:block">
           <Table head={[...cfg.cols.map((c) => c.label), '']} empty={!data.data.length}>
             {data.data.map((r) => (
               <tr key={r.id} className="hover:bg-paper-2">
                 {cfg.cols.map((c) => <td key={c.key} className="px-4 py-2.5">{c.render ? c.render(r) : String(r[c.key] ?? '—')}</td>)}
                 <td className="whitespace-nowrap px-4 text-right">
+                  {cfg.action && <span className="mr-3">{cfg.action(r)}</span>}
                   <button onClick={() => setEditing(r)} className="mr-3 text-ink-soft hover:text-ink" aria-label="Düzenle"><Pencil className="size-4" /></button>
                   <button onClick={() => confirm('Silinsin mi? Bu işlem geri alınamaz.') && remove.mutate(r.id)} className="text-ink-soft hover:text-berry" aria-label="Sil"><Trash2 className="size-4" /></button>
                 </td>
               </tr>
             ))}
           </Table>
+          </div>
           <Pager page={data.current_page} last={data.last_page} onPage={setPage} />
         </>
       )}

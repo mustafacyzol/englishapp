@@ -29,6 +29,9 @@ const StoryReader = lazy(() => import('./pages/app/StoryReader'))
 const Practice = lazy(() => import('./pages/app/Practice'))
 const AiHub = lazy(() => import('./pages/app/AiHub'))
 const Duel = lazy(() => import('./pages/app/Duel'))
+const Institution = lazy(() => import('./pages/app/Institution'))
+const InstitutionDetail = lazy(() => import('./pages/admin/InstitutionDetail'))
+const Invite = lazy(() => import('./pages/institution/Invite'))
 const AiChat = lazy(() => import('./pages/app/AiChat'))
 const WritingLab = lazy(() => import('./pages/app/WritingLab'))
 const Leagues = lazy(() => import('./pages/app/Leagues'))
@@ -85,6 +88,7 @@ export default function App() {
         </Route>
         <Route path="/placement" element={<Placement />} />
         <Route path="/r/:code" element={<Register />} />
+        <Route path="/davet/:token" element={<Invite />} />
         <Route path="/login" element={<Guard guest><Login /></Guard>} />
         <Route path="/register" element={<Guard guest><Register /></Guard>} />
         <Route path="/forgot-password" element={<Guard guest><ForgotPassword /></Guard>} />
@@ -100,6 +104,7 @@ export default function App() {
           <Route path="/ai/writing" element={<WritingLab />} />
           <Route path="/ai/:id" element={<AiChat />} />
           <Route path="/duel" element={<Duel />} />
+          <Route path="/kurum" element={<Institution />} />
           <Route path="/leagues" element={<Leagues />} />
           <Route path="/quests" element={<Quests />} />
           <Route path="/profile" element={<Profile />} />
@@ -123,6 +128,7 @@ export default function App() {
           <Route path="settings" element={<AdminSettings />} />
           <Route path="audit" element={<AdminAudit />} />
           <Route path="r/:resource" element={<AdminResource />} />
+          <Route path="institutions/:id" element={<InstitutionDetail />} />
         </Route>
 
         <Route path="*" element={<Navigate to="/" replace />} />

@@ -3,7 +3,7 @@ import { NavLink, useLocation, useOutlet, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { Bell, BookOpen, Dumbbell, Gift, Grid2x2, Home, MessageCircle, Settings, Shield, ShoppingBag, Swords, Target, Trophy, User, X, type LucideIcon } from 'lucide-react'
+import { Bell, BookOpen, Building2, Dumbbell, Gift, Grid2x2, Home, MessageCircle, Settings, Shield, ShoppingBag, Swords, Target, Trophy, User, X, type LucideIcon } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import { get } from '@/lib/api'
 import { rewardImg } from '@/lib/assets'
@@ -81,6 +81,12 @@ export default function AppLayout() {
               </div>
             </div>
           ))}
+          {user.institution_role === 'manager' && (
+            <div>
+              <p className="mb-1.5 px-3 text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft/80">{user.institution?.name ?? 'Kurum'}</p>
+              <SideLink item={{ to: '/kurum', label: 'Kurum paneli', icon: Building2 }} />
+            </div>
+          )}
           {user.is_staff && (
             <div>
               <p className="mb-1.5 px-3 text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft/80">Yönetim</p>
@@ -154,7 +160,7 @@ export default function AppLayout() {
         </div>
       </nav>
 
-      <MoreSheet open={more} onClose={() => setMore(false)} staff={!!user.is_staff} />
+      <MoreSheet open={more} onClose={() => setMore(false)} staff={!!user.is_staff} manager={user.institution_role === 'manager'} />
       <ProductTour />
     </div>
   )
@@ -179,7 +185,7 @@ function SideLink({ item: n }: { item: Item }) {
 
 const MORE_TONE = ['bg-sky/12 text-sky', 'bg-mint/12 text-mint-deep', 'bg-butter/20 text-butter-deep', 'bg-berry/12 text-berry', 'bg-flame/10 text-flame', 'bg-lilac/15 text-lilac', 'bg-sage/15 text-sage-deep']
 
-function MoreSheet({ open, onClose, staff }: { open: boolean; onClose: () => void; staff: boolean }) {
+function MoreSheet({ open, onClose, staff, manager }: { open: boolean; onClose: () => void; staff: boolean; manager: boolean }) {
   const items: Item[] = [
     { to: '/stories', label: 'Hikâyeler', icon: BookOpen },
     { to: '/leagues', label: 'Ligler', icon: Trophy },
@@ -188,6 +194,7 @@ function MoreSheet({ open, onClose, staff }: { open: boolean; onClose: () => voi
     { to: '/shop', label: 'Mağaza', icon: ShoppingBag },
     { to: '/profile', label: 'Profil', icon: User },
     { to: '/settings', label: 'Ayarlar', icon: Settings },
+    ...(manager ? [{ to: '/kurum', label: 'Kurum', icon: Building2 }] : []),
     ...(staff ? [{ to: '/admin', label: 'Yönetim', icon: Shield }] : []),
   ]
   return (
