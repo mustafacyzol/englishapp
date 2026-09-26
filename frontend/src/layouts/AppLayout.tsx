@@ -15,6 +15,7 @@ import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { SideRail, type Dashboard } from './SideRail'
 import { Img } from '@/components/ui/Img'
 import { SkillMeter } from '@/components/game/SkillMeter'
+import { ProductTour } from '@/components/game/ProductTour'
 
 interface Item { to: string; label: string; icon: LucideIcon; badge?: string }
 
@@ -154,6 +155,7 @@ export default function AppLayout() {
       </nav>
 
       <MoreSheet open={more} onClose={() => setMore(false)} staff={!!user.is_staff} />
+      <ProductTour />
     </div>
   )
 }
