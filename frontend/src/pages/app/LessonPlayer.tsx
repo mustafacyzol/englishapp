@@ -5,7 +5,9 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { Check, Gem, Infinity as InfinityIcon, Keyboard, Mic, MicOff, Snail, Volume2, X } from 'lucide-react'
 import { img, rewardImg } from '@/lib/assets'
-import { Defne } from '@/components/game/Defne'
+import { Defne, DefnePose } from '@/components/game/Defne'
+import { SKILL } from '@/lib/skills'
+import type { SkillKey } from '@/lib/types'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { canListen, listen, normalize, similarity, speak } from '@/lib/speech'
@@ -61,6 +63,9 @@ export const correctText = (ex: Exercise) => {
   if (ex.type === 'speak') return ex.text
   return ''
 }
+
+/** Which of the four skills each drill trains (mirrors App\\Support\\Skills on the server). */
+const SKILL_OF: Record<Exercise['type'], SkillKey> = { choice: 'reading', fill: 'reading', spot_error: 'reading', sequence: 'reading', match: 'reading', listen_choice: 'listening', listen_type: 'listening', dialogue: 'listening', speak: 'speaking', translate: 'writing' }
 
 /** Each drill gets its own name, colour and kicker so a lesson feels like a set of scenes. */
 const DRILL: Record<Exercise['type'], { label: string; title: string; accent: string; tint: string }> = {
@@ -237,7 +242,10 @@ export default function LessonPlayer() {
       <footer className={clsx('safe-bottom border-t-2 px-5 pb-4 pt-4 transition-colors', checked === null ? 'border-line' : checked ? 'border-transparent bg-mint/15' : 'border-transparent bg-berry/12')}>
         <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center">
           {checked !== null && (
-            <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="flex flex-1 items-center gap-3">
+            <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative flex flex-1 items-center gap-3">
+              <motion.span initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="pointer-events-none absolute -top-[132px] right-0 hidden sm:block">
+                <DefnePose pose={checked ? 'cheer' : 'think'} className="h-32" />
+              </motion.span>
               <span className={clsx('grid size-12 place-items-center rounded-full text-white', checked ? 'bg-mint' : 'bg-berry')}>
                 {checked ? <Check className="size-7" strokeWidth={3} /> : <X className="size-7" strokeWidth={3} />}
               </span>
@@ -288,12 +296,15 @@ export default function LessonPlayer() {
 }
 
 function SpeakerButton({ text, rate, big }: { text: string; rate?: number; big?: boolean }) {
+  const [on, setOn] = useState(false)
+  const play = (r: number) => speak(text, { rate: r, onStart: () => setOn(true), onEnd: () => setOn(false) })
   return (
     <div className="flex gap-3">
-      <button type="button" onClick={() => speak(text, { rate: rate ?? 0.95 })} className={clsx('press grid place-items-center rounded-2xl bg-sky text-white shadow-[0_4px_0_0_var(--color-sky-deep)]', big ? 'size-24' : 'size-14')} aria-label="Dinle">
+      <button type="button" onClick={() => play(rate ?? 0.95)} className={clsx('press relative grid place-items-center rounded-2xl bg-sky text-white shadow-[0_4px_0_0_var(--color-sky-deep)]', big ? 'size-24' : 'size-14')} aria-label="Dinle">
+        {on && [0, 1].map((k) => <motion.span key={k} className="absolute inset-0 rounded-2xl border-2 border-sky" initial={{ scale: 1, opacity: 0.7 }} animate={{ scale: 1.45, opacity: 0 }} transition={{ repeat: Infinity, duration: 1.2, delay: k * 0.6 }} />)}
         <Volume2 className={big ? 'size-11' : 'size-7'} />
       </button>
-      <button type="button" onClick={() => speak(text, { rate: 0.6 })} className={clsx('press grid place-items-center self-end rounded-2xl border-2 border-line bg-card text-sky shadow-hard', big ? 'size-14' : 'size-10')} aria-label="Yavaş dinle">
+      <button type="button" onClick={() => play(0.6)} className={clsx('press grid place-items-center self-end rounded-2xl border-2 border-line bg-card text-sky shadow-hard', big ? 'size-14' : 'size-10')} aria-label="Yavaş dinle">
         <Snail className={big ? 'size-7' : 'size-5'} />
       </button>
     </div>
@@ -306,10 +317,25 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
   }, [ex, ttsRate])
 
   const d = DRILL[ex.type]
+  const sk = SKILL[SKILL_OF[ex.type]]
+
+  // Number keys pick options, like a game controller.
+  useEffect(() => {
+    if (locked || !('options' in ex) || ex.type === 'spot_error' || ex.type === 'dialogue') return
+    const on = (e: KeyboardEvent) => {
+      const n = Number(e.key)
+      if (n >= 1 && n <= ex.options.length && !(e.target instanceof HTMLTextAreaElement) && !(e.target instanceof HTMLInputElement)) setValue(n - 1)
+    }
+    window.addEventListener('keydown', on)
+    return () => window.removeEventListener('keydown', on)
+  }, [ex, locked, setValue])
 
   return (
     <div>
-      <p className={clsx('mb-1.5 text-xs font-black uppercase tracking-[0.2em]', d.accent)}>{d.label}</p>
+      <p className="mb-2 flex items-center gap-2">
+        <span className={clsx('flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider', sk.soft, sk.text)}><sk.icon className="size-3.5" /> {sk.label}</span>
+        <span className={clsx('text-xs font-black uppercase tracking-[0.2em]', d.accent)}>{d.label}</span>
+      </p>
       <h1 className="mb-7 text-2xl font-extrabold sm:text-3xl">{d.title}</h1>
       {(ex.type === 'choice' || ex.type === 'fill' || ex.type === 'listen_choice') && (
         <>
@@ -330,10 +356,26 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
           )}
           <div className="grid gap-3 sm:grid-cols-2">
             {ex.options.map((o, i) => (
-              <button key={i} disabled={locked} onClick={() => { sfx.tap(); setValue(i) }} className={clsx('press flex items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left text-lg font-bold', value === i ? 'border-sky bg-sky/10 text-sky shadow-[0_3px_0_0_var(--color-sky)]' : 'border-line bg-card shadow-hard hover:bg-paper-2')}>
-                <span className="grid size-7 place-items-center rounded-lg border-2 border-current text-xs font-black opacity-70">{i + 1}</span>
+              <motion.button
+                key={i}
+                disabled={locked}
+                onClick={() => { sfx.tap(); setValue(i) }}
+                animate={locked && value === i && i !== ex.answer ? { x: [0, -6, 6, -3, 0] } : {}}
+                className={clsx(
+                  'press flex items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left text-lg font-bold transition-colors',
+                  locked && i === ex.answer
+                    ? 'border-mint bg-mint/12 text-mint-deep shadow-[0_3px_0_0_var(--color-mint)]'
+                    : locked && value === i
+                      ? 'border-berry bg-berry/8 text-berry shadow-[0_3px_0_0_var(--color-berry)]'
+                      : value === i
+                        ? 'border-ink bg-ink text-paper shadow-[0_3px_0_0_#000]'
+                        : 'border-line bg-card shadow-hard hover:border-ink/25',
+                  locked && i !== ex.answer && value !== i && 'opacity-50',
+                )}
+              >
+                <span className="grid size-7 shrink-0 place-items-center rounded-lg border-2 border-current text-xs font-black opacity-70">{locked && i === ex.answer ? <Check className="size-4" strokeWidth={3} /> : i + 1}</span>
                 {o}
-              </button>
+              </motion.button>
             ))}
           </div>
         </>
@@ -685,6 +727,9 @@ export function MicBlocked({ onRetry }: { onRetry: () => void }) {
   )
 }
 
+/** Matched pairs keep a shared colour instead of vanishing, so the board reads as progress. */
+const PAIR_TONES = ['bg-butter/30 text-ink', 'bg-sky/15 text-sky', 'bg-mint/15 text-mint-deep', 'bg-berry/12 text-berry', 'bg-lilac/18 text-lilac', 'bg-flame/10 text-flame']
+
 function MatchGame({ ex, onDone }: { ex: Extract<Exercise, { type: 'match' }>; onDone: () => void }) {
   const left = useMemo(() => shuffle(ex.pairs.map((p, i) => ({ t: p[0], i }))), [ex])
   const right = useMemo(() => shuffle(ex.pairs.map((p, i) => ({ t: p[1], i }))), [ex])
@@ -710,26 +755,43 @@ function MatchGame({ ex, onDone }: { ex: Extract<Exercise, { type: 'match' }>; o
     }
   }
 
+  const tone = (i: number) => PAIR_TONES[matched.indexOf(i) % PAIR_TONES.length]
   const cell = (side: 'l' | 'r', it: { t: string; i: number }) => {
     const isSel = sel?.side === side && sel.i === it.i
     const isDone = matched.includes(it.i)
     return (
       <motion.button
         key={side + it.i}
-        animate={wrong === it.i && !isDone ? { x: [0, -6, 6, 0] } : {}}
+        layout
+        animate={wrong === it.i && !isDone ? { x: [0, -7, 7, -4, 0] } : isDone ? { scale: [1, 1.06, 1] } : {}}
+        transition={{ duration: 0.3 }}
         onClick={() => pick(side, it.i, it.t)}
         disabled={isDone}
-        className={clsx('press rounded-2xl border-2 px-3 py-4 text-lg font-bold', isDone ? 'border-transparent bg-paper-2 text-ink-soft/50' : isSel ? 'border-sky bg-sky/10 text-sky shadow-[0_3px_0_0_var(--color-sky)]' : 'border-line bg-card shadow-hard')}
+        className={clsx(
+          'press relative flex min-h-16 items-center justify-center gap-2 rounded-2xl border-2 px-3 py-3 text-center text-lg font-bold transition-colors',
+          isDone ? clsx('border-transparent', tone(it.i)) : isSel ? 'border-ink bg-ink text-paper shadow-[0_3px_0_0_#000]' : 'border-line bg-card shadow-hard hover:border-ink/25',
+        )}
       >
+        {side === 'l' && !isDone && <Volume2 className={clsx('size-4 shrink-0', isSel ? 'text-paper/70' : 'text-ink-soft')} />}
         {it.t}
+        {isDone && <Check className="absolute right-2.5 top-2.5 size-4" strokeWidth={3} />}
       </motion.button>
     )
   }
 
   return (
-    <div className="grid grid-cols-2 gap-3">
-      <div className="grid gap-3">{left.map((it) => cell('l', it))}</div>
-      <div className="grid gap-3">{right.map((it) => cell('r', it))}</div>
+    <div>
+      <div className="mb-3 grid grid-cols-2 gap-3 text-xs font-black uppercase tracking-[0.14em] text-ink-soft">
+        <span className="text-center">İngilizce</span>
+        <span className="text-center">Türkçe</span>
+      </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div className="grid gap-3">{left.map((it) => cell('l', it))}</div>
+        <div className="grid gap-3">{right.map((it) => cell('r', it))}</div>
+      </div>
+      <div className="mt-5 flex items-center justify-center gap-1.5" aria-label={`${matched.length}/${ex.pairs.length} eşleşti`}>
+        {ex.pairs.map((_, i) => <span key={i} className={clsx('h-2 w-8 rounded-full transition-colors', i < matched.length ? 'bg-mint' : 'bg-paper-2')} />)}
+      </div>
     </div>
   )
 }
