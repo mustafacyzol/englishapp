@@ -35,7 +35,7 @@ export default function Login() {
   }
 
   return (
-    <AuthShell title="Tekrar hoş geldin!" subtitle="Serin seni bekliyor 🔥" footer={<>Hesabın yok mu? <Link to="/register" className="font-extrabold text-flame">Ücretsiz kayıt ol</Link></>}>
+    <AuthShell title="Tekrar hoş geldin!" subtitle="Kaldığın yerden devam edelim." footer={<>Hesabın yok mu? <Link to="/register" className="font-extrabold text-flame">Ücretsiz kayıt ol</Link></>}>
       <form onSubmit={submit} className="space-y-4">
         {err && <Alert tone="error">{err.first()}</Alert>}
         <Input label="E-posta veya kullanıcı adı" autoComplete="username" value={login} onChange={(e) => setLogin(e.target.value)} required autoFocus />

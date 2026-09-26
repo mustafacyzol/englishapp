@@ -2,116 +2,131 @@ import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Quote, Star } from 'lucide-react'
+import { Star } from 'lucide-react'
 import { get } from '@/lib/api'
-import { rewardImg } from '@/lib/assets'
+import { PHOTO } from '@/lib/assets'
 import { Logo } from '@/components/game/Logo'
 import { Img } from '@/components/ui/Img'
 import { ThemeButton } from '@/components/ui/ThemeToggle'
 import type { Review } from '../public/Landing'
 
-/** Drifting highlight chips + a rotating student quote — the login side feels alive,
- *  and a newcomer sees real outcomes before they even sign in. */
-function Showcase() {
+export interface Slide { src: string; caption: string }
+
+/** Real moments of learning — each photo carries a short, honest caption of what it shows. */
+export const LOGIN_SLIDES: Slide[] = [
+  { src: PHOTO.auth, caption: 'Sabah kahvesiyle beş dakikalık ders' },
+  { src: PHOTO.listen, caption: 'Vapurda bir hikâye dinlemek' },
+  { src: PHOTO.classroom, caption: 'Bayrak Dil Okulları sınıflarında pratik' },
+  { src: PHOTO.speak, caption: 'Kafede Defne ile konuşma provası' },
+]
+export const REGISTER_SLIDES: Slide[] = [
+  { src: PHOTO.hero, caption: 'Kendi temponda, kendi köşende' },
+  { src: PHOTO.read, caption: 'Çay molasında seviyene göre okuma' },
+  { src: PHOTO.write, caption: 'Yazdığını Defne ile düzeltmek' },
+  { src: PHOTO.reception, caption: 'Şubelerimizde canlı ders kuponunu kullan' },
+]
+
+const DURATION = 6500
+
+/**
+ * The photo side of the auth pages: full-bleed photographs that crossfade with a
+ * slow push-in, story-style progress bars, and a single quiet quote card.
+ */
+function Showcase({ slides }: { slides: Slide[] }) {
   const { data } = useQuery({ queryKey: ['landing'], queryFn: () => get<{ testimonials?: Review[] }>('/landing'), staleTime: 600_000 })
   const reviews = data?.testimonials ?? []
   const [i, setI] = useState(0)
   const reduced = useReducedMotion()
 
   useEffect(() => {
-    if (reduced || reviews.length < 2) return
-    const t = setInterval(() => setI((x) => (x + 1) % reviews.length), 5000)
-    return () => clearInterval(t)
-  }, [reviews.length, reduced])
+    if (reduced) return
+    const t = setTimeout(() => setI((x) => (x + 1) % slides.length), DURATION)
+    return () => clearTimeout(t)
+  }, [i, reduced, slides.length])
 
-  const r = reviews[i]
-  const bubbles = [
-    { t: '🔥 97 gün seri', c: 'text-flame', pos: 'left-8 top-28', d: 0 },
-    { t: '⭐ Elmas Lig', c: 'text-butter-deep', pos: 'right-10 top-40', d: 0.6 },
-    { t: '💬 Defne ile mülakat', c: 'text-sky', pos: 'left-12 top-[46%]', d: 1.2 },
-    { t: '✅ B2 seviye', c: 'text-mint-deep', pos: 'right-8 top-[54%]', d: 1.8 },
-  ]
+  const s = slides[i]
+  const r = reviews.length ? reviews[i % reviews.length] : null
 
   return (
-    <aside className="relative hidden overflow-hidden bg-gradient-to-br from-flame/12 via-paper to-sky/12 lg:block">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60 [background-image:radial-gradient(var(--line)_1.4px,transparent_1.4px)] [background-size:26px_26px]" />
-      <span className="glow left-[-15%] top-[-10%] size-[420px] bg-flame/20" />
-      <span className="glow bottom-[-12%] right-[-10%] size-[380px] bg-sky/16" />
+    <aside className="relative hidden overflow-hidden bg-[#10131a] lg:block">
+      <AnimatePresence initial={false}>
+        <motion.div key={s.src} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1.2, ease: 'easeInOut' }}>
+          <motion.div className="size-full" initial={{ scale: reduced ? 1 : 1.08 }} animate={{ scale: 1 }} transition={{ duration: DURATION / 1000 + 1.2, ease: 'linear' }}>
+            <Img src={s.src} alt="" className="photo" />
+          </motion.div>
+        </motion.div>
+      </AnimatePresence>
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/5 to-black/80" />
 
-      <Link to="/" className="absolute left-10 top-10 z-10 rounded-2xl bg-card/90 px-4 py-2 shadow-hard-sm backdrop-blur"><Logo small /></Link>
-
-      {/* drifting bubbles */}
-      {!reduced &&
-        bubbles.map((b) => (
-          <motion.span
-            key={b.t}
-            className={`absolute ${b.pos} rounded-full border-2 border-line bg-card/95 px-3.5 py-2 text-sm font-extrabold shadow-soft backdrop-blur ${b.c}`}
-            animate={{ y: [0, -12, 0] }}
-            transition={{ repeat: Infinity, duration: 5, delay: b.d, ease: 'easeInOut' }}
-          >
-            {b.t}
-          </motion.span>
+      {/* story-style progress */}
+      <div className="absolute inset-x-10 top-8 z-10 flex gap-1.5">
+        {slides.map((x, k) => (
+          <button key={x.src} onClick={() => setI(k)} aria-label={`${k + 1}. fotoğraf`} className="h-1 flex-1 overflow-hidden rounded-full bg-white/30">
+            {k < i && <span className="block h-full w-full bg-white" />}
+            {k === i && <motion.span key={i} className="block h-full bg-white" initial={{ width: reduced ? '100%' : '0%' }} animate={{ width: '100%' }} transition={{ duration: DURATION / 1000, ease: 'linear' }} />}
+          </button>
         ))}
+      </div>
+      <Link to="/" className="absolute left-10 top-14 z-10 rounded-2xl bg-white/95 px-4 py-2 text-[#1f2433] shadow-soft"><Logo small /></Link>
 
-      {/* rotating quote */}
-      <div className="absolute inset-x-10 bottom-10">
+      <div className="absolute inset-x-10 bottom-10 z-10 text-white">
+        <AnimatePresence mode="wait">
+          <motion.p key={s.caption} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.4 }} className="mb-5 text-xs font-black uppercase tracking-[0.18em] text-white/75">
+            {s.caption}
+          </motion.p>
+        </AnimatePresence>
         <AnimatePresence mode="wait">
           {r && (
-            <motion.figure
-              key={r.id}
-              initial={reduced ? false : { opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={reduced ? undefined : { opacity: 0, y: -16 }}
-              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-              className="rounded-3xl bg-card/95 p-6 shadow-soft backdrop-blur"
-            >
-              <Quote className="mb-2 size-7 text-flame/30" />
-              <blockquote className="font-display text-lg font-extrabold leading-snug">“{r.quote}”</blockquote>
-              <figcaption className="mt-4 flex items-center gap-3">
-                <span className="grid size-10 shrink-0 place-items-center rounded-2xl bg-sky font-display font-black text-white">{r.name[0]}</span>
-                <span className="min-w-0 flex-1">
-                  <span className="block font-extrabold">{r.name}</span>
-                  <span className="block truncate text-sm text-ink-soft">{r.role}</span>
-                </span>
-                {!!r.streak && (
-                  <span className="ink-chip shrink-0 py-0.5 text-xs">
-                    <Img src={rewardImg('flame')} alt="" className="size-4" /> {r.streak}g
-                  </span>
-                )}
+            <motion.figure key={r.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }} className="max-w-lg">
+              <div className="mb-3 flex gap-0.5">{[...Array(r.rating || 5)].map((_, k) => <Star key={k} className="size-4 fill-butter text-butter" />)}</div>
+              <blockquote className="font-read text-[22px] leading-snug xl:text-[26px]">“{r.quote}”</blockquote>
+              <figcaption className="mt-4 flex items-center gap-3 text-sm">
+                <span className="grid size-9 place-items-center rounded-full bg-white/15 font-display font-black backdrop-blur">{r.name[0]}</span>
+                <span><b className="block">{r.name}</b><span className="text-white/70">{r.role}</span></span>
               </figcaption>
-              {reviews.length > 1 && (
-                <div className="mt-4 flex gap-1.5">
-                  {reviews.map((x, k) => (
-                    <button key={x.id} onClick={() => setI(k)} aria-label={`${k + 1}. yorum`} className={`h-1.5 rounded-full transition-all ${k === i ? 'w-6 bg-flame' : 'w-1.5 bg-line'}`} />
-                  ))}
-                </div>
-              )}
             </motion.figure>
           )}
         </AnimatePresence>
-        {!r && (
-          <div className="flex items-center gap-1 rounded-3xl bg-card/95 p-6 shadow-soft backdrop-blur">
-            {[...Array(5)].map((_, k) => <Star key={k} className="size-5 fill-butter text-butter" />)}
-            <span className="ml-2 font-extrabold">Öğrencilerimiz DilGO’yu seviyor.</span>
-          </div>
-        )}
       </div>
     </aside>
   )
 }
 
-export function AuthShell({ title, subtitle, children, footer, wide }: { title: string; subtitle?: ReactNode; children: ReactNode; footer?: ReactNode; wide?: boolean }) {
+/** On phones the photos become a slim rotating banner above the form. */
+function MobileBanner({ slides }: { slides: Slide[] }) {
+  const [i, setI] = useState(0)
+  const reduced = useReducedMotion()
+  useEffect(() => {
+    if (reduced) return
+    const t = setInterval(() => setI((x) => (x + 1) % slides.length), DURATION)
+    return () => clearInterval(t)
+  }, [reduced, slides.length])
   return (
-    <div className="grid min-h-dvh bg-card lg:grid-cols-[1.05fr_1fr]">
-      <Showcase />
-      <main className="flex flex-col px-5 py-8 sm:px-10">
+    <div className="relative mb-7 h-36 overflow-hidden rounded-3xl bg-paper-2 sm:h-44 lg:hidden">
+      <AnimatePresence initial={false}>
+        <motion.div key={slides[i].src} className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 1 }}>
+          <Img src={slides[i].src} alt="" className="photo" />
+        </motion.div>
+      </AnimatePresence>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+      <p className="absolute inset-x-4 bottom-3 text-xs font-black uppercase tracking-[0.14em] text-white">{slides[i].caption}</p>
+    </div>
+  )
+}
+
+export function AuthShell({ title, subtitle, children, footer, wide, slides = LOGIN_SLIDES, aside, banner = true, lead }: { lead?: ReactNode; title: ReactNode; subtitle?: ReactNode; children: ReactNode; footer?: ReactNode; wide?: boolean; slides?: Slide[]; aside?: ReactNode; banner?: boolean }) {
+  return (
+    <div className="grid min-h-dvh bg-card lg:h-dvh lg:grid-cols-[1fr_1fr] xl:grid-cols-[1.1fr_1fr]">
+      {aside ?? <Showcase slides={slides} />}
+      <main className="flex flex-col px-5 py-6 sm:px-10 lg:overflow-y-auto">
         <div className="flex items-center justify-between">
-          <Link to="/" className="lg:hidden"><Logo small /></Link>
-          <span className="hidden lg:block" />
+          <Link to="/" className="lg:invisible"><Logo small /></Link>
           <ThemeButton />
         </div>
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} className={`mx-auto my-auto w-full ${wide ? 'max-w-lg' : 'max-w-md'}`}>
-          <h1 className="text-4xl">{title}</h1>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className={`mx-auto my-auto w-full py-8 ${wide ? 'max-w-xl' : 'max-w-md'}`}>
+          {banner && <MobileBanner slides={slides} />}
+          {lead}
+          <h1 className="text-3xl sm:text-4xl">{title}</h1>
           {subtitle && <p className="mt-2 text-lg text-ink-soft">{subtitle}</p>}
           <div className="mt-8">{children}</div>
           {footer && <div className="mt-8 text-center font-semibold text-ink-soft">{footer}</div>}

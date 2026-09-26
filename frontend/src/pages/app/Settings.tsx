@@ -8,6 +8,8 @@ import { useAuth } from '@/lib/auth'
 import { dateTR, GOALS, tl } from '@/lib/format'
 import { speak } from '@/lib/speech'
 import type { Me } from '@/lib/types'
+import { INTERESTS, STUDY_TIMES } from '@/lib/onboarding'
+import { SKILL, SKILLS } from '@/lib/skills'
 import { Button } from '@/components/ui/Button'
 import { Input, Toggle } from '@/components/ui/Field'
 import { Alert, Modal, PageHeader } from '@/components/ui/Misc'
@@ -67,6 +69,36 @@ export default function Settings() {
         <div className="flex flex-wrap gap-2">
           {GOALS.map((g) => (
             <button key={g.key} onClick={() => save.mutate({ learning_goal: g.key })} className={clsx('rounded-xl border-2 border-line px-3 py-1.5 font-bold', user.learning_goal === g.key ? 'bg-butter text-ink shadow-hard-sm' : 'bg-card')}>{g.emoji} {g.label}</button>
+          ))}
+        </div>
+      </Section>
+
+      <Section title="Öğrenme tercihlerin">
+        <p className="mb-4 text-sm text-ink-soft">Defne sohbetleri, hikâye önerileri ve günlük planın bu seçimlere göre hazırlanır.</p>
+        <p className="mb-2 text-sm font-bold">İlgi alanların</p>
+        <div className="mb-5 flex flex-wrap gap-2">
+          {INTERESTS.map((o) => {
+            const on = user.interests?.includes(o.key)
+            const next = on ? user.interests.filter((x) => x !== o.key) : [...(user.interests ?? []), o.key]
+            return (
+              <button key={o.key} onClick={() => next.length && save.mutate({ interests: next })} aria-pressed={on} className={clsx('flex items-center gap-2 rounded-full border-2 py-1 pl-1 pr-3 text-sm font-bold transition', on ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink/30')}>
+                <img src={o.photo} alt="" className="size-7 rounded-full object-cover" /> {o.label}
+              </button>
+            )
+          })}
+        </div>
+        <p className="mb-2 text-sm font-bold">Odak beceri</p>
+        <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {SKILLS.map((k) => (
+            <button key={k} onClick={() => save.mutate({ focus_skill: k })} className={clsx('flex items-center justify-center gap-1.5 rounded-xl border-2 py-2 text-sm font-bold', user.focus_skill === k ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>
+              {(() => { const I = SKILL[k].icon; return <I className="size-4" /> })()} {SKILL[k].label}
+            </button>
+          ))}
+        </div>
+        <p className="mb-2 text-sm font-bold">Çalışma saatin <span className="font-normal text-ink-soft">— hatırlatmalar bu saate göre gelir</span></p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {STUDY_TIMES.map((t) => (
+            <button key={t.key} onClick={() => save.mutate({ study_time: t.key })} className={clsx('rounded-xl border-2 py-2 text-sm font-bold', user.study_time === t.key ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>{t.label}</button>
           ))}
         </div>
       </Section>
