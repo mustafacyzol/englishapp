@@ -117,6 +117,7 @@ class DuelService
             'ghost_trophies' => $ghost?->duel_trophies ?? max(0, $user->duel_trophies + random_int(-40, 40)),
             'ghost_skills' => $ghostSkills,
             'rounds' => $rounds,
+            'status' => 'active',
         ]);
     }
 

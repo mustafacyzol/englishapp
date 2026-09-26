@@ -152,6 +152,20 @@ const FREE: [string, string][] = [
 ]
 
 const convs: Record<number, Json> = {}
+let activeDuel: Json = null
+
+/** Same rules as LessonService::gradeOne on the server. */
+function gradeEx(ex: Json, a: Json): boolean {
+  const norm = (t: string) => String(t ?? '').toLowerCase().replace(/[’']/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim()
+  if (['choice', 'fill', 'listen_choice', 'dialogue'].includes(ex.type)) return String(a) === String(ex.answer)
+  if (['translate', 'listen_type', 'order'].includes(ex.type)) return [ex.answer, ...(ex.alternatives ?? [])].some((x: string) => norm(x) === norm(a))
+  if (ex.type === 'speak') {
+    const w = norm(a).split(' ').filter(Boolean)
+    const t = new Set(norm(ex.text).split(' '))
+    return w.length > 0 && w.filter((x) => t.has(x)).length / Math.max(w.length, t.size) >= 0.6
+  }
+  return true
+}
 let badgeShown = false
 let nextConv = 100
 let nextMsg = 1000
@@ -177,6 +191,7 @@ function getRoute(path: string, admin: boolean): Json {
   if (db[base] !== undefined) return db[base]
 
   let m
+  if (/^\/invites\/[^/]+$/.test(base)) return { institution: { name: 'Demo Koleji', type: 'school', city: 'İzmir' }, email: 'yeni.ogrenci@example.com', name: null, role: 'student' }
   if ((m = base.match(/^\/ai\/conversations\/(\d+)$/))) {
     const c = convs[+m[1]]
     if (c) return { conversation: c, usage: usage() }
@@ -373,6 +388,65 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     syncUser()
     return { user: me() }
   }
+  // --- Gölge Düellosu (graded here the same way the server does)
+  if (path === '/duel') {
+    const ov = db['/duel']
+    if (ov.me.tickets_left === 0) throw new DemoError(402, 'Bugünkü ücretsiz düello hakların bitti. Yarın yenilenir — ya da Premium ile sınırsız oyna.')
+    if (ov.me.tickets_left !== null) ov.me.tickets_left--
+    const d = structuredClone(F.post.duel_start)
+    d.duel.id = nextMsg++
+    activeDuel = d.duel
+    return d
+  }
+  if ((m = path.match(/^\/duel\/(\d+)\/finish$/)) && activeDuel) {
+    const ov = db['/duel']
+    const pts = (ok: boolean, ms: number) => (ok ? 100 + Math.max(0, 50 - Math.floor(ms / 400)) : 0)
+    const items = activeDuel.rounds.flatMap((r: Json) => r.items.map((it: Json) => ({ ...it, skill: r.skill })))
+    const answers: Json[] = body.answers ?? []
+    const results = items.map((it: Json, i: number) => gradeEx(it.ex, answers[i]?.[0]))
+    const score = items.reduce((s: number, _: Json, i: number) => s + pts(results[i], answers[i]?.[1] ?? 20000), 0)
+    const ghost = items.reduce((s: number, it: Json) => s + pts(it.ghost.correct, it.ghost.ms), 0)
+    const result = score > ghost ? 'win' : score < ghost ? 'loss' : 'draw'
+    const delta = result === 'win' ? 24 + Math.min(8, Math.floor((score - ghost) / 60)) : result === 'draw' ? 4 : -Math.min(12, ov.me.trophies)
+    const before = ov.me.rank
+    ov.me.trophies += delta
+    ov.me.best = Math.max(ov.me.best, ov.me.trophies)
+    const rank = [...ov.ranks].reverse().find((r: Json) => ov.me.trophies >= r.min)
+    ov.me.rank = rank
+    ov.me.next_rank = ov.ranks.find((r: Json) => r.min > ov.me.trophies) ?? null
+    ov.me[result === 'win' ? 'wins' : result === 'loss' ? 'losses' : 'draws']++
+    ov.me.win_streak = result === 'win' ? ov.me.win_streak + 1 : 0
+    ov.recent.unshift({ id: activeDuel.id, ghost_name: activeDuel.ghost.name, result, score, ghost_score: ghost, delta, at: new Date().toISOString() })
+    const correct = results.filter(Boolean).length
+    const r = reward(5 + correct * 2 + (result === 'win' ? 5 : 0), {}, { duels: 1 })
+    if (result === 'win') addGems(5)
+    activeDuel = null
+    return {
+      result, score, ghost_score: ghost, correct, total: items.length, results, ghost_results: items.map((it: Json) => it.ghost.correct),
+      trophies_delta: delta, trophies: ov.me.trophies, rank, rank_up: rank.min > before.min, next_rank: ov.me.next_rank,
+      win_streak: ov.me.win_streak, gems: result === 'win' ? 5 : 0, chest: result === 'win' && ov.me.win_streak % 3 === 0, reward: r,
+    }
+  }
+
+  // --- institutions
+  if (path === '/institution/invite') {
+    const rep = db['/institution']
+    const rows: Json[] = body.rows ?? []
+    for (const row of rows) {
+      rep.members.push({ id: nextMsg++, name: row.name ?? null, email: row.email, class_name: row.class_name ?? null, role: 'student', status: 'invited', invited_at: new Date().toISOString(), joined_at: null, last_active_at: null, cefr_level: null, xp_total: 0, week_xp: 0, streak: 0, lessons: 0, skills: null })
+    }
+    rep.summary.students += rows.length
+    rep.summary.invited += rows.length
+    rep.institution.seats_used += rows.length
+    return { invited: rows.length, skipped: [] }
+  }
+  if ((m = path.match(/^\/institution\/members\/(\d+)$/)) && method === 'DELETE') {
+    const rep = db['/institution']
+    rep.members = rep.members.filter((x: Json) => x.id !== +m![1])
+    return ok('ok')
+  }
+  if (path === '/institution/join' || /^\/invites\/[^/]+\/accept$/.test(path)) return { ok: true, user: me() }
+
   if (path === '/checkout/quote') return body.coupon ? F.post.quote_coupon ?? F.post.quote : F.post.quote
   if (path === '/checkout') return { order: { uuid: 'demo-order', status: 'paid' }, checkout: null }
   if (path === '/notifications/read') return null

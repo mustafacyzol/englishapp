@@ -22,11 +22,11 @@ interface LessonData {
   lesson: { id: number; title: string; xp_reward: number; exercises: Exercise[] }
   hearts: { hearts: number; unlimited: boolean }
 }
-type Answer = number | string | boolean | number[] | null
+export type Answer = number | string | boolean | number[] | null
 
 const shuffle = <T,>(a: T[]) => [...a].sort(() => Math.random() - 0.5)
 
-function isCorrect(ex: Exercise, v: Answer): boolean {
+export function isCorrect(ex: Exercise, v: Answer): boolean {
   switch (ex.type) {
     case 'choice':
     case 'fill':
@@ -53,7 +53,7 @@ function isCorrect(ex: Exercise, v: Answer): boolean {
 const fixedSentence = (ex: Extract<Exercise, { type: 'spot_error' }>) =>
   ex.words.map((w, i) => (i === ex.error_index ? ex.options[ex.answer] : w)).join(' ')
 
-const correctText = (ex: Exercise) => {
+export const correctText = (ex: Exercise) => {
   if (ex.type === 'spot_error') return fixedSentence(ex)
   if (ex.type === 'sequence') return ex.answer.map((i) => ex.items[i]).join(' → ')
   if ('options' in ex && typeof ex.answer === 'number') return ex.options[ex.answer]
@@ -300,7 +300,7 @@ function SpeakerButton({ text, rate, big }: { text: string; rate?: number; big?:
   )
 }
 
-function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exercise; value: Answer; setValue: (v: Answer) => void; locked: boolean; ttsRate?: number }) {
+export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exercise; value: Answer; setValue: (v: Answer) => void; locked: boolean; ttsRate?: number }) {
   useEffect(() => {
     if ('audio' in ex && ex.audio) setTimeout(() => speak(ex.audio!, { rate: ttsRate }), 250)
   }, [ex, ttsRate])

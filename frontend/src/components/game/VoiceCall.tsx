@@ -85,7 +85,11 @@ export function VoiceCall({
     if (!canListen()) return
     stopSpeaking()
     const state = await ensureMic()
-    if (state === 'denied') return onMicBlocked()
+    if (state === 'denied') {
+      // Don't keep re-asking after every reply — fall back to tap-to-talk.
+      setHandsFree(false)
+      return onMicBlocked()
+    }
     setHeard('')
     setListening(true)
     stopListen.current = listen({
@@ -94,7 +98,12 @@ export function VoiceCall({
         setHeard(t)
         onSend(t)
       },
-      onError: (e) => e === 'not-allowed' && onMicBlocked(),
+      onError: (e) => {
+        if (e === 'not-allowed') {
+          setHandsFree(false)
+          onMicBlocked()
+        }
+      },
       onEnd: () => setListening(false),
     })
   }, [onSend, onMicBlocked])

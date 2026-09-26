@@ -21,6 +21,8 @@ export interface Dashboard {
   unread_notifications: number
   available_items: number
   announcement: string | null
+  skills?: import('@/lib/skills').SkillReport
+  plan?: import('@/pages/app/Learn').PlanItem[]
 }
 
 const DAYS = ['Pt', 'Sa', 'Ça', 'Pe', 'Cu', 'Ct', 'Pz']

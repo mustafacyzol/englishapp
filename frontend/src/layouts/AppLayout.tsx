@@ -126,9 +126,7 @@ export default function AppLayout() {
 
         <div className="flex flex-1 gap-8 px-4 pb-32 pt-6 sm:px-6 md:px-8 lg:pb-12 xl:gap-10">
           <main className="min-w-0 flex-1">
-            <AnimatePresence mode="wait" initial={false}>
-              <PageTransition key={loc.pathname}>{outlet}</PageTransition>
-            </AnimatePresence>
+            <PageTransition key={loc.pathname}>{outlet}</PageTransition>
           </main>
           {withRail && data && <SideRail data={data} />}
         </div>

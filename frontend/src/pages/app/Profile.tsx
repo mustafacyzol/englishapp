@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
+import { SkillMeter } from '@/components/game/SkillMeter'
 import clsx from 'clsx'
 import { BookOpen, Brain, ChevronRight, Clock, Flame, Layers, Mic, Settings, Share2, Target, Zap } from 'lucide-react'
 import { get } from '@/lib/api'
@@ -80,8 +81,10 @@ export default function Profile() {
         <StatTile icon={<Target className="size-6 text-mint-deep" />} value={user.stats.streak_longest} label="En uzun seri" />
       </div>
 
+      <SkillMeter className="mb-6" />
+
       <section className="ink-card mb-6 p-5">
-        <h2 className="mb-4 text-xl font-extrabold">Dört beceri</h2>
+        <h2 className="mb-4 text-xl font-extrabold">İstatistikler</h2>
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Skill icon={BookOpen} label="Okunan hikaye" v={s?.stories_read} color="bg-butter" />
           <Skill icon={Layers} label="Kelime" v={s?.words_saved} color="bg-mint" />

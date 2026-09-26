@@ -60,6 +60,15 @@ class UserPresenter
         ];
     }
 
+    /** The learner's school/company membership, if any (students hold a seat, managers see the panel). */
+    private static function institution(User $user): array
+    {
+        $m = InstitutionMember::query()->where('user_id', $user->id)->where('status', 'active')
+            ->orderByRaw("CASE WHEN role = 'manager' THEN 0 ELSE 1 END")->with('institution:id,name,type')->first();
+
+        return ['institution' => $m?->institution?->only(['id', 'name', 'type']), 'institution_role' => $m?->role];
+    }
+
     public static function public(User $user): array
     {
         return [

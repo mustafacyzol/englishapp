@@ -99,7 +99,10 @@ class InstitutionService
     {
         return DB::transaction(function () use ($member, $user) {
             $member->update(['user_id' => $user->id, 'status' => 'active', 'joined_at' => $member->joined_at ?? now(), 'invite_token' => null, 'name' => $member->name ?? $user->name]);
-            $user->forceFill(['institution_id' => $member->institution_id])->save();
+            // Only students occupy a seat (and get Premium through it); managers just get the panel.
+            if ($member->role === 'student') {
+                $user->forceFill(['institution_id' => $member->institution_id])->save();
+            }
 
             return $member;
         });

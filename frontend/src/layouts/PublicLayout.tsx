@@ -59,9 +59,7 @@ export default function PublicLayout() {
       <MenuSheet open={open} onClose={() => setOpen(false)} />
       <ScrollProgress />
 
-      <AnimatePresence mode="wait" initial={false}>
-        <PageTransition key={loc.pathname}>{outlet}</PageTransition>
-      </AnimatePresence>
+      <PageTransition key={loc.pathname}>{outlet}</PageTransition>
 
       <Footer />
     </div>

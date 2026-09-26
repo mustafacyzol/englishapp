@@ -1,15 +1,18 @@
 import { type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 
-/** Route transition wrapper: a short fade + lift, keyed by the parent on pathname. */
+/**
+ * Route transition: an enter-only fade + lift, keyed by the parent on pathname.
+ * No exit/"wait" phase on purpose — fast tab switching could otherwise leave the
+ * previous page stuck on screen while its exit animation was interrupted.
+ */
 export function PageTransition({ children }: { children: ReactNode }) {
   const reduced = useReducedMotion()
   return (
     <motion.div
       initial={reduced ? false : { opacity: 0, y: 14 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={reduced ? undefined : { opacity: 0, y: -8 }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
     </motion.div>
