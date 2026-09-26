@@ -39,6 +39,9 @@ const CAT: Record<string, string> = { grammar: 'Dilbilgisi', vocabulary: 'Kelime
 const RUBRIC: [keyof NonNullable<Result['rubric']>, string][] = [['task', 'Görev'], ['grammar', 'Dilbilgisi'], ['vocabulary', 'Kelime'], ['organisation', 'Akış']]
 const SCAN_STEPS = ['Dilbilgisine bakıyorum…', 'Kelime seçimlerini inceliyorum…', 'Cümle akışını değerlendiriyorum…', 'Notlarımı hazırlıyorum…']
 
+const CEFR = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
+/** A task suits you at your level or one step above — a stretch, not a wall. */
+const suits = (task: string, mine?: string) => CEFR.indexOf(task) <= CEFR.indexOf(mine ?? 'A1') + 1
 const countWords = (t: string) => (t.trim() ? t.trim().split(/\s+/).length : 0)
 const hasWord = (text: string, w: string) => text.toLowerCase().includes(w.toLowerCase())
 
@@ -175,7 +178,7 @@ function TaskPicker({ onPick, level }: { onPick: (t: Task) => void; level?: stri
           <motion.button key={t.key} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }} onClick={() => onPick(t)} className="group overflow-hidden rounded-3xl border-2 border-line bg-card text-left transition hover:-translate-y-1 hover:shadow-soft">
             <div className="relative aspect-[16/10] overflow-hidden">
               <Img src={t.photo} alt="" className="photo transition duration-700 group-hover:scale-105" />
-              <span className={clsx('absolute left-3 top-3 rounded-lg px-2 py-0.5 text-xs font-black', t.level <= (level ?? 'A1') ? 'bg-mint text-white' : 'bg-card/95')}>{t.level}</span>
+              <span className={clsx('absolute left-3 top-3 rounded-lg px-2 py-0.5 text-xs font-black', suits(t.level, level) ? 'bg-mint text-white' : 'bg-card/95')}>{t.level}</span>
             </div>
             <div className="p-5">
               <p className="text-lg font-black leading-tight">{t.title}</p>

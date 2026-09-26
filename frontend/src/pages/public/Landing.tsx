@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useInView, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, ArrowRight, BookOpen, Check, Headphones, Mic, PenLine, Quote, Star } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BarChart3, BookOpen, Building2, Check, Ghost, Headphones, Mail, Mic, PenLine, Quote, Star, Trophy } from 'lucide-react'
 import { get } from '@/lib/api'
 import { tl } from '@/lib/format'
 import type { Plan } from '@/lib/types'
@@ -12,6 +12,8 @@ import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
 import { Reveal } from '@/components/motion/Page'
 import { Defne } from '@/components/game/Defne'
+import { TUTOR } from '@/lib/tutor'
+import { SKILL, SKILLS as SKILL_KEYS } from '@/lib/skills'
 
 export interface Review {
   id: number
@@ -36,9 +38,11 @@ export default function Landing() {
       <Ticker reviews={reviews} />
       <SkillSwitcher />
       <MeetDefne />
+      <DuelShowcase />
       <RewardTrack />
       <Reviews reviews={reviews} />
       <School />
+      <ForInstitutions />
       <Pricing plans={data?.plans} />
       <Faq />
       <FinalCta />
@@ -406,11 +410,12 @@ function MeetDefne() {
   }, [inView, step])
 
   return (
-    <section id="defne" className="relative overflow-hidden bg-sky/6 py-24">
+    <section id="defne" className="relative overflow-hidden bg-sage/8 py-24">
       <div ref={ref} className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 lg:grid-cols-2">
         <Reveal>
-          <p className="mb-2 font-extrabold uppercase tracking-widest text-sky">Yapay zekâ öğretmenin</p>
+          <p className="mb-2 font-extrabold uppercase tracking-widest text-sage-deep dark:text-sage">Yapay zekâ koçun</p>
           <h2 className="text-4xl leading-tight sm:text-5xl">Defne seni tanıyor.</h2>
+          <p className="mt-4 max-w-lg text-lg text-ink-soft">Adı defne yaprağından: zaferin simgesi. Sesli aramada yüzünü görürsün, konuşur, dinler, hatanı o an Türkçe açıklar.</p>
           <ul className="mt-8 space-y-4 text-lg">
             {[
               'Seviyeni, hedefini ve kaydettiğin kelimeleri bilir.',
@@ -419,7 +424,7 @@ function MeetDefne() {
               'Yazılı ya da sesli. Gece yarısı bile hazır.',
             ].map((t) => (
               <li key={t} className="flex gap-3">
-                <span className="mt-1 grid size-6 shrink-0 place-items-center rounded-full bg-sky text-white"><Check className="size-4" strokeWidth={3} /></span>
+                <span className="mt-1 grid size-6 shrink-0 place-items-center rounded-full bg-sage text-white"><Check className="size-4" strokeWidth={3} /></span>
                 <span>{t}</span>
               </li>
             ))}
@@ -427,8 +432,13 @@ function MeetDefne() {
           <LinkButton to="/register" className="mt-9" size="lg">Defne ile konuşmaya başla</LinkButton>
         </Reveal>
 
-        <Reveal delay={0.1}>
-          <div className="relative overflow-hidden rounded-[32px] bg-card p-5 shadow-soft ring-1 ring-line">
+        <Reveal delay={0.1} className="relative">
+          {/* the call: Defne's live portrait, with the conversation card overlapping it */}
+          <div className="relative ml-auto aspect-[4/5] w-full max-w-[400px] overflow-hidden rounded-[32px] bg-[#141a24] shadow-soft">
+            <video src={TUTOR.video.idle} poster={TUTOR.portrait} muted loop autoPlay playsInline className="size-full object-cover" />
+            <span className="absolute left-4 top-4 flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1 text-xs font-extrabold text-white backdrop-blur"><span className="size-2 rounded-full bg-mint" /> Sesli arama · 02:14</span>
+          </div>
+          <div className="relative -mt-40 mr-auto w-full max-w-[400px] overflow-hidden rounded-[28px] bg-card p-5 shadow-soft ring-1 ring-line sm:-mt-56">
             <div className="mb-4 flex items-center gap-3 border-b-2 border-line pb-4">
               <Defne className="size-11" online />
               <div>
@@ -436,7 +446,7 @@ function MeetDefne() {
                 <p className="text-xs font-bold text-mint-deep">Kafede sipariş · rol yapma</p>
               </div>
             </div>
-            <div className="flex min-h-[290px] flex-col gap-3">
+            <div className="flex min-h-[260px] flex-col gap-3">
               {CHAT.slice(0, step).map((m, i) => (
                 <motion.div
                   key={i}
@@ -762,6 +772,149 @@ function FinalCta() {
         </div>
         <Link to="/register" className="press relative rounded-2xl bg-white px-8 py-4 text-lg font-black uppercase tracking-wide text-flame shadow-[0_4px_0_0_rgba(0,0,0,0.2)]">Hemen başla</Link>
       </Reveal>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------------- Duel */
+
+const RACE = [
+  { skill: 'reading', me: 140, ghost: 120 },
+  { skill: 'listening', me: 110, ghost: 145 },
+  { skill: 'speaking', me: 150, ghost: 95 },
+  { skill: 'writing', me: 130, ghost: 125 },
+] as const
+
+/** DilGO's own game: a four-round race against another learner's ghost. */
+function DuelShowcase() {
+  const ref = useRef<HTMLDivElement>(null)
+  const inView = useInView(ref, { amount: 0.35, once: true })
+  const [round, setRound] = useState(0)
+  useEffect(() => {
+    if (!inView || round >= RACE.length) return
+    const t = setTimeout(() => setRound((r) => r + 1), round === 0 ? 400 : 1100)
+    return () => clearTimeout(t)
+  }, [inView, round])
+  const me = RACE.slice(0, round).reduce((a, r) => a + r.me, 0)
+  const ghost = RACE.slice(0, round).reduce((a, r) => a + r.ghost, 0)
+  const max = RACE.reduce((a, r) => a + Math.max(r.me, r.ghost), 0)
+
+  return (
+    <section id="duello" className="px-5 py-24">
+      <div ref={ref} className="relative mx-auto grid max-w-6xl items-center gap-10 overflow-hidden rounded-[36px] bg-[#151922] p-7 text-white sm:p-12 lg:grid-cols-[1fr_1.05fr]">
+        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:repeating-linear-gradient(135deg,#fff_0_1px,transparent_1px_14px)]" />
+        <Reveal className="relative">
+          <p className="mb-2 flex items-center gap-2 font-extrabold uppercase tracking-widest text-butter"><Ghost className="size-5" /> Sadece DilGO’da</p>
+          <h2 className="text-4xl leading-tight sm:text-5xl">Gölge Düellosu</h2>
+          <p className="mt-4 text-lg leading-relaxed text-white/75">
+            Dört tur, dört beceri. Başka bir öğrencinin gerçek seviyelerinden oluşan <b className="text-white">gölgesine</b> karşı yarışırsın. Kazan, kupa topla, Acemi’den Efsane’ye yüksel.
+            Sen uyurken bile gölgen kupalarını savunur — geri geldiğinde ne olduğunu görürsün.
+          </p>
+          <ul className="mt-6 grid gap-2 text-white/85 sm:grid-cols-2">
+            {['Her gün 5 ücretsiz düello', '3 galibiyet serisine sandık', 'Kurum ve genel kupa sıralaması', 'Düello rozetleri ve görevleri'].map((t) => (
+              <li key={t} className="flex items-center gap-2 font-bold"><Check className="size-4 text-butter" strokeWidth={3} /> {t}</li>
+            ))}
+          </ul>
+          <LinkButton to="/register" variant="butter" size="lg" className="mt-8">İlk düellona hazırlan</LinkButton>
+        </Reveal>
+
+        <Reveal delay={0.1} className="relative">
+          <div className="rounded-3xl bg-white/6 p-5 ring-1 ring-white/10 sm:p-6">
+            <div className="mb-5 flex items-center justify-between">
+              <span className="flex items-center gap-2 font-display font-black"><span className="grid size-9 place-items-center rounded-full bg-flame">S</span> Sen</span>
+              <span className="rounded-full bg-butter px-3 py-1 font-display text-sm font-black text-[#1f2433]">VS</span>
+              <span className="flex items-center gap-2 font-display font-black text-white/70">Elif’in gölgesi <span className="grid size-9 place-items-center rounded-full bg-white/10"><Ghost className="size-5" /></span></span>
+            </div>
+            {[['Sen', me, 'bg-flame'], ['Gölge', ghost, 'bg-white/40']].map(([l, v, c]) => (
+              <div key={l as string} className="mb-2 flex items-center gap-3">
+                <span className="w-12 text-xs font-extrabold text-white/60">{l}</span>
+                <span className="h-3 flex-1 overflow-hidden rounded-full bg-white/10"><motion.span className={clsx('block h-full rounded-full', c)} animate={{ width: `${((v as number) / max) * 100}%` }} transition={{ type: 'spring', stiffness: 90, damping: 18 }} /></span>
+                <span className="w-10 text-right font-mono text-sm font-bold tabular-nums">{v}</span>
+              </div>
+            ))}
+            <div className="mt-5 grid grid-cols-4 gap-2">
+              {SKILL_KEYS.map((k, i) => {
+                const S = SKILL[k]
+                const done = i < round
+                const won = done && RACE[i].me >= RACE[i].ghost
+                return (
+                  <div key={k} className={clsx('rounded-2xl p-3 text-center transition', done ? (won ? 'bg-mint/20' : 'bg-berry/20') : 'bg-white/5')}>
+                    <S.icon className="mx-auto size-5" />
+                    <p className="mt-1 text-[11px] font-black">{S.label}</p>
+                    <p className="text-[11px] font-bold text-white/60">{done ? (won ? 'kazandın' : 'kaybettin') : `Tur ${i + 1}`}</p>
+                  </div>
+                )
+              })}
+            </div>
+            <AnimatePresence>
+              {round >= RACE.length && (
+                <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-butter px-4 py-3 font-display font-black text-[#1f2433]">
+                  <Trophy className="size-5" /> Galibiyet · +28 kupa
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </div>
+        </Reveal>
+      </div>
+    </section>
+  )
+}
+
+/* ------------------------------------------------------------- Institutions */
+
+/** B2B: schools, courses and companies buy seats and follow their learners. */
+function ForInstitutions() {
+  const points = [
+    { icon: Building2, title: 'Koltuk bazlı anlaşma', text: 'Öğrenci sayınızı belirleyin; herkes Premium’un tamamına erişir.' },
+    { icon: Mail, title: 'E-posta ya da kodla katılım', text: 'Listeyi yapıştırın, davetler gitsin — ya da sınıfa tek bir katılım kodu verin.' },
+    { icon: BarChart3, title: 'Kurum paneli', text: 'Kim çalışıyor, hangi beceride geride — sınıf sınıf, haftalık olarak görün.' },
+  ]
+  return (
+    <section id="kurumlar" className="mx-auto max-w-6xl px-5 py-20">
+      <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
+        <Reveal>
+          <p className="mb-2 font-extrabold uppercase tracking-widest text-sage-deep dark:text-sage">Okullar, kurslar ve şirketler için</p>
+          <h2 className="text-4xl leading-tight sm:text-5xl">Öğrencileriniz için DilGO</h2>
+          <p className="mt-4 text-lg text-ink-soft">Bayrak Dil Okulları’nın müfredatı, Defne ile konuşma pratiği ve dört beceri takibi — kurumunuzun kendi paneliyle.</p>
+          <div className="mt-8 space-y-4">
+            {points.map((p) => (
+              <div key={p.title} className="flex gap-4">
+                <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-sage text-white"><p.icon className="size-5" /></span>
+                <div><p className="font-display text-lg font-black">{p.title}</p><p className="text-ink-soft">{p.text}</p></div>
+              </div>
+            ))}
+          </div>
+          <LinkButton to="/contact?konu=corporate" size="lg" className="mt-8">Kurumsal teklif alın</LinkButton>
+        </Reveal>
+        <Reveal delay={0.1}>
+          <div className="overflow-hidden rounded-[32px] border-2 border-line bg-card shadow-soft">
+            <div className="flex items-center justify-between border-b-2 border-line px-5 py-4">
+              <div><p className="text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft">Kurum paneli</p><p className="font-display text-lg font-black">10-A sınıfı</p></div>
+              <span className="rounded-full bg-mint/15 px-3 py-1 text-sm font-extrabold text-mint-deep">%90 katılım</span>
+            </div>
+            <div className="grid grid-cols-4 gap-3 border-b-2 border-line p-5">
+              {SKILL_KEYS.map((k, i) => {
+                const S = SKILL[k]
+                return (
+                  <div key={k}>
+                    <p className="mb-1 flex items-center gap-1 text-xs font-bold"><S.icon className={clsx('size-3.5', S.text)} /> {S.label}</p>
+                    <div className="h-2 overflow-hidden rounded-full bg-paper-2"><div className={clsx('h-full rounded-full', S.bg)} style={{ width: `${[82, 64, 47, 38][i]}%` }} /></div>
+                  </div>
+                )
+              })}
+            </div>
+            {[['Öğrenci A', '76 XP', 5], ['Öğrenci B', '62 XP', 12], ['Öğrenci C', '41 XP', 3], ['Öğrenci D', 'davetli', 0]].map(([n, xp, st]) => (
+              <div key={n as string} className="flex items-center gap-3 border-b-2 border-line px-5 py-3 last:border-b-0">
+                <span className="grid size-9 place-items-center rounded-full bg-paper-2 font-display font-black">{(n as string).slice(-1)}</span>
+                <span className="flex-1 font-bold">{n}</span>
+                <span className="text-sm font-bold tabular-nums">{xp}</span>
+                <span className="w-10 text-right text-sm tabular-nums text-ink-soft">{st ? `${st}g` : '—'}</span>
+              </div>
+            ))}
+            <p className="bg-paper-2 px-5 py-2 text-center text-xs text-ink-soft">Örnek görünüm — isimler temsilidir.</p>
+          </div>
+        </Reveal>
+      </div>
     </section>
   )
 }

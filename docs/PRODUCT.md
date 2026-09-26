@@ -17,7 +17,7 @@ DilGO, HikayeGO'nun hikaye DNA'sını korur ve onu **dört becerili, oyunlaştı
 
 **Konumlandırma cümlesi:** *"İngilizceyi dört yönden yakala: oyun kadar eğlenceli, okul kadar ciddi."*
 
-## 7 farkımız (reklam mesajları için)
+## Farklarımız (reklam mesajları için)
 
 1. **Dört beceri tek döngüde:** okuduğun hikayedeki kelime → kelime defterine → aralıklı tekrara → Defne'yla sohbette tekrar kullanılır. Beceriler birbirini besler.
 2. **Defne seni tanıyor:** seviyeni, hedefini ve kaydettiğin kelimeleri bilen AI öğretmen.
@@ -26,12 +26,15 @@ DilGO, HikayeGO'nun hikaye DNA'sını korur ve onu **dört becerili, oyunlaştı
 5. **Tam oyunlaştırma:** seri + dondurucu, 10 kademeli lig, 38 rozet, günlük/haftalık görevler, elmas ekonomisi, sandıklar.
 6. **Okul güvencesi:** CEFR uyumlu müfredat, yıllık pakette seviye sertifikası.
 7. **Her yerde:** web + iOS + Android, tek hesap.
+8. **Gölge Düellosu:** dört beceride, başka bir öğrencinin gölgesine karşı asenkron yarış; sen yokken gölgen kupalarını savunur. Başka hiçbir uygulamada yok.
+9. **Defne'yi ara:** yüzünü gördüğün, konuşurken dudakları hareket eden 3B koçla sesli arama.
+10. **Kurumlar için panel:** okul ve şirketler koltuk alır, öğrencilerini davet eder, dört beceri ilerlemesini sınıf sınıf izler.
 
 ## Gelir modeli
 
 - Freemium: sınırsız ders yolu, seçili hikayeler, günde 10 AI mesajı, 5 can.
 - Premium (aylık/3 aylık/yıllık): sınırsız can, tüm hikayeler, 200 AI mesajı/gün, premium senaryolar, bonus elmas, canlı ders kuponları.
-- Okul/kurum: toplu hediye kodu (kampanya, fuar, kurumsal anlaşma, sınıf ödülü) — admin panelinden CSV olarak üretilir.
+- Okul/kurum (B2B): koltuk bazlı yıllık anlaşma + kurum paneli; ayrıca toplu hediye kodu (kampanya, fuar, kurumsal anlaşma, sınıf ödülü) — admin panelinden CSV olarak üretilir.
 - Kanal: referans sistemi (iki taraflı ödül), paylaşılabilir profil ve seri.
 
 ## Sonraki adımlar (yol haritası)
@@ -39,7 +42,7 @@ DilGO, HikayeGO'nun hikaye DNA'sını korur ve onu **dört becerili, oyunlaştı
 1. **İçerik:** HikayeGO hikayelerinin aktarılması; A2–B2 ünitelerinin genişletilmesi; hikayeler için insan seslendirmesi (`audio_url` alanı hazır).
 2. **Abonelik yenileme** (iyzico Subscription API) ve App Store / Google Play uygulama içi satın alma.
 3. **Push bildirimleri** (Capacitor Push + FCM) — seri hatırlatmaları için e-postaya ek.
-4. **Sınıf modu:** Bayrak Dil Okulları öğretmenleri için sınıf oluşturma, ödev atama, öğrenci ilerleme raporu.
+4. **Sınıf modu (devam):** kurum paneli hazır; sırada öğretmenin ödev ataması ve dönemlik PDF raporu var.
 5. **Telaffuz puanlama** (fonem düzeyinde) ve native konuşma tanıma eklentisi.
 6. **Arkadaş ekleme ve arkadaş görevleri** (sosyal döngü).
 7. **Sertifika PDF üretimi** ve CEFR ara sınavları.
