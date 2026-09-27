@@ -14,11 +14,14 @@ export interface Me {
   learning_goal: string | null
   daily_goal_xp: number
   onboarded: boolean
-  preferences: { email_reminders?: boolean; sound?: boolean; tts_rate?: number; tts_voice?: string; theme?: 'light' | 'dark' | 'system'; frame?: string; tour_done?: boolean }
+  preferences: { email_reminders?: boolean; sound?: boolean; tts_rate?: number; tts_voice?: string; theme?: 'light' | 'dark' | 'system'; frame?: string; tour_done?: boolean; language?: 'tr' | 'en' }
   focus_skill: SkillKey | null
   interests: string[]
   study_time: 'morning' | 'lunch' | 'evening' | 'night' | null
   motivation: string | null
+  exam_target: ExamKey | null
+  exam_date: string | null
+  linked?: { google: boolean; apple: boolean }
   institution: { id: number; name: string; type: string } | null
   institution_role: 'student' | 'manager' | null
   marketing_opt_in: boolean
@@ -42,6 +45,8 @@ export interface Me {
 }
 
 export type SkillKey = 'reading' | 'listening' | 'speaking' | 'writing'
+
+export type ExamKey = 'yds' | 'yokdil' | 'ydt' | 'ielts' | 'toefl'
 
 export interface RewardSummary {
   xp_gained: number

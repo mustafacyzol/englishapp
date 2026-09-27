@@ -46,3 +46,14 @@ export const FOCUS_TEXT: Record<SkillKey, string> = {
 }
 
 export const timeLabel = (k?: string | null) => STUDY_TIMES.find((t) => t.key === k)?.label
+
+/** Exam tracks. ÖSYM exams first: they are what most Turkish adult learners sit. */
+export const EXAMS = [
+  { key: 'yds', name: 'YDS', label: 'Akademik kadro ve tazminat', text: '80 soru · 180 dk · ÖSYM', color: '#e8403a' },
+  { key: 'yokdil', name: 'YÖKDİL', label: 'Lisansüstü ve doçentlik', text: 'Fen, sağlık, sosyal · ÖSYM', color: '#8f7cf8' },
+  { key: 'ydt', name: 'YKS-YDT', label: 'Dil bölümleri için', text: '80 soru · 120 dk · ÖSYM', color: '#2f7cf6' },
+  { key: 'ielts', name: 'IELTS', label: 'Yurt dışında eğitim, göç', text: '4 beceri · band 0-9', color: '#22b573' },
+  { key: 'toefl', name: 'TOEFL iBT', label: 'ABD ve Kanada üniversiteleri', text: '4 beceri · 0-120 puan', color: '#d99a00' },
+] as const
+
+export const examName = (k?: string | null) => EXAMS.find((e) => e.key === k)?.name

@@ -15,6 +15,8 @@ import { Input, Toggle } from '@/components/ui/Field'
 import { Alert, Modal, PageHeader } from '@/components/ui/Misc'
 import { OtpInput } from '@/components/ui/OtpInput'
 import { useToast } from '@/components/ui/Toast'
+import { LangSelect } from '@/components/ui/LangSelect'
+import { EXAMS } from '@/lib/onboarding'
 
 function Section({ title, children, danger }: { title: string; children: ReactNode; danger?: boolean }) {
   return (
@@ -103,14 +105,48 @@ export default function Settings() {
         </div>
       </Section>
 
+      <Section title="Sınav hedefin">
+        <p className="mb-4 text-sm text-ink-soft">Seçtiğin sınava göre soru tipleri, okuma parçaları ve Defne’nin geri bildirimi ayarlanır.</p>
+        <div className="mb-4 grid gap-2 sm:grid-cols-3">
+          {EXAMS.map((e) => {
+            const on = user.exam_target === e.key
+            return (
+              <button key={e.key} onClick={() => save.mutate({ exam_target: on ? null : e.key })} aria-pressed={on} className={clsx('flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition', on ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>
+                <span className="grid h-9 min-w-12 place-items-center rounded-lg px-1.5 text-xs font-black text-white" style={{ background: e.color }}>{e.name}</span>
+                <span className="text-xs font-bold leading-tight">{e.label}</span>
+              </button>
+            )
+          })}
+        </div>
+        {user.exam_target && (
+          <Input label="Sınav tarihi" type="date" defaultValue={user.exam_date ?? ''} min={new Date(Date.now() + 864e5).toISOString().slice(0, 10)} onBlur={(e) => e.target.value !== (user.exam_date ?? '') && save.mutate({ exam_date: e.target.value || null })} hint="Geri sayım ve deneme planı için." />
+        )}
+      </Section>
+
       <JoinInstitution />
 
-      <Section title="Görünüm, ses ve bildirimler">
+      <Section title="Görünüm, dil, ses ve bildirimler">
         <p className="mb-2 text-sm font-bold">Tema</p>
-        <div className="mb-4 grid grid-cols-3 gap-2">
+        <div className="mb-6 grid grid-cols-3 gap-2.5">
           {([['light', 'Açık', Sun], ['dark', 'Koyu', Moon], ['system', 'Sistem', Monitor]] as const).map(([v, l, I]) => (
-            <button key={v} onClick={() => { setTheme(v); save.mutate({ preferences: { theme: v } }) }} className={clsx('flex items-center justify-center gap-2 rounded-xl border-2 py-2 font-bold transition', theme === v ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:bg-paper-2')}><I className="size-4" /> {l}</button>
+            <button key={v} onClick={() => { setTheme(v); save.mutate({ preferences: { theme: v } }) }} aria-pressed={theme === v} className={clsx('press overflow-hidden rounded-2xl border-2 text-left transition', theme === v ? 'border-ink shadow-[0_3px_0_0_var(--ink)]' : 'border-line hover:border-ink/25')}>
+              {/* a tiny preview of the app in that theme */}
+              <span className="relative block h-16 overflow-hidden" style={{ background: v === 'dark' ? '#11141c' : v === 'light' ? '#f7f8fa' : 'linear-gradient(90deg,#f7f8fa 50%,#11141c 50%)' }}>
+                <span className="absolute left-2 top-2 h-12 w-5 rounded-md" style={{ background: v === 'dark' ? '#1b2030' : '#fff', boxShadow: '0 0 0 1px rgba(0,0,0,.08)' }} />
+                <span className="absolute left-9 right-2 top-2 h-3 rounded" style={{ background: v === 'dark' ? '#2b3242' : '#e3e6eb' }} />
+                <span className="absolute left-9 top-7 size-6 rounded-full bg-flame" />
+                <span className="absolute left-[4.25rem] top-8 h-2 w-8 rounded" style={{ background: v === 'light' ? '#e3e6eb' : '#2b3242' }} />
+              </span>
+              <span className="flex items-center gap-1.5 px-3 py-2 text-sm font-extrabold"><I className="size-4" /> {l}</span>
+            </button>
           ))}
+        </div>
+        <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-paper-2 px-4 py-3">
+          <span>
+            <span className="block font-bold">Arayüz dili</span>
+            <span className="block text-xs text-ink-soft">Ders içeriği her zaman İngilizce.</span>
+          </span>
+          <LangSelect />
         </div>
         <div className="divide-y-2 divide-line/10">
           <Toggle label="Ses efektleri" checked={prefs.sound !== false} onChange={(v) => save.mutate({ preferences: { sound: v } })} />

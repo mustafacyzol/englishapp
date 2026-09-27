@@ -10,11 +10,13 @@ import { AuthProvider } from './lib/auth'
 import { ToastProvider } from './components/ui/Toast'
 import { RewardProvider } from './components/game/RewardProvider'
 import { initTheme } from './lib/theme'
+import { initLang } from './lib/i18n'
 
 // The demo build is a single static file, so it routes with the URL hash.
 const Router = import.meta.env.VITE_DEMO ? HashRouter : BrowserRouter
 
 initTheme()
+initLang()
 
 const queryClient = new QueryClient({
   defaultOptions: {

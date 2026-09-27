@@ -149,3 +149,14 @@ export const IconSliders: NavIcon = (p) => (
     <circle cx="9" cy="17" r="2.5" />
   </svg>
 )
+
+/** A mortarboard with a tassel: exam prep. */
+export const IconExam: NavIcon = (p) => (
+  <svg {...base(p)}>
+    <path {...soft} d="M12 4.5 2.5 9 12 13.5 21.5 9z" />
+    <path d="M12 4.5 2.5 9 12 13.5 21.5 9z" />
+    <path d="M6.5 11v4.2c0 1.6 2.5 3.3 5.5 3.3s5.5-1.7 5.5-3.3V11" />
+    <path d="M21.5 9v5.5" />
+    <circle cx="21.5" cy="16" r="1.2" fill="currentColor" stroke="none" />
+  </svg>
+)

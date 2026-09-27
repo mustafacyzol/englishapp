@@ -226,7 +226,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   let m
   // --- auth
   if (path === '/auth/login') {
-    if (!body.email || !body.password) throw new DemoError(422, 'E-posta ve şifre gerekli.', { email: ['E-posta ve şifre gerekli.'] })
+    if (!(body.login ?? body.email) || !body.password) throw new DemoError(422, 'E-posta ve şifre gerekli.', { login: ['E-posta ve şifre gerekli.'] })
     return { token: 'demo-token', user: me() }
   }
   if (path === '/auth/register') return { token: 'demo-token', user: { ...me(), name: body.name || me().name, email: body.email || me().email, email_verified: false } }

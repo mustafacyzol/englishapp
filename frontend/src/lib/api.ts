@@ -24,16 +24,44 @@ export class ApiError extends Error {
   }
 }
 
+const session = {
+  get: () => {
+    try {
+      return sessionStorage.getItem(TOKEN_KEY)
+    } catch {
+      return null
+    }
+  },
+  set: (v: string | null) => {
+    try {
+      if (v) sessionStorage.setItem(TOKEN_KEY, v)
+      else sessionStorage.removeItem(TOKEN_KEY)
+    } catch {
+      /* private mode */
+    }
+  },
+}
+
 export async function loadTokens() {
-  token = await storage.get(TOKEN_KEY)
+  token = (await storage.get(TOKEN_KEY)) ?? session.get()
   adminToken = await storage.get(ADMIN_TOKEN_KEY)
 }
 
-export async function setToken(t: string | null) {
+/**
+ * "Beni hatırla" keeps the token in persistent storage; without it the web app
+ * keeps it for this tab session only (the server token also expires in a day).
+ */
+export async function setToken(t: string | null, remember = true) {
   token = t
-  if (t) await storage.set(TOKEN_KEY, t)
-  else {
+  if (t && remember) {
+    await storage.set(TOKEN_KEY, t)
+    session.set(null)
+  } else if (t) {
     await storage.remove(TOKEN_KEY)
+    session.set(t)
+  } else {
+    await storage.remove(TOKEN_KEY)
+    session.set(null)
     await setAdminToken(null)
   }
 }

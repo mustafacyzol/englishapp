@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState, t
 import { useQueryClient } from '@tanstack/react-query'
 import { get, hasToken, loadTokens, post, setToken } from './api'
 import { setTheme } from './theme'
+import { setLang } from './i18n'
 import type { Me } from './types'
 
 interface AuthState {
@@ -9,7 +10,7 @@ interface AuthState {
   ready: boolean
   setUser: (u: Me | null) => void
   refresh: () => Promise<Me | null>
-  signIn: (token: string, user: Me) => Promise<void>
+  signIn: (token: string, user: Me, remember?: boolean) => Promise<void>
   signOut: () => Promise<void>
 }
 
@@ -42,8 +43,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     loadTokens().then(refresh).finally(() => setReady(true))
   }, [refresh])
 
-  const signIn = useCallback(async (token: string, u: Me) => {
-    await setToken(token)
+  const signIn = useCallback(async (token: string, u: Me, remember = true) => {
+    await setToken(token, remember)
     setUser(u)
   }, [])
 
@@ -63,6 +64,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const t = user?.preferences?.theme
     if (t) setTheme(t)
   }, [user?.preferences?.theme])
+
+  useEffect(() => {
+    const l = user?.preferences?.language
+    if (l) setLang(l)
+  }, [user?.preferences?.language])
 
   const value = useMemo(() => ({ user, ready, setUser, refresh, signIn, signOut }), [user, ready, refresh, signIn, signOut])
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>

@@ -239,3 +239,25 @@ html.dark {
     scroll-behavior: auto !important;
   }
 }
+
+/* Quiet backdrop for the sign-in screen: a faint dot grid and two soft brand washes. */
+@utility auth-backdrop {
+  background-color: var(--paper);
+  background-image:
+    radial-gradient(60rem 36rem at 12% -10%, color-mix(in oklab, var(--color-flame) 10%, transparent), transparent 60%),
+    radial-gradient(50rem 32rem at 105% 110%, color-mix(in oklab, var(--color-sky) 10%, transparent), transparent 60%),
+    radial-gradient(color-mix(in oklab, var(--ink) 9%, transparent) 1px, transparent 1.2px);
+  background-size: auto, auto, 22px 22px;
+}
+
+/* Boarding-pass notches: the ticket is two flush pieces, each bitten at the perforation. */
+@utility ticket-top {
+  mask:
+    radial-gradient(circle 13px at 0 100%, transparent 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 13px at 100% 100%, transparent 98%, #000) right / 51% 100% no-repeat;
+}
+@utility ticket-bottom {
+  mask:
+    radial-gradient(circle 13px at 0 0, transparent 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 13px at 100% 0, transparent 98%, #000) right / 51% 100% no-repeat;
+}

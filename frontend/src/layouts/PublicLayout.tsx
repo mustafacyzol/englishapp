@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useOutlet } from 'react-router-dom'
 import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowUp, ArrowUpRight, Clock, Mail, Menu, ShieldCheck, Smartphone, X, type LucideIcon } from 'lucide-react'
-import { useQuery } from '@tanstack/react-query'
+import { ArrowUp, ArrowUpRight, Clock, Mail, Menu, ShieldCheck, Smartphone, X } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
-import { get } from '@/lib/api'
 import { Logo } from '@/components/game/Logo'
-import { ThemeButton, ThemeToggle } from '@/components/ui/ThemeToggle'
+import { LangSelect } from '@/components/ui/LangSelect'
+import { useLang } from '@/lib/i18n'
+import { useSiteConfig } from '@/lib/site'
 import { LinkButton } from '@/components/ui/Button'
 import { PageTransition } from '@/components/motion/Page'
 
@@ -71,6 +71,7 @@ export default function PublicLayout() {
  * the page scrolls, so it never covers content with a heavy slab.
  */
 function SiteHeader({ onMenu }: { onMenu: () => void }) {
+  const { t } = useLang()
   const { user } = useAuth()
   const isActive = useIsActive()
   const [scrolled, setScrolled] = useState(false)
@@ -97,7 +98,7 @@ function SiteHeader({ onMenu }: { onMenu: () => void }) {
             const active = isActive(l.to)
             return (
               <Link key={l.to} to={l.to} className={clsx('relative rounded-xl px-3.5 py-2 text-[15px] font-extrabold transition-colors', active ? 'text-ink' : 'text-ink-soft hover:bg-paper-2 hover:text-ink')}>
-                {l.label}
+                {t(l.label)}
                 {active && <motion.span layoutId="nav-dot" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="absolute inset-x-3.5 -bottom-0.5 h-[3px] rounded-full bg-flame" />}
               </Link>
             )
@@ -105,13 +106,13 @@ function SiteHeader({ onMenu }: { onMenu: () => void }) {
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 lg:ml-0">
-          <ThemeButton className="hidden sm:grid" />
+          <LangSelect className="hidden sm:block" />
           {user ? (
-            <span className="hidden sm:block"><LinkButton to="/learn" size="sm">Uygulamaya git</LinkButton></span>
+            <span className="hidden sm:block"><LinkButton to="/learn" size="sm">{t('Uygulamaya git')}</LinkButton></span>
           ) : (
             <>
-              <Link to="/login" className="hidden rounded-xl px-3 py-2 text-[15px] font-extrabold text-ink-soft transition hover:bg-paper-2 hover:text-ink lg:block">Giriş yap</Link>
-              <span className="hidden min-[400px]:block"><LinkButton to="/register" size="sm">Ücretsiz başla</LinkButton></span>
+              <Link to="/login" className="hidden rounded-xl px-3 py-2 text-[15px] font-extrabold text-ink-soft transition hover:bg-paper-2 hover:text-ink lg:block">{t('Giriş yap')}</Link>
+              <span className="hidden min-[400px]:block"><LinkButton to="/register" size="sm">{t('Ücretsiz başla')}</LinkButton></span>
             </>
           )}
           <button
@@ -191,8 +192,8 @@ function MenuSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
 
           <div className="safe-bottom mx-auto w-full max-w-2xl px-6 pb-6 pt-8 sm:px-10">
             <div className="mb-4 flex items-center justify-between">
-              <span className="text-sm font-extrabold text-ink-soft">Görünüm</span>
-              <ThemeToggle />
+              <span className="text-sm font-extrabold text-ink-soft">Dil / Language</span>
+              <LangSelect />
             </div>
             {user ? (
               <LinkButton to="/learn" block size="lg" onClick={onClose}>Uygulamaya git</LinkButton>
@@ -220,7 +221,14 @@ function ScrollProgress() {
  * Social accounts. Left empty on purpose, fill in the school's real handles and
  * the row appears; an empty list keeps the footer free of dead links.
  */
-const SOCIAL: { label: string; href: string; icon: LucideIcon }[] = []
+/** Brand marks drawn inline (lucide dropped brand icons). */
+const SOCIAL_ICON: Record<string, (p: { className?: string }) => React.JSX.Element> = {
+  instagram: (p) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...p}><rect x="3" y="3" width="18" height="18" rx="5" /><circle cx="12" cy="12" r="4" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>,
+  youtube: (p) => <svg viewBox="0 0 24 24" fill="currentColor" {...p}><path d="M22 8.2a3 3 0 0 0-2.1-2.1C18 5.6 12 5.6 12 5.6s-6 0-7.9.5A3 3 0 0 0 2 8.2 31 31 0 0 0 1.6 12 31 31 0 0 0 2 15.8a3 3 0 0 0 2.1 2.1c1.9.5 7.9.5 7.9.5s6 0 7.9-.5a3 3 0 0 0 2.1-2.1c.4-1.2.4-3.8.4-3.8s0-2.6-.4-3.8zM10 15V9l5.2 3z" /></svg>,
+  tiktok: (p) => <svg viewBox="0 0 24 24" fill="currentColor" {...p}><path d="M16.6 3c.3 2.1 1.6 3.6 3.9 3.8v3a7 7 0 0 1-3.9-1.2v6.1A5.7 5.7 0 1 1 11 9v3.1a2.6 2.6 0 1 0 2.5 2.6V3z" /></svg>,
+  linkedin: (p) => <svg viewBox="0 0 24 24" fill="currentColor" {...p}><path d="M4.5 3.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM3 9h3v12H3zM9 9h2.9v1.7c.4-.8 1.4-1.9 3.3-1.9 3.5 0 4.1 2.3 4.1 5.3V21h-3v-6c0-1.4 0-3.2-2-3.2s-2.3 1.5-2.3 3.1V21H9z" /></svg>,
+  x: (p) => <svg viewBox="0 0 24 24" fill="currentColor" {...p}><path d="M17.8 3h3.1l-6.8 7.8 8 10.2h-6.3l-4.9-6.4L5.3 21H2.2l7.3-8.3L1.8 3h6.4l4.4 5.9zm-1.1 16.2h1.7L7.4 4.7H5.6z" /></svg>,
+}
 
 const COLS: { title: string; links: [string, string][] }[] = [
   {
@@ -268,8 +276,10 @@ const COLS: { title: string; links: [string, string][] }[] = [
 ]
 
 function Footer() {
-  const { data } = useQuery({ queryKey: ['config'], queryFn: () => get<{ support_email: string }>('/config'), staleTime: 600_000 })
-  const email = data?.support_email ?? 'destek@dilgo.app'
+  const { data } = useSiteConfig()
+  const email = data?.site?.contact?.email ?? data?.support_email ?? 'destek@dilgo.app'
+  // Social links are filled in from the admin panel (Yönetim > Site ayarları).
+  const SOCIAL = Object.entries(data?.site?.social ?? {}).filter(([, href]) => !!href).map(([k, href]) => ({ label: k, href: href as string, icon: SOCIAL_ICON[k] }))
 
   return (
     <footer className="relative overflow-hidden border-t-2 border-line bg-paper">

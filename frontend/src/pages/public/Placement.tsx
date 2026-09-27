@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
@@ -25,6 +25,9 @@ const LEVEL_TEXT: Record<string, string> = {
 export default function Placement() {
   const { user, refresh } = useAuth()
   const nav = useNavigate()
+  // Opened from sign-up: leaving (or finishing) returns to the same onboarding step.
+  const fromRegister = useSearchParams()[0].get('from') === 'register'
+  const exit = user ? '/learn' : fromRegister ? '/register' : '/'
   const { data, isLoading } = useQuery({ queryKey: ['placement'], queryFn: () => get<{ data: Q[] }>('/placement') })
   const [i, setI] = useState(0)
   const [answers, setAnswers] = useState<Record<number, number>>({})
@@ -51,7 +54,7 @@ export default function Placement() {
   return (
     <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-5 py-6">
       <div className="mb-8 flex items-center gap-4">
-        <Link to={user ? '/learn' : '/'} aria-label="Çık"><X className="size-7 text-ink-soft" /></Link>
+        <Link to={exit} aria-label={fromRegister ? 'Kayda dön' : 'Çık'}><X className="size-7 text-ink-soft" /></Link>
         <Progress value={submit.isSuccess ? qs.length : i} max={qs.length} color="bg-flame" tall className="flex-1" />
       </div>
 
@@ -60,7 +63,7 @@ export default function Placement() {
           <p className="text-sm font-extrabold uppercase tracking-[0.2em] text-flame">Seviyen</p>
           <p className="my-4 font-display text-8xl font-extrabold">{submit.data.level}</p>
           <p className="mx-auto mb-8 max-w-sm text-ink-soft">{LEVEL_TEXT[submit.data.level]}</p>
-          {user ? <Button block onClick={() => nav('/learn')}>Yoluma git</Button> : <Button block onClick={() => nav('/register')}>Hesabını oluştur</Button>}
+          {user ? <Button block onClick={() => nav('/learn')}>Yoluma git</Button> : <Button block onClick={() => nav('/register')}>{fromRegister ? 'Kayda devam et' : 'Hesabını oluştur'}</Button>}
         </motion.div>
       ) : (
         <AnimatePresence mode="wait">

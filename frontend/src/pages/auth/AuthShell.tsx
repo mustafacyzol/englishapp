@@ -7,7 +7,7 @@ import { get } from '@/lib/api'
 import { PHOTO } from '@/lib/assets'
 import { Logo } from '@/components/game/Logo'
 import { Img } from '@/components/ui/Img'
-import { ThemeButton } from '@/components/ui/ThemeToggle'
+import { LangSelect } from '@/components/ui/LangSelect'
 import type { Review } from '../public/Landing'
 
 export interface Slide { src: string; caption: string }
@@ -121,7 +121,7 @@ export function AuthShell({ title, subtitle, children, footer, wide, slides = LO
       <main className="flex flex-col px-5 py-6 sm:px-10 lg:overflow-y-auto">
         <div className="flex items-center justify-between">
           <Link to="/" className="lg:invisible"><Logo small /></Link>
-          <ThemeButton />
+          <LangSelect />
         </div>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className={`mx-auto my-auto w-full py-8 ${wide ? 'max-w-xl' : 'max-w-md'}`}>
           {banner && <MobileBanner slides={slides} />}
