@@ -388,12 +388,16 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
     itemStart.current = performance.now()
   }, [idx, flat, answers, finish])
 
-  // Keep the pace: move on by itself shortly after each answer.
+  // Keep the pace: move on by itself shortly after each answer. `next` changes every
+  // render (the clock ticks 10x a second), so it's read through a ref, or the timer
+  // would be reset before it ever fired.
+  const nextRef = useRef(next)
+  nextRef.current = next
   useEffect(() => {
     if (checked === null || phase !== 'play') return
-    const t = setTimeout(next, checked ? 750 : 1500)
+    const t = setTimeout(() => nextRef.current(), checked ? 750 : 1500)
     return () => clearTimeout(t)
-  }, [checked, phase, next])
+  }, [checked, phase, idx])
 
   // Ghost replay: answers in sequence after its recorded times, with its own combo.
   const ghostTimeline = useMemo(() => {
@@ -413,7 +417,6 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
   const ghostFresh = lastGhost && elapsed - lastGhost.at < 1100
 
   const round = duel.rounds.findIndex((r) => r.skill === item?.skill)
-  const S = item ? SKILL[item.skill] : SKILL.reading
   const share = myScore + ghostScore ? myScore / (myScore + ghostScore) : 0.5
   const mult = multiplier(combo, R)
   const first = user?.name.split(' ')[0] ?? 'Sen'
@@ -492,12 +495,7 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
 
           {phase === 'play' && item && (
             <motion.div key={idx} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.18 }} className="relative mx-auto max-w-3xl px-4 py-6 sm:py-8">
-              <div className="mb-5 flex items-center justify-between gap-3">
-                <p className={clsx('inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider', S.soft, S.text)}>
-                  <S.icon className="size-3.5" /> {item.label}
-                </p>
-                <ClockRing left={leftMs} total={R.item_ms} />
-              </div>
+              <div className="absolute right-4 top-5 z-10 sm:top-7"><ClockRing left={leftMs} total={R.item_ms} /></div>
               <ExerciseView ex={item.ex} value={value} setValue={setValue} locked={checked !== null} ttsRate={user?.preferences?.tts_rate} />
               <AnimatePresence>
                 {pop && checked && (

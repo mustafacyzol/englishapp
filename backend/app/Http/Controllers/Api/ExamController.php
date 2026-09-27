@@ -74,7 +74,7 @@ class ExamController extends Controller
         $data = $request->validate([
             'exam' => ['nullable', Rule::in(Exams::keys())],
             'section' => ['nullable', Rule::in([...array_keys(Exams::SECTIONS), 'mix'])],
-            'n' => ['nullable', 'integer', 'min:3', 'max:20'],
+            'n' => ['nullable', 'integer', 'min:1', 'max:20'],
         ]);
         $user = $request->user();
         $exam = $data['exam'] ?? $user->exam_target ?? 'yds';

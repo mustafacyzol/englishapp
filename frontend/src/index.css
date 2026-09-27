@@ -264,11 +264,18 @@ html.dark {
 
 /* The duel arena is always night-mode: tokens redefined locally, whatever the app theme. */
 .arena-dark {
+  /* the --color-* tokens are resolved at :root, so both layers are redefined here */
   --paper: #0c0f17;
   --paper-2: #1a2030;
   --card: #151a26;
   --ink: #eef0f4;
   --ink-soft: #9aa1b2;
   --line: #262d3d;
+  --color-paper: #0c0f17;
+  --color-paper-2: #1a2030;
+  --color-card: #151a26;
+  --color-ink: #eef0f4;
+  --color-ink-soft: #9aa1b2;
+  --color-line: #262d3d;
   color-scheme: dark;
 }

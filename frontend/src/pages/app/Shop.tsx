@@ -53,9 +53,9 @@ export default function Shop() {
         <span className="ink-chip bg-sky/10 text-lg"><Img src={img('rewards/gems.webp')} alt="" className="size-7" /> {num(user.stats.gems)}</span>
       </PageHeader>
 
-      <section className="ink-card mb-8 flex flex-wrap items-center gap-5 p-5">
+      <section className="ink-card mb-8 flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:gap-5">
         <div className="flex -space-x-2">
-          {Array.from({ length: 5 }, (_, i) => <Img key={i} src={img('rewards/heart.webp')} alt="" className={clsx('size-11 transition', !(i < user.hearts.hearts || user.hearts.unlimited) && 'opacity-25 grayscale')} />)}
+          {Array.from({ length: 5 }, (_, i) => <Img key={i} src={img('rewards/heart.webp')} alt="" className={clsx('size-10 transition sm:size-11', !(i < user.hearts.hearts || user.hearts.unlimited) && 'opacity-25 grayscale')} />)}
         </div>
         <div className="min-w-0 flex-1">
           <p className="font-display text-xl font-extrabold">{user.hearts.unlimited ? 'Sınırsız can' : `${user.hearts.hearts}/5 can`}</p>

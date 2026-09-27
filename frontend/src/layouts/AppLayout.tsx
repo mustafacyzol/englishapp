@@ -209,7 +209,7 @@ function SideLink({ item: n, path }: { item: Item; path: string }) {
 function HubTabs({ tabs, path }: { tabs: (typeof HUBS)[number]['tabs']; path: string }) {
   const { t } = useLang()
   return (
-    <div className="mb-6 flex justify-center sm:justify-start">
+    <div className="mb-6 flex justify-center">
       <div className="inline-flex gap-1 rounded-2xl border-2 border-line bg-card p-1" role="tablist">
         {tabs.map((x) => {
           const on = path === x.to

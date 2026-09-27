@@ -70,6 +70,11 @@ class ExamPartnerAuthTest extends TestCase
         $chest = RewardItem::query()->create(['key' => 'test_chest', 'name' => 'Test', 'type' => 'chest', 'icon' => 'chest', 'rarity' => 'rare', 'value' => ['pool' => [['weight' => 1, 'type' => 'partner']]]]);
         $owned = UserItem::query()->create(['user_id' => $user->id, 'reward_item_id' => $chest->id, 'status' => 'available', 'source' => 'test']);
 
+        // Odds are attached to every chest in the shop, not only when a chest is listed first.
+        $shop = collect($this->actingAs($user)->getJson('/api/v1/shop')->assertOk()->json('items'));
+        $this->assertTrue($shop->where('type', 'chest')->every(fn ($i) => ! empty($i['odds'])));
+        $this->assertNotSame('chest', $shop->first()['type']);
+
         $inv = $this->actingAs($user)->getJson('/api/v1/inventory')->assertOk();
         $this->assertEquals(100, $inv->json('data.0.odds.0.chance'));
 

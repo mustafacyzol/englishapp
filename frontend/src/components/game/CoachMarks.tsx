@@ -148,13 +148,11 @@ export function CoachMarks() {
       </svg>
       <motion.span
         aria-hidden
-        className="pointer-events-none absolute rounded-2xl ring-[3px] ring-butter"
+        className="pointer-events-none absolute rounded-2xl"
         initial={false}
-        animate={{ left: hole.x, top: hole.y, width: hole.w, height: hole.h }}
-        transition={{ type: 'spring', stiffness: 260, damping: 30 }}
-      >
-        <span className="absolute -inset-1 animate-ping rounded-2xl ring-2 ring-butter/60 [animation-duration:1.6s]" />
-      </motion.span>
+        animate={{ left: hole.x, top: hole.y, width: hole.w, height: hole.h, boxShadow: ['0 0 0 3px #ffc233, 0 0 0 0 rgba(255,194,51,.5)', '0 0 0 3px #ffc233, 0 0 0 10px rgba(255,194,51,0)'] }}
+        transition={{ type: 'spring', stiffness: 260, damping: 30, boxShadow: { repeat: Infinity, duration: 1.4, ease: 'easeOut' } }}
+      />
 
       <AnimatePresence mode="wait">
         <motion.div

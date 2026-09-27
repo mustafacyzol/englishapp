@@ -278,9 +278,9 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
 
   return (
     // The open node is lifted above its siblings, so its card is never painted over by later stops.
-    <div ref={nodeRef} className={clsx('absolute left-1/2', open ? 'z-40' : current ? 'z-20' : 'z-10')} style={{ top: y - (current ? 6 : 0), transform: `translateX(calc(-50% + ${x}px))`, width: size }}>
+    <div ref={nodeRef} data-tour={current ? 'here' : undefined} className={clsx('absolute left-1/2', open ? 'z-40' : current ? 'z-20' : 'z-10')} style={{ top: y - (current ? 6 : 0), transform: `translateX(calc(-50% + ${x}px))`, width: size }}>
       {current && (
-        <motion.span data-tour="here" className="absolute -top-11 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap" animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}>
+        <motion.span className="absolute -top-11 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap" animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}>
           <span className="relative flex items-center gap-1.5 rounded-xl bg-ink px-3 py-1.5 text-xs font-black uppercase tracking-wide text-paper shadow-soft">
             <MapPin className="size-3.5" /> Buradasın
             <span className="absolute -bottom-[5px] left-1/2 size-2.5 -translate-x-1/2 rotate-45 bg-ink" />

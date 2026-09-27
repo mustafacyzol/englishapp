@@ -72,7 +72,7 @@ export default function Exam() {
               </div>
             )}
             <div>
-              <p className="font-display text-4xl font-black leading-none tabular-nums">{data.total.accuracy ?? '-'}{data.total.accuracy !== null && <span className="text-2xl">%</span>}</p>
+              <p className="font-display text-4xl font-black leading-none tabular-nums">{data.total.accuracy !== null && <span className="text-2xl">%</span>}{data.total.accuracy ?? '-'}</p>
               <p className="mt-1 text-sm font-bold text-white/85">isabet · {data.total.answered} soru</p>
             </div>
             <div>

@@ -180,6 +180,36 @@ function adaReply(conv: Json, text: string) {
   return { id: nextMsg++, role: 'assistant', content: reply, feedback: { reply_tr, correction: correct(text), new_words, goals_completed: done }, created_at: new Date().toISOString() }
 }
 
+/** Mirrors RewardService: a weighted roll over the chest's pool, partner gifts drawn from the live offers. */
+function rollChest(e: Json) {
+  const pool: Json[] = e.item.value?.pool ?? [{ weight: 1, type: 'gems', amount: 150 }]
+  let roll = Math.random() * pool.reduce((s: number, p: Json) => s + p.weight, 0)
+  const pick = pool.find((p: Json) => (roll -= p.weight) <= 0) ?? pool[0]
+  const offers: Json[] = (db['/admin/partner-offers?page=1']?.data ?? []).filter((o: Json) => o.is_active)
+  if (pick.type === 'partner' && offers.length) {
+    let r = Math.random() * offers.reduce((s: number, o: Json) => s + o.weight, 0)
+    const o = offers.find((x: Json) => (r -= x.weight) <= 0) ?? offers[0]
+    const partner = (db['/admin/partners?page=1']?.data ?? []).find((p: Json) => p.id === o.partner_id) ?? o.partner ?? {}
+    const code = `${o.code_prefix}-${Math.random().toString(36).slice(2, 10).toUpperCase()}`
+    const won = { id: nextMsg++, status: 'active', source: 'chest', code, activated_at: new Date().toISOString(), expires_at: new Date(Date.now() + o.valid_days * 864e5).toISOString(), created_at: new Date().toISOString(),
+      item: { name: 'İş ortağı hediyesi', type: 'partner_coupon', icon: 'ticket', rarity: 'epic' },
+      meta: { partner: partner.name, partner_logo: partner.logo_url, partner_url: partner.website, color: partner.color, offer: o.title, description: o.description, terms: o.terms, rarity: o.rarity } }
+    db['/inventory'].data.unshift(won)
+    return { message: `Sandıktan iş ortağı hediyesi çıktı: ${o.title}!`, user: me(), extra: { prize: { type: 'partner', item: won } } }
+  }
+  if (pick.type === 'item') {
+    const it = (db['/admin/reward-items?per_page=100']?.data ?? db['/admin/reward-items?page=1']?.data ?? []).find((x: Json) => x.key === pick.item)
+    if (it) {
+      const won = { id: nextMsg++, status: 'available', source: 'chest', code: null, created_at: new Date().toISOString(), item: it }
+      db['/inventory'].data.unshift(won)
+      return { message: `Sandıktan çıktı: ${it.name}!`, user: me(), extra: { prize: { type: 'item', item: won } } }
+    }
+  }
+  const amount = pick.amount ?? 200
+  addGems(amount)
+  return { message: `Sandıktan ${amount} elmas çıktı!`, user: me(), extra: { prize: { type: 'gems', amount } } }
+}
+
 // ---------------------------------------------------------------- router
 const ok = (message: string, extra: Json = {}) => ({ message, ...extra })
 const usage = () => ({ used: 3, limit: 20, remaining: 17 })
@@ -211,6 +241,8 @@ function getRoute(path: string, admin: boolean): Json {
       return q ? { ...all, data: all.data.filter((x: Json) => JSON.stringify(x).toLowerCase().includes(q)) } : all
     }
   }
+  if (base === '/exam/practice') return db['/exam/practice?section=mix&n=10']
+  if (base === '/words/deck') return db['/words/deck?n=16']
   if ((m = base.match(/^\/admin\/users\/(\d+)$/))) return db['/admin/users/1']
   if ((m = base.match(/^\/orders\/(.+)$/))) {
     const plan = db['/plans'].data.find((p: Json) => p.is_featured) ?? db['/plans'].data[0]
@@ -240,6 +272,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     if (!/^\d{6}$/.test(body.code ?? '')) throw new DemoError(422, 'Kod hatalı.', { code: ['Demo için 6 haneli herhangi bir kod gir (ör. 123456).'] })
     return { token: 'demo-admin-token' }
   }
+  if ((m = path.match(/^\/auth\/social\/(google|apple)$/))) return { token: 'demo-token', remember: true, user: me() }
   if (path === '/contact') return ok('Mesajın bize ulaştı. En geç 1 iş günü içinde dönüş yapacağız.')
   if (path === '/placement') return { level: 'A2', score: 68 }
 
@@ -369,18 +402,16 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     const it = db['/shop'].items.find((x: Json) => x.id === +m![1])
     if (!it || me().stats.gems < it.price_gems) throw new DemoError(422, 'Yeterli elmasın yok.')
     addGems(-it.price_gems)
-    db['/inventory'].data.unshift({ id: nextMsg++, status: 'available', source: 'shop', code: null, created_at: new Date().toISOString(), item: it })
-    return { user: me() }
+    const owned = { id: nextMsg++, status: 'available', source: 'shop', code: null, created_at: new Date().toISOString(), item: it, odds: it.odds }
+    db['/inventory'].data.unshift(owned)
+    return { user: me(), item: owned }
   }
   if ((m = path.match(/^\/inventory\/(\d+)\/activate$/))) {
     const e = db['/inventory'].data.find((x: Json) => x.id === +m![1])
     if (!e) throw new DemoError(404, 'Kart bulunamadı.')
     e.status = e.item.type === 'streak_freeze' ? 'available' : 'used'
     e.activated_at = new Date().toISOString()
-    if (e.item.type === 'chest') {
-      addGems(150)
-      return { message: 'Sandıktan 150 elmas çıktı!', user: me(), extra: { prize: { item: { item: { icon: 'gem' } } } } }
-    }
+    if (e.item.type === 'chest') return rollChest(e)
     if (e.item.type === 'live_lesson' || e.item.type === 'discount_coupon') {
       const code = e.item.type === 'live_lesson' ? 'BDO-7K2M-Q9' : 'OKUL15-X4T8'
       e.code = code
@@ -470,9 +501,37 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   if (path === '/checkout') return { order: { uuid: 'demo-order', status: 'paid' }, checkout: null }
   if (path === '/notifications/read') return null
 
+  // --- exam mode: graded against the recorded answer key, like ExamController
+  if (path === '/exam/answer') {
+    const key = (db['/admin/exam-questions?per_page=100']?.data ?? []).find((q: Json) => q.id === body.question_id)
+    const correct = !!key && body.choice === key.answer
+    const ov = db['/exam']
+    const st = ov?.stats?.find((x: Json) => x.key === key?.section)
+    if (ov) {
+      ov.total.answered++
+      ov.total.today++
+    }
+    if (st) {
+      const right = Math.round(((st.accuracy ?? 0) * st.answered) / 100) + (correct ? 1 : 0)
+      st.answered++
+      st.accuracy = Math.round((right * 100) / st.answered)
+    }
+    const r = reward(correct ? 4 : 1, {}, {})
+    return { correct, answer: key?.answer ?? 0, explanation: key?.explanation ?? null, xp: r.xp_gained ?? (correct ? 4 : 1) }
+  }
+  if (path === '/institution' && method === 'PATCH') {
+    Object.assign(db['/institution'].institution, body)
+    return db['/institution']
+  }
+
   // --- account
   if (path === '/account' && method === 'PATCH') {
     Object.assign(me(), body, body.preferences ? { preferences: { ...me().preferences, ...body.preferences } } : {})
+    if (db['/exam'] && 'exam_target' in body) db['/exam'].target = body.exam_target
+    if (db['/exam'] && 'exam_date' in body) {
+      db['/exam'].exam_date = body.exam_date
+      db['/exam'].days_left = body.exam_date ? Math.max(0, Math.round((new Date(body.exam_date).getTime() - Date.now()) / 864e5)) : null
+    }
     syncUser()
     return { user: me() }
   }
