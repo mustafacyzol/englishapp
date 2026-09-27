@@ -6,5 +6,5 @@
   <div style="text-align:center;margin:0 0 22px;">
     <span style="display:inline-block;font-family:'Courier New',monospace;font-size:34px;font-weight:700;letter-spacing:10px;background:#FFE7A3;border:2px solid #1B1F3B;border-radius:14px;padding:14px 22px 14px 32px;">{{ $code }}</span>
   </div>
-  <p style="margin:0;font-size:13px;color:#6B6A7A;">Kod {{ $ttl }} dakika geçerlidir. Kodu kimseyle paylaşma — ekibimiz asla senden kod istemez.</p>
+  <p style="margin:0;font-size:13px;color:#6B6A7A;">Kod {{ $ttl }} dakika geçerlidir. Kodu kimseyle paylaşma, ekibimiz asla senden kod istemez.</p>
 @endsection

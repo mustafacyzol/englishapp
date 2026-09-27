@@ -1,5 +1,5 @@
 /**
- * One-time-code input — adapted from 21st.dev "OTP Input" (ddoemonn), restyled
+ * One-time-code input, adapted from 21st.dev "OTP Input" (ddoemonn), restyled
  * to DilGO's ink/sticker language and trimmed to what our flows need.
  */
 import { useCallback, useEffect, useRef, useState, type ClipboardEvent, type KeyboardEvent } from 'react'

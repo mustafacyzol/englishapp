@@ -4,7 +4,7 @@ export const tl = (v: number | string) =>
 export const num = (v: number) => new Intl.NumberFormat('tr-TR').format(v)
 
 export const dateTR = (iso?: string | null, withTime = false) =>
-  iso ? new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', ...(withTime ? { hour: '2-digit', minute: '2-digit' } : {}) }).format(new Date(iso)) : '—'
+  iso ? new Intl.DateTimeFormat('tr-TR', { day: 'numeric', month: 'long', year: 'numeric', ...(withTime ? { hour: '2-digit', minute: '2-digit' } : {}) }).format(new Date(iso)) : '-'
 
 export function timeLeft(iso: string) {
   const ms = new Date(iso).getTime() - Date.now()

@@ -84,7 +84,7 @@ export default function Duel() {
             <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-white/55"><Ghost className="size-4" /> DilGO’ya özel</p>
             <h1 className="mt-2 text-4xl leading-[1.05] sm:text-5xl">Gölge Düellosu</h1>
             <p className="mt-3 max-w-xl text-[17px] leading-relaxed text-white/70">
-              Dört tur, dört beceri: okuma, dinleme, konuşma, yazma. Rakibinin <b className="text-white">gölgesine</b> — gerçek beceri seviyelerinden oluşan kaydına — karşı yarış. Sen yokken senin gölgen de kupalarını savunur.
+              Dört tur, dört beceri: okuma, dinleme, konuşma, yazma. Rakibinin <b className="text-white">gölgesine</b> gerçek beceri seviyelerinden oluşan kaydına karşı yarış. Sen yokken senin gölgen de kupalarını savunur.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <button
@@ -161,7 +161,7 @@ export default function Duel() {
           {/* ------------------------------------------------------- Rank ladder */}
           <section>
             <h2 className="mb-1 text-xl">Rütbe yolu</h2>
-            <p className="mb-4 text-sm text-ink-soft">Galibiyet +24–32 kupa, mağlubiyet −12. Her 3 galibiyet serisinde gizemli sandık.</p>
+            <p className="mb-4 text-sm text-ink-soft">Galibiyet +24-32 kupa, mağlubiyet −12. Her 3 galibiyet serisinde gizemli sandık.</p>
             <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 pt-3">
               {data.ranks.map((r) => {
                 const reached = me.trophies >= r.min
@@ -192,7 +192,7 @@ export default function Duel() {
                       <span className={clsx('grid size-8 place-items-center rounded-lg text-white', S.bg)}><S.icon className="size-4" /></span>
                       <span className="font-extrabold">{S.label}</span>
                     </div>
-                    <p className="mt-3 font-display text-3xl font-black tabular-nums">{pct === null ? '—' : `%${pct}`}</p>
+                    <p className="mt-3 font-display text-3xl font-black tabular-nums">{pct === null ? '-' : `%${pct}`}</p>
                     <p className="text-xs text-ink-soft">{s?.total ? `${s.correct}/${s.total} doğru` : 'Henüz tur yok'}</p>
                   </div>
                 )
@@ -209,7 +209,7 @@ export default function Duel() {
                     <span className={clsx('grid size-9 place-items-center rounded-xl text-sm font-black text-white', r.result === 'win' ? 'bg-mint' : r.result === 'loss' ? 'bg-berry' : 'bg-ink-soft')}>{r.result === 'win' ? 'G' : r.result === 'loss' ? 'M' : 'B'}</span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-bold">{r.ghost_name}’in gölgesi</span>
-                      <span className="block text-xs tabular-nums text-ink-soft">{r.score} – {r.ghost_score}</span>
+                      <span className="block text-xs tabular-nums text-ink-soft">{r.score}, {r.ghost_score}</span>
                     </span>
                     <span className={clsx('flex items-center gap-1 font-display font-black tabular-nums', r.delta >= 0 ? 'text-mint-deep' : 'text-berry')}><Trophy className="size-4" /> {r.delta >= 0 ? `+${r.delta}` : r.delta}</span>
                   </div>
@@ -223,7 +223,7 @@ export default function Duel() {
         <section>
           <h2 className="mb-3 text-xl">Kupa sıralaması</h2>
           <div className="overflow-hidden rounded-2xl border-2 border-line bg-card">
-            {data.leaderboard.length === 0 && <p className="p-6 text-center text-ink-soft">İlk kupayı sen al — sıralama seni bekliyor.</p>}
+            {data.leaderboard.length === 0 && <p className="p-6 text-center text-ink-soft">İlk kupayı sen al, sıralama seni bekliyor.</p>}
             {data.leaderboard.map((r) => (
               <div key={r.username} className={clsx('flex items-center gap-3 border-b-2 border-line px-4 py-2.5 last:border-b-0', r.is_me && 'bg-butter/12')}>
                 <span className={clsx('w-7 text-center font-display font-black tabular-nums', r.position <= 3 ? 'text-butter-deep' : 'text-ink-soft')}>{r.position <= 3 ? <Crown className="mx-auto size-5" /> : r.position}</span>
@@ -482,12 +482,12 @@ function ResultView({ duel, result, onExit, onRematch }: { duel: DuelData; resul
           <Img src={win ? rewardImg('trophy') : rewardImg('star')} alt="" className={clsx('mx-auto size-28 object-contain drop-shadow-xl', !win && !draw && 'opacity-60 grayscale')} />
         </motion.div>
         <p className={clsx('mt-2 text-sm font-black uppercase tracking-[0.2em]', win ? 'text-mint-deep' : draw ? 'text-ink-soft' : 'text-berry')}>{win ? 'Galibiyet' : draw ? 'Berabere' : 'Mağlubiyet'}</p>
-        <h2 className="mt-1 text-4xl tabular-nums sm:text-5xl">{result.score} <span className="text-ink-soft">–</span> {result.ghost_score}</h2>
+        <h2 className="mt-1 text-4xl tabular-nums sm:text-5xl">{result.score} <span className="text-ink-soft">-</span> {result.ghost_score}</h2>
         <p className={clsx('mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-display text-lg font-black tabular-nums', result.trophies_delta >= 0 ? 'bg-mint/12 text-mint-deep' : 'bg-berry/10 text-berry')}>
           <Trophy className="size-5" /> {result.trophies_delta >= 0 ? `+${result.trophies_delta}` : result.trophies_delta} kupa
         </p>
         {result.rank_up && <p className="mt-3 font-display text-xl font-black text-butter-deep">Yeni rütbe: {result.rank.name}!</p>}
-        {!win && result.next_rank && <p className="mt-2 text-sm text-ink-soft">Rövanşla kupalarını geri al — {result.next_rank.name} rütbesi seni bekliyor.</p>}
+        {!win && result.next_rank && <p className="mt-2 text-sm text-ink-soft">Rövanşla kupalarını geri al, {result.next_rank.name} rütbesi seni bekliyor.</p>}
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border-2 border-line bg-card">

@@ -23,9 +23,9 @@ export default function Audit() {
             {data.data.map((a) => (
               <tr key={a.id}>
                 <td className="whitespace-nowrap px-4 py-2">{dateTR(a.created_at, true)}</td>
-                <td className="px-4">{a.user?.email ?? '—'}</td>
+                <td className="px-4">{a.user?.email ?? '-'}</td>
                 <td className="px-4"><Pill tone={a.action.includes('failed') || a.action.includes('locked') ? 'bad' : a.action.startsWith('admin') ? 'info' : 'default'}>{a.action}</Pill></td>
-                <td className="px-4 text-xs">{a.subject_type ? `${a.subject_type.split('\\').pop()}#${a.subject_id}` : '—'}</td>
+                <td className="px-4 text-xs">{a.subject_type ? `${a.subject_type.split('\\').pop()}#${a.subject_id}` : '-'}</td>
                 <td className="px-4 font-mono text-xs">{a.ip}</td>
                 <td className="max-w-xs truncate px-4 font-mono text-xs" title={JSON.stringify(a.meta)}>{a.meta ? JSON.stringify(a.meta) : ''}</td>
               </tr>

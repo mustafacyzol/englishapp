@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from 'motion/react'
 
 /**
  * Route transition: an enter-only fade + lift, keyed by the parent on pathname.
- * No exit/"wait" phase on purpose — fast tab switching could otherwise leave the
+ * No exit/"wait" phase on purpose, fast tab switching could otherwise leave the
  * previous page stuck on screen while its exit animation was interrupted.
  */
 export function PageTransition({ children }: { children: ReactNode }) {

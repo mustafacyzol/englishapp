@@ -1,7 +1,7 @@
 /**
  * Listening & speaking on top of the Web Speech API.
  * Works in Chrome/Edge/Safari and inside Capacitor's WebView (Android Chrome WebView
- * supports synthesis; recognition falls back gracefully — see `canListen`).
+ * supports synthesis; recognition falls back gracefully, see `canListen`).
  */
 
 let voicesCache: SpeechSynthesisVoice[] = []
@@ -121,7 +121,7 @@ export function listen(handlers: { onPartial?: (t: string) => void; onFinal: (t:
   return () => rec.stop()
 }
 
-/** Word-overlap similarity 0..1 — mirrors the server-side check for speaking exercises. */
+/** Word-overlap similarity 0..1, mirrors the server-side check for speaking exercises. */
 export function similarity(a: string, b: string) {
   const norm = (s: string) => s.toLowerCase().replace(/[’']/g, '').replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean)
   const wa = norm(a)

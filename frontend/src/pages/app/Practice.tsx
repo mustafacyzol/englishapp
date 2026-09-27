@@ -90,7 +90,7 @@ function Review() {
           </div>
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-[22px] border-2 border-line bg-butter p-6 text-ink shadow-hard-lg" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
             <span className="text-xs font-extrabold uppercase tracking-widest opacity-60">Türkçe</span>
-            <span className="font-display text-4xl font-extrabold">{w.translation || '—'}</span>
+            <span className="font-display text-4xl font-extrabold">{w.translation || '-'}</span>
             {w.example && <span className="line-clamp-3 text-center font-read text-sm italic">“{w.example}”</span>}
             <span onClick={(e) => { e.stopPropagation(); speak(w.word) }} className="grid size-10 place-items-center rounded-full border-2 border-line bg-card"><Volume2 className="size-5" /></span>
           </div>
@@ -152,7 +152,7 @@ function WordList() {
               <button onClick={() => speak(w.word)} className="text-sky" aria-label="Dinle"><Volume2 className="size-5" /></button>
               <div className="min-w-0 flex-1">
                 <p className="font-bold">{w.word}</p>
-                <p className="truncate text-sm text-ink-soft">{w.translation ?? '—'}</p>
+                <p className="truncate text-sm text-ink-soft">{w.translation ?? '-'}</p>
               </div>
               <span className={clsx('rounded-lg border-2 border-line px-2 py-0.5 text-xs font-bold', w.interval_days >= 21 ? 'bg-mint' : w.interval_days >= 3 ? 'bg-butter' : 'bg-paper-2')}>
                 {w.interval_days >= 21 ? 'Usta' : w.interval_days >= 3 ? 'Öğreniyor' : 'Yeni'}

@@ -1,5 +1,5 @@
 /**
- * Inventory card with a physical 3D flip on activation — built on the spring-flip
+ * Inventory card with a physical 3D flip on activation, built on the spring-flip
  * technique from 21st.dev "Neo-Brutalist Kinetic Deck", restyled for DilGO.
  */
 import { motion } from 'motion/react'

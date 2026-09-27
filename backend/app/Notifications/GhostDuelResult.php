@@ -4,7 +4,7 @@ namespace App\Notifications;
 
 use Illuminate\Notifications\Notification;
 
-/** Tells a learner what their ghost did while they were away — a reason to come back. */
+/** Tells a learner what their ghost did while they were away, a reason to come back. */
 class GhostDuelResult extends Notification
 {
     public function __construct(public string $challenger, public string $outcome, public int $delta) {}

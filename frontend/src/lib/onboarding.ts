@@ -3,7 +3,7 @@ import type { SkillKey } from './types'
 
 const onb = (n: string) => img(`onboarding/${n}.webp`)
 
-/** Why the learner is here — shown as real photos, mapped onto the backend's learning goal. */
+/** Why the learner is here, shown as real photos, mapped onto the backend's learning goal. */
 export const MOTIVATIONS = [
   { key: 'abroad', goal: 'travel', label: 'Yurt dışında rahat olmak', text: 'Seyahat, gurbet, yeni bir şehir', photo: onb('travel') },
   { key: 'job', goal: 'career', label: 'İşimde yükselmek', text: 'Toplantı, e-posta, mülakat', photo: onb('career') },

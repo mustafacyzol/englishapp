@@ -3,7 +3,7 @@ import { useSyncExternalStore } from 'react'
 /**
  * App-wide theme, independent of login. The choice lives in localStorage under
  * `dilgo.theme` (the same key the boot script in index.html reads before paint),
- * so the setting works on the marketing pages too — not only once you have an account.
+ * so the setting works on the marketing pages too, not only once you have an account.
  */
 export type Theme = 'light' | 'dark' | 'system'
 

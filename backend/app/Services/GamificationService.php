@@ -374,7 +374,7 @@ class GamificationService
     }
 
     /**
-     * Per-skill XP totals, levels and a 7-day trend — the four-skill report card.
+     * Per-skill XP totals, levels and a 7-day trend, the four-skill report card.
      *
      * @return array{skills: list<array>, weakest: string, strongest: string, balance: int}
      */
@@ -417,7 +417,7 @@ class GamificationService
         return ['skills' => $skills, 'weakest' => $weakest, 'strongest' => $byXp->last()['key'], 'balance' => $byXp->last()['xp'] === 0 ? 0 : $balance];
     }
 
-    /** The lowest of the four skill levels — a badge family rewards keeping all four up together. */
+    /** The lowest of the four skill levels, a badge family rewards keeping all four up together. */
     public function balancedSkillLevel(User $user): int
     {
         return (int) collect($this->skillReport($user)['skills'])->min('level');

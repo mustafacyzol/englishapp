@@ -112,13 +112,13 @@ export default function Register() {
 
   const who = firstName ? `${firstName}, ` : ''
   const Q: { title: ReactNode; sub: string }[] = [
-    { title: 'Merhaba! Sana nasıl hitap edelim?', sub: `Ben ${TUTOR.name}, İngilizce koçun. Planını birlikte kuralım — 1 dakika sürer.` },
+    { title: 'Merhaba! Sana nasıl hitap edelim?', sub: `Ben ${TUTOR.name}, İngilizce koçun. Planını birlikte kuralım, 1 dakika sürer.` },
     { title: `${who}İngilizce seni nereye götürsün?`, sub: 'Hedefin derslerdeki örnekleri ve senaryoları belirler.' },
     { title: 'Hangi konular seni heyecanlandırır?', sub: 'Hikâyeler ve Defne ile sohbetler bunlardan seçilir. Birden fazla seçebilirsin.' },
-    { title: 'En çok nerede zorlanıyorsun?', sub: 'Bu beceriye biraz daha ağırlık vereceğiz — ama dördünü de dengede tutacağız.' },
+    { title: 'En çok nerede zorlanıyorsun?', sub: 'Bu beceriye biraz daha ağırlık vereceğiz, ama dördünü de dengede tutacağız.' },
     { title: 'Şu an hangi seviyedesin?', sub: 'Tahmin etmen yeterli; ilk derslerde kendini ayarlar.' },
     { title: 'Ne zaman çalışacaksın?', sub: 'Saatini belirleyenlerin alışkanlığı sürdürme ihtimali çok daha yüksek.' },
-    { title: firstName ? `Planın hazır, ${firstName}.` : 'Planın hazır.', sub: 'Kaydet ve ilk dersine başla — ücretsiz, kredi kartı gerekmez.' },
+    { title: firstName ? `Planın hazır, ${firstName}.` : 'Planın hazır.', sub: 'Kaydet ve ilk dersine başla, ücretsiz, kredi kartı gerekmez.' },
   ]
   const canNext = [name.trim().length >= 2, !!motivation, interests.length > 0, !!focus, true, !!time, true][step]
 
@@ -153,7 +153,7 @@ export default function Register() {
       {(inv.data || form.referral_code) && step === 0 && (
         <div className="mb-5 flex items-center gap-3 rounded-2xl border-2 border-line p-3 text-sm font-bold">
           {inv.data ? <Building2 className="size-5 shrink-0 text-sage" /> : <Gift className="size-5 shrink-0 text-butter-deep" />}
-          {inv.data ? `${inv.data.institution.name} seni davet etti — Premium koltuğun hazır.` : 'Bir arkadaşın seni davet etti! E-postanı doğrulayınca 100 elmas senin.'}
+          {inv.data ? `${inv.data.institution.name} seni davet etti, Premium koltuğun hazır.` : 'Bir arkadaşın seni davet etti! E-postanı doğrulayınca 100 elmas senin.'}
         </div>
       )}
 
@@ -338,15 +338,15 @@ function PlanPanel({ name, mot, interests, focus, level, slot, pace, weeks, step
             </div>
           </div>
           <ul className="space-y-3">
-            <Row done={!!mot} label="Hedef">{mot ? mot.label : '—'}</Row>
+            <Row done={!!mot} label="Hedef">{mot ? mot.label : '-'}</Row>
             <Row done={interests.length > 0} label="Konular">
               {interests.length ? (
                 <span className="flex flex-wrap gap-1">{interests.map((k) => <span key={k} className="rounded-md bg-paper-2 px-1.5 py-0.5 text-xs">{INTERESTS.find((i) => i.key === k)?.label}</span>)}</span>
-              ) : '—'}
+              ) : '-'}
             </Row>
-            <Row done={!!focus} label="Odak beceri">{focus ? <span className={SKILL[focus].text}>{SKILL[focus].label}</span> : '—'}</Row>
-            <Row done={step > 4} label="Başlangıç">{step > 4 ? `${level} → ${NEXT[level] ?? 'C1'}` : '—'}</Row>
-            <Row done={!!slot} label="Ritüel">{slot ? `Her gün ${slot.label.toLocaleLowerCase('tr')} · ${pace.minutes} dk` : '—'}</Row>
+            <Row done={!!focus} label="Odak beceri">{focus ? <span className={SKILL[focus].text}>{SKILL[focus].label}</span> : '-'}</Row>
+            <Row done={step > 4} label="Başlangıç">{step > 4 ? `${level} → ${NEXT[level] ?? 'C1'}` : '-'}</Row>
+            <Row done={!!slot} label="Ritüel">{slot ? `Her gün ${slot.label.toLocaleLowerCase('tr')} · ${pace.minutes} dk` : '-'}</Row>
           </ul>
           <AnimatePresence>
             {step >= 5 && slot && (

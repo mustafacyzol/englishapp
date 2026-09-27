@@ -51,7 +51,7 @@ class CourseSeeder extends Seeder
     }
 
     /**
-     * "Hata avı" — a sentence carrying a slip Turkish speakers really make. The learner
+     * "Hata avı", a sentence carrying a slip Turkish speakers really make. The learner
      * taps the guilty word, picks the fix and reads why it was wrong, in Turkish.
      */
     private function err(string $sentence, int $errorIndex, array $options, int $answer, string $why): array
@@ -67,7 +67,7 @@ class CourseSeeder extends Seeder
         ];
     }
 
-    /** "Sahne" — a real scene with the learner's line missing. */
+    /** "Sahne", a real scene with the learner's line missing. */
     private function dlg(string $prompt, ?string $scene, array $lines, array $options, int $answer, ?string $note = null): array
     {
         return array_filter([
@@ -76,7 +76,7 @@ class CourseSeeder extends Seeder
         ], fn ($v) => $v !== null);
     }
 
-    /** "Sıralama" — steps given in the right order; the player shuffles them on screen. */
+    /** "Sıralama", steps given in the right order; the player shuffles them on screen. */
     private function seq(string $prompt, array $items, ?string $note = null): array
     {
         return array_filter([

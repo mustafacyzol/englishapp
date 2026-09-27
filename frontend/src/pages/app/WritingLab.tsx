@@ -40,7 +40,7 @@ const RUBRIC: [keyof NonNullable<Result['rubric']>, string][] = [['task', 'Göre
 const SCAN_STEPS = ['Dilbilgisine bakıyorum…', 'Kelime seçimlerini inceliyorum…', 'Cümle akışını değerlendiriyorum…', 'Notlarımı hazırlıyorum…']
 
 const CEFR = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
-/** A task suits you at your level or one step above — a stretch, not a wall. */
+/** A task suits you at your level or one step above, a stretch, not a wall. */
 const suits = (task: string, mine?: string) => CEFR.indexOf(task) <= CEFR.indexOf(mine ?? 'A1') + 1
 const countWords = (t: string) => (t.trim() ? t.trim().split(/\s+/).length : 0)
 const hasWord = (text: string, w: string) => text.toLowerCase().includes(w.toLowerCase())
@@ -54,7 +54,7 @@ export default function WritingLab() {
   const [history, setHistory] = useState<number[]>([])
   const m = useMutation({
     mutationFn: async () => {
-      // A short, deliberate review beat so the feedback feels considered — never a blink.
+      // A short, deliberate review beat so the feedback feels considered, never a blink.
       const [r] = await Promise.all([
         post<{ result: Result; reward: RewardSummary }>('/ai/writing', { text, task: task?.prompt, target_words: task?.words }),
         new Promise((res) => setTimeout(res, 2600)),
@@ -87,7 +87,7 @@ export default function WritingLab() {
             <Img src={task.photo} alt="" className="photo" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
             <div className="absolute inset-x-5 bottom-4 text-white">
-              <p className="text-xs font-black uppercase tracking-[0.16em] text-white/75">{task.level} · {task.min}–{task.max} kelime</p>
+              <p className="text-xs font-black uppercase tracking-[0.16em] text-white/75">{task.level} · {task.min}-{task.max} kelime</p>
               <p className="font-display text-2xl font-black">{task.title}</p>
             </div>
           </div>
@@ -148,7 +148,7 @@ export default function WritingLab() {
           ) : !r ? (
             <div className="flex h-full min-h-80 flex-col items-center justify-center gap-4 rounded-3xl border-2 border-dashed border-line p-8 text-center">
               <DefnePose pose="wave" className="h-44" />
-              <p className="max-w-xs font-bold text-ink-soft">Yazını bitir, gönder. Seviyeni tahmin edip hataları metninin üstünde işaretleyeceğim — her birinin nedenini Türkçe anlatarak.</p>
+              <p className="max-w-xs font-bold text-ink-soft">Yazını bitir, gönder. Seviyeni tahmin edip hataları metninin üstünde işaretleyeceğim, her birinin nedenini Türkçe anlatarak.</p>
             </div>
           ) : (
             <Feedback r={r} text={text} history={history} />
@@ -170,7 +170,7 @@ function TaskPicker({ onPick, level }: { onPick: (t: Task) => void; level?: stri
         </div>
         <div className="flex items-center gap-3 rounded-2xl border-2 border-line bg-card p-3 pr-4">
           <Defne className="size-11" />
-          <p className="text-sm font-bold">Seviyen <b>{level}</b> — işaretli görevler sana uygun.</p>
+          <p className="text-sm font-bold">Seviyen <b>{level}</b> işaretli görevler sana uygun.</p>
         </div>
       </div>
       <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
@@ -183,7 +183,7 @@ function TaskPicker({ onPick, level }: { onPick: (t: Task) => void; level?: stri
             <div className="p-5">
               <p className="text-lg font-black leading-tight">{t.title}</p>
               <p className="mt-1 line-clamp-2 font-read text-sm text-ink-soft">{t.prompt}</p>
-              <p className="mt-3 flex items-center gap-1.5 text-xs font-extrabold text-ink-soft"><PenLine className="size-3.5" /> {t.min}–{t.max} kelime · {t.words.length} hedef kelime</p>
+              <p className="mt-3 flex items-center gap-1.5 text-xs font-extrabold text-ink-soft"><PenLine className="size-3.5" /> {t.min}-{t.max} kelime · {t.words.length} hedef kelime</p>
             </div>
           </motion.button>
         ))}
@@ -291,7 +291,7 @@ function Feedback({ r, text, history }: { r: Result; text: string; history: numb
           <p className="text-xs font-black uppercase tracking-[0.14em] text-ink-soft">Tahmini seviye</p>
           <p className="font-display text-4xl font-black">{r.cefr_estimate}</p>
           {prev !== null && <p className={clsx('mt-1 text-sm font-extrabold', r.score >= prev ? 'text-mint-deep' : 'text-berry')}>{r.score >= prev ? `+${r.score - prev}` : r.score - prev} puan, önceki denemene göre</p>}
-          <p className="mt-1 text-sm text-ink-soft">{r.mistakes.length ? `${r.mistakes.length} düzeltme — ${found} tanesi metninde işaretli` : 'Hata bulunamadı!'}</p>
+          <p className="mt-1 text-sm text-ink-soft">{r.mistakes.length ? `${r.mistakes.length} düzeltme, ${found} tanesi metninde işaretli` : 'Hata bulunamadı!'}</p>
         </div>
       </div>
 
@@ -330,7 +330,7 @@ function Feedback({ r, text, history }: { r: Result; text: string; history: numb
           <span className="flex items-center gap-1 text-sm font-extrabold text-ink-soft">{showFixed ? <EyeOff className="size-4" /> : <Eye className="size-4" />} {showFixed ? 'Gizle' : 'Göster'}</span>
         </button>
         <AnimatePresence>{showFixed && <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mt-3 overflow-hidden font-read leading-relaxed">{r.corrected_text}</motion.p>}</AnimatePresence>
-        {!showFixed && <p className="mt-1 text-sm text-ink-soft">Önce işaretli yerleri kendin düzeltmeyi dene — kalıcı öğrenme böyle olur.</p>}
+        {!showFixed && <p className="mt-1 text-sm text-ink-soft">Önce işaretli yerleri kendin düzeltmeyi dene, kalıcı öğrenme böyle olur.</p>}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">

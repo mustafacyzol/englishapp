@@ -11,7 +11,7 @@ import { ThemeButton, ThemeToggle } from '@/components/ui/ThemeToggle'
 import { LinkButton } from '@/components/ui/Button'
 import { PageTransition } from '@/components/motion/Page'
 
-/** Primary sections — the full row shows from lg; below that everything lives in the sheet. */
+/** Primary sections, the full row shows from lg; below that everything lives in the sheet. */
 const LINKS = [
   { to: '/#beceriler', label: 'Yöntem' },
   { to: '/#defne', label: 'Defne' },
@@ -68,7 +68,7 @@ export default function PublicLayout() {
 
 /**
  * The header sits flush at the top, then lifts into a floating, rounded bar once
- * the page scrolls — so it never covers content with a heavy slab.
+ * the page scrolls, so it never covers content with a heavy slab.
  */
 function SiteHeader({ onMenu }: { onMenu: () => void }) {
   const { user } = useAuth()
@@ -209,7 +209,7 @@ function MenuSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
   )
 }
 
-/** A hairline reading-progress bar — one solid brand colour, no gradient. */
+/** A hairline reading-progress bar, one solid brand colour, no gradient. */
 function ScrollProgress() {
   const { scrollYProgress } = useScroll()
   const width = useSpring(scrollYProgress, { stiffness: 140, damping: 26, restDelta: 0.001 })
@@ -217,7 +217,7 @@ function ScrollProgress() {
 }
 
 /**
- * Social accounts. Left empty on purpose — fill in the school's real handles and
+ * Social accounts. Left empty on purpose, fill in the school's real handles and
  * the row appears; an empty list keeps the footer free of dead links.
  */
 const SOCIAL: { label: string; href: string; icon: LucideIcon }[] = []
@@ -278,7 +278,7 @@ function Footer() {
           <div>
             <Logo />
             <p className="mt-4 max-w-sm leading-relaxed text-ink-soft">
-              DilGO, Bayrak Dil Okulları’nın İngilizce uygulamasıdır. Oku, dinle, konuş, yaz — her gün birkaç dakika, gerçek öğretmen desteğiyle.
+              DilGO, Bayrak Dil Okulları’nın İngilizce uygulamasıdır. Oku, dinle, konuş, yaz, her gün birkaç dakika, gerçek öğretmen desteğiyle.
             </p>
 
             <ul className="mt-6 space-y-3 text-sm font-bold">
@@ -288,7 +288,7 @@ function Footer() {
               </li>
               <li className="flex items-center gap-2.5">
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl border-2 border-line bg-card"><Clock className="size-4 text-sky" /></span>
-                <span className="text-ink-soft">Hafta içi 09:00–19:00</span>
+                <span className="text-ink-soft">Hafta içi 09:00-19:00</span>
               </li>
               <li className="flex items-center gap-2.5">
                 <span className="grid size-9 shrink-0 place-items-center rounded-xl border-2 border-line bg-card"><Smartphone className="size-4 text-mint" /></span>

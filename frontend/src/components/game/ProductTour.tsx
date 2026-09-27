@@ -48,7 +48,7 @@ export function ProductTour() {
     },
     {
       kicker: 'Dört beceri',
-      title: 'Okuma, dinleme, konuşma, yazma — dengede',
+      title: 'Okuma, dinleme, konuşma, yazma, dengede',
       text: 'Her gün dört küçük görev: her beceriden bir tane. En geride kalanı öne alırım, karnen profilinde.',
       art: (
         <div className="grid size-full grid-cols-2 gap-2">
@@ -82,7 +82,7 @@ export function ProductTour() {
     {
       kicker: 'Ödüller',
       title: 'Seri, sandık, rozet, canlı ders',
-      text: `${when ? `Her gün ${when.toLocaleLowerCase('tr')} seni hatırlatırım. ` : ''}Serini koru, sandıkları aç, rozetleri topla — kazandığın kuponları Bayrak Dil Okulları’nda gerçek derste kullan.`,
+      text: `${when ? `Her gün ${when.toLocaleLowerCase('tr')} seni hatırlatırım. ` : ''}Serini koru, sandıkları aç, rozetleri topla, kazandığın kuponları Bayrak Dil Okulları’nda gerçek derste kullan.`,
       art: (
         <div className="grid size-full grid-cols-2 place-items-center gap-2 rounded-[28px] bg-butter/15 p-4">
           {['flame', 'chest', 'trophy', 'voucher'].map((k) => <Img key={k} src={rewardImg(k)} alt="" className="size-20 object-contain" />)}

@@ -1,4 +1,4 @@
-# DilGO — Bayrak Dil Okulları
+# DilGO · Bayrak Dil Okulları
 
 **Oku · Dinle · Konuş · Yaz.** Dört beceriyi tek uygulamada birleştiren, tamamen oyunlaştırılmış İngilizce öğrenme platformu.
 HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyunlaştırmayla, yapay zekâ öğretmen **Defne** ile konuşma/yazma pratiğiyle ve Bayrak Dil Okulları'nın gerçek öğretmenleriyle birleştirir.
@@ -22,7 +22,7 @@ HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyun
 
 | Alan | Özellikler |
 |---|---|
-| **Okuma + Dinleme** | Seviyeli (A1–C2) hikaye kütüphanesi, dokun-çevir kelime kartı, paragraf/tüm hikaye sesli okuma (kelime kelime vurgulu), Türkçe çeviri katmanı, kavrama quizi, kaldığın yerden devam, yer imi |
+| **Okuma + Dinleme** | Seviyeli (A1-C2) hikaye kütüphanesi, dokun-çevir kelime kartı, paragraf/tüm hikaye sesli okuma (kelime kelime vurgulu), Türkçe çeviri katmanı, kavrama quizi, kaldığın yerden devam, yer imi |
 | **Ders yolu** | Kurs → ünite → ders; 7 alıştırma tipi (seçmeli, boşluk doldurma, dinle-seç, kutucukla çeviri, dinle-yaz, sesli söyle, eşleştir), yanlışlar sona tekrar gelir, ünite rehberleri (Türkçe dilbilgisi notları), kontrol noktaları, tekrarla taç kazanma |
 | **Konuşma + Yazma (AI)** | Defne: seviyeni, hedefini, ilgi alanlarını ve **kaydettiğin kelimeleri bilen** AI koç (tek persona dosyası: `frontend/src/lib/tutor.ts`). **Sesli arama ekranı**: 3B Defne portresi; konuşurken dudak senkronlu konuşma döngüsüne, dinlerken bekleme döngüsüne geçer, kelime kelime altyazı, eller serbest mod. Sesli/yazılı sohbet, rol-yapma senaryoları, Türkçe düzeltme kartı. **Yazma Atölyesi**: fotoğraflı görevler, hedef kelimeler, inceleme animasyonu, hatalar metnin üstünde işaretli, puan halkası + 4'lü rubrik, düzeltilmiş hali, deneme karşılaştırması |
 | **Dört beceri takibi** | Her XP okuma/dinleme/konuşma/yazma arasında, yapılan alıştırma türüne göre bölünür (`App\Support\Skills`). Beceri seviyeleri, 7 günlük eğilim, denge puanı, en geride kalan beceri önerisi (`GET /me/skills`) ve her gün her beceriden bir görev içeren **günlük plan** (odak beceri önde) |
@@ -60,7 +60,7 @@ HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyun
 - **Hostinger Premium Web Hosting** Node.js sunucu çalıştırmaz; PHP + MySQL + cron + SSH sunar. Laravel bu ortamda sorunsuz çalışır (kuyruk ve zamanlayıcı tek bir cron ile).
 - API **tamamen başsız (headless)** ve token tabanlıdır: aynı API web sitesine, iOS ve Android uygulamasına hizmet verir. Cookie/CSRF yok → mobil taşıma sıfır ek iş.
 - Frontend statik dosya olarak derlenir; hem `public_html`'e yüklenir hem de **Capacitor** ile native uygulamaya paketlenir (tek kod tabanı).
-- Büyüdüğünüzde: aynı kod VPS/Cloud'a taşınır, `QUEUE_CONNECTION=redis`, `CACHE_STORE=redis` yapılır — kod değişmez.
+- Büyüdüğünüzde: aynı kod VPS/Cloud'a taşınır, `QUEUE_CONNECTION=redis`, `CACHE_STORE=redis` yapılır, kod değişmez.
 
 **Teknolojiler:** Laravel 12, Sanctum, PHP 8.2+ · React 19, TypeScript, Vite, Tailwind CSS 4, TanStack Query, Motion, Lucide · Capacitor 8 · Anthropic Claude (resmî PHP SDK) · iyzico.
 

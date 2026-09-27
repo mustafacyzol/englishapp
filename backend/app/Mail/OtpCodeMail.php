@@ -23,7 +23,7 @@ class OtpCodeMail extends Mailable
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: $this->code.' · '.self::COPY[$this->purpose][0].' — '.config('dilgo.brand.name'));
+        return new Envelope(subject: $this->code.' · '.self::COPY[$this->purpose][0].', '.config('dilgo.brand.name'));
     }
 
     public function content(): Content

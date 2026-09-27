@@ -243,12 +243,15 @@ export default function LessonPlayer() {
         <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center">
           {checked !== null && (
             <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative flex flex-1 items-center gap-3">
-              <motion.span initial={{ y: 30, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="pointer-events-none absolute -top-[132px] right-0 hidden sm:block">
-                <DefnePose pose={checked ? 'cheer' : 'think'} className="h-32" />
+              {/* Defne reacts from a round portrait, badged with the verdict, instead of floating above the button. */}
+              <motion.span initial={{ scale: 0.6, rotate: -8 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 380, damping: 16 }} className="relative shrink-0">
+                <span className={clsx('block size-14 overflow-hidden rounded-full border-[3px] sm:size-16', checked ? 'border-mint bg-mint/20' : 'border-berry bg-berry/15')}>
+                  <DefnePose pose={checked ? 'cheer' : 'think'} className="size-full scale-[1.35] object-cover object-top pt-1" />
+                </span>
+                <span className={clsx('absolute -bottom-1 -right-1 grid size-6 place-items-center rounded-full border-2 border-card text-white', checked ? 'bg-mint' : 'bg-berry')}>
+                  {checked ? <Check className="size-3.5" strokeWidth={4} /> : <X className="size-3.5" strokeWidth={4} />}
+                </span>
               </motion.span>
-              <span className={clsx('grid size-12 place-items-center rounded-full text-white', checked ? 'bg-mint' : 'bg-berry')}>
-                {checked ? <Check className="size-7" strokeWidth={3} /> : <X className="size-7" strokeWidth={3} />}
-              </span>
               <div>
                 <p className={clsx('text-2xl font-black', checked ? 'text-mint-deep' : 'text-berry')}>{checked ? ['Harika!', 'Süper!', 'Aynen böyle!', 'Mükemmel!'][done % 4] : 'Doğru cevap:'}</p>
                 {!checked && <p className="text-lg font-bold text-berry">{correctText(ex)}</p>}
@@ -404,7 +407,7 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
 }
 
 /**
- * Hata Avı — a sentence carrying the kind of slip a Turkish speaker actually makes.
+ * Hata Avı, a sentence carrying the kind of slip a Turkish speaker actually makes.
  * Tap the guilty word, then choose its replacement. The Turkish "why" lands with the result.
  */
 function SpotError({ ex, value, setValue, locked }: { ex: Extract<Exercise, { type: 'spot_error' }>; value: Answer; setValue: (v: Answer) => void; locked: boolean }) {
@@ -470,7 +473,7 @@ function SpotError({ ex, value, setValue, locked }: { ex: Extract<Exercise, { ty
 }
 
 /**
- * Sahne — a real scene from the scenario library with the learner's line missing.
+ * Sahne, a real scene from the scenario library with the learner's line missing.
  * Choosing a reply is a conversation decision, not a grammar gap-fill.
  */
 function DialogueScene({ ex, value, setValue, locked, ttsRate }: { ex: Extract<Exercise, { type: 'dialogue' }>; value: Answer; setValue: (v: Answer) => void; locked: boolean; ttsRate?: number }) {
@@ -534,7 +537,7 @@ function DialogueScene({ ex, value, setValue, locked, ttsRate }: { ex: Extract<E
 }
 
 /**
- * Sıralama — put the steps of a story or a real-life task in order. Tap to add a stop
+ * Sıralama, put the steps of a story or a real-life task in order. Tap to add a stop
  * to the track, tap again to take it off.
  */
 function SequenceTrack({ ex, value, setValue, locked }: { ex: Extract<Exercise, { type: 'sequence' }>; value: Answer; setValue: (v: Answer) => void; locked: boolean }) {
@@ -703,7 +706,7 @@ function SpeakExercise({ ex, setValue, locked, value, ttsRate }: { ex: Extract<E
             )}
             {listening ? <><MicOff className="relative size-6" /> Dinliyorum… (bitir)</> : <><Mic className="size-6 text-flame" /> Konuşmak için dokun</>}
           </button>
-          {mic === 'prompt' && <p className="mt-3 text-center text-sm font-semibold text-ink-soft">Tarayıcı mikrofon izni isteyecek — “İzin ver”e dokun.</p>}
+          {mic === 'prompt' && <p className="mt-3 text-center text-sm font-semibold text-ink-soft">Tarayıcı mikrofon izni isteyecek, “İzin ver”e dokun.</p>}
         </>
       ) : (
         <p className="rounded-2xl border-2 border-dashed border-line/40 p-4 text-center text-sm text-ink-soft">Bu tarayıcı konuşma tanımayı desteklemiyor. Chrome ya da uygulamamızı kullan veya “Şu an konuşamıyorum”a bas.</p>

@@ -56,7 +56,7 @@ export default function UserDetail() {
             <dt className="text-ink-soft">XP / Elmas</dt><dd>{num(u.stats.xp_total)} / {num(u.stats.gems)}</dd>
             <dt className="text-ink-soft">Seri</dt><dd>{u.stats.streak} (en uzun {u.stats.streak_longest})</dd>
             <dt className="text-ink-soft">Son giriş</dt><dd>{dateTR(u.last_login_at, true)} · {u.last_login_ip}</dd>
-            <dt className="text-ink-soft">Kilit</dt><dd>{u.locked_until ? dateTR(u.locked_until, true) : '—'}</dd>
+            <dt className="text-ink-soft">Kilit</dt><dd>{u.locked_until ? dateTR(u.locked_until, true) : '-'}</dd>
             <dt className="text-ink-soft">2FA</dt><dd>{u.two_factor_enabled ? 'açık' : 'kapalı'}</dd>
             <dt className="text-ink-soft">Davet kodu</dt><dd className="font-mono">{u.referral_code}</dd>
           </dl>
@@ -99,7 +99,7 @@ export default function UserDetail() {
         <section>
           <h2 className="mb-3 text-lg font-extrabold">Kartlar</h2>
           <Table head={['Kart', 'Durum', 'Kaynak', 'Kod', 'Tarih']} empty={!data.items.length}>
-            {data.items.map((i) => <tr key={i.id}><td className="px-4 py-2">{i.item.name}</td><td className="px-4"><Pill>{i.status}</Pill></td><td className="px-4">{i.source}</td><td className="px-4 font-mono">{i.code ?? '—'}</td><td className="px-4">{dateTR(i.created_at)}</td></tr>)}
+            {data.items.map((i) => <tr key={i.id}><td className="px-4 py-2">{i.item.name}</td><td className="px-4"><Pill>{i.status}</Pill></td><td className="px-4">{i.source}</td><td className="px-4 font-mono">{i.code ?? '-'}</td><td className="px-4">{dateTR(i.created_at)}</td></tr>)}
           </Table>
         </section>
         <section>

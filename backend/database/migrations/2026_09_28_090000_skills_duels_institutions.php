@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Per-skill XP per day — powers the four-skill balance, trends and recommendations.
+        // Per-skill XP per day, powers the four-skill balance, trends and recommendations.
         Schema::table('daily_activities', function (Blueprint $table) {
             foreach (['reading', 'listening', 'speaking', 'writing'] as $s) {
                 $table->unsignedInteger("xp_{$s}")->default(0);
@@ -51,7 +51,7 @@ return new class extends Migration
         });
 
         Schema::table('users', function (Blueprint $table) {
-            // Personal onboarding answers — used across the product loop.
+            // Personal onboarding answers, used across the product loop.
             $table->string('focus_skill', 20)->nullable();
             $table->json('interests')->nullable();
             $table->string('study_time', 20)->nullable(); // morning | lunch | evening | night

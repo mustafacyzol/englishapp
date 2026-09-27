@@ -17,7 +17,7 @@ class LeagueResult extends Notification
     {
         $title = match ($this->result) {
             'promoted' => "Terfi! Artık {$this->tierName} Ligi'ndesin",
-            'demoted' => "{$this->tierName} Ligi'ne düştün — bu hafta geri al!",
+            'demoted' => "{$this->tierName} Ligi'ne düştün, bu hafta geri al!",
             default => "Haftayı {$this->rank}. sırada bitirdin",
         };
 

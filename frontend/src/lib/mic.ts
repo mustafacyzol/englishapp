@@ -3,8 +3,8 @@
  *
  * Speech recognition only raises its own prompt on some browsers, and never again
  * once the site has been blocked. So a speaking exercise asks up front through
- * getUserMedia — that is the call every browser and the Capacitor WebView answer
- * with the real system dialog — and we keep the outcome so we can explain the
+ * getUserMedia, that is the call every browser and the Capacitor WebView answer
+ * with the real system dialog, and we keep the outcome so we can explain the
  * blocked case instead of failing silently.
  */
 
@@ -28,7 +28,7 @@ export async function readMicState(): Promise<MicState> {
       return cached
     }
   } catch {
-    /* Firefox and Safari don't expose the microphone permission — fall through. */
+    /* Firefox and Safari don't expose the microphone permission, fall through. */
   }
   return cached
 }

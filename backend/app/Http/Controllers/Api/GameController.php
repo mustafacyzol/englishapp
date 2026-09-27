@@ -79,7 +79,7 @@ class GameController extends Controller
 
     /**
      * Today's plan: one small task per skill, the weakest (or the learner's chosen
-     * focus) first — so no skill is ever left behind and there's always a next step.
+     * focus) first, so no skill is ever left behind and there's always a next step.
      */
     private function dailyPlan(User $user, ?DailyActivity $today, array $skills): array
     {
@@ -198,7 +198,7 @@ class GameController extends Controller
                     'id' => $a->id,
                     'key' => $a->key,
                     'title' => $a->is_hidden && ! $ua ? '???' : $a->title,
-                    'description' => $a->is_hidden && ! $ua ? 'Gizli rozet — keşfetmeye devam et.' : $a->description,
+                    'description' => $a->is_hidden && ! $ua ? 'Gizli rozet, keşfetmeye devam et.' : $a->description,
                     'category' => $a->category,
                     'tier' => $a->tier,
                     'icon' => $a->icon,
@@ -242,7 +242,7 @@ class GameController extends Controller
         return response()->json(['user' => UserPresenter::me($user->fresh())]);
     }
 
-    /** "Practice to earn a heart" — a short review session restores one heart. */
+    /** "Practice to earn a heart", a short review session restores one heart. */
     public function earnHeart(Request $request, HeartService $hearts): JsonResponse
     {
         $data = $request->validate(['correct' => ['required', 'integer', 'min:5']]);

@@ -95,7 +95,7 @@ export default function Settings() {
             </button>
           ))}
         </div>
-        <p className="mb-2 text-sm font-bold">Çalışma saatin <span className="font-normal text-ink-soft">— hatırlatmalar bu saate göre gelir</span></p>
+        <p className="mb-2 text-sm font-bold">Çalışma saatin <span className="font-normal text-ink-soft">hatırlatmalar bu saate göre gelir</span></p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {STUDY_TIMES.map((t) => (
             <button key={t.key} onClick={() => save.mutate({ study_time: t.key })} className={clsx('rounded-xl border-2 py-2 text-sm font-bold', user.study_time === t.key ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>{t.label}</button>
@@ -279,7 +279,7 @@ function JoinInstitution() {
   return (
     <Section title="Okul / kurum">
       {user.institution ? (
-        <p className="font-bold">{user.institution.name} <span className="font-normal text-ink-soft">— {user.institution_role === 'manager' ? 'kurum yöneticisi' : 'öğrenci koltuğun aktif'}</span></p>
+        <p className="font-bold">{user.institution.name} <span className="font-normal text-ink-soft">{user.institution_role === 'manager' ? 'kurum yöneticisi' : 'öğrenci koltuğun aktif'}</span></p>
       ) : (
         <form className="flex flex-wrap items-end gap-3" onSubmit={(e) => { e.preventDefault(); join.mutate() }}>
           <Input label="Kurum katılım kodu" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="ör. ABC-1234" className="min-w-48 flex-1" />

@@ -9,7 +9,7 @@ use RuntimeException;
 
 /**
  * iyzico Checkout Form integration (hosted payment page) using the IYZWSv2
- * HMAC-SHA256 authorization scheme. No SDK dependency — works on shared hosting.
+ * HMAC-SHA256 authorization scheme. No SDK dependency, works on shared hosting.
  */
 class IyzicoGateway implements PaymentGateway
 {

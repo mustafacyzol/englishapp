@@ -145,7 +145,7 @@ const SCRIPTS: Record<string, [string, string, { word: string; meaning_tr: strin
   ],
 }
 const FREE: [string, string][] = [
-  ['That sounds great! Tell me more — what was the best part?', 'Kulağa harika geliyor! Biraz daha anlat, en güzel kısmı neydi?'],
+  ['That sounds great! Tell me more, what was the best part?', 'Kulağa harika geliyor! Biraz daha anlat, en güzel kısmı neydi?'],
   ['Interesting! How did you feel about it?', 'İlginç! Bu konuda ne hissettin?'],
   ['Nice! What are you planning to do this weekend?', 'Güzel! Bu hafta sonu ne yapmayı planlıyorsun?'],
   ["You're doing really well. Let's try a new word: \"looking forward to\". What are you looking forward to?", 'Çok iyi gidiyorsun. Yeni bir kalıp deneyelim: "looking forward to" (dört gözle beklemek). Neyi dört gözle bekliyorsun?'],
@@ -401,7 +401,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   // --- Gölge Düellosu (graded here the same way the server does)
   if (path === '/duel') {
     const ov = db['/duel']
-    if (ov.me.tickets_left === 0) throw new DemoError(402, 'Bugünkü ücretsiz düello hakların bitti. Yarın yenilenir — ya da Premium ile sınırsız oyna.')
+    if (ov.me.tickets_left === 0) throw new DemoError(402, 'Bugünkü ücretsiz düello hakların bitti. Yarın yenilenir, ya da Premium ile sınırsız oyna.')
     if (ov.me.tickets_left !== null) ov.me.tickets_left--
     const d = structuredClone(F.post.duel_start)
     d.duel.id = nextMsg++

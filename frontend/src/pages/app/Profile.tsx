@@ -137,7 +137,7 @@ function Skill({ icon: Icon, label, v, color }: { icon: typeof Mic; label: strin
     <div className="flex items-center gap-3 rounded-2xl border-2 border-line/15 p-3">
       <span className={clsx('grid size-10 place-items-center rounded-xl border-2 border-line text-ink', color)}><Icon className="size-5" /></span>
       <div>
-        <p className="font-display text-xl font-extrabold leading-none">{v ?? '–'}</p>
+        <p className="font-display text-xl font-extrabold leading-none">{v ?? '-'}</p>
         <p className="text-[11px] font-bold text-ink-soft">{label}</p>
       </div>
     </div>

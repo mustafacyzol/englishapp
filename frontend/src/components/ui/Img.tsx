@@ -8,8 +8,8 @@ type Props = ImgHTMLAttributes<HTMLImageElement> & { priority?: boolean }
  * baked into the bundle and painted as the element's own background, so the picture
  * is there on the first frame and simply sharpens when the real file lands.
  *
- * Cut-out objects (transparent icons, medals, trophies) skip the preview — a blurred
- * blob behind a transparent subject looks like a smudge — and fade in instead.
+ * Cut-out objects (transparent icons, medals, trophies) skip the preview, a blurred
+ * blob behind a transparent subject looks like a smudge, and fade in instead.
  */
 export function Img({ src, style, priority, onLoad, ...rest }: Props) {
   const key = typeof src === 'string' ? src.slice(src.indexOf('img/') + 4) : ''

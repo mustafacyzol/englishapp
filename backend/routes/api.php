@@ -32,7 +32,7 @@ Route::prefix('v1')->group(function () {
     Route::post('contact', [SiteController::class, 'contact'])->middleware('throttle:5,10');
     Route::get('invites/{token}', [InstitutionController::class, 'invitation'])->middleware('throttle:30,1');
 
-    // Payment provider callbacks (no auth — verified server-to-server)
+    // Payment provider callbacks (no auth, verified server-to-server)
     Route::post('payments/iyzico/callback', [BillingController::class, 'iyzicoCallback'])->middleware('throttle:60,1');
     Route::get('payments/fake/{uuid}', [BillingController::class, 'fakePay']);
 

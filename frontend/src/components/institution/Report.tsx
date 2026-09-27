@@ -44,7 +44,7 @@ function ago(iso: string | null) {
   return d < 30 ? `${d} gün önce` : dateTR(iso)
 }
 
-/** "e-posta, Ad Soyad, Sınıf" per line — pasted straight from a spreadsheet works too (tabs or semicolons). */
+/** "e-posta, Ad Soyad, Sınıf" per line, pasted straight from a spreadsheet works too (tabs or semicolons). */
 export function parseRows(text: string, defaultClass: string): InviteRow[] {
   return text
     .split(/\n+/)
@@ -55,7 +55,7 @@ export function parseRows(text: string, defaultClass: string): InviteRow[] {
 
 /**
  * Seat usage, weekly activity, the class's four-skill balance and per-student
- * progress — shared by the institution panel (/kurum) and the admin view.
+ * progress, shared by the institution panel (/kurum) and the admin view.
  */
 export function Report({ data, onInvite, onRemove, inviting, admin }: { data: InstitutionReport; onInvite: (rows: InviteRow[], role: 'student' | 'manager') => Promise<unknown>; onRemove: (id: number) => void; inviting?: boolean; admin?: boolean }) {
   const { institution: inst, summary } = data
@@ -90,7 +90,7 @@ export function Report({ data, onInvite, onRemove, inviting, admin }: { data: In
           <p className="text-xs font-black uppercase tracking-[0.14em] text-ink-soft">{TYPE[inst.type] ?? inst.type}{inst.city ? ` · ${inst.city}` : ''}</p>
           <h2 className="mt-1 text-2xl sm:text-3xl">{inst.name}</h2>
           <p className="mt-1 text-sm text-ink-soft">
-            Sözleşme {inst.starts_at ? dateTR(inst.starts_at) : '—'} – {inst.ends_at ? dateTR(inst.ends_at) : 'süresiz'} ·{' '}
+            Sözleşme {inst.starts_at ? dateTR(inst.starts_at) : '-'}, {inst.ends_at ? dateTR(inst.ends_at) : 'süresiz'} ·{' '}
             <span className={inst.current ? 'font-bold text-mint-deep' : 'font-bold text-berry'}>{inst.current ? 'aktif' : 'pasif'}</span>
           </p>
           <div className="mt-5">
@@ -109,7 +109,7 @@ export function Report({ data, onInvite, onRemove, inviting, admin }: { data: In
 
         <div className="grid grid-cols-2 gap-3">
           <Kpi label="Öğrenci" value={summary.students} sub={`${summary.active} aktif · ${summary.invited} davetli`} />
-          <Kpi label="Bu hafta çalışan" value={summary.active_this_week} sub={summary.active ? `%${Math.round((summary.active_this_week / summary.active) * 100)} katılım` : '—'} />
+          <Kpi label="Bu hafta çalışan" value={summary.active_this_week} sub={summary.active ? `%${Math.round((summary.active_this_week / summary.active) * 100)} katılım` : '-'} />
           <Kpi label="Haftalık XP" value={num(summary.week_xp)} sub="tüm sınıflar" />
           <Kpi label="Ortalama seri" value={`${summary.avg_streak} gün`} sub="aktif öğrenciler" icon={<Flame className="size-4 text-flame" />} />
         </div>
@@ -160,8 +160,8 @@ export function Report({ data, onInvite, onRemove, inviting, admin }: { data: In
             <tbody className="divide-y-2 divide-line/40">
               {rows.map((m) => (
                 <tr key={m.id} className="hover:bg-paper-2/60">
-                  <td className="px-4 py-3"><p className="font-bold">{m.name ?? '—'} {m.status === 'invited' && <InvitedPill />}</p><p className="text-xs text-ink-soft">{m.email}</p></td>
-                  <td className="px-4 py-3">{m.class_name ?? '—'}</td>
+                  <td className="px-4 py-3"><p className="font-bold">{m.name ?? '-'} {m.status === 'invited' && <InvitedPill />}</p><p className="text-xs text-ink-soft">{m.email}</p></td>
+                  <td className="px-4 py-3">{m.class_name ?? '-'}</td>
                   <td className="px-4 py-3 text-ink-soft">{m.status === 'invited' ? `davet ${ago(m.invited_at)}` : ago(m.last_active_at)}</td>
                   <td className="px-4 py-3 text-right font-bold tabular-nums">{m.week_xp} XP</td>
                   <td className="px-4 py-3 text-right tabular-nums">{m.streak}</td>
@@ -227,7 +227,7 @@ function InvitedPill() {
 }
 
 function SkillBars({ m }: { m: Member }) {
-  if (!m.skills) return <span className="text-xs text-ink-soft">—</span>
+  if (!m.skills) return <span className="text-xs text-ink-soft">-</span>
   const max = Math.max(1, ...SKILLS.map((k) => m.skills![k]?.xp ?? 0))
   return (
     <span className="flex h-6 items-end gap-1" title={SKILLS.map((k) => `${SKILL[k].label}: Sv${m.skills![k]?.level ?? 0}`).join(' · ')}>

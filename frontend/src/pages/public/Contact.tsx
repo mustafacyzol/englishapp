@@ -63,7 +63,7 @@ export default function Contact() {
           )}
           <div className="flex items-center gap-4 rounded-2xl border-2 border-line bg-card p-4">
             <Clock className="size-6 text-sky" />
-            <span><span className="block text-sm font-bold text-ink-soft">Çalışma saatleri</span><span className="block text-lg font-extrabold">Hafta içi 09:00–19:00</span></span>
+            <span><span className="block text-sm font-bold text-ink-soft">Çalışma saatleri</span><span className="block text-lg font-extrabold">Hafta içi 09:00-19:00</span></span>
           </div>
         </div>
       </Reveal>

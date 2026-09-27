@@ -14,11 +14,11 @@ export interface CallMsg {
 }
 
 /** The recorded, truly lip-synced greeting that opens a free-talk call. */
-const GREETING = "Hi! I'm Defne, your English coach. So, tell me — how was your day? Take your time, there's no rush. I'm listening, and we'll practise together, step by step."
+const GREETING = "Hi! I'm Defne, your English coach. So, tell me, how was your day? Take your time, there's no rush. I'm listening, and we'll practise together, step by step."
 
 /**
- * A FaceTime-style call with Defne. Two loops of the same 3D portrait — a
- * listening idle and a talking take — crossfade on the speech engine's start
+ * A FaceTime-style call with Defne. Two loops of the same 3D portrait, a
+ * listening idle and a talking take, crossfade on the speech engine's start
  * and end events, so her mouth moves exactly while she speaks. Captions follow
  * the spoken word, and hands-free mode hands the turn back to you automatically.
  */
@@ -86,7 +86,7 @@ export function VoiceCall({
     stopSpeaking()
     const state = await ensureMic()
     if (state === 'denied') {
-      // Don't keep re-asking after every reply — fall back to tap-to-talk.
+      // Don't keep re-asking after every reply, fall back to tap-to-talk.
       setHandsFree(false)
       return onMicBlocked()
     }
@@ -264,7 +264,7 @@ export function VoiceCall({
             <PhoneOff className="size-6" />
           </button>
         </div>
-        {!canListen() && <p className="mt-3 text-center text-xs text-white/60">Bu tarayıcı konuşma tanımayı desteklemiyor — Chrome veya Safari’de dene.</p>}
+        {!canListen() && <p className="mt-3 text-center text-xs text-white/60">Bu tarayıcı konuşma tanımayı desteklemiyor, Chrome veya Safari’de dene.</p>}
       </footer>
     </motion.div>
   )

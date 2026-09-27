@@ -108,7 +108,7 @@ export default function AiHub() {
       {/* ---------------------------------------------------------- Modes */}
       <section>
         <h2 className="text-2xl">Nasıl çalışmak istersin?</h2>
-        <p className="mb-5 text-ink-soft">Her mod farklı becerilere puan yazar — dengede kal.</p>
+        <p className="mb-5 text-ink-soft">Her mod farklı becerilere puan yazar, dengede kal.</p>
         <div className="grid gap-4 md:grid-cols-3">
           <ModeCard icon={AudioLines} title="Sesli arama" text="Defne’yi görerek konuş; telaffuzun ve cümlen anında düzelsin." skills={['speaking', 'listening']} onClick={() => start.mutate({ mode: 'speaking', call: true })} loading={start.isPending} />
           <ModeCard icon={MessageSquareText} title="Yazılı sohbet" text="Acele etmeden yaz, her mesajda küçük bir düzeltme al." skills={['writing', 'reading']} onClick={() => start.mutate({ mode: 'chat' })} loading={start.isPending} />

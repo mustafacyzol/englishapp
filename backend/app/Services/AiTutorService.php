@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
- * "Defne" — the AI English teacher. Unlike generic chatbots she knows the learner's
+ * "Defne", the AI English teacher. Unlike generic chatbots she knows the learner's
  * CEFR level, goal and the exact words they saved while reading stories, and
  * recycles that vocabulary in conversation. Explanations are given in Turkish,
  * targeting the typical mistakes Turkish speakers make.

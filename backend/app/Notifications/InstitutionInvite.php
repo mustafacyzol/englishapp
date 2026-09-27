@@ -24,7 +24,7 @@ class InstitutionInvite extends Notification
             ->subject("{$this->institution->name} seni DilGO'ya davet etti")
             ->greeting('Merhaba'.($this->member->name ? " {$this->member->name}" : '').'!')
             ->line("{$this->institution->name}, İngilizce çalışman için sana bir DilGO Premium koltuğu ayırdı.")
-            ->line('Okuma, dinleme, konuşma ve yazma — dört beceri tek uygulamada, yapay zekâ koçun Defne ile.')
+            ->line('Okuma, dinleme, konuşma ve yazma, dört beceri tek uygulamada, yapay zekâ koçun Defne ile.')
             ->action('Daveti kabul et', $url)
             ->line('Bu daveti beklemiyorsan e-postayı yok sayabilirsin.');
     }

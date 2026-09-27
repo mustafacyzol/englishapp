@@ -93,7 +93,7 @@ function Hero() {
 
   return (
     <section ref={ref} className="relative overflow-hidden">
-      {/* Refined backdrop: a faint dotted grid, one warm wash — editorial, not a toy. */}
+      {/* Refined backdrop: a faint dotted grid, one warm wash, editorial, not a toy. */}
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.5] [background-image:radial-gradient(var(--line)_1.4px,transparent_1.4px)] [background-size:26px_26px] [mask-image:radial-gradient(120%_80%_at_70%_0%,#000_35%,transparent_75%)]" />
 
       <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-5 pb-20 pt-12 lg:grid-cols-[1.05fr_1fr] lg:pb-28 lg:pt-20">
@@ -129,7 +129,7 @@ function Hero() {
             transition={{ delay: 0.2 }}
             className="mt-6 max-w-md text-lg leading-relaxed text-ink-soft"
           >
-            Oku, dinle, konuş, yaz — dört beceri tek uygulamada. Seviyene göre hikâyeler, 5 dakikalık dersler ve seni tanıyan yapay zekâ öğretmenin&nbsp;Defne.
+            Oku, dinle, konuş, yaz, dört beceri tek uygulamada. Seviyene göre hikâyeler, 5 dakikalık dersler ve seni tanıyan yapay zekâ öğretmenin&nbsp;Defne.
           </motion.p>
 
           <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-9 flex flex-col gap-3 sm:flex-row">
@@ -228,7 +228,7 @@ const ACCENT: Record<string, { text: string; bg: string; bar: string; ring: stri
   mint: { text: 'text-mint-deep', bg: 'bg-mint/10', bar: 'bg-mint', ring: 'ring-mint/40', solid: 'bg-mint' },
 }
 
-/** A small live demo of each skill, floating over its photo — so the promise is shown, not told. */
+/** A small live demo of each skill, floating over its photo, so the promise is shown, not told. */
 function SkillDemo({ skill }: { skill: (typeof SKILLS)[number] }) {
   if (skill.key === 'read')
     return (
@@ -241,7 +241,7 @@ function SkillDemo({ skill }: { skill: (typeof SKILLS)[number] }) {
           </span>{' '}
           and smiled.
         </p>
-        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mt-1 text-xs font-bold text-butter-deep">umbrella · şemsiye — deftere eklendi</motion.p>
+        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mt-1 text-xs font-bold text-butter-deep">umbrella · şemsiye, deftere eklendi</motion.p>
       </div>
     )
   if (skill.key === 'listen')
@@ -395,7 +395,7 @@ function SkillSwitcher() {
 const CHAT: { role: 'ada' | 'me'; text: string; note?: string; fix?: [string, string] }[] = [
   { role: 'ada', text: "Hi! Welcome to Bean & Leaf. What can I get for you?" },
   { role: 'me', text: 'I want a latte and one cake please' },
-  { role: 'ada', text: "Sure — a latte and a slice of cake. For here or to take away?", fix: ['I want a latte and one cake', "I'd like a latte and a slice of cake"], note: 'Siparişte "I\'d like" daha kibar; kek dilimle istenir.' },
+  { role: 'ada', text: "Sure, a latte and a slice of cake. For here or to take away?", fix: ['I want a latte and one cake', "I'd like a latte and a slice of cake"], note: 'Siparişte "I\'d like" daha kibar; kek dilimle istenir.' },
 ]
 
 function MeetDefne() {
@@ -808,7 +808,7 @@ function DuelShowcase() {
           <h2 className="text-4xl leading-tight sm:text-5xl">Gölge Düellosu</h2>
           <p className="mt-4 text-lg leading-relaxed text-white/75">
             Dört tur, dört beceri. Başka bir öğrencinin gerçek seviyelerinden oluşan <b className="text-white">gölgesine</b> karşı yarışırsın. Kazan, kupa topla, Acemi’den Efsane’ye yüksel.
-            Sen uyurken bile gölgen kupalarını savunur — geri geldiğinde ne olduğunu görürsün.
+            Sen uyurken bile gölgen kupalarını savunur, geri geldiğinde ne olduğunu görürsün.
           </p>
           <ul className="mt-6 grid gap-2 text-white/85 sm:grid-cols-2">
             {['Her gün 5 ücretsiz düello', '3 galibiyet serisine sandık', 'Kurum ve genel kupa sıralaması', 'Düello rozetleri ve görevleri'].map((t) => (
@@ -866,8 +866,8 @@ function DuelShowcase() {
 function ForInstitutions() {
   const points = [
     { icon: Building2, title: 'Koltuk bazlı anlaşma', text: 'Öğrenci sayınızı belirleyin; herkes Premium’un tamamına erişir.' },
-    { icon: Mail, title: 'E-posta ya da kodla katılım', text: 'Listeyi yapıştırın, davetler gitsin — ya da sınıfa tek bir katılım kodu verin.' },
-    { icon: BarChart3, title: 'Kurum paneli', text: 'Kim çalışıyor, hangi beceride geride — sınıf sınıf, haftalık olarak görün.' },
+    { icon: Mail, title: 'E-posta ya da kodla katılım', text: 'Listeyi yapıştırın, davetler gitsin, ya da sınıfa tek bir katılım kodu verin.' },
+    { icon: BarChart3, title: 'Kurum paneli', text: 'Kim çalışıyor, hangi beceride geride, sınıf sınıf, haftalık olarak görün.' },
   ]
   return (
     <section id="kurumlar" className="mx-auto max-w-6xl px-5 py-20">
@@ -875,7 +875,7 @@ function ForInstitutions() {
         <Reveal>
           <p className="mb-2 font-extrabold uppercase tracking-widest text-sage-deep dark:text-sage">Okullar, kurslar ve şirketler için</p>
           <h2 className="text-4xl leading-tight sm:text-5xl">Öğrencileriniz için DilGO</h2>
-          <p className="mt-4 text-lg text-ink-soft">Bayrak Dil Okulları’nın müfredatı, Defne ile konuşma pratiği ve dört beceri takibi — kurumunuzun kendi paneliyle.</p>
+          <p className="mt-4 text-lg text-ink-soft">Bayrak Dil Okulları’nın müfredatı, Defne ile konuşma pratiği ve dört beceri takibi, kurumunuzun kendi paneliyle.</p>
           <div className="mt-8 space-y-4">
             {points.map((p) => (
               <div key={p.title} className="flex gap-4">
@@ -908,10 +908,10 @@ function ForInstitutions() {
                 <span className="grid size-9 place-items-center rounded-full bg-paper-2 font-display font-black">{(n as string).slice(-1)}</span>
                 <span className="flex-1 font-bold">{n}</span>
                 <span className="text-sm font-bold tabular-nums">{xp}</span>
-                <span className="w-10 text-right text-sm tabular-nums text-ink-soft">{st ? `${st}g` : '—'}</span>
+                <span className="w-10 text-right text-sm tabular-nums text-ink-soft">{st ? `${st}g` : '-'}</span>
               </div>
             ))}
-            <p className="bg-paper-2 px-5 py-2 text-center text-xs text-ink-soft">Örnek görünüm — isimler temsilidir.</p>
+            <p className="bg-paper-2 px-5 py-2 text-center text-xs text-ink-soft">Örnek görünüm, isimler temsilidir.</p>
           </div>
         </Reveal>
       </div>

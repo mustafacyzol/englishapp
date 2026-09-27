@@ -50,7 +50,7 @@ export function RewardProvider({ children }: { children: ReactNode }) {
             {r.goal_met_now && <Banner icon={<Zap className="size-4" />}>Günlük hedefini tamamladın!</Banner>}
             {r.quests_completed.map((q) => (
               <Banner key={q.id} icon={<Sparkles className="size-4" />}>
-                Görev tamam: {q.title} — ödülünü Görevler'den al (+{q.reward_gems} elmas)
+                Görev tamam: {q.title}, ödülünü Görevler'den al (+{q.reward_gems} elmas)
               </Banner>
             ))}
 

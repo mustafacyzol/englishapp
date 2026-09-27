@@ -32,7 +32,7 @@ export default function Vouchers() {
           </div>
           <p className="text-sm"><b>{v.user.name}</b> · {v.user.email}</p>
           <p className="text-sm text-ink-soft">Aktifleştirme: {dateTR(v.activated_at)} · Son geçerlilik: {dateTR(v.expires_at)}</p>
-          {v.status === 'active' && <Button className="mt-4" variant="success" loading={lookup.isPending} onClick={() => lookup.mutate(true)}>Ders verildi — kuponu kullan</Button>}
+          {v.status === 'active' && <Button className="mt-4" variant="success" loading={lookup.isPending} onClick={() => lookup.mutate(true)}>Ders verildi, kuponu kullan</Button>}
         </div>
       )}
     </div>

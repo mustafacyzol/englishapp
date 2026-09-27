@@ -1,7 +1,7 @@
 import type { SVGProps } from 'react'
 
 /**
- * DilGO's own menu icons — drawn for the app rather than taken from a stock set.
+ * DilGO's own menu icons: drawn for the app rather than taken from a stock set.
  * Duotone: a soft filled body (currentColor at low opacity) under a rounded 1.8px
  * outline, so they stay crisp at 20px and pick up the item's colour when active.
  */
@@ -11,14 +11,13 @@ const soft = { fill: 'currentColor', fillOpacity: 0.18, stroke: 'none' }
 
 export type NavIcon = (p: P) => React.JSX.Element
 
-/** A winding route ending at a flag. */
+/** A folded map with a marked stop: the learning path. */
 export const IconPath: NavIcon = (p) => (
   <svg {...base(p)}>
-    <path d="M5 20c0-3 3-3.5 5-5s1-4 3.5-5.5S19 9 19 6" />
-    <circle cx="5" cy="20" r="1.6" fill="currentColor" stroke="none" />
-    <path d="M17 3v6" />
-    <path {...soft} d="M17 3h4.2l-1.3 1.6 1.3 1.6H17z" />
-    <path d="M17 3h4.2l-1.3 1.6 1.3 1.6H17" />
+    <path {...soft} d="M3.5 6.5 9 4.5l6 2 5.5-2v13l-5.5 2-6-2-5.5 2z" />
+    <path d="M3.5 6.5 9 4.5l6 2 5.5-2v13l-5.5 2-6-2-5.5 2z" />
+    <path d="M9 4.5v13M15 6.5v13" />
+    <circle cx="12" cy="11" r="1.5" fill="currentColor" stroke="none" />
   </svg>
 )
 
@@ -32,7 +31,7 @@ export const IconBook: NavIcon = (p) => (
   </svg>
 )
 
-/** A speech bubble carrying a voice wave — talking with Defne. */
+/** A speech bubble carrying a voice wave: talking with Defne. */
 export const IconTalk: NavIcon = (p) => (
   <svg {...base(p)}>
     <path {...soft} d="M4 11.5C4 7.4 7.6 4.5 12 4.5s8 2.9 8 7-3.6 7-8 7c-1 0-2-.1-2.9-.4L5 20l1.1-3.4A6.6 6.6 0 0 1 4 11.5z" />
@@ -41,7 +40,7 @@ export const IconTalk: NavIcon = (p) => (
   </svg>
 )
 
-/** Two stacked flash cards — practice and review. */
+/** Two stacked flash cards: practice and review. */
 export const IconCards: NavIcon = (p) => (
   <svg {...base(p)}>
     <rect x="3.5" y="7" width="12" height="13" rx="2.5" transform="rotate(-8 9.5 13.5)" />
@@ -51,7 +50,7 @@ export const IconCards: NavIcon = (p) => (
   </svg>
 )
 
-/** A little ghost — Gölge Düellosu. */
+/** A little ghost: Gölge Düellosu. */
 export const IconGhost: NavIcon = (p) => (
   <svg {...base(p)}>
     <path {...soft} d="M5 20V11a7 7 0 0 1 14 0v9l-2.4-1.6L14.3 20 12 18.4 9.7 20l-2.3-1.6z" />
@@ -61,7 +60,7 @@ export const IconGhost: NavIcon = (p) => (
   </svg>
 )
 
-/** A cup with handles and a star — leagues. */
+/** A cup with handles and a star: leagues. */
 export const IconCup: NavIcon = (p) => (
   <svg {...base(p)}>
     <path {...soft} d="M7 4h10v5a5 5 0 0 1-10 0z" />
@@ -71,7 +70,7 @@ export const IconCup: NavIcon = (p) => (
   </svg>
 )
 
-/** A rolled scroll with a tick — quests. */
+/** A rolled scroll with a tick: quests. */
 export const IconQuest: NavIcon = (p) => (
   <svg {...base(p)}>
     <path {...soft} d="M6 4h11a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H8" />
@@ -81,7 +80,7 @@ export const IconQuest: NavIcon = (p) => (
   </svg>
 )
 
-/** A ribboned gift box — rewards. */
+/** A ribboned gift box: rewards. */
 export const IconGift: NavIcon = (p) => (
   <svg {...base(p)}>
     <path {...soft} d="M5 11h14v8.5a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 5 19.5z" />
@@ -91,7 +90,7 @@ export const IconGift: NavIcon = (p) => (
   </svg>
 )
 
-/** A shopping bag with a gem tag — shop. */
+/** A shopping bag with a gem tag: shop. */
 export const IconBag: NavIcon = (p) => (
   <svg {...base(p)}>
     <path {...soft} d="M5 8h14l-1 12H6z" />
@@ -101,7 +100,7 @@ export const IconBag: NavIcon = (p) => (
   </svg>
 )
 
-/** A person in a soft circle — profile. */
+/** A person in a soft circle: profile. */
 export const IconProfile: NavIcon = (p) => (
   <svg {...base(p)}>
     <circle {...soft} cx="12" cy="12" r="9" />
@@ -111,7 +110,7 @@ export const IconProfile: NavIcon = (p) => (
   </svg>
 )
 
-/** A school building with a flag — institution. */
+/** A school building with a flag: institution. */
 export const IconSchool: NavIcon = (p) => (
   <svg {...base(p)}>
     <path {...soft} d="M4 10h16v10H4z" />
@@ -120,7 +119,7 @@ export const IconSchool: NavIcon = (p) => (
   </svg>
 )
 
-/** A shield with a check — admin. */
+/** A shield with a check: admin. */
 export const IconShield: NavIcon = (p) => (
   <svg {...base(p)}>
     <path {...soft} d="M12 3 19.5 6v5.5c0 4.5-3.1 8-7.5 9.5-4.4-1.5-7.5-5-7.5-9.5V6z" />
@@ -129,7 +128,7 @@ export const IconShield: NavIcon = (p) => (
   </svg>
 )
 
-/** Four rounded tiles — "more". */
+/** Four rounded tiles: "more". */
 export const IconMore: NavIcon = (p) => (
   <svg {...base(p)}>
     <rect {...soft} x="13" y="4" width="7" height="7" rx="2" />
@@ -140,7 +139,7 @@ export const IconMore: NavIcon = (p) => (
   </svg>
 )
 
-/** Two sliders — settings. */
+/** Two sliders: settings. */
 export const IconSliders: NavIcon = (p) => (
   <svg {...base(p)}>
     <path d="M4 7h9M17 7h3M4 17h3M11 17h9" />

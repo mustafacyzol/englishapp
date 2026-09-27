@@ -33,7 +33,7 @@ export function Sticker({ children, color = 'bg-butter', className }: { children
 
 /**
  * Branded loading state: the DilGO mark inside a sweeping ring. Used as the
- * fallback wherever a page's shape isn't known ahead of time — where it is,
+ * fallback wherever a page's shape isn't known ahead of time, where it is,
  * prefer a <Skeleton> layout, which tells the reader what is coming.
  */
 export function Spinner({ label = 'Yükleniyor', className }: { label?: string; className?: string }) {

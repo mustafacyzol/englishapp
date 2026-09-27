@@ -26,10 +26,10 @@ Hedef düzen (önerilen):
 ssh -p 65002 u123456789@SUNUCU_IP
 cd ~/domains/api.dilgo.app
 
-# Seçenek A — GitHub'dan (önerilen, güncellemesi kolay)
+# Seçenek A, GitHub'dan (önerilen, güncellemesi kolay)
 git clone https://github.com/mustafacyzol/englishapp.git dilgo-src
 ln -s dilgo-src/backend dilgo-api
-# Seçenek B — scripts/build-release.sh ile üretilen dilgo-api.zip'i File Manager'dan yükleyip açın
+# Seçenek B, scripts/build-release.sh ile üretilen dilgo-api.zip'i File Manager'dan yükleyip açın
 
 cd dilgo-api
 composer2 install --no-dev --optimize-autoloader     # Hostinger'da "composer" v1'dir, composer2 kullanın
@@ -156,7 +156,7 @@ Ayrı alt alan adı istemezseniz: kodu `~/dilgo-api`'ye koyun ve `public_html/ap
 | Belirti | Çözüm |
 |---|---|
 | 500 hatası, boş sayfa | `storage/logs/laravel-*.log`'a bakın; `chmod -R 775 storage bootstrap/cache`; `php artisan optimize:clear` |
-| E-posta gitmiyor | SMTP şifresi, `MAIL_SCHEME=smtps` + 465; hPanel'de SPF/DKIM; cron çalışıyor mu (e-postalar kuyruktan gider — OTP'ler anlık gönderilir) |
+| E-posta gitmiyor | SMTP şifresi, `MAIL_SCHEME=smtps` + 465; hPanel'de SPF/DKIM; cron çalışıyor mu (e-postalar kuyruktan gider, OTP'ler anlık gönderilir) |
 | CORS hatası | `CORS_ALLOWED_ORIGINS` web adresini tam olarak (https dahil) içermeli, sonra `php artisan config:cache` |
 | Admin şifresi/2FA kayıp | SSH: `php artisan dilgo:admin eposta --reset-password --reset-2fa --unlock` |
 | Defne "bakımda" diyor | `ANTHROPIC_API_KEY` eksik/geçersiz ya da `AI_ENABLED=false`; loglara bakın |

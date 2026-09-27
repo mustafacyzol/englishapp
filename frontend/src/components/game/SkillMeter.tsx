@@ -84,7 +84,7 @@ export function SkillMeter({ compact, className, report }: { compact?: boolean; 
 
       <Link to={weak.to} className="group flex items-center gap-3 border-t-2 border-line bg-paper-2/50 px-5 py-3.5 transition hover:bg-paper-2 sm:px-6">
         <span className={clsx('grid size-9 shrink-0 place-items-center rounded-xl', weak.soft, weak.text)}><WeakIcon className="size-5" /></span>
-        <span className="min-w-0 flex-1 text-sm"><b>Sıradaki odak: {weak.label}.</b> <span className="text-ink-soft">En az çalıştığın beceri — bugün küçük bir adım dengeyi toparlar.</span></span>
+        <span className="min-w-0 flex-1 text-sm"><b>Sıradaki odak: {weak.label}.</b> <span className="text-ink-soft">En az çalıştığın beceri, bugün küçük bir adım dengeyi toparlar.</span></span>
         <ArrowRight className="size-5 shrink-0 text-ink-soft transition group-hover:translate-x-1" />
       </Link>
     </section>

@@ -13,7 +13,7 @@ use Illuminate\Validation\ValidationException;
 
 /**
  * Inventory ("Ödül Kasası"): every earned reward lands here as a card the user
- * activates when they want — a deliberate, satisfying moment instead of silent grants.
+ * activates when they want, a deliberate, satisfying moment instead of silent grants.
  */
 class RewardService
 {
@@ -84,7 +84,7 @@ class RewardService
             $extra = [];
             switch ($item->type) {
                 case 'streak_freeze':
-                    return ['message' => 'Seri dondurucu hazır bekliyor — bir gün kaçırırsan otomatik devreye girer.', 'item' => $userItem];
+                    return ['message' => 'Seri dondurucu hazır bekliyor, bir gün kaçırırsan otomatik devreye girer.', 'item' => $userItem];
 
                 case 'xp_boost':
                     $userItem->update(['status' => 'active', 'activated_at' => now(), 'expires_at' => now()->addMinutes($value['minutes'] ?? 15)]);

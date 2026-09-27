@@ -15,7 +15,7 @@ class DatabaseSeeder extends Seeder
         $this->call([ContentSeeder::class, GameSeeder::class, CourseSeeder::class, BlogSeeder::class, TestimonialSeeder::class]);
 
         if (! app()->isProduction()) {
-            // Local demo accounts — production admins are created with `php artisan dilgo:admin`.
+            // Local demo accounts, production admins are created with `php artisan dilgo:admin`.
             $admin = User::query()->firstOrCreate(['email' => 'admin@dilgo.test'], ['name' => 'Demo Admin', 'password' => 'password1']);
             $admin->forceFill(['role' => 'super_admin', 'email_verified_at' => now(), 'onboarded' => true])->save();
 

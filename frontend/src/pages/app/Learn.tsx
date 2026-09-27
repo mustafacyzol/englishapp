@@ -26,7 +26,7 @@ interface Stats { total: number; done: number; pct: number; cur?: { l: PathLesso
 const SKILL_ICON = { reading: BookOpen, listening: Headphones, speaking: Mic, writing: PenLine, vocabulary: Star, grammar: BookText, mixed: Dumbbell }
 const KIND_LABEL: Record<string, string> = { story: 'Hikâye', ai_talk: 'Defne ile konuşma', checkpoint: 'Kontrol noktası' }
 
-/** Horizontal offset of node i — a gentle S-curve so the path reads as a route. */
+/** Horizontal offset of node i, a gentle S-curve so the path reads as a route. */
 const wave = (i: number) => Math.round(Math.sin(i * 0.95) * 64)
 const NODE = 72
 const GAP = 44
@@ -230,7 +230,7 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
           <LessonNode key={l.id} lesson={l} index={i} x={pts[i].x} y={pts[i].y - NODE / 2} color={color} open={openId === l.id} setOpenId={setOpenId} nodeRef={l.state === 'current' ? currentRef : undefined} />
         ))}
 
-        {/* unit trophy — the visible finish line of this unit */}
+        {/* unit trophy, the visible finish line of this unit */}
         <div className="absolute left-1/2 flex -translate-x-1/2 flex-col items-center" style={{ top: endY - 34 }}>
           <span className={clsx('grid size-[68px] place-items-center rounded-full border-4 bg-card', done ? 'border-butter' : 'border-line')}>
             <Img src={rewardImg('trophy')} alt="" className={clsx('size-11 object-contain', !done && 'opacity-50 grayscale')} />
@@ -269,7 +269,7 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
     nav(`/lesson/${lesson.id}`)
   }
 
-  // Keep the opened card in view — it can open near the bottom of the screen.
+  // Keep the opened card in view, it can open near the bottom of the screen.
   useEffect(() => {
     if (open) setTimeout(() => popRef.current?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 60)
   }, [open])
@@ -288,6 +288,14 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
         </motion.span>
       )}
 
+      {current && (
+        // The halo is centred on the whole coin (face plus its 6px edge), so it reads as one ring around the stop.
+        <span aria-hidden className="pointer-events-none absolute left-1/2 -translate-x-1/2" style={{ top: -8, width: size + 22, height: size + 22 }}>
+          <span className="absolute inset-0 rounded-full" style={{ background: `color-mix(in oklab, ${color} 14%, transparent)`, boxShadow: `inset 0 0 0 3px color-mix(in oklab, ${color} 45%, transparent)` }} />
+          <motion.span className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 3px ${color}` }} animate={{ scale: [1, 1.14], opacity: [0.55, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: 'easeOut' }} />
+        </span>
+      )}
+
       <motion.button
         initial={{ opacity: 0, scale: 0.7 }}
         whileInView={{ opacity: 1, scale: 1 }}
@@ -299,8 +307,6 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
         className={clsx('relative grid place-items-center rounded-full transition-transform active:translate-y-[5px]', locked ? 'text-ink-soft' : 'text-white')}
         style={{ width: size, height: size, background: locked ? 'var(--paper-2)' : color, boxShadow: `0 6px 0 0 ${base}` }}
       >
-        {current && <span className="absolute -inset-2 rounded-full border-4 opacity-40" style={{ borderColor: color }} />}
-        {current && <span className="absolute -inset-2 animate-ping rounded-full border-4 opacity-20" style={{ borderColor: color }} />}
         {done && <span className="absolute inset-1.5 rounded-full border-2 border-white/35" />}
         {locked ? <Lock className="size-6" /> : done ? <Check className="size-8" strokeWidth={3.5} /> : <Icon className={current ? 'size-9' : 'size-7'} strokeWidth={2.5} />}
         {lesson.is_premium && !done && <Img src={rewardImg('crown')} alt="Premium" className="absolute -right-2 -top-2 size-7 object-contain drop-shadow" />}

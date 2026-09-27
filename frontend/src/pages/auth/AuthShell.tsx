@@ -12,7 +12,7 @@ import type { Review } from '../public/Landing'
 
 export interface Slide { src: string; caption: string }
 
-/** Real moments of learning — each photo carries a short, honest caption of what it shows. */
+/** Real moments of learning, each photo carries a short, honest caption of what it shows. */
 export const LOGIN_SLIDES: Slide[] = [
   { src: PHOTO.auth, caption: 'Sabah kahvesiyle beş dakikalık ders' },
   { src: PHOTO.listen, caption: 'Vapurda bir hikâye dinlemek' },

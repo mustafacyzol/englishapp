@@ -11,7 +11,7 @@ use App\Support\Skills;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Gölge Düellosu — asynchronous four-skill duels against another learner's
+ * Gölge Düellosu, asynchronous four-skill duels against another learner's
  * "ghost". The ghost is a replay generated from the opponent's real per-skill
  * levels, so you can duel anyone at any time; when your ghost wins while you
  * are away it earns you trophies (and you get told about it).
@@ -94,7 +94,7 @@ class DuelService
     {
         $this->expireStale($user);
         $user->refresh();
-        abort_if($this->ticketsLeft($user) === 0, 402, 'Bugünkü ücretsiz düello hakların bitti. Yarın yenilenir — ya da Premium ile sınırsız oyna.');
+        abort_if($this->ticketsLeft($user) === 0, 402, 'Bugünkü ücretsiz düello hakların bitti. Yarın yenilenir, ya da Premium ile sınırsız oyna.');
 
         $ghost = $this->pickGhost($user);
         $ghostSkills = $ghost ? collect($this->game->skillReport($ghost)['skills'])->pluck('level', 'key')->all() : $this->trainingSkills($user);
@@ -244,7 +244,7 @@ class DuelService
         $finished = $user->duels()->where('status', '!=', 'active');
         $counts = (clone $finished)->selectRaw('result, COUNT(*) c')->groupBy('result')->pluck('c', 'result');
 
-        // Per-skill accuracy across the last 20 duels — the four-skill duel record.
+        // Per-skill accuracy across the last 20 duels, the four-skill duel record.
         $recentDuels = (clone $finished)->where('status', 'finished')->latest('id')->limit(20)->get();
         $skillStats = array_fill_keys(Skills::ALL, ['correct' => 0, 'total' => 0]);
         foreach ($recentDuels as $d) {

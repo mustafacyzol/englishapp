@@ -41,7 +41,7 @@ export default function Orders() {
                 <td className="px-4">{o.user?.email}</td>
                 <td className="px-4">{o.plan?.name}</td>
                 <td className="px-4 font-mono">{tl(o.total)}{Number(o.discount) > 0 && <span className="block text-xs text-mint-deep">-{tl(o.discount)}</span>}</td>
-                <td className="px-4 font-mono text-xs">{o.coupon?.code ?? '—'}</td>
+                <td className="px-4 font-mono text-xs">{o.coupon?.code ?? '-'}</td>
                 <td className="px-4"><Pill tone={o.status === 'paid' ? 'good' : o.status === 'failed' ? 'bad' : o.status === 'refunded' ? 'warn' : 'default'}>{ORDER_STATUS[o.status] ?? o.status}</Pill></td>
                 <td className="px-4">{dateTR(o.created_at, true)}</td>
                 <td className="px-4">{o.status === 'paid' && <button onClick={() => confirm('Bu siparişi iade olarak işaretle ve Premium süresini geri al?') && refund.mutate(o.id)} className="text-xs font-bold text-berry">İade</button>}</td>

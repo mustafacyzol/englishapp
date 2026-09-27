@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Usage: ->middleware('role:admin') — "admin" also admits super_admin,
+ * Usage: ->middleware('role:admin'), "admin" also admits super_admin,
  * "staff" admits editor/admin/super_admin.
  */
 class EnsureRole

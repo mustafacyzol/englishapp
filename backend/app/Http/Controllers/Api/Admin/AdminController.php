@@ -203,7 +203,7 @@ class AdminController extends Controller
             'school.cta_url' => ['sometimes', 'nullable', 'url'],
             'school.whatsapp' => ['sometimes', 'nullable', 'string', 'max:30'],
         ]);
-        // dotted keys arrive nested — flatten
+        // dotted keys arrive nested, flatten
         $flat = [];
         foreach (Settings::EDITABLE as $key => $_) {
             if (data_get($data, $key, '__missing__') !== '__missing__' || array_key_exists($key, $data)) {

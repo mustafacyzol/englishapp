@@ -3,14 +3,20 @@ import { Capacitor } from '@capacitor/core'
 import { Haptics, ImpactStyle, NotificationType } from '@capacitor/haptics'
 
 /*
-  Recorded, mastered sound effects (public/sfx) played through Web Audio so they
+  DilGO's sound identity: every effect is built from one timbre (a glassy marimba)
+  and one motif, the rising "Dil-GO" fifth (G to D). Right answers play it, combos
+  climb past it, wrong answers turn it upside down and softly, finishing a lesson
+  resolves it into a chord. Files live in public/sfx and are played through Web Audio so they
   start instantly and can overlap. Buffers are fetched once on first use and
   cached; if a file can't load (offline, blocked) we fall back to a soft synth
   so the feedback never goes silent.
 */
-type Sound = 'tap' | 'correct' | 'combo' | 'wrong' | 'complete' | 'reward' | 'levelup'
+type Sound = 'tap' | 'correct' | 'combo' | 'wrong' | 'complete' | 'reward' | 'levelup' | 'notify' | 'notify-success' | 'notify-error' | 'tick' | 'count' | 'go' | 'beat' | 'lose'
 
-const GAIN: Record<Sound, number> = { tap: 0.35, correct: 0.55, combo: 0.8, wrong: 0.7, complete: 0.5, reward: 0.45, levelup: 0.5 }
+const GAIN: Record<Sound, number> = {
+  tap: 0.3, correct: 0.6, combo: 0.65, wrong: 0.5, complete: 0.6, reward: 0.55, levelup: 0.6,
+  notify: 0.35, 'notify-success': 0.4, 'notify-error': 0.4, tick: 0.3, count: 0.5, go: 0.6, beat: 0.55, lose: 0.5,
+}
 
 let ctx: AudioContext | null = null
 let muted = false
@@ -71,6 +77,14 @@ const FALLBACK: Record<Sound, number[]> = {
   complete: [523, 659, 784, 1046],
   reward: [659, 880, 1319],
   levelup: [523, 784, 1046, 1568],
+  notify: [1175, 1568],
+  'notify-success': [784, 1175, 1568],
+  'notify-error': [880, 587],
+  tick: [1760],
+  count: [587],
+  go: [784, 1175, 1568],
+  beat: [60, 55],
+  lose: [1175, 988, 784, 587],
 }
 
 function play(name: Sound) {
@@ -102,7 +116,7 @@ export const sfx = {
     play('tap')
     haptic('light')
   },
-  /** A streak of right answers gets the brighter sparkle take — a small variable reward. */
+  /** A streak of right answers gets the motif climbing higher, a small variable reward. */
   correct: (combo = 0) => {
     play(combo >= 3 ? 'combo' : 'correct')
     haptic('success')
@@ -123,7 +137,18 @@ export const sfx = {
     play('levelup')
     haptic('success')
   },
-  /** @deprecated kept for older call sites — the chest/reward sound. */
+  /** The small version of the motif for on-screen notices. */
+  notify: (tone: 'info' | 'success' | 'error' = 'info') => play(tone === 'info' ? 'notify' : `notify-${tone}`),
+  /** Duel cues: countdown, clock ticks, heartbeat under pressure, the start and a loss. */
+  tick: () => play('tick'),
+  count: () => play('count'),
+  go: () => {
+    play('go')
+    haptic('success')
+  },
+  beat: () => play('beat'),
+  lose: () => play('lose'),
+  /** @deprecated kept for older call sites: the chest/reward sound. */
   fanfare: () => {
     play('reward')
     haptic('success')
