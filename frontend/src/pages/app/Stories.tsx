@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowDownWideNarrow, Bookmark, Briefcase, CheckCircle2, Clock, Coffee, Crown, Headphones, Laugh, Plane, Rocket, Search, SearchCheck, Sparkles, X, type LucideIcon } from 'lucide-react'
+import { ArrowDownWideNarrow, Bookmark, Briefcase, Check, CheckCircle2, ChevronDown, Clock, Coffee, Crown, Headphones, Laugh, Plane, Rocket, Search, SearchCheck, Sparkles, X, type LucideIcon } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import { get } from '@/lib/api'
 import type { Paginated, StoryCard } from '@/lib/types'
@@ -23,6 +23,46 @@ const GENRE: Record<string, { icon: LucideIcon; color: string }> = {
 }
 const genre = (c: string) => GENRE[c] ?? { icon: Sparkles, color: '#676d7c' }
 type Quick = '' | 'unread' | 'saved' | 'short'
+
+/** Genre as a single tidy dropdown, each genre with its icon and colour. */
+function GenreMenu({ cats, value, onChange }: { cats: string[]; value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const close = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false)
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [open])
+  const G = value ? genre(value) : null
+  return (
+    <div ref={ref} className="relative">
+      <button onClick={() => setOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={open} className={clsx('flex h-10 items-center gap-2 rounded-xl border-2 px-3 text-sm font-extrabold transition', value ? 'border-transparent text-white' : 'border-line hover:border-ink/25')} style={G ? { background: G.color } : undefined}>
+        {G ? <G.icon className="size-4" /> : <Sparkles className="size-4 text-ink-soft" />}
+        {value || 'Tüm türler'}
+        <ChevronDown className={clsx('size-4 transition', open && 'rotate-180')} />
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.ul role="listbox" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="absolute left-0 top-12 z-30 w-56 rounded-2xl border-2 border-line bg-card p-1.5 shadow-soft">
+            {['', ...cats].map((c) => {
+              const g = c ? genre(c) : { icon: Sparkles, color: '#676d7c' }
+              return (
+                <li key={c || 'all'}>
+                  <button role="option" aria-selected={value === c} onClick={() => { onChange(c); setOpen(false) }} className={clsx('flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm font-bold hover:bg-paper-2', value === c && 'bg-paper-2')}>
+                    <span className="grid size-7 place-items-center rounded-lg" style={{ background: `${g.color}1f`, color: g.color }}><g.icon className="size-4" /></span>
+                    {c || 'Tüm türler'}
+                    {value === c && <Check className="ml-auto size-4" strokeWidth={3} />}
+                  </button>
+                </li>
+              )
+            })}
+          </motion.ul>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
 
 export default function Stories() {
   const { user } = useAuth()
@@ -45,7 +85,7 @@ export default function Stories() {
     if (sort === 'short') xs = [...xs].sort((a, b) => a.reading_minutes - b.reading_minutes)
     return xs
   }, [data, quick, sort])
-  const active = [level && `Seviye ${level}`, category, quick && { unread: 'Okunmamış', saved: 'Kaydettiklerim', short: '5 dk altı' }[quick]].filter(Boolean) as string[]
+  const active = [level && `Seviye ${level}`, category, quick && { unread: 'Okunmamış', saved: 'Kaydettiklerim', short: 'Kısa (5 dk altı)' }[quick]].filter(Boolean) as string[]
   const clear = () => { setLevel(''); setCategory(''); setQuick(''); setQ('') }
 
   return (
@@ -74,49 +114,28 @@ export default function Stories() {
         </section>
       )}
 
-      {/* ------------------------------------------------------------ Filters */}
-      <section className="mb-6 rounded-[28px] border-2 border-line bg-card p-4 sm:p-5">
-        <div className="grid gap-5 lg:grid-cols-[auto_1fr] lg:items-end [&>*]:min-w-0">
-          <div>
-            <p className="mb-2 flex items-center justify-between text-xs font-black uppercase tracking-widest text-ink-soft">
-              Seviye
-              {user && <button onClick={() => setLevel(level === user.cefr_level ? '' : user.cefr_level)} className={clsx('rounded-full px-2 py-0.5 normal-case tracking-normal transition', level === user.cefr_level ? 'bg-flame text-white' : 'bg-flame/10 text-flame hover:bg-flame/15')}>Benim seviyem · {user.cefr_level}</button>}
-            </p>
-            {/* a small staircase: each level is a step up */}
-            <div className="flex items-end gap-1.5" role="radiogroup" aria-label="Seviye">
-              {LEVELS.map((l, i) => {
-                const on = level === l
-                return (
-                  <button key={l} role="radio" aria-checked={on} onClick={() => setLevel(on ? '' : l)} className={clsx('group relative flex w-[3.6rem] flex-col items-center justify-end rounded-xl border-2 pb-1.5 transition sm:w-16', on ? 'border-ink bg-ink text-paper' : 'border-line bg-paper-2/60 hover:border-ink/25')} style={{ height: 44 + i * 9 }}>
-                    <span className="font-display text-lg font-black leading-none">{l}</span>
-                    <span className={clsx('text-[10px] font-bold', on ? 'text-paper/70' : 'text-ink-soft')}>{LEVEL_TEXT[l]}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-          <div>
-            <p className="mb-2 text-xs font-black uppercase tracking-widest text-ink-soft">Tür</p>
-            <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
-              {(cats.data?.data ?? []).map((c) => {
-                const G = genre(c)
-                const on = category === c
-                return (
-                  <button key={c} onClick={() => setCategory(on ? '' : c)} aria-pressed={on} className={clsx('flex shrink-0 items-center gap-2 rounded-2xl border-2 py-1.5 pl-1.5 pr-3.5 text-sm font-extrabold transition', on ? 'text-white' : 'border-line bg-card hover:border-ink/25')} style={on ? { background: G.color, borderColor: G.color } : undefined}>
-                    <span className="grid size-8 place-items-center rounded-xl" style={{ background: on ? 'rgba(255,255,255,.2)' : `${G.color}1a`, color: on ? '#fff' : G.color }}><G.icon className="size-4" /></span>
-                    {c}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+      {/* ------------------------------------------------------------ Filters: one calm toolbar */}
+      <section className="mb-5 flex flex-wrap items-center gap-2 rounded-2xl border-2 border-line bg-card p-2">
+        <div className="no-scrollbar flex max-w-full overflow-x-auto rounded-xl bg-paper-2 p-1" role="radiogroup" aria-label="Seviye">
+          {['', ...LEVELS].map((l) => {
+            const on = level === l
+            const mine = !!l && user?.cefr_level === l
+            return (
+              <button key={l || 'all'} role="radio" aria-checked={on} onClick={() => setLevel(l)} title={l ? LEVEL_TEXT[l] : undefined} className={clsx('relative shrink-0 rounded-lg px-3 py-1.5 text-sm font-extrabold transition', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
+                {on && <motion.span layoutId="lvl" className="absolute inset-0 rounded-lg bg-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+                <span className="relative">{l || 'Tüm seviyeler'}</span>
+                {mine && <span className={clsx('absolute bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full', on ? 'bg-paper' : 'bg-flame')} aria-label="senin seviyen" />}
+              </button>
+            )
+          })}
         </div>
-        <div className="mt-4 flex flex-wrap items-center gap-2 border-t-2 border-line pt-4">
-          {([['unread', 'Okunmamış'], ['saved', 'Kaydettiklerim'], ['short', '5 dk altı']] as const).map(([k, l]) => (
-            <button key={k} onClick={() => setQuick(quick === k ? '' : k)} className={clsx('rounded-full border-2 px-3 py-1 text-sm font-bold transition', quick === k ? 'border-ink bg-ink text-paper' : 'border-line text-ink-soft hover:text-ink')}>{l}</button>
+        <GenreMenu cats={cats.data?.data ?? []} value={category} onChange={setCategory} />
+        <div className="ml-auto flex flex-wrap items-center gap-1">
+          {([['unread', 'Okunmamış'], ['saved', 'Kaydettiklerim'], ['short', 'Kısa']] as const).map(([k, l]) => (
+            <button key={k} onClick={() => setQuick(quick === k ? '' : k)} aria-pressed={quick === k} className={clsx('rounded-lg px-2.5 py-1.5 text-sm font-bold transition', quick === k ? 'bg-ink text-paper' : 'text-ink-soft hover:bg-paper-2 hover:text-ink')}>{l}</button>
           ))}
-          <button onClick={() => setSort(sort === 'short' ? 'recommended' : 'short')} className="ml-auto flex items-center gap-1.5 rounded-full px-3 py-1 text-sm font-bold text-ink-soft hover:bg-paper-2 hover:text-ink">
-            <ArrowDownWideNarrow className="size-4" /> {sort === 'short' ? 'Kısadan uzuna' : 'Önerilen sıra'}
+          <button onClick={() => setSort(sort === 'short' ? 'recommended' : 'short')} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-bold text-ink-soft hover:bg-paper-2 hover:text-ink" title="Sıralama">
+            <ArrowDownWideNarrow className="size-4" /> {sort === 'short' ? 'Kısadan uzuna' : 'Önerilen'}
           </button>
         </div>
       </section>

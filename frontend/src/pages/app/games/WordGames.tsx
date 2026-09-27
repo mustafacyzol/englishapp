@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { AnimatePresence, motion, useMotionValue, useTransform, type PanInfo } from 'motion/react'
+import { animate, AnimatePresence, motion, useMotionValue, useTransform, type PanInfo } from 'motion/react'
 import clsx from 'clsx'
-import { Check, Delete, Headphones, Lightbulb, RotateCcw, Undo2, Volume2, X, Zap } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, Delete, Headphones, Lightbulb, RotateCcw, Undo2, Volume2, X, Zap } from 'lucide-react'
 import { speak } from '@/lib/speech'
 import { sfx } from '@/lib/fx'
 import { Button } from '@/components/ui/Button'
@@ -59,17 +59,18 @@ export function SwipeDeck({ deck, onFinish }: { deck: DeckWord[]; onFinish: Fini
   const known = log.filter((x) => x.known).length
   return (
     <div className="mx-auto max-w-md select-none">
-      <div className="mb-5 flex items-center justify-between text-sm font-black">
-        <span className="flex items-center gap-1.5 text-berry"><X className="size-4" strokeWidth={3} /> {log.length - known}</span>
-        <span className="font-mono text-ink-soft">{Math.min(i + 1, deck.length)}/{deck.length}</span>
-        <span className="flex items-center gap-1.5 text-mint-deep">{known} <Check className="size-4" strokeWidth={3} /></span>
+      {/* the rule, always visible: left = again, right = I know it */}
+      <div className="mb-4 flex items-center justify-between gap-2 text-sm font-black">
+        <span className="flex items-center gap-1.5 rounded-full bg-berry/10 px-3 py-1.5 text-berry"><ArrowLeft className="size-4" strokeWidth={3} /> Tekrar <span className="tabular-nums opacity-70">{log.length - known}</span></span>
+        <span className="font-mono text-xs text-ink-soft">{Math.min(i + 1, deck.length)}/{deck.length}</span>
+        <span className="flex items-center gap-1.5 rounded-full bg-mint/12 px-3 py-1.5 text-mint-deep"><span className="tabular-nums opacity-70">{known}</span> Biliyorum <ArrowRight className="size-4" strokeWidth={3} /></span>
       </div>
 
       <div className="relative h-[380px] sm:h-[400px]">
         {deck.slice(i, i + 3).reverse().map((w, k, arr) => {
           const depth = arr.length - 1 - k
           return depth === 0 ? (
-            <TopCard key={`${i}-${w.word}`} w={w} flipped={flipped} onFlip={() => setFlipped((f) => !f)} onDecide={decide} exit={exit} />
+            <TopCard key={`${i}-${w.word}`} w={w} flipped={flipped} onFlip={() => setFlipped((f) => !f)} onDecide={decide} exit={exit} hint={i === 0} />
           ) : (
             <motion.div key={`${i + depth}-${w.word}`} className="absolute inset-0 rounded-[32px] border-2 border-line bg-card shadow-hard" initial={false} animate={{ scale: 1 - depth * 0.05, y: depth * 14, opacity: 1 - depth * 0.25 }} transition={{ type: 'spring', stiffness: 300, damping: 26 }} />
           )
@@ -87,8 +88,17 @@ export function SwipeDeck({ deck, onFinish }: { deck: DeckWord[]; onFinish: Fini
   )
 }
 
-function TopCard({ w, flipped, onFlip, onDecide, exit }: { w: DeckWord; flipped: boolean; onFlip: () => void; onDecide: (known: boolean) => void; exit: 1 | -1 }) {
+function TopCard({ w, flipped, onFlip, onDecide, exit, hint }: { w: DeckWord; flipped: boolean; onFlip: () => void; onDecide: (known: boolean) => void; exit: 1 | -1; hint?: boolean }) {
   const x = useMotionValue(0)
+  // First card: a small nudge right then left shows it can be swiped, Tinder-style.
+  useEffect(() => {
+    if (!hint) return
+    const t = setTimeout(() => {
+      if (dragged.current) return
+      void animate(x, [0, 70, 0, -70, 0], { duration: 1.6, ease: 'easeInOut' })
+    }, 900)
+    return () => clearTimeout(t)
+  }, [hint, x])
   const rotate = useTransform(x, [-220, 220], [-16, 16])
   const yes = useTransform(x, [30, 120], [0, 1])
   const no = useTransform(x, [-120, -30], [1, 0])
@@ -420,6 +430,144 @@ export function Scramble({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finis
             <Button onClick={next} variant={state === 'ok' ? 'success' : 'primary'}>Devam</Button>
           </>
         )}
+      </div>
+    </div>
+  )
+}
+
+
+// ---------------------------------------------------------------------------
+// Memory: flip two cards, find the English-Turkish pairs.
+// ---------------------------------------------------------------------------
+export function Memory({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finish }) {
+  const words = useMemo(() => shuffle(deck).slice(0, 6), [deck])
+  const cards = useMemo(() => shuffle(words.flatMap((w, k) => [{ id: `e${k}`, k, text: w.word, en: true }, { id: `t${k}`, k, text: w.translation, en: false }])), [words])
+  const [open, setOpen] = useState<string[]>([])
+  const [found, setFound] = useState<number[]>([])
+  const [moves, setMoves] = useState(0)
+  const misses = useRef(new Set<number>())
+
+  const flip = (c: (typeof cards)[number]) => {
+    if (open.length === 2 || open.includes(c.id) || found.includes(c.k)) return
+    sfx.tap()
+    if (c.en) speak(c.text)
+    const next = [...open, c.id]
+    setOpen(next)
+    if (next.length < 2) return
+    setMoves((m) => m + 1)
+    const [a, b] = next.map((id) => cards.find((x) => x.id === id)!)
+    if (a.k === b.k) {
+      sfx.correct(0)
+      const f = [...found, a.k]
+      setFound(f)
+      setOpen([])
+      if (f.length === words.length) setTimeout(() => onFinish(words.map((w, k) => ({ w, known: !misses.current.has(k) })), Math.max(0, 100 - (moves + 1 - words.length) * 8)), 600)
+    } else {
+      misses.current.add(a.k).add(b.k)
+      setTimeout(() => setOpen([]), 800)
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-xl">
+      <p className="mb-4 text-center text-sm font-bold text-ink-soft">İngilizce kelimeyle Türkçesini eşle · {moves} hamle · {found.length}/{words.length}</p>
+      <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4">
+        {cards.map((c) => {
+          const up = open.includes(c.id) || found.includes(c.k)
+          return (
+            <button key={c.id} onClick={() => flip(c)} className="aspect-[4/3] [perspective:800px]" aria-label={up ? c.text : 'Kapalı kart'}>
+              <motion.span className="relative block size-full [transform-style:preserve-3d]" animate={{ rotateY: up ? 180 : 0 }} transition={{ type: 'spring', stiffness: 260, damping: 22 }}>
+                <span className="absolute inset-0 grid place-items-center rounded-2xl border-2 border-line bg-gradient-to-br from-sky to-lilac text-2xl font-black text-white shadow-hard-sm [backface-visibility:hidden]">?</span>
+                <span className={clsx('absolute inset-0 grid place-items-center rounded-2xl border-2 p-1 text-center text-sm font-extrabold [backface-visibility:hidden] [transform:rotateY(180deg)] sm:text-base', found.includes(c.k) ? 'border-mint bg-mint/12 text-mint-deep' : c.en ? 'border-line bg-card' : 'border-line bg-butter/25')}>{c.text}</span>
+              </motion.span>
+            </button>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Cloze: the word is missing from its own example sentence.
+// ---------------------------------------------------------------------------
+export function Cloze({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finish }) {
+  const items = useMemo(() => shuffle(deck.filter((w) => w.example && new RegExp(`\\b${w.word}\\b`, 'i').test(w.example))).slice(0, 8), [deck])
+  const [i, setI] = useState(0)
+  const [pick, setPick] = useState<string | null>(null)
+  const log = useRef<Outcome[]>([])
+  const w = items[i]
+  const options = useMemo(() => (w ? shuffle([w.word, ...shuffle(deck.filter((x) => x.word !== w.word)).slice(0, 3).map((x) => x.word)]) : []), [w, deck])
+  if (!w) return <p className="text-center text-ink-soft">Bu oyun için örnek cümleli kelime yok. Kaydır kartlarını dene.</p>
+  const parts = w.example!.split(new RegExp(`(\\b${w.word}\\b)`, 'i'))
+  const choose = (o: string) => {
+    if (pick) return
+    setPick(o)
+    const ok = o === w.word
+    ok ? sfx.correct(0) : sfx.wrong()
+    log.current.push({ w, known: ok })
+    setTimeout(() => {
+      if (i + 1 >= items.length) return onFinish(log.current)
+      setI(i + 1)
+      setPick(null)
+    }, ok ? 700 : 1400)
+  }
+  return (
+    <div className="mx-auto max-w-lg text-center">
+      <p className="mb-6 font-mono text-sm font-bold text-ink-soft">{i + 1}/{items.length}</p>
+      <p className="font-read text-2xl leading-relaxed">
+        {parts.map((p, k) => (p.toLowerCase() === w.word.toLowerCase() ? <span key={k} className={clsx('mx-1 inline-block min-w-24 border-b-4 px-2 font-display font-black', pick ? (pick === w.word ? 'border-mint text-mint-deep' : 'border-berry text-berry') : 'border-ink/30 text-transparent')}>{pick ? w.word : '____'}</span> : <span key={k}>{p}</span>))}
+      </p>
+      <p className="mt-3 text-sm text-ink-soft">İpucu: {w.translation}</p>
+      <div className="mt-7 grid grid-cols-2 gap-2.5">
+        {options.map((o) => (
+          <button key={o} onClick={() => choose(o)} className={clsx('press rounded-2xl border-2 px-3 py-3 font-extrabold transition', pick && o === w.word ? 'border-mint bg-mint/12' : pick === o ? 'border-berry bg-berry/10' : 'border-line bg-card shadow-hard-sm hover:border-ink/25')}>{o}</button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// Quick meaning: English word, four Turkish options, keys 1-4.
+// ---------------------------------------------------------------------------
+export function QuickChoice({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finish }) {
+  const items = useMemo(() => shuffle(deck).slice(0, 10), [deck])
+  const [i, setI] = useState(0)
+  const [pick, setPick] = useState<string | null>(null)
+  const [streak, setStreak] = useState(0)
+  const log = useRef<Outcome[]>([])
+  const w = items[i]
+  const options = useMemo(() => (w ? shuffle([w.translation, ...shuffle(deck.filter((x) => x.translation !== w.translation)).slice(0, 3).map((x) => x.translation)]) : []), [w, deck])
+  const choose = useCallback((o: string) => {
+    if (pick || !w) return
+    setPick(o)
+    const ok = o === w.translation
+    setStreak((s) => (ok ? s + 1 : 0))
+    ok ? sfx.correct(streak + 1) : sfx.wrong()
+    log.current.push({ w, known: ok })
+    setTimeout(() => {
+      if (i + 1 >= items.length) return onFinish(log.current)
+      setI(i + 1)
+      setPick(null)
+    }, ok ? 450 : 1100)
+  }, [pick, w, streak, i, items.length, onFinish])
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => { const n = Number(e.key); if (n >= 1 && n <= options.length) choose(options[n - 1]) }
+    window.addEventListener('keydown', k)
+    return () => window.removeEventListener('keydown', k)
+  }, [options, choose])
+  if (!w) return null
+  return (
+    <div className="mx-auto max-w-md text-center">
+      <div className="mb-6 flex items-center justify-between text-sm font-bold text-ink-soft"><span className="font-mono">{i + 1}/{items.length}</span>{streak >= 2 && <span className="flex items-center gap-1 rounded-full bg-butter px-2 py-0.5 text-xs font-black text-[#1f2433]"><Zap className="size-3.5" />{streak} seri</span>}</div>
+      <button onClick={() => speak(w.word)} className="font-display text-5xl font-black">{w.word}</button>
+      <div className="mt-8 grid gap-2.5">
+        {options.map((o, k) => (
+          <button key={o} onClick={() => choose(o)} className={clsx('press flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left font-extrabold transition', pick && o === w.translation ? 'border-mint bg-mint/12' : pick === o ? 'border-berry bg-berry/10' : 'border-line bg-card shadow-hard-sm hover:border-ink/25')}>
+            <span className="grid size-7 place-items-center rounded-lg bg-paper-2 text-xs">{k + 1}</span>{o}
+          </button>
+        ))}
       </div>
     </div>
   )

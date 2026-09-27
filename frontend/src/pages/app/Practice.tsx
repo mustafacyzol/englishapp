@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, BookmarkPlus, Check, Headphones, Layers, Puzzle, Search, Shuffle, Timer, Trash2, Volume2, X } from 'lucide-react'
+import { ArrowRight, BookmarkPlus, Brain, Check, Headphones, Layers, Puzzle, Search, Shuffle, TextCursorInput, Timer, Trash2, Volume2, X, Zap } from 'lucide-react'
 import { del, get, post } from '@/lib/api'
 import { speak } from '@/lib/speech'
 import { celebrate, sfx } from '@/lib/fx'
@@ -11,10 +11,10 @@ import type { RewardSummary } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Empty, PageHeader, SkeletonPage, Spinner, Tabs } from '@/components/ui/Misc'
 import { useReward } from '@/components/game/RewardProvider'
-import { ListenType, Restart, Scramble, SpeedMatch, SwipeDeck, TrueFalse, type DeckWord, type Outcome } from './games/WordGames'
+import { Cloze, ListenType, Memory, QuickChoice, Restart, Scramble, SpeedMatch, SwipeDeck, TrueFalse, type DeckWord, type Outcome } from './games/WordGames'
 
 interface Word { id: number; word: string; translation: string | null; example: string | null; interval_days: number; due_at: string | null; source: string | null }
-type GameKey = 'swipe' | 'match' | 'truefalse' | 'listen' | 'scramble'
+type GameKey = 'swipe' | 'match' | 'truefalse' | 'listen' | 'scramble' | 'memory' | 'cloze' | 'choice'
 
 const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; tone: string; badge?: string }[] = [
   { key: 'swipe', title: 'Kaydır kartları', text: 'Sağa biliyorum, sola tekrar. Mobilde parmağınla kaydır.', icon: Layers, tone: 'from-flame to-berry', badge: 'Favori' },
@@ -22,6 +22,9 @@ const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; t
   { key: 'truefalse', title: 'Doğru mu?', text: '30 saniyelik blitz: çeviri doğru mu, yanlış mı?', icon: Check, tone: 'from-mint to-sage' },
   { key: 'listen', title: 'Dinle ve yaz', text: 'Duyduğun kelimeyi yaz, kulağını ve yazımını çalıştır.', icon: Headphones, tone: 'from-lilac to-sky' },
   { key: 'scramble', title: 'Harf karıştır', text: 'Karışık harflerden kelimeyi yeniden kur.', icon: Puzzle, tone: 'from-butter to-flame' },
+  { key: 'memory', title: 'Hafıza kartları', text: 'Kartları çevir, İngilizceyi Türkçesiyle eşle.', icon: Brain, tone: 'from-berry to-lilac' },
+  { key: 'cloze', title: 'Cümlede boşluk', text: 'Kelimeyi kendi örnek cümlesinde yerine koy.', icon: TextCursorInput, tone: 'from-sage to-mint' },
+  { key: 'choice', title: 'Hızlı anlam', text: 'On kelime, dört seçenek. Klavyede 1-4.', icon: Zap, tone: 'from-flame to-butter' },
 ]
 
 export default function Practice() {
@@ -162,6 +165,9 @@ function GameRun({ game, onExit, onSwitch }: { game: GameKey; onExit: () => void
             {game === 'truefalse' && <TrueFalse deck={data.data} onFinish={finish} />}
             {game === 'listen' && <ListenType deck={data.data} onFinish={finish} />}
             {game === 'scramble' && <Scramble deck={data.data} onFinish={finish} />}
+            {game === 'memory' && <Memory deck={data.data} onFinish={finish} />}
+            {game === 'cloze' && <Cloze deck={data.data} onFinish={finish} />}
+            {game === 'choice' && <QuickChoice deck={data.data} onFinish={finish} />}
           </motion.div>
         </AnimatePresence>
       )}
