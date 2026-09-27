@@ -29,6 +29,7 @@ const StoryReader = lazy(() => import('./pages/app/StoryReader'))
 const Practice = lazy(() => import('./pages/app/Practice'))
 const AiHub = lazy(() => import('./pages/app/AiHub'))
 const Duel = lazy(() => import('./pages/app/Duel'))
+const Exam = lazy(() => import('./pages/app/Exam'))
 const Institution = lazy(() => import('./pages/app/Institution'))
 const InstitutionDetail = lazy(() => import('./pages/admin/InstitutionDetail'))
 const Invite = lazy(() => import('./pages/institution/Invite'))
@@ -104,6 +105,7 @@ export default function App() {
           <Route path="/ai/writing" element={<WritingLab />} />
           <Route path="/ai/:id" element={<AiChat />} />
           <Route path="/duel" element={<Duel />} />
+          <Route path="/exam" element={<Exam />} />
           <Route path="/kurum" element={<Institution />} />
           <Route path="/leagues" element={<Leagues />} />
           <Route path="/quests" element={<Quests />} />

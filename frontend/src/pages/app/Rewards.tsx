@@ -11,6 +11,7 @@ import { dateTR } from '@/lib/format'
 import { rewardImg } from '@/lib/assets'
 import type { Me, UserItem } from '@/lib/types'
 import { RewardCard } from '@/components/game/RewardCard'
+import { ChestOpening, type ChestResult } from '@/components/game/ChestOpening'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Empty, PageHeader, Progress, SkeletonPage, Tabs } from '@/components/ui/Misc'
@@ -45,6 +46,13 @@ function Vault() {
   const toast = useToast()
   const [flipped, setFlipped] = useState<Record<number, { message: string; code?: string; img: string }>>({})
   const [filter, setFilter] = useState<'open' | 'history'>('open')
+  const [chest, setChest] = useState<UserItem | null>(null)
+  const openChest = async (e: UserItem) => {
+    const r = await post<ChestResult & { user: Me }>(`/inventory/${e.id}/activate`)
+    setUser(r.user)
+    qc.invalidateQueries({ queryKey: ['inventory'] })
+    return r
+  }
   const { data, isLoading } = useQuery({ queryKey: ['inventory'], queryFn: () => get<{ data: UserItem[] }>('/inventory') })
 
   const activate = useMutation({
@@ -98,11 +106,12 @@ function Vault() {
                 />
                 <div className="mt-4 min-h-12">
                   {e.status === 'available' && e.item.type !== 'streak_freeze' && !f && (
-                    <Button block variant="butter" loading={activate.isPending && activate.variables?.id === e.id} onClick={() => activate.mutate(e)}>
+                    <Button block variant="butter" loading={activate.isPending && activate.variables?.id === e.id} onClick={() => (e.item.type === 'chest' ? setChest(e) : activate.mutate(e))}>
                       {e.item.type === 'chest' ? 'Sandığı aç' : 'Kartı kullan'}
                     </Button>
                   )}
                   {e.item.type === 'streak_freeze' && e.status === 'available' && <p className="text-center text-sm font-bold text-sky">Hazır bekliyor · bir gün kaçırırsan serini otomatik korur</p>}
+                  {e.meta?.offer && <p className="mb-1 text-center text-sm font-extrabold">{e.meta.partner}: {e.meta.offer}</p>}
                   {e.status === 'active' && e.code && <p className="text-center text-sm font-bold">Kodun: <span className="font-mono">{e.code}</span>{e.expires_at && <span className="text-ink-soft"> · {dateTR(e.expires_at)} tarihine kadar</span>}</p>}
                   {e.status === 'active' && !e.code && e.expires_at && <p className="text-center text-sm font-bold text-mint-deep">Aktif · {new Date(e.expires_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}'e kadar</p>}
                 </div>
@@ -111,6 +120,7 @@ function Vault() {
           })}
         </div>
       )}
+      {chest && <ChestOpening chest={chest.item} odds={chest.odds} onOpen={() => openChest(chest)} onClose={() => setChest(null)} />}
     </>
   )
 }

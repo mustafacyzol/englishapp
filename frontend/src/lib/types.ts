@@ -154,6 +154,7 @@ export interface RewardItem {
   price_gems: number | null
   icon: string
   rarity: 'common' | 'rare' | 'epic' | 'legendary'
+  odds?: ChestOdds[]
 }
 
 export interface UserItem {
@@ -165,7 +166,11 @@ export interface UserItem {
   expires_at: string | null
   created_at: string
   item: RewardItem
+  meta?: { partner?: string; partner_logo?: string | null; partner_url?: string | null; color?: string | null; offer?: string; description?: string | null; terms?: string | null; rarity?: RewardItem['rarity'] } | null
+  odds?: ChestOdds[]
 }
+
+export interface ChestOdds { label: string; type: 'gems' | 'item' | 'partner'; rarity: RewardItem['rarity']; chance: number; partners?: string[] | null }
 
 export interface Plan {
   id: number

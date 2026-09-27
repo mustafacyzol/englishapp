@@ -14,9 +14,17 @@ import { img } from '@/lib/assets'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 
+/** Profile frames bought in the shop. */
+const FRAMES: Record<string, string> = {
+  gold: 'ring-4 ring-butter ring-offset-2 ring-offset-paper',
+  flame: 'ring-4 ring-flame ring-offset-2 ring-offset-paper',
+  emerald: 'ring-4 ring-mint ring-offset-2 ring-offset-paper',
+  sky: 'ring-4 ring-sky ring-offset-2 ring-offset-paper',
+}
+
 export function Avatar({ name, frame, size = 'size-24' }: { name: string; frame?: string; size?: string }) {
   return (
-    <span className={clsx('relative grid place-items-center rounded-[28px] border-4 border-card bg-sky font-display text-4xl font-extrabold text-white shadow-lg', size, frame === 'gold' && 'ring-4 ring-butter ring-offset-2 ring-offset-paper')}>
+    <span className={clsx('relative grid place-items-center rounded-[28px] border-4 border-card bg-sky font-display text-4xl font-extrabold text-white shadow-lg', size, frame && FRAMES[frame])}>
       {name[0]}
     </span>
   )
