@@ -6,8 +6,24 @@
 import fixture from './fixture.json'
 
 type Json = any // eslint-disable-line @typescript-eslint/no-explicit-any
-const F = fixture as { get: Record<string, Json>; post: Record<string, Json>; err: Record<string, { status: number; message: string }> }
+const F = fixture as { get: Record<string, Json>; post: Record<string, Json>; err: Record<string, { status: number; message: string }>; fresh?: Record<string, Json> }
 const db: Record<string, Json> = structuredClone(F.get)
+
+/**
+ * Two recorded learners: "deniz" (three weeks in) and "fresh" (just signed up, nothing
+ * earned). The fresh one shows every screen exactly as a new account sees it on a real backend.
+ */
+export type Persona = 'deniz' | 'fresh'
+const PKEY = 'dilgo-demo-persona'
+export function getPersona(): Persona {
+  try { return sessionStorage.getItem(PKEY) === 'fresh' ? 'fresh' : 'deniz' } catch { return 'deniz' }
+}
+export function setPersona(p: Persona) {
+  try { sessionStorage.setItem(PKEY, p) } catch { /* private mode */ }
+  for (const k of Object.keys(db)) delete db[k]
+  Object.assign(db, structuredClone(F.get), p === 'fresh' ? structuredClone(F.fresh ?? {}) : {})
+}
+if (getPersona() === 'fresh') setPersona('fresh')
 const me = () => db['/auth/me'].user
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -215,6 +231,8 @@ const ok = (message: string, extra: Json = {}) => ({ message, ...extra })
 const usage = () => ({ used: 3, limit: 20, remaining: 17 })
 
 function getRoute(path: string, admin: boolean): Json {
+  // Coupons are the partner gifts in the inventory, so a chest win shows up here at once.
+  if (path === '/coupons') return { data: (db['/inventory']?.data ?? []).filter((x: Json) => x.item?.type === 'partner_coupon') }
   if (db[path] !== undefined) return db[path]
   const [base, qs = ''] = path.split('?')
   const params = new URLSearchParams(qs)
@@ -261,12 +279,25 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     if (!(body.login ?? body.email) || !body.password) throw new DemoError(422, 'E-posta ve şifre gerekli.', { login: ['E-posta ve şifre gerekli.'] })
     return { token: 'demo-token', user: me() }
   }
-  if (path === '/auth/register') return { token: 'demo-token', user: { ...me(), name: body.name || me().name, email: body.email || me().email, email_verified: false } }
+  if (path === '/auth/register') {
+    // A new sign-up starts from zero, just like on a real backend.
+    setPersona('fresh')
+    Object.assign(me(), { name: body.name || me().name, email: body.email || me().email, age_group: body.age_group ?? me().age_group, cefr_level: body.cefr_level ?? me().cefr_level, learning_goal: body.learning_goal ?? me().learning_goal, exam_target: body.exam_target ?? null, daily_goal_xp: body.daily_goal_xp ?? me().daily_goal_xp })
+    syncUser()
+    return { token: 'demo-token', user: { ...me(), email_verified: false } }
+  }
   if (path === '/auth/email/send') return { retry_after: 60 }
   if (path === '/auth/email/verify') return { user: me() }
   if (path === '/auth/forgot-password') return ok('Hesabın varsa, şifre sıfırlama kodunu e-postana gönderdik.')
   if (path === '/auth/reset-password') return { token: 'demo-token', user: me() }
   if (path === '/auth/logout') return null
+  if ((m = path.match(/^\/coupons\/(\d+)\/used$/))) {
+    const c = (db['/inventory']?.data ?? []).find((x: Json) => x.id === +m![1])
+    if (!c || c.status !== 'active') throw new DemoError(422, 'Bu kupon artık aktif değil.')
+    c.status = 'used'
+    c.meta = { ...(c.meta ?? {}), used_at: new Date().toISOString() }
+    return { item: c }
+  }
   if (path === '/auth/admin/challenge') return { method: 'email', retry_after: 60 }
   if (path === '/auth/admin/verify') {
     if (!/^\d{6}$/.test(body.code ?? '')) throw new DemoError(422, 'Kod hatalı.', { code: ['Demo için 6 haneli herhangi bir kod gir (ör. 123456).'] })

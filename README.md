@@ -99,12 +99,14 @@ Demo hesaplar (yalnızca yerelde oluşturulur):
 - Yerelde e-postalar `storage/logs/laravel-*.log` dosyasına yazılır (OTP kodlarını oradan görebilirsiniz).
 - Ödemeler yerelde `PAYMENT_GATEWAY=fake` ile anında "ödendi" olur.
 - Defne için `.env` dosyasına `ANTHROPIC_API_KEY` ekleyin; anahtar yoksa AI ekranları "bakımda" mesajı gösterir, uygulamanın geri kalanı çalışır.
+- Defne'nin gerçek sesi ve sese bağlı ağız hareketi için `ELEVENLABS_API_KEY` ekleyin (ayrıntı: `docs/DEPLOY_HOSTINGER.md`, "Defne: konuşan yapay zekâ").
+- XP, seri, elmas, sandık ve yaş grubu kuralları: `docs/ECONOMY.md`.
 
 Testler: `cd backend && php artisan test` (kayıt/OTP, kilitleme, admin 2FA, ders→XP→seri→rozet, lig kapanışı, mağaza, sandık, canlı ders kuponu, kupon+ödeme, hediye kodu, seviye testi, seri dondurucu).
 
 ## Demo önizleme (sunucusuz)
 
-`cd frontend && VITE_DEMO=1 npx vite build` → `dist-demo/index.html` + `dist-demo/img/`. Bu derleme API yerine gerçek backend'den kaydedilmiş yanıtları (`src/demo/fixture.json`) kullanır; ders/hikaye tamamlama, görev ödülü, mağaza, kart açma ve Defne sohbeti tarayıcıda simüle edilir. Sol alttaki **Demo** çubuğundan öğrenci ya da yönetim paneline geçilir (yönetim doğrulama kodu olarak 6 haneli herhangi bir sayı yeterli).
+`cd frontend && VITE_DEMO=1 npx vite build` → `dist-demo/index.html` + `dist-demo/img/`. Bu derleme API yerine gerçek backend'den kaydedilmiş yanıtları (`src/demo/fixture.json`) kullanır; ders/hikaye tamamlama, görev ödülü, mağaza, kart açma ve Defne sohbeti tarayıcıda simüle edilir. Sol alttaki **Demo** çubuğundan öğrenci (üç haftalık Deniz), **yeni öğrenci** (kaydı yeni bitmiş, hiçbir şey kazanmamış hesap; gerçek backend'in ilk hâli) ya da yönetim paneline geçilir. Demo'da kayıt olmak da sıfırdan başlayan hesaba geçirir (yönetim doğrulama kodu olarak 6 haneli herhangi bir sayı yeterli).
 
 ## Klasör yapısı
 

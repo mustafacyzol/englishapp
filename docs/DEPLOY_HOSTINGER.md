@@ -90,6 +90,10 @@ ANTHROPIC_API_KEY=sk-ant-...        # Defne (AI öğretmen)
 AI_MODEL=claude-opus-5
 AI_EFFORT=low
 
+# Defne'nin gerçek sesi ve ağız senkronu (boşsa tarayıcının sesi kullanılır)
+ELEVENLABS_API_KEY=                 # elevenlabs.io > Profile > API key
+ELEVENLABS_VOICE_ID=EXAVITQu4vr4xnSDxMaL
+
 PAYMENT_GATEWAY=iyzico
 IYZICO_API_KEY=...
 IYZICO_SECRET_KEY=...
@@ -165,3 +169,23 @@ Ayrı alt alan adı istemezseniz: kodu `~/dilgo-api`'ye koyun ve `public_html/ap
 | CORS hatası | `CORS_ALLOWED_ORIGINS` web adresini tam olarak (https dahil) içermeli, sonra `php artisan config:cache` |
 | Admin şifresi/2FA kayıp | SSH: `php artisan dilgo:admin eposta --reset-password --reset-2fa --unlock` |
 | Defne "bakımda" diyor | `ANTHROPIC_API_KEY` eksik/geçersiz ya da `AI_ENABLED=false`; loglara bakın |
+
+## Defne: konuşan yapay zekâ nasıl çalışır
+
+Hiçbir parça göstermelik değildir. Hangi anahtar varsa o katman gerçek çalışır:
+
+| Katman | Anahtar | Anahtar yoksa |
+| --- | --- | --- |
+| Sohbet, rol oyunu, yazı düzeltme | `ANTHROPIC_API_KEY` | AI ekranları "bakımda" der, uygulamanın geri kalanı çalışır |
+| Defne'nin sesi | `ELEVENLABS_API_KEY` | Tarayıcının kendi İngilizce sesi okur |
+| Ağız hareketi | (sesle birlikte gelir) | Kelime sınırlarında kısa ağız darbeleri (yaklaşık) |
+| Konuşmayı yazıya çevirme | yok (tarayıcının Web Speech API'si) | Desteklemeyen tarayıcıda klavyeyle yazılır |
+
+Ağız senkronu: `/api/v1/ai/tts` Defne'nin cümlesini ElevenLabs'e gönderir, MP3'ü `storage/app/tts/` altında
+önbelleğe alır (aynı cümle ikinci kez ücretlendirilmez). Tarayıcı sesi çalarken Web Audio `AnalyserNode` ile
+anlık ses şiddetini ölçer ve "konuşan" videonun görünürlüğünü bu şiddete bağlar. Ses yükseldikçe ağız açılır,
+sustuğunda kapanır. Açılıştaki selamlama, sesle birebir eşlenmiş hazır bir videodur.
+
+Heceye ve sese birebir uyan dudak hareketi (viseme) gerekirse, viseme zaman damgası döndüren bir TTS
+(ör. Azure Speech) ile 2D veya 3D bir avatar gerekir. Bunun için `speakNeural` fonksiyonuna,
+ses şiddeti (`onLevel`) yanında viseme olaylarını ileten bir geri çağırma eklenmesi yeterlidir.

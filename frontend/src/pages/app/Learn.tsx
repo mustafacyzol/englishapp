@@ -82,7 +82,7 @@ export default function Learn() {
 
       {/* A small pill that rides along the bottom of the path column (not a floating
           corner button over other content) and points toward where you left off. */}
-      <div className="pointer-events-none sticky bottom-[calc(env(safe-area-inset-bottom)+5.75rem)] z-20 flex h-0 justify-center lg:bottom-6">
+      <div className="pointer-events-none sticky bottom-[calc(env(safe-area-inset-bottom)+5.75rem)] z-20 flex h-0 items-end justify-center lg:bottom-6">
         <AnimatePresence>
           {!currentVisible && stats.cur && (
             <motion.button
@@ -91,7 +91,7 @@ export default function Learn() {
               exit={{ opacity: 0, y: 10, scale: 0.9 }}
               transition={{ type: 'spring', stiffness: 420, damping: 30 }}
               onClick={jump}
-              className="press pointer-events-auto flex -translate-y-full items-center gap-1.5 rounded-full border-2 border-line bg-card/95 py-1.5 pl-1.5 pr-3.5 text-[13px] font-extrabold text-ink shadow-soft backdrop-blur"
+              className="press pointer-events-auto flex shrink-0 items-center gap-1.5 rounded-full border-2 border-line bg-card/95 py-1.5 pl-1.5 pr-3.5 text-[13px] font-extrabold text-ink shadow-soft backdrop-blur"
             >
               <span className="grid size-6 place-items-center rounded-full bg-flame text-white">{curAbove ? <ArrowUp className="size-3.5" strokeWidth={3} /> : <ArrowDown className="size-3.5" strokeWidth={3} />}</span>
               Kaldığın yer <span className="max-w-[9rem] truncate font-semibold text-ink-soft sm:max-w-[14rem]">· {stats.cur.l.title}</span>
