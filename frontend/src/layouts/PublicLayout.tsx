@@ -13,9 +13,9 @@ import { PageTransition } from '@/components/motion/Page'
 
 /** Primary sections, the full row shows from lg; below that everything lives in the sheet. */
 const LINKS = [
-  { to: '/#beceriler', label: 'Yöntem' },
-  { to: '/#defne', label: 'Defne' },
-  { to: '/#duello', label: 'Düello' },
+  { to: '/#nasil', label: 'Nasıl çalışır' },
+  { to: '/#kimler-icin', label: 'Kimler için' },
+  { to: '/#dene', label: 'Dene' },
   { to: '/#kurumlar', label: 'Kurumlar' },
   { to: '/#paketler', label: 'Fiyatlar' },
   { to: '/blog', label: 'Blog' },
@@ -93,11 +93,11 @@ function SiteHeader({ onMenu }: { onMenu: () => void }) {
       >
         <Link to="/" aria-label="DilGO ana sayfa" className="shrink-0"><Logo /></Link>
 
-        <nav aria-label="Ana menü" className="mx-auto hidden items-center gap-1 lg:flex">
+        <nav aria-label="Ana menü" className="mx-auto hidden items-center gap-1 xl:flex">
           {LINKS.map((l) => {
             const active = isActive(l.to)
             return (
-              <Link key={l.to} to={l.to} className={clsx('relative rounded-xl px-3.5 py-2 text-[15px] font-extrabold transition-colors', active ? 'text-ink' : 'text-ink-soft hover:bg-paper-2 hover:text-ink')}>
+              <Link key={l.to} to={l.to} className={clsx('relative whitespace-nowrap rounded-xl px-3.5 py-2 text-[15px] font-extrabold transition-colors', active ? 'text-ink' : 'text-ink-soft hover:bg-paper-2 hover:text-ink')}>
                 {t(l.label)}
                 {active && <motion.span layoutId="nav-dot" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="absolute inset-x-3.5 -bottom-0.5 h-[3px] rounded-full bg-flame" />}
               </Link>
@@ -105,20 +105,20 @@ function SiteHeader({ onMenu }: { onMenu: () => void }) {
           })}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-1.5 lg:ml-0">
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 xl:ml-0">
           <LangSelect className="hidden sm:block" />
           {user ? (
             <span className="hidden sm:block"><LinkButton to="/learn" size="sm">{t('Uygulamaya git')}</LinkButton></span>
           ) : (
             <>
-              <Link to="/login" className="hidden rounded-xl px-3 py-2 text-[15px] font-extrabold text-ink-soft transition hover:bg-paper-2 hover:text-ink lg:block">{t('Giriş yap')}</Link>
+              <Link to="/login" className="hidden rounded-xl px-3 py-2 text-[15px] font-extrabold text-ink-soft transition hover:bg-paper-2 hover:text-ink sm:block">{t('Giriş yap')}</Link>
               <span className="hidden min-[400px]:block"><LinkButton to="/register" size="sm">{t('Ücretsiz başla')}</LinkButton></span>
             </>
           )}
           <button
             onClick={onMenu}
             aria-label="Menüyü aç"
-            className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm lg:hidden"
+            className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm xl:hidden"
           >
             <Menu className="size-5" />
           </button>
@@ -156,7 +156,7 @@ function MenuSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
           role="dialog"
           aria-modal="true"
           aria-label="Menü"
-          className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-card lg:hidden"
+          className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-card xl:hidden"
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
@@ -236,8 +236,8 @@ const COLS: { title: string; links: [string, string][] }[] = [
     links: [
       ['/register', 'Ücretsiz başla'],
       ['/placement', 'Seviye testi'],
-      ['/#beceriler', 'Dört beceri'],
-      ['/#defne', 'AI öğretmen Defne'],
+      ['/#nasil', 'Nasıl çalışır'],
+      ['/#dene', 'Kaydolmadan dene'],
       ['/#oduller', 'Ödül sistemi'],
       ['/#paketler', 'Paketler ve fiyatlar'],
       ['/login', 'Giriş yap'],

@@ -55,6 +55,8 @@ const EN: Record<string, string> = {
   'Kayıt ol': 'Sign up',
   'Menü': 'Menu',
   'Yöntem': 'Method',
+  'Kimler için': 'Who it’s for',
+  'Dene': 'Try it',
   'Uygulamaya git': 'Open the app',
   'Yönetim': 'Admin',
   // app nav
