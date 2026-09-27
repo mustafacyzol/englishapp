@@ -156,7 +156,7 @@ export default function Duel() {
         </section>
       )}
 
-      <div className="grid gap-8 xl:grid-cols-[1.2fr_1fr]">
+      <div className="grid gap-8 xl:grid-cols-[1.2fr_1fr] [&>*]:min-w-0">
         <div className="space-y-8">
           {/* ------------------------------------------------------- Rank ladder */}
           <section>

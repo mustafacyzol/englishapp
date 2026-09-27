@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowDown, ArrowRight, BookOpen, BookText, Check, ChevronDown, Dumbbell, Flame, Headphones, Lock, MapPin, MessageCircle, Mic, PenLine, Play, Star, Trophy } from 'lucide-react'
+import { BookOpen, BookText, Check, ChevronDown, Dumbbell, Flame, Headphones, Lock, MapPin, MessageCircle, Mic, PenLine, Play, Star, Trophy } from 'lucide-react'
 import { rewardImg, unitImg } from '@/lib/assets'
 import { get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { SKILL_LABEL } from '@/lib/format'
 import { Markdown } from '@/lib/markdown'
-import { SKILL } from '@/lib/skills'
 import type { PathLesson, PathUnit, SkillKey } from '@/lib/types'
-import type { Dashboard } from '@/layouts/SideRail'
 import { Button } from '@/components/ui/Button'
 import { Modal, SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
@@ -38,7 +36,6 @@ export default function Learn() {
   const [courseId, setCourseId] = useState<number | null>(null)
   const { data, isLoading } = useQuery({ queryKey: ['path', courseId], queryFn: () => get<PathData>(`/path${courseId ? `/${courseId}` : ''}`) })
   const courses = useQuery({ queryKey: ['courses'], queryFn: () => get<{ data: CourseItem[] }>('/courses') })
-  const dash = useQuery({ queryKey: ['dashboard'], queryFn: () => get<Dashboard>('/dashboard') })
   const [picker, setPicker] = useState(false)
   const [guide, setGuide] = useState<PathUnit | null>(null)
   const [openId, setOpenId] = useState<number | null>(null)
@@ -75,9 +72,8 @@ export default function Learn() {
   return (
     <div className="mx-auto max-w-2xl">
       <ContinueCard data={data} stats={stats} onJump={jump} onPick={() => setPicker(true)} />
-      {dash.data && <TodayStrip dash={dash.data} />}
 
-      <div className="mt-10">
+      <div className="mt-8">
         {data.units.map((unit, ui) => (
           <UnitSection key={unit.id} unit={unit} index={ui} photoIndex={courseOffset(data.course.cefr_level) + ui} onGuide={() => setGuide(unit)} openId={openId} setOpenId={setOpenId} currentRef={currentRef} />
         ))}
@@ -127,123 +123,47 @@ function ContinueCard({ data, stats, onJump, onPick }: { data: PathData; stats: 
   const cur = stats.cur
   const unit = cur?.u
   const unitColor = unit?.color ?? data.course.color
-  const R = 30
+  const R = 15
   const C = 2 * Math.PI * R
-  const left = unit ? unit.lessons.length - stats.unitDone : 0
+  const go = () => (cur && (cur.l.kind === 'lesson' || cur.l.kind === 'checkpoint') ? nav(`/lesson/${cur.l.id}`) : onJump())
   return (
-    <section className="overflow-hidden rounded-[28px] border-2 border-line bg-card">
-      <div className="flex items-center gap-3 border-b-2 border-line px-4 py-3 sm:px-5">
-        <button onClick={onPick} className="flex min-w-0 flex-1 items-center gap-3 text-left">
-          <span className="grid size-10 shrink-0 place-items-center rounded-xl text-sm font-black text-white" style={{ background: data.course.color }}>{data.course.cefr_level}</span>
-          <span className="min-w-0">
-            <span className="block text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft">Kursun</span>
-            <span className="flex items-center gap-1 truncate font-display text-lg font-black">{data.course.title} <ChevronDown className="size-4 shrink-0 text-ink-soft" /></span>
-          </span>
-        </button>
-        <div className="flex items-center gap-3">
-          <div className="hidden text-right sm:block">
-            <p className="font-display text-lg font-black tabular-nums">{stats.done}/{stats.total}</p>
-            <p className="text-[11px] font-bold text-ink-soft">durak tamam</p>
-          </div>
-          <div className="relative size-14">
-            <svg viewBox="0 0 72 72" className="size-14 -rotate-90" aria-hidden>
-              <circle cx="36" cy="36" r={R} fill="none" stroke="var(--paper-2)" strokeWidth="8" />
-              <motion.circle cx="36" cy="36" r={R} fill="none" stroke={data.course.color} strokeWidth="8" strokeLinecap="round" strokeDasharray={C} initial={{ strokeDashoffset: C }} animate={{ strokeDashoffset: C * (1 - stats.pct / 100) }} transition={{ duration: 1.1, ease: [0.22, 1, 0.36, 1] }} />
-            </svg>
-            <span className="absolute inset-0 grid place-items-center font-display text-sm font-black tabular-nums" aria-label={`Kurs ilerlemesi yüzde ${stats.pct}`}>%{stats.pct}</span>
-          </div>
-        </div>
-      </div>
+    <section className="flex items-center gap-3 rounded-2xl border-2 border-line bg-card p-2.5 pr-3 sm:gap-4 sm:p-3 sm:pr-4">
+      <button onClick={onPick} title="Kurs değiştir" className="flex shrink-0 items-center gap-1 rounded-xl py-1 pl-1 pr-1.5 hover:bg-paper-2">
+        <span className="grid size-10 place-items-center rounded-xl text-sm font-black text-white" style={{ background: data.course.color }}>{data.course.cefr_level}</span>
+        <ChevronDown className="size-4 text-ink-soft" />
+      </button>
 
       {cur && unit ? (
-        <div className="grid sm:grid-cols-[1fr_200px]">
-          <div className="p-5 sm:p-6">
-            <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[0.14em] text-flame"><MapPin className="size-3.5" /> Kaldığın yer</p>
-            <h2 className="mt-1.5 text-2xl leading-tight sm:text-3xl">{cur.l.title}</h2>
-            <p className="mt-1 text-sm font-semibold text-ink-soft">Ünite {stats.unitIndex + 1} · {unit.title} — {stats.unitDone}/{unit.lessons.length} durak</p>
-            {/* goal-gradient: this unit's stops, so the finish always looks close */}
-            <div className="mt-4 flex gap-1" aria-hidden>
+        <button onClick={onJump} className="min-w-0 flex-1 text-left" title="Yolda göster">
+          <span className="flex items-center gap-1 text-[11px] font-black uppercase tracking-[0.12em] text-flame"><MapPin className="size-3" /> Kaldığın yer</span>
+          <span className="block truncate font-display text-[17px] font-black leading-tight">{cur.l.title}</span>
+          <span className="mt-1 flex items-center gap-2">
+            <span className="flex gap-0.5" aria-hidden>
               {unit.lessons.map((l) => (
-                <span
-                  key={l.id}
-                  className={clsx('h-2 flex-1 rounded-full', l.state === 'locked' && 'bg-paper-2', l.state === 'current' && 'animate-pulse')}
-                  style={l.state === 'completed' ? { background: unitColor } : l.state === 'current' ? { background: `color-mix(in oklab, ${unitColor} 45%, transparent)` } : undefined}
-                />
+                <span key={l.id} className={clsx('h-1.5 w-4 rounded-full sm:w-5', l.state === 'locked' && 'bg-paper-2')} style={l.state === 'completed' ? { background: unitColor } : l.state === 'current' ? { background: `color-mix(in oklab, ${unitColor} 40%, transparent)` } : undefined} />
               ))}
-            </div>
-            <p className="mt-2 text-xs font-bold text-ink-soft">{left <= 1 ? 'Bu durak üniteyi bitiriyor!' : `Ünite kupasına ${left} durak`}</p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              <Button size="lg" icon={<Play className="size-5 fill-current" />} onClick={() => (cur.l.kind === 'lesson' || cur.l.kind === 'checkpoint' ? nav(`/lesson/${cur.l.id}`) : onJump())}>Devam et</Button>
-              <Button size="lg" variant="ghost" onClick={onJump} icon={<ArrowDown className="size-5" />}>Yolda göster</Button>
-            </div>
-          </div>
-          <Img src={unitImg(courseOffset(data.course.cefr_level) + stats.unitIndex)} alt="" className="hidden h-full w-full object-cover sm:block" />
-        </div>
+            </span>
+            <span className="truncate text-xs font-bold text-ink-soft">Ünite {stats.unitIndex + 1} · {stats.unitDone}/{unit.lessons.length}</span>
+          </span>
+        </button>
       ) : (
-        <div className="p-6 text-center">
-          <Img src={rewardImg('trophy')} alt="" className="mx-auto size-20 object-contain" />
-          <p className="mt-2 text-xl font-black">Bu kursu tamamladın!</p>
-          <Button className="mt-4" onClick={onPick}>Sonraki kursu seç</Button>
-        </div>
-      )}
-    </section>
-  )
-}
-
-/* ------------------------------------------------------------------- Today */
-
-function TodayStrip({ dash }: { dash: Dashboard }) {
-  const { user } = useAuth()
-  const plan = dash.plan ?? []
-  const doneCount = plan.filter((p) => p.done).length
-  const streak = user?.stats.streak ?? 0
-  const left = Math.max(0, dash.today.goal - dash.today.xp)
-  return (
-    <section className="mt-6 space-y-4">
-      {/* loss aversion, gently: only when there's a streak to protect and today isn't done yet */}
-      {streak > 0 && !dash.today.goal_met && (
-        <div className="flex items-center gap-3 rounded-2xl border-2 border-flame/25 bg-flame/6 px-4 py-3">
-          <Img src={rewardImg('flame')} alt="" className="size-10 shrink-0 object-contain" />
-          <p className="min-w-0 flex-1 text-sm font-bold">
-            <span className="text-flame">{streak} günlük serin</span> bugün {left} XP bekliyor. Kısa bir ders yeter.
-          </p>
-        </div>
+        <p className="min-w-0 flex-1 truncate font-display font-black">{data.course.title} tamamlandı</p>
       )}
 
-      {plan.length > 0 && (
-        <div className="rounded-3xl border-2 border-line bg-card p-4 sm:p-5">
-          <div className="mb-3 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft">Bugünün dört beceri planı</p>
-              <p className="font-display text-lg font-black">{doneCount === plan.length ? 'Hepsi tamam — harikasın!' : `${doneCount}/${plan.length} tamam`}</p>
-            </div>
-            <div className="flex gap-1" aria-hidden>
-              {plan.map((p) => <span key={p.skill} className={clsx('h-2 w-6 rounded-full', p.done ? SKILL[p.skill].bg : 'bg-paper-2')} />)}
-            </div>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {plan.map((p) => {
-              const S = SKILL[p.skill]
-              return (
-                <Link key={p.skill} to={p.to} className={clsx('press group flex items-center gap-3 rounded-2xl border-2 p-3 transition', p.done ? 'border-transparent bg-paper-2/70' : 'border-line hover:border-ink/20')}>
-                  <span className={clsx('grid size-11 shrink-0 place-items-center rounded-xl text-white', p.done ? 'bg-mint' : S.bg)}>
-                    {p.done ? <Check className="size-6" strokeWidth={3} /> : <S.icon className="size-5" />}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wide">
-                      <span className={S.text}>{S.label}</span>
-                      {p.focus && !p.done && <span className="rounded bg-ink px-1 text-[9px] text-paper">odak</span>}
-                      {p.weakest && !p.focus && !p.done && <span className="rounded bg-butter/40 px-1 text-[9px]">geride</span>}
-                    </span>
-                    <span className={clsx('block truncate font-bold leading-tight', p.done && 'text-ink-soft line-through')}>{p.title}</span>
-                    <span className="block truncate text-xs text-ink-soft">{p.minutes} dk · {p.detail}</span>
-                  </span>
-                  {!p.done && <ArrowRight className="size-4 shrink-0 text-ink-soft transition group-hover:translate-x-0.5" />}
-                </Link>
-              )
-            })}
-          </div>
-        </div>
+      <div className="relative hidden size-10 shrink-0 sm:block" title={`Kurs ilerlemesi: ${stats.done}/${stats.total}`}>
+        <svg viewBox="0 0 36 36" className="size-10 -rotate-90" aria-hidden>
+          <circle cx="18" cy="18" r={R} fill="none" stroke="var(--paper-2)" strokeWidth="4" />
+          <motion.circle cx="18" cy="18" r={R} fill="none" stroke={data.course.color} strokeWidth="4" strokeLinecap="round" strokeDasharray={C} initial={{ strokeDashoffset: C }} animate={{ strokeDashoffset: C * (1 - stats.pct / 100) }} transition={{ duration: 1 }} />
+        </svg>
+        <span className="absolute inset-0 grid place-items-center text-[10px] font-black tabular-nums">%{stats.pct}</span>
+      </div>
+
+      {cur ? (
+        <button onClick={go} className="press flex h-11 shrink-0 items-center gap-1.5 rounded-xl bg-flame px-3.5 font-display text-sm font-extrabold uppercase tracking-wide text-white shadow-[0_3px_0_0_var(--color-flame-deep)] sm:px-4">
+          <Play className="size-4 fill-current" /> <span className="hidden min-[400px]:inline">Devam</span>
+        </button>
+      ) : (
+        <Button size="sm" onClick={onPick}>Sonraki kurs</Button>
       )}
     </section>
   )

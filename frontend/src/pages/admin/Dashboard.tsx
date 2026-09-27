@@ -54,7 +54,7 @@ export default function Dashboard() {
         <BarChart title="Yeni kayıt · son 30 gün" color="#3A6FF7" data={last30(data.series.signups.map((r) => ({ d: r.d, v: r.count })))} format={(v) => num(Math.round(v))} />
         <BarChart title="Günlük aktif öğrenci · son 30 gün" color="#3A6FF7" data={last30(data.series.dau.map((r) => ({ d: String(r.d), v: r.count })))} format={(v) => num(Math.round(v))} />
       </div>
-      <div className="grid gap-6 xl:grid-cols-2">
+      <div className="grid gap-6 xl:grid-cols-2 [&>*]:min-w-0">
         <section>
           <h2 className="mb-3 text-lg font-extrabold">Son siparişler</h2>
           <Table head={['Kullanıcı', 'Paket', 'Tutar', 'Durum']} empty={!data.recent_orders.length}>

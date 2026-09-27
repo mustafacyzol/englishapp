@@ -85,7 +85,7 @@ export function Report({ data, onInvite, onRemove, inviting, admin }: { data: In
   return (
     <div className="space-y-6">
       {/* ------------------------------------------------ Contract + seats */}
-      <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr]">
+      <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr] [&>*]:min-w-0">
         <div className="rounded-3xl border-2 border-line bg-card p-5 sm:p-6">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-ink-soft">{TYPE[inst.type] ?? inst.type}{inst.city ? ` · ${inst.city}` : ''}</p>
           <h2 className="mt-1 text-2xl sm:text-3xl">{inst.name}</h2>
@@ -175,7 +175,7 @@ export function Report({ data, onInvite, onRemove, inviting, admin }: { data: In
         </div>
 
         {/* cards on phones */}
-        <div className="grid gap-2 md:hidden">
+        <div className="grid gap-2 md:hidden [&>*]:min-w-0">
           {rows.map((m) => (
             <div key={m.id} className="rounded-2xl border-2 border-line bg-card p-4">
               <div className="flex items-start gap-3">

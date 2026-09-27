@@ -3,7 +3,8 @@ import { NavLink, useLocation, useOutlet, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { Bell, BookOpen, Building2, Dumbbell, Gift, Grid2x2, Home, MessageCircle, Settings, Shield, ShoppingBag, Swords, Target, Trophy, User, X, type LucideIcon } from 'lucide-react'
+import { Bell, Settings, X } from 'lucide-react'
+import { IconBag, IconBook, IconCards, IconCup, IconGhost, IconGift, IconMore, IconPath, IconProfile, IconQuest, IconSchool, IconShield, IconSliders, IconTalk, type NavIcon } from '@/components/ui/NavIcons'
 import { useAuth } from '@/lib/auth'
 import { get } from '@/lib/api'
 import { rewardImg } from '@/lib/assets'
@@ -14,46 +15,57 @@ import { PageTransition } from '@/components/motion/Page'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 import { SideRail, type Dashboard } from './SideRail'
 import { Img } from '@/components/ui/Img'
-import { SkillMeter } from '@/components/game/SkillMeter'
 import { ProductTour } from '@/components/game/ProductTour'
 
-interface Item { to: string; label: string; icon: LucideIcon; badge?: string }
+interface Item { to: string; label: string; icon: NavIcon; tone: string; badge?: string }
+
+/** Each item owns a colour: the icon and its soft pill take it on when active. */
+const TONE: Record<string, string> = {
+  flame: 'text-flame bg-flame/10',
+  butter: 'text-butter-deep bg-butter/15',
+  sage: 'text-sage-deep bg-sage/15 dark:text-sage',
+  sky: 'text-sky bg-sky/10',
+  ink: 'text-ink bg-ink/[0.07]',
+  berry: 'text-berry bg-berry/10',
+  mint: 'text-mint-deep bg-mint/12',
+  lilac: 'text-lilac bg-lilac/15',
+}
 
 /** Grouped so the sidebar reads as three jobs: learn, compete, your account. */
 const GROUPS: { title: string; items: Item[] }[] = [
   {
     title: 'Öğren',
     items: [
-      { to: '/learn', label: 'Yol haritası', icon: Home },
-      { to: '/stories', label: 'Hikâyeler', icon: BookOpen },
-      { to: '/ai', label: `${TUTOR.name} ile konuş`, icon: MessageCircle },
-      { to: '/practice', label: 'Pratik', icon: Dumbbell },
+      { to: '/learn', label: 'Yol haritası', icon: IconPath, tone: 'flame' },
+      { to: '/stories', label: 'Hikâyeler', icon: IconBook, tone: 'butter' },
+      { to: '/ai', label: `${TUTOR.name} ile konuş`, icon: IconTalk, tone: 'sage' },
+      { to: '/practice', label: 'Pratik', icon: IconCards, tone: 'sky' },
     ],
   },
   {
     title: 'Yarış',
     items: [
-      { to: '/duel', label: 'Gölge Düellosu', icon: Swords, badge: 'Yeni' },
-      { to: '/leagues', label: 'Ligler', icon: Trophy },
-      { to: '/quests', label: 'Görevler', icon: Target },
+      { to: '/duel', label: 'Gölge Düellosu', icon: IconGhost, tone: 'ink', badge: 'Yeni' },
+      { to: '/leagues', label: 'Ligler', icon: IconCup, tone: 'butter' },
+      { to: '/quests', label: 'Görevler', icon: IconQuest, tone: 'mint' },
     ],
   },
   {
     title: 'Hesabım',
     items: [
-      { to: '/rewards', label: 'Ödüller', icon: Gift },
-      { to: '/shop', label: 'Mağaza', icon: ShoppingBag },
-      { to: '/profile', label: 'Profil', icon: User },
+      { to: '/rewards', label: 'Ödüller', icon: IconGift, tone: 'berry' },
+      { to: '/shop', label: 'Mağaza', icon: IconBag, tone: 'lilac' },
+      { to: '/profile', label: 'Profil', icon: IconProfile, tone: 'sky' },
     ],
   },
 ]
 
 /** Phone tab bar: the four daily jobs plus a "more" sheet for everything else. */
 const TABS: Item[] = [
-  { to: '/learn', label: 'Öğren', icon: Home },
-  { to: '/practice', label: 'Pratik', icon: Dumbbell },
-  { to: '/duel', label: 'Düello', icon: Swords },
-  { to: '/ai', label: TUTOR.name, icon: MessageCircle },
+  { to: '/learn', label: 'Öğren', icon: IconPath, tone: 'flame' },
+  { to: '/practice', label: 'Pratik', icon: IconCards, tone: 'sky' },
+  { to: '/duel', label: 'Düello', icon: IconGhost, tone: 'ink' },
+  { to: '/ai', label: TUTOR.name, icon: IconTalk, tone: 'sage' },
 ]
 
 export default function AppLayout() {
@@ -84,18 +96,16 @@ export default function AppLayout() {
           {user.institution_role === 'manager' && (
             <div>
               <p className="mb-1.5 px-3 text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft/80">{user.institution?.name ?? 'Kurum'}</p>
-              <SideLink item={{ to: '/kurum', label: 'Kurum paneli', icon: Building2 }} />
+              <SideLink item={{ to: '/kurum', label: 'Kurum paneli', icon: IconSchool, tone: 'sage' }} />
             </div>
           )}
           {user.is_staff && (
             <div>
               <p className="mb-1.5 px-3 text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft/80">Yönetim</p>
-              <SideLink item={{ to: '/admin', label: 'Yönetim paneli', icon: Shield }} />
+              <SideLink item={{ to: '/admin', label: 'Yönetim paneli', icon: IconShield, tone: 'ink' }} />
             </div>
           )}
         </nav>
-
-        <SkillMeter compact className="mt-4" />
 
         {!user.premium.active && (
           <Link to="/premium" className="press group mt-3 flex items-center gap-3 rounded-2xl border-2 border-line bg-card p-3 shadow-hard">
@@ -146,15 +156,15 @@ export default function AppLayout() {
             <NavLink key={n.to} to={n.to} className="relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[11px] font-extrabold">
               {({ isActive }) => (
                 <>
-                  {isActive && <motion.span layoutId="tab-bg" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="absolute inset-0 rounded-2xl bg-flame/10" />}
-                  <n.icon className={clsx('relative size-6', isActive ? 'text-flame' : 'text-ink-soft')} strokeWidth={2.2} />
-                  <span className={clsx('relative', isActive ? 'text-flame' : 'text-ink-soft')}>{n.label}</span>
+                  {isActive && <motion.span layoutId="tab-bg" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className={clsx('absolute inset-0 rounded-2xl', TONE[n.tone].split(' ').slice(1).join(' '))} />}
+                  <n.icon className={clsx('relative size-6', isActive ? TONE[n.tone].split(' ')[0] : 'text-ink-soft')} />
+                  <span className={clsx('relative', isActive ? 'text-ink' : 'text-ink-soft')}>{n.label}</span>
                 </>
               )}
             </NavLink>
           ))}
           <button onClick={() => setMore(true)} className="relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[11px] font-extrabold text-ink-soft" aria-label="Diğer sayfalar">
-            <Grid2x2 className="size-6" strokeWidth={2.2} />
+            <IconMore className="size-6" />
             Daha
           </button>
         </div>
@@ -167,35 +177,33 @@ export default function AppLayout() {
 }
 
 function SideLink({ item: n }: { item: Item }) {
+  const [text, bg] = TONE[n.tone].split(' ')
   return (
-    <NavLink to={n.to} end={n.to === '/admin'} className="group relative flex items-center gap-3 rounded-xl px-3 py-2 text-[15px] font-extrabold transition">
+    <NavLink to={n.to} end={n.to === '/admin'} className="group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-bold transition-colors">
       {({ isActive }) => (
         <>
-          {isActive && <motion.span layoutId="side-active" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className="absolute inset-0 rounded-xl bg-flame/10" />}
-          <span className={clsx('relative grid size-8 place-items-center rounded-lg transition', isActive ? 'bg-flame text-white shadow-[0_2px_0_0_var(--color-flame-deep)]' : 'text-ink-soft group-hover:bg-paper-2 group-hover:text-ink')}>
-            <n.icon className="size-[18px]" strokeWidth={2.4} />
-          </span>
-          <span className={clsx('relative flex-1 truncate', isActive ? 'text-ink' : 'text-ink-soft group-hover:text-ink')}>{n.label}</span>
-          {n.badge && <span className="relative rounded-md bg-butter px-1.5 py-0.5 text-[10px] font-black uppercase text-[#1f2433]">{n.badge}</span>}
+          {isActive && <motion.span layoutId="side-active" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className={clsx('absolute inset-0 rounded-xl', bg)} />}
+          {isActive && <motion.span layoutId="side-bar" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className={clsx('absolute -left-3 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-current', text)} />}
+          <n.icon className={clsx('relative size-[22px] shrink-0 transition-colors', isActive ? text : 'text-ink-soft group-hover:text-ink')} />
+          <span className={clsx('relative flex-1 truncate', isActive ? 'font-extrabold text-ink' : 'text-ink-soft group-hover:text-ink')}>{n.label}</span>
+          {n.badge && <span className="relative rounded-md bg-butter px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wide text-[#1f2433]">{n.badge}</span>}
         </>
       )}
     </NavLink>
   )
 }
 
-const MORE_TONE = ['bg-sky/12 text-sky', 'bg-mint/12 text-mint-deep', 'bg-butter/20 text-butter-deep', 'bg-berry/12 text-berry', 'bg-flame/10 text-flame', 'bg-lilac/15 text-lilac', 'bg-sage/15 text-sage-deep']
-
 function MoreSheet({ open, onClose, staff, manager }: { open: boolean; onClose: () => void; staff: boolean; manager: boolean }) {
   const items: Item[] = [
-    { to: '/stories', label: 'Hikâyeler', icon: BookOpen },
-    { to: '/leagues', label: 'Ligler', icon: Trophy },
-    { to: '/quests', label: 'Görevler', icon: Target },
-    { to: '/rewards', label: 'Ödüller', icon: Gift },
-    { to: '/shop', label: 'Mağaza', icon: ShoppingBag },
-    { to: '/profile', label: 'Profil', icon: User },
-    { to: '/settings', label: 'Ayarlar', icon: Settings },
-    ...(manager ? [{ to: '/kurum', label: 'Kurum', icon: Building2 }] : []),
-    ...(staff ? [{ to: '/admin', label: 'Yönetim', icon: Shield }] : []),
+    { to: '/stories', label: 'Hikâyeler', icon: IconBook, tone: 'butter' },
+    { to: '/leagues', label: 'Ligler', icon: IconCup, tone: 'butter' },
+    { to: '/quests', label: 'Görevler', icon: IconQuest, tone: 'mint' },
+    { to: '/rewards', label: 'Ödüller', icon: IconGift, tone: 'berry' },
+    { to: '/shop', label: 'Mağaza', icon: IconBag, tone: 'lilac' },
+    { to: '/profile', label: 'Profil', icon: IconProfile, tone: 'sky' },
+    { to: '/settings', label: 'Ayarlar', icon: IconSliders, tone: 'ink' },
+    ...(manager ? [{ to: '/kurum', label: 'Kurum', icon: IconSchool, tone: 'sage' }] : []),
+    ...(staff ? [{ to: '/admin', label: 'Yönetim', icon: IconShield, tone: 'ink' }] : []),
   ]
   return (
     <AnimatePresence>
@@ -219,9 +227,9 @@ function MoreSheet({ open, onClose, staff, manager }: { open: boolean; onClose: 
               <button onClick={onClose} className="grid size-9 place-items-center rounded-xl hover:bg-paper-2" aria-label="Kapat"><X className="size-5" /></button>
             </div>
             <div className="grid grid-cols-4 gap-2 sm:grid-cols-4">
-              {items.map((n, i) => (
+              {items.map((n) => (
                 <NavLink key={n.to} to={n.to} className={({ isActive }) => clsx('flex flex-col items-center gap-1.5 rounded-2xl border-2 p-2.5 text-center text-xs font-extrabold transition', isActive ? 'border-flame/40 bg-flame/5' : 'border-transparent hover:bg-paper-2')}>
-                  <span className={clsx('grid size-12 place-items-center rounded-2xl', MORE_TONE[i % MORE_TONE.length])}><n.icon className="size-6" strokeWidth={2.2} /></span>
+                  <span className={clsx('grid size-12 place-items-center rounded-2xl', TONE[n.tone])}><n.icon className="size-6" /></span>
                   <span className="leading-tight">{n.label}</span>
                 </NavLink>
               ))}
