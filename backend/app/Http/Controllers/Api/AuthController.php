@@ -48,6 +48,8 @@ class AuthController extends Controller
             'motivation' => ['nullable', 'in:confidence,job,abroad,exam,kids,hobby'],
             'exam_target' => ['nullable', Rule::in(Exams::keys())],
             'age_group' => ['nullable', 'in:kid,teen,adult'],
+            // under 13: a parent creates the account (KVKK / COPPA-style consent)
+            'parent_consent' => ['accepted_if:age_group,kid'],
             'exam_date' => ['nullable', 'date', 'after:today', 'before:+3 years'],
             'invite' => ['nullable', 'string', 'max:64'],
             'marketing_opt_in' => ['boolean'],
@@ -87,7 +89,7 @@ class AuthController extends Controller
             app(InstitutionService::class)->acceptToken($user, $data['invite']);
         }
         $this->otp->send($user->email, 'verify_email', $user);
-        Audit::log('auth.register', $user);
+        Audit::log('auth.register', $user, null, ($data['age_group'] ?? null) === 'kid' ? ['parent_consent' => true] : []);
 
         return $this->issueToken($user, $data['device'] ?? 'web', 201);
     }
@@ -173,6 +175,8 @@ class AuthController extends Controller
             'motivation' => ['nullable', 'in:confidence,job,abroad,exam,kids,hobby'],
             'exam_target' => ['nullable', Rule::in(Exams::keys())],
             'age_group' => ['nullable', 'in:kid,teen,adult'],
+            // under 13: a parent creates the account (KVKK / COPPA-style consent)
+            'parent_consent' => ['accepted_if:age_group,kid'],
             'referral_code' => ['nullable', 'string', 'max:16'],
             'invite' => ['nullable', 'string', 'max:64'],
         ]);

@@ -279,3 +279,20 @@ html.dark {
   --color-line: #262d3d;
   color-scheme: dark;
 }
+
+/* Landscape boarding pass: the main part and the stub are bitten at the perforation. */
+@utility ticket-l {
+  mask:
+    radial-gradient(circle 12px at 100% 0, transparent 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle 12px at 100% 100%, transparent 98%, #000) bottom / 100% 51% no-repeat;
+}
+@utility ticket-r {
+  mask:
+    radial-gradient(circle 12px at 0 0, transparent 98%, #000) top / 100% 51% no-repeat,
+    radial-gradient(circle 12px at 0 100%, transparent 98%, #000) bottom / 100% 51% no-repeat;
+}
+@keyframes foil {
+  to {
+    background-position: 300% 0;
+  }
+}

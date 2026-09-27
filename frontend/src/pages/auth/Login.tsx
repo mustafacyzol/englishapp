@@ -52,32 +52,32 @@ export default function Login() {
 
   return (
     <div className="auth-backdrop relative flex min-h-dvh flex-col overflow-hidden">
-      <header className="relative z-10 flex items-center justify-between px-5 py-4 sm:px-8">
+      <header className="relative z-10 flex items-center justify-between px-5 py-3 sm:px-8">
         <Link to="/" aria-label="DilGO ana sayfa"><Logo small /></Link>
         <LangSelect />
       </header>
 
-      <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-10 pt-4">
+      <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-6 pt-2">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[420px]">
-          <div className="rounded-[28px] border-2 border-line bg-card p-6 shadow-soft sm:p-8">
-            <div className="mb-6 flex flex-col items-center text-center">
-              <span className="relative mb-4">
-                <Img src={TUTOR.avatar} alt="" className="size-16 rounded-full bg-sage/15 object-cover ring-4 ring-card" />
+          <div className="rounded-[28px] border-2 border-line bg-card p-5 shadow-soft sm:p-7">
+            <div className="mb-5 flex flex-col items-center text-center">
+              <span className="relative mb-3">
+                <Img src={TUTOR.avatar} alt="" className="size-12 rounded-full bg-sage/15 object-cover ring-4 ring-card" />
                 <motion.span initial={{ rotate: -20 }} animate={{ rotate: [0, 18, -6, 14, 0] }} transition={{ delay: 0.5, duration: 1.1 }} className="absolute -right-2 -top-1 origin-bottom-left text-2xl" aria-hidden>👋</motion.span>
               </span>
-              <h1 className="text-[28px] leading-tight sm:text-3xl">{t('Tekrar hoş geldin')}</h1>
-              <p className="mt-1.5 text-ink-soft">{t('Hesabına giriş yap ve kaldığın yerden devam et.')}</p>
+              <h1 className="text-[26px] leading-tight">{t('Tekrar hoş geldin')}</h1>
+              <p className="mt-1 text-[15px] text-ink-soft">{t('Hesabına giriş yap ve kaldığın yerden devam et.')}</p>
             </div>
 
-            <SocialButtons onDone={done} remember={remember} />
+            <SocialButtons onDone={done} remember={remember} compact />
 
-            <div className="my-6 flex items-center gap-3 text-xs font-black uppercase tracking-widest text-ink-soft">
+            <div className="my-5 flex items-center gap-3 text-xs font-black uppercase tracking-widest text-ink-soft">
               <span className="h-0.5 flex-1 rounded bg-line" />
               {t('veya e-posta ile')}
               <span className="h-0.5 flex-1 rounded bg-line" />
             </div>
 
-            <form onSubmit={submit} className="space-y-4">
+            <form onSubmit={submit} className="space-y-3.5">
               {err && <Alert tone="error">{err.first()}</Alert>}
               <Input label={t('E-posta veya kullanıcı adı')} autoComplete="username" value={login} onChange={(e) => setLogin(e.target.value)} required autoFocus />
               <Input label={t('Şifre')} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
@@ -94,9 +94,12 @@ export default function Login() {
               <Turnstile onToken={setCaptcha} />
               <Button type="submit" block size="lg" loading={m.isPending}>{t('Giriş yap')}</Button>
             </form>
+            <p className="mt-4 text-center text-xs leading-relaxed text-ink-soft">
+              DilGO'da oturum açarak <Link to="/terms" className="font-bold text-ink underline underline-offset-2">Koşullarımızı</Link> ve <Link to="/privacy" className="font-bold text-ink underline underline-offset-2">Gizlilik Politikamızı</Link> kabul etmiş olursun.
+            </p>
           </div>
 
-          <p className="mt-6 text-center font-semibold text-ink-soft">
+          <p className="mt-4 text-center font-semibold text-ink-soft">
             {t('Hesabın yok mu?')} <Link to="/register" className="font-extrabold text-flame hover:underline">{t('Ücretsiz kayıt ol')}</Link>
           </p>
         </motion.div>

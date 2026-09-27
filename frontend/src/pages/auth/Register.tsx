@@ -28,12 +28,13 @@ const LEVELS: { v: Cefr; t: string; d: string }[] = [
   { v: 'B1', t: 'Günlük konuşmaları anlıyorum', d: 'Derdimi anlatırım ama takılırım' },
   { v: 'B2', t: 'Rahat konuşabiliyorum', d: 'Dizileri çoğunlukla anlıyorum' },
 ]
-type StepKey = 'name' | 'goal' | 'exam' | 'interests' | 'focus' | 'level' | 'time' | 'account'
+type StepKey = 'name' | 'age' | 'goal' | 'exam' | 'interests' | 'focus' | 'level' | 'time' | 'account'
 const DRAFT = 'dilgo.onboarding'
 
 interface Draft {
   step: StepKey
   name: string
+  age: '' | 'kid' | 'teen' | 'adult'
   motivation: string
   exam: string
   examDate: string
@@ -43,8 +44,14 @@ interface Draft {
   time: string
   daily: number
 }
-const flowFor = (motivation: string): StepKey[] => ['name', 'goal', ...(motivation === 'exam' ? (['exam'] as const) : []), 'interests', 'focus', 'level', 'time', 'account']
-const EMPTY: Draft = { step: 'name', name: '', motivation: '', exam: '', examDate: '', interests: [], focus: '', level: 'A1', time: '', daily: 20 }
+const AGES = [
+  { key: 'kid', label: 'Çocuk', range: '7-12 yaş', emoji: '🧒', bg: 'bg-butter/25', text: 'Oyun gibi dersler, yalnızca yaşıtlarla düello, veli onayıyla.' },
+  { key: 'teen', label: 'Genç', range: '13-17 yaş', emoji: '🎧', bg: 'bg-sky/15', text: 'Okul, dizi, müzik ve oyun dünyasından içerik.' },
+  { key: 'adult', label: 'Yetişkin', range: '18 yaş ve üzeri', emoji: '💼', bg: 'bg-flame/10', text: 'İş, seyahat ve sınav odaklı, doğal sohbetler.' },
+] as const
+
+const flowFor = (motivation: string): StepKey[] => ['name', 'age', 'goal', ...(motivation === 'exam' ? (['exam'] as const) : []), 'interests', 'focus', 'level', 'time', 'account']
+const EMPTY: Draft = { step: 'name', name: '', age: '', motivation: '', exam: '', examDate: '', interests: [], focus: '', level: 'A1', time: '', daily: 20 }
 
 export default function Register() {
   const { code } = useParams()
@@ -55,7 +62,7 @@ export default function Register() {
   const [d, setD] = useState<Draft>(EMPTY)
   const [loaded, setLoaded] = useState(false)
   const [placed, setPlaced] = useState(false)
-  const [form, setForm] = useState({ email: '', password: '', password_confirmation: '', referral_code: '', accept_terms: false, marketing_opt_in: false })
+  const [form, setForm] = useState({ email: '', password: '', password_confirmation: '', referral_code: '', accept_terms: false, marketing_opt_in: false, parent_consent: false })
   const [captcha, setCaptcha] = useState('')
   const inv = useQuery({ queryKey: ['invite', invite], queryFn: () => get<{ institution: { name: string }; email: string }>(`/invites/${invite}`), enabled: !!invite, retry: false })
   const up = (patch: Partial<Draft>) => setD((x) => ({ ...x, ...patch }))
@@ -108,6 +115,8 @@ export default function Register() {
 
   const payload = () => ({
     name: d.name.trim(),
+    age_group: d.age || undefined,
+    parent_consent: d.age === 'kid' ? form.parent_consent : undefined,
     learning_goal: mot?.goal,
     motivation: d.motivation || undefined,
     exam_target: d.motivation === 'exam' ? d.exam || undefined : undefined,
@@ -151,6 +160,7 @@ export default function Register() {
 
   const who = firstName ? `${firstName}, ` : ''
   const Q: Record<StepKey, { title: ReactNode; sub: string }> = {
+    age: { title: `${who}kaç yaşındasın?`, sub: 'Dersler, Defne’nin konuşma tarzı, rakiplerin ve ödüller yaşına göre ayarlanır.' },
     name: { title: 'Merhaba! Sana nasıl hitap edelim?', sub: `Ben ${TUTOR.name}, İngilizce koçun. Planını birlikte kuralım, 1 dakika sürer.` },
     goal: { title: `${who}İngilizce seni nereye götürsün?`, sub: 'Hedefin derslerdeki örnekleri ve senaryoları belirler.' },
     exam: { title: 'Hangi sınava hazırlanıyorsun?', sub: 'Okuma parçaları, soru tipleri ve Defne’nin geri bildirimleri bu sınava göre ayarlanır.' },
@@ -160,7 +170,7 @@ export default function Register() {
     time: { title: 'Ne zaman çalışacaksın?', sub: 'Saatini belirleyenlerin alışkanlığı sürdürme ihtimali çok daha yüksek.' },
     account: { title: firstName ? `Biniş kartın hazır, ${firstName}.` : 'Biniş kartın hazır.', sub: 'Hesabını oluştur ve ilk dersine başla. Ücretsiz, kredi kartı gerekmez.' },
   }
-  const canNext: Record<StepKey, boolean> = { name: d.name.trim().length >= 2, goal: !!d.motivation, exam: !!d.exam, interests: d.interests.length > 0, focus: !!d.focus, level: true, time: !!d.time, account: true }
+  const canNext: Record<StepKey, boolean> = { name: d.name.trim().length >= 2, age: !!d.age, goal: !!d.motivation, exam: !!d.exam, interests: d.interests.length > 0, focus: !!d.focus, level: true, time: !!d.time, account: true }
 
   return (
     <AuthShell
@@ -168,7 +178,7 @@ export default function Register() {
       banner={false}
       title={Q[key].title}
       subtitle={Q[key].sub}
-      aside={<PassPanel name={d.name.trim()} mot={mot} exam={exam} interests={d.interests} focus={d.focus || null} level={d.level} slot={slot} pace={pace} weeks={weeks} step={key} />}
+      aside={<PassPanel name={d.name.trim()} age={d.age || undefined} mot={mot} exam={exam} interests={d.interests} focus={d.focus || null} level={d.level} slot={slot} pace={pace} weeks={weeks} step={key} />}
       footer={<>Zaten hesabın var mı? <Link to="/login" className="font-extrabold text-flame">Giriş yap</Link></>}
       lead={
         <div className="mb-7 flex items-center gap-3">
@@ -206,9 +216,25 @@ export default function Register() {
             </form>
           )}
 
+          {key === 'age' && (
+            <div className="grid gap-3 sm:grid-cols-3">
+              {AGES.map((a) => (
+                <button key={a.key} onClick={pick({ age: a.key, ...(a.key === 'kid' && d.motivation === 'exam' ? { motivation: '' } : {}) })} aria-pressed={d.age === a.key} className={clsx('press relative flex flex-col items-start gap-3 rounded-3xl border-2 p-4 text-left transition', d.age === a.key ? 'border-ink shadow-[0_4px_0_0_var(--ink)]' : 'border-line shadow-hard hover:border-ink/25')}>
+                  <span className={clsx('grid size-12 place-items-center rounded-2xl text-2xl', a.bg)} aria-hidden>{a.emoji}</span>
+                  <span>
+                    <span className="block font-display text-xl font-black">{a.label}</span>
+                    <span className="block text-sm font-bold text-ink-soft">{a.range}</span>
+                  </span>
+                  <span className="text-sm text-ink-soft">{a.text}</span>
+                  {d.age === a.key && <Tick />}
+                </button>
+              ))}
+            </div>
+          )}
+
           {key === 'goal' && (
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {MOTIVATIONS.map((o) => (
+              {MOTIVATIONS.filter((o) => !(d.age === 'kid' && o.key === 'exam')).map((o) => (
                 <PhotoCard key={o.key} photo={o.photo} title={o.label} text={o.text} selected={d.motivation === o.key} onClick={pick({ motivation: o.key })} />
               ))}
             </div>
@@ -312,6 +338,12 @@ export default function Register() {
           {key === 'account' && (
             <div className="space-y-5">
               <MobilePass name={d.name.trim()} mot={mot?.label} exam={exam?.name} focus={d.focus || null} level={d.level} slot={slot?.label} minutes={pace.minutes} weeks={weeks} />
+              {d.age === 'kid' && (
+                <label className="flex gap-3 rounded-2xl bg-butter/15 p-3 text-sm">
+                  <input type="checkbox" checked={form.parent_consent} onChange={set('parent_consent')} className="mt-0.5 size-5 accent-[#e8403a]" required />
+                  <span><b>Veli onayı:</b> Ben bu çocuğun velisiyim, kaydını ben oluşturuyorum ve e-posta adresi bana ait.</span>
+                </label>
+              )}
               <SocialButtons onDone={finish} extra={payload()} />
               <div className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-ink-soft">
                 <span className="h-0.5 flex-1 rounded bg-line" /> veya e-posta ile <span className="h-0.5 flex-1 rounded bg-line" />

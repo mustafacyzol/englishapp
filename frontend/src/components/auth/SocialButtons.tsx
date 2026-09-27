@@ -35,7 +35,7 @@ type Done = (token: string, user: Me, remember: boolean) => void
  * client ids; otherwise the buttons stay visible but explain they're coming soon.
  * `extra` carries onboarding answers when used on the sign-up screen.
  */
-export function SocialButtons({ onDone, remember = true, extra, className }: { onDone: Done; remember?: boolean; extra?: Record<string, unknown>; className?: string }) {
+export function SocialButtons({ onDone, remember = true, extra, className, compact }: { onDone: Done; remember?: boolean; extra?: Record<string, unknown>; className?: string; compact?: boolean }) {
   const { t } = useLang()
   const toast = useToast()
   const { data: cfg } = useSiteConfig()
@@ -83,18 +83,18 @@ export function SocialButtons({ onDone, remember = true, extra, className }: { o
   const btn = 'relative flex h-12 w-full items-center justify-center gap-3 rounded-2xl border-2 text-[15px] font-extrabold transition active:translate-y-px disabled:opacity-60'
 
   return (
-    <div className={clsx('grid gap-2.5', className)}>
+    <div className={clsx('grid gap-2.5', compact && 'sm:grid-cols-2', className)}>
       {googleId && !DEMO ? (
         <div ref={googleRef} className="flex h-12 w-full items-center justify-center overflow-hidden [&>div]:!w-full" aria-label={t('Google ile devam et')} />
       ) : (
         <button type="button" onClick={google} disabled={busy !== null} className={clsx(btn, 'border-line bg-card text-ink hover:border-ink/25 hover:bg-paper-2/60')}>
           {busy === 'google' ? <Loader2 className="size-5 animate-spin" /> : <GoogleMark className="size-5" />}
-          {t('Google ile devam et')}
+          {compact ? <><span className="sm:hidden">{t('Google ile devam et')}</span><span className="hidden sm:inline">Google</span></> : t('Google ile devam et')}
         </button>
       )}
       <button type="button" onClick={apple} disabled={busy !== null} className={clsx(btn, 'border-ink bg-ink text-paper hover:opacity-90')}>
         {busy === 'apple' ? <Loader2 className="size-5 animate-spin" /> : <AppleMark className="size-5 -translate-y-px" />}
-        {t('Apple ile devam et')}
+        {compact ? <><span className="sm:hidden">{t('Apple ile devam et')}</span><span className="hidden sm:inline">Apple</span></> : t('Apple ile devam et')}
       </button>
     </div>
   )

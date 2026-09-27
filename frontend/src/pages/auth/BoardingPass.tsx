@@ -1,8 +1,8 @@
 import { useMemo, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useMotionValue, useSpring } from 'motion/react'
 import clsx from 'clsx'
-import { Plane } from 'lucide-react'
+import { ArrowRight, Plane } from 'lucide-react'
 import type { Cefr, SkillKey } from '@/lib/types'
 import { PHOTO } from '@/lib/assets'
 import { SKILL } from '@/lib/skills'
@@ -17,7 +17,7 @@ const NEXT: Record<string, string> = {
   C1: 'C2',
   C2: 'C2',
 }
-const ORDER = ['name', 'goal', 'exam', 'interests', 'focus', 'level', 'time', 'account']
+const ORDER = ['name', 'age', 'goal', 'exam', 'interests', 'focus', 'level', 'time', 'account']
 
 /** A value that flips in like a split-flap board whenever it changes. */
 function Flap({ value, className, empty = '···' }: { value?: ReactNode; className?: string; empty?: string }) {
@@ -33,14 +33,6 @@ function Flap({ value, className, empty = '···' }: { value?: ReactNode; class
   )
 }
 
-function Field({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
-  return (
-    <div className={clsx('min-w-0', className)}>
-      <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">{label}</p>
-      <div className="truncate text-[15px] font-extrabold leading-snug">{children}</div>
-    </div>
-  )
-}
 
 /** Deterministic barcode from the passenger's name, so it changes as they type. */
 function Barcode({ seed, className }: { seed: string; className?: string }) {
@@ -63,6 +55,7 @@ function Barcode({ seed, className }: { seed: string; className?: string }) {
 
 interface PassProps {
   name: string
+  age?: string
   mot?: (typeof MOTIVATIONS)[number]
   exam?: (typeof EXAMS)[number]
   interests: string[]
@@ -74,151 +67,134 @@ interface PassProps {
   step: string
 }
 
+export const AGE_LABEL: Record<string, string> = { kid: 'Çocuk · 7-12', teen: 'Genç · 13-17', adult: 'Yetişkin · 18+' }
+
+/** An empty field is a quiet placeholder bar, never text that looks like an input. */
+function Blank({ w = 'w-16' }: { w?: string }) {
+  return <span aria-hidden className={clsx('inline-block h-3 rounded-full bg-paper-2', w)} />
+}
+
+function Cell({ label, children, className }: { label: string; children: ReactNode; className?: string }) {
+  return (
+    <div className={clsx('min-w-0', className)}>
+      <p className="text-[10px] font-black uppercase tracking-[0.18em] text-ink-soft">{label}</p>
+      <div className="mt-1 flex min-h-6 items-center truncate text-[15px] font-extrabold leading-tight">{children}</div>
+    </div>
+  )
+}
+
 /**
  * Sign-up's left side: the learner's plan as a boarding pass for their English
- * journey. Every answer lands on the ticket as it's given (name typed live,
- * route from today's level to the goal or exam, interests stamped on the stub).
+ * journey. Every answer lands on the ticket as it's given. Empty fields are
+ * placeholder bars (so nobody tries to type into the picture), the pass tilts
+ * gently with the pointer, and it gets stamped when the plan is complete.
  */
-export function PassPanel({ name, mot, exam, interests, focus, level, slot, pace, weeks, step }: PassProps) {
+export function PassPanel({ name, age, mot, exam, interests, focus, level, slot, pace, weeks, step }: PassProps) {
   const at = ORDER.indexOf(step)
   const reached = (s: string) => at > ORDER.indexOf(s)
   const lastInterest = INTERESTS.find((i) => i.key === interests[interests.length - 1])
   const photo = (at >= ORDER.indexOf('time') && slot?.photo) || (at >= ORDER.indexOf('focus') && focus && SKILL[focus].photo) || (at >= ORDER.indexOf('interests') && lastInterest?.photo) || mot?.photo || PHOTO.hero
   const to = exam ? exam.name : reached('level') ? NEXT[level] : ''
   const progress = Math.min(1, at / (ORDER.length - 1))
+  const done = step === 'account'
+  const rx = useMotionValue(0)
+  const ry = useMotionValue(0)
+  const srx = useSpring(rx, { stiffness: 120, damping: 14 })
+  const sry = useSpring(ry, { stiffness: 120, damping: 14 })
+  const move = (e: React.PointerEvent<HTMLDivElement>) => {
+    const r = e.currentTarget.getBoundingClientRect()
+    ry.set(((e.clientX - r.left) / r.width - 0.5) * 8)
+    rx.set(-((e.clientY - r.top) / r.height - 0.5) * 6)
+  }
 
   return (
-    <aside className="relative hidden overflow-hidden bg-[#10131a] lg:block">
+    <aside className="relative hidden overflow-hidden bg-[#10131a] lg:block" onPointerMove={move} onPointerLeave={() => { rx.set(0); ry.set(0) }}>
       <AnimatePresence initial={false}>
         <motion.div key={photo} className="absolute inset-0" initial={{ opacity: 0, scale: 1.05 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.9 }}>
           <Img src={photo} alt="" className="photo" />
         </motion.div>
       </AnimatePresence>
-      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/10 to-black/70" />
+      <div aria-hidden className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/15 to-black/80" />
       <Link to="/" className="absolute left-10 top-10 z-10 rounded-2xl bg-white/95 px-4 py-2 text-[#1f2433] shadow-soft xl:left-14">
-        <span className="font-display text-xl font-black">
-          dil<span className="text-flame">go</span>
-        </span>
+        <span className="font-display text-xl font-black">dil<span className="text-flame">go</span></span>
       </Link>
 
-      <motion.div
-        initial={{ y: 30, opacity: 0, rotate: -1.5 }}
-        animate={{ y: 0, opacity: 1, rotate: -1.5 }}
-        transition={{
-          delay: 0.15,
-          type: 'spring',
-          stiffness: 120,
-          damping: 16,
-        }}
-        className="absolute inset-x-10 bottom-10 z-10 xl:inset-x-14"
-      >
-        <div className="text-ink drop-shadow-[0_24px_40px_rgba(0,0,0,.45)]">
-          <div className="ticket-top overflow-hidden rounded-t-[26px] bg-card">
-            {/* header strip */}
+      <div className="absolute inset-x-8 bottom-10 z-10 [perspective:1200px] xl:inset-x-12">
+        <motion.div style={{ rotateX: srx, rotateY: sry }} initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15, type: 'spring', stiffness: 110, damping: 16 }} className="flex text-ink drop-shadow-[0_30px_45px_rgba(0,0,0,.5)]">
+          {/* main part */}
+          <div className="ticket-l relative min-w-0 flex-1 overflow-hidden rounded-l-[26px] bg-card">
             <div className="flex items-center justify-between bg-ink px-6 py-3 text-paper">
-              <span className="font-display text-sm font-black tracking-wide">
-                dil<span className="text-flame">go</span> <span className="ml-1 font-sans text-[11px] font-black uppercase tracking-[0.2em] text-paper/60">Biniş kartı</span>
-              </span>
-              <span className="font-mono text-xs font-bold tracking-widest text-paper/70">
-                DG-{level}
-                {to
-                  ? `·${to
-                      .replace(/[^A-Z0-9]/gi, '')
-                      .slice(0, 4)
-                      .toUpperCase()}`
-                  : ''}
-              </span>
+              <span className="font-display text-sm font-black tracking-wide">dil<span className="text-flame">go</span><span className="ml-2 font-sans text-[11px] font-black uppercase tracking-[0.2em] text-paper/60">Biniş kartı · Boarding pass</span></span>
+              <span className="font-mono text-xs font-bold tracking-widest text-paper/70">DG {level}{to ? `-${to.replace(/[^A-Z0-9]/gi, '').slice(0, 4).toUpperCase()}` : ''}</span>
             </div>
-
-            <div className="px-6 pb-5 pt-5">
-              {/* route */}
-              <div className="flex items-end justify-between gap-4">
+            <div className="px-6 pb-5 pt-4">
+              <div className="flex items-end gap-4">
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">Bugün</p>
-                  <Flap value={reached('level') || level !== 'A1' ? level : ''} className="font-display text-5xl font-black leading-none" empty="--" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-ink-soft">Bugün</p>
+                  <Flap value={reached('level') || level !== 'A1' ? level : ''} className="font-display text-5xl font-black leading-none" empty="··" />
                 </div>
                 <div className="relative mb-3 flex-1">
-                  <div className="h-0.5 w-full border-t-2 border-dashed border-line" />
-                  <motion.span
-                    className="absolute -top-[13px] grid size-7 place-items-center rounded-full bg-flame text-white shadow-soft"
-                    initial={false}
-                    animate={{
-                      left: `calc(${progress * 100}% - ${progress * 28}px)`,
-                    }}
-                    transition={{ type: 'spring', stiffness: 90, damping: 18 }}
-                  >
+                  <svg viewBox="0 0 100 20" preserveAspectRatio="none" className="h-5 w-full overflow-visible"><path d="M0 18 Q50 -8 100 18" fill="none" stroke="var(--line)" strokeWidth="2" strokeDasharray="4 4" vectorEffect="non-scaling-stroke" /></svg>
+                  <motion.span className="absolute -top-2 grid size-7 place-items-center rounded-full bg-flame text-white shadow-soft" initial={false} animate={{ left: `calc(${progress * 100}% - ${progress * 28}px)`, top: `${-8 + Math.abs(progress - 0.5) * 20}px` }} transition={{ type: 'spring', stiffness: 90, damping: 18 }}>
                     <Plane className="size-4 rotate-45" />
                   </motion.span>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">{exam ? 'Sınav' : 'Hedef'}</p>
-                  <Flap value={to} className="font-display text-5xl font-black leading-none" empty="--" />
+                  <p className="text-[10px] font-black uppercase tracking-[0.18em] text-ink-soft">{exam ? 'Sınav' : 'Hedef'}</p>
+                  <Flap value={to} className="font-display text-5xl font-black leading-none" empty="··" />
                 </div>
               </div>
 
-              {/* passenger */}
-              <div className="mt-5">
-                <p className="text-[10px] font-black uppercase tracking-[0.16em] text-ink-soft">Yolcu</p>
-                <p className="truncate font-display text-2xl font-black uppercase tracking-wide">
-                  {name ? name.toLocaleUpperCase('tr') : <span className="text-ink-soft/40">Adın buraya</span>}
-                  {step === 'name' && <span className="ml-0.5 inline-block h-6 w-[3px] translate-y-0.5 animate-pulse bg-flame" />}
-                </p>
+              <div className="mt-4 grid grid-cols-3 gap-x-5 gap-y-3">
+                <Cell label="Yolcu" className="col-span-2">
+                  {name ? <span className="truncate font-display text-xl font-black uppercase tracking-wide">{name.toLocaleUpperCase('tr')}</span> : <span className="flex items-center gap-2"><Blank w="w-28" /><Blank w="w-14" /></span>}
+                </Cell>
+                <Cell label="Kabin"><Flap value={age ? AGE_LABEL[age] : undefined} empty="" />{!age && <Blank w="w-20" />}</Cell>
+                <Cell label="Amaç" className="col-span-2">{mot ? <Flap value={mot.label} /> : <Blank w="w-40" />}</Cell>
+                <Cell label="Kapı">{focus ? <Flap value={<span className={SKILL[focus].text}>{SKILL[focus].label}</span>} /> : <Blank />}</Cell>
               </div>
 
-              <div className="mt-4 grid grid-cols-4 gap-4">
-                <Field label="Amaç" className="col-span-2">
-                  <Flap value={mot?.label} />
-                </Field>
-                <Field label="Kapı">
-                  <Flap value={focus ? <span className={SKILL[focus].text}>{SKILL[focus].label}</span> : undefined} />
-                </Field>
-                <Field label="Kalkış">
-                  <Flap value={slot ? `${slot.label} · ${pace.minutes} dk` : undefined} />
-                </Field>
+              <div className="mt-4 flex min-h-8 flex-wrap items-center gap-2 border-t-2 border-dashed border-line pt-3">
+                {interests.length ? interests.map((k, i) => (
+                  <motion.span key={k} initial={{ scale: 2.2, opacity: 0, rotate: -30 }} animate={{ scale: 1, opacity: 1, rotate: ((i * 37) % 18) - 9 }} transition={{ type: 'spring', stiffness: 420, damping: 16 }} className="rounded-lg border-2 border-sky/70 px-2 py-0.5 text-[11px] font-black uppercase tracking-wider text-sky">
+                    {INTERESTS.find((x) => x.key === k)?.label}
+                  </motion.span>
+                )) : <><Blank w="w-14" /><Blank w="w-12" /><Blank w="w-16" /></>}
               </div>
-            </div>
-          </div>
-          {/* perforation + stub */}
-          <div className="ticket-bottom overflow-hidden rounded-b-[26px] bg-card">
-            <div className="mx-6 border-t-2 border-dashed border-line" />
-            <div className="flex items-center gap-5 px-6 pb-5 pt-4">
-              <div className="flex min-h-14 flex-1 flex-wrap items-center gap-2">
-                {interests.length ? (
-                  interests.map((k, i) => (
-                    <motion.span
-                      key={k}
-                      initial={{ scale: 2.2, opacity: 0, rotate: -30 }}
-                      animate={{
-                        scale: 1,
-                        opacity: 1,
-                        rotate: ((i * 37) % 22) - 11,
-                      }}
-                      transition={{
-                        type: 'spring',
-                        stiffness: 420,
-                        damping: 16,
-                      }}
-                      className="rounded-lg border-2 border-sky/70 px-2 py-0.5 text-[11px] font-black uppercase tracking-wider text-sky"
-                    >
-                      {INTERESTS.find((x) => x.key === k)?.label}
-                    </motion.span>
-                  ))
-                ) : (
-                  <span className="text-xs font-bold text-ink-soft/60">İlgi alanların buraya damgalanacak</span>
-                )}
-              </div>
-              <Barcode seed={name} className="shrink-0 opacity-85" />
             </div>
             <AnimatePresence>
-              {slot && (
-                <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} className="bg-mint/12 px-6 py-2.5 text-sm font-black text-mint-deep">
-                  İlk ünite ~{weeks} günde · ayda {Math.round((pace.minutes * 30) / 60)} saat pratik
-                </motion.p>
+              {done && (
+                <motion.span initial={{ scale: 2.6, opacity: 0, rotate: -24 }} animate={{ scale: 1, opacity: 0.9, rotate: -14 }} transition={{ type: 'spring', stiffness: 380, damping: 14, delay: 0.2 }} className="absolute bottom-5 right-6 rounded-xl border-4 border-mint bg-card/70 px-3 py-1 font-display text-xl font-black tracking-widest text-mint">
+                  ONAYLANDI
+                </motion.span>
               )}
             </AnimatePresence>
           </div>
-        </div>
-      </motion.div>
+
+          {/* stub, torn along a perforation */}
+          <div className="ticket-r relative flex w-40 shrink-0 flex-col overflow-hidden rounded-r-[26px] border-l-2 border-dashed border-line bg-card xl:w-44">
+            <div aria-hidden className="h-[46px] bg-[linear-gradient(115deg,#ff8a7a,#ffd36b,#7ee2b8,#7fb2ff,#c7a2ff,#ff8a7a)] bg-[length:300%_100%] [animation:foil_6s_linear_infinite]" />
+            <div className="flex flex-1 flex-col gap-3 px-4 pb-4 pt-4">
+              <Cell label="Kalkış">{slot ? <Flap value={slot.label} /> : <Blank w="w-16" />}</Cell>
+              <Cell label="Koltuk">{slot ? <Flap value={`${pace.minutes} dk/gün`} /> : <Blank w="w-14" />}</Cell>
+              <Barcode seed={name + (age ?? '')} className="mt-auto h-10" />
+            </div>
+          </div>
+        </motion.div>
+
+        <AnimatePresence>
+          {step === 'name' && !name && (
+            <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="mt-4 flex items-center justify-end gap-2 text-sm font-bold text-white/85">
+              Adını sağdaki kutuya yaz, biletine basılsın <ArrowRight className="size-4" />
+            </motion.p>
+          )}
+          {slot && (
+            <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="mt-4 text-right text-sm font-black text-white/90">
+              İlk ünite ~{weeks} günde · ayda {Math.round((pace.minutes * 30) / 60)} saat pratik
+            </motion.p>
+          )}
+        </AnimatePresence>
+      </div>
     </aside>
   )
 }
