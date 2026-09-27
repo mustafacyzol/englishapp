@@ -57,3 +57,10 @@ export const EXAMS = [
 ] as const
 
 export const examName = (k?: string | null) => EXAMS.find((e) => e.key === k)?.name
+
+/**
+ * Exam mode is opt-in: it shows only for learners who chose an exam goal or
+ * picked an exam track, and never for children.
+ */
+export const examOn = (u?: { exam_target?: string | null; learning_goal?: string | null; age_group?: string | null; preferences?: { exam_mode?: boolean } } | null) =>
+  !!u && u.age_group !== 'kid' && (u.preferences?.exam_mode ?? (!!u.exam_target || u.learning_goal === 'exam'))

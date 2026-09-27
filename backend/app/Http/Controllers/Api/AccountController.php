@@ -47,11 +47,12 @@ class AccountController extends Controller
             'preferences.tts_voice' => ['sometimes', 'nullable', 'string', 'max:80'],
             'preferences.tts_rate' => ['sometimes', 'numeric', 'between:0.5,1.5'],
             'preferences.theme' => ['sometimes', 'in:light,dark,system'],
+            'preferences.exam_mode' => ['sometimes', 'boolean'],
         ], ['username.regex' => 'Kullanıcı adı yalnızca küçük harf, rakam, nokta ve alt çizgi içerebilir.']);
 
         if (isset($data['preferences'])) {
             // merge and whitelist; never let the client overwrite server-owned keys (frame)
-            $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'sound', 'tts_voice', 'tts_rate', 'theme', 'tour_done']));
+            $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'sound', 'tts_voice', 'tts_rate', 'theme', 'tour_done', 'exam_mode']));
             $data['preferences'] = array_merge($user->preferences ?? [], $allowed);
         }
         if (isset($data['name'])) {

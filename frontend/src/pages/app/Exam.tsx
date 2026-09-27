@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
@@ -40,6 +41,8 @@ export default function Exam() {
   const { data, isLoading } = useQuery({ queryKey: ['exam'], queryFn: () => get<Overview>('/exam') })
 
   if (!user) return null
+  // Exam practice is for teens and adults only.
+  if (user.age_group === 'kid') return <Navigate to="/learn" replace />
   if (isLoading || !data) return <Spinner className="min-h-[50vh]" />
   if (!data.target) return <PickExam />
   if (run) return <Runner section={run.section} n={run.n} onExit={() => setRun(null)} />
@@ -134,7 +137,7 @@ function useSaveExam() {
   const qc = useQueryClient()
   const toast = useToast()
   return useMutation({
-    mutationFn: (b: { exam_target: ExamKey | null; exam_date?: string | null }) => patch<{ user: Me }>('/account', b),
+    mutationFn: (b: { exam_target: ExamKey | null; exam_date?: string | null }) => patch<{ user: Me }>('/account', b.exam_target ? { ...b, preferences: { exam_mode: true } } : b),
     onSuccess: (r) => {
       if (user) setUser(r.user)
       qc.invalidateQueries({ queryKey: ['exam'] })

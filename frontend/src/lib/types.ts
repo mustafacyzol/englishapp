@@ -14,13 +14,14 @@ export interface Me {
   learning_goal: string | null
   daily_goal_xp: number
   onboarded: boolean
-  preferences: { email_reminders?: boolean; sound?: boolean; tts_rate?: number; tts_voice?: string; theme?: 'light' | 'dark' | 'system'; frame?: string; tour_done?: boolean; language?: 'tr' | 'en' }
+  preferences: { email_reminders?: boolean; sound?: boolean; tts_rate?: number; tts_voice?: string; theme?: 'light' | 'dark' | 'system'; frame?: string; tour_done?: boolean; language?: 'tr' | 'en'; exam_mode?: boolean }
   focus_skill: SkillKey | null
   interests: string[]
   study_time: 'morning' | 'lunch' | 'evening' | 'night' | null
   motivation: string | null
   exam_target: ExamKey | null
   exam_date: string | null
+  age_group?: 'kid' | 'teen' | 'adult' | null
   linked?: { google: boolean; apple: boolean }
   institution: { id: number; name: string; type: string } | null
   institution_role: 'student' | 'manager' | null
@@ -166,7 +167,7 @@ export interface UserItem {
   expires_at: string | null
   created_at: string
   item: RewardItem
-  meta?: { partner?: string; partner_logo?: string | null; partner_url?: string | null; color?: string | null; offer?: string; description?: string | null; terms?: string | null; rarity?: RewardItem['rarity'] } | null
+  meta?: { partner?: string; partner_logo?: string | null; partner_url?: string | null; color?: string | null; offer?: string; description?: string | null; terms?: string | null; rarity?: RewardItem['rarity']; used_at?: string } | null
   odds?: ChestOdds[]
 }
 

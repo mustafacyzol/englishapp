@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { BookOpen, BookText, Check, ChevronDown, Dumbbell, Flame, Headphones, Lock, MapPin, MessageCircle, Mic, PenLine, Play, Star, Trophy } from 'lucide-react'
+import { ArrowDown, ArrowUp, BookOpen, BookText, Check, ChevronDown, Dumbbell, Flame, Headphones, Lock, MapPin, MessageCircle, Mic, PenLine, Play, Star, Trophy } from 'lucide-react'
 import { rewardImg, unitImg } from '@/lib/assets'
 import { get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
@@ -41,6 +41,7 @@ export default function Learn() {
   const [openId, setOpenId] = useState<number | null>(null)
   const currentRef = useRef<HTMLDivElement | null>(null)
   const [currentVisible, setCurrentVisible] = useState(true)
+  const [curAbove, setCurAbove] = useState(false)
 
   const stats = useMemo<Stats | null>(() => {
     if (!data) return null
@@ -61,7 +62,7 @@ export default function Learn() {
   useEffect(() => {
     const el = currentRef.current
     if (!el) return
-    const io = new IntersectionObserver(([e]) => setCurrentVisible(e.isIntersecting), { rootMargin: '-80px 0px -80px 0px' })
+    const io = new IntersectionObserver(([e]) => { setCurrentVisible(e.isIntersecting); setCurAbove(e.boundingClientRect.top < 0) }, { rootMargin: '-80px 0px -80px 0px' })
     io.observe(el)
     return () => io.disconnect()
   }, [data])
@@ -79,25 +80,32 @@ export default function Learn() {
         ))}
       </div>
 
+      {/* A small pill that rides along the bottom of the path column (not a floating
+          corner button over other content) and points toward where you left off. */}
+      <div className="pointer-events-none sticky bottom-[calc(env(safe-area-inset-bottom)+5.75rem)] z-20 flex h-0 justify-center lg:bottom-6">
+        <AnimatePresence>
+          {!currentVisible && stats.cur && (
+            <motion.button
+              initial={{ opacity: 0, y: 10, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 10, scale: 0.9 }}
+              transition={{ type: 'spring', stiffness: 420, damping: 30 }}
+              onClick={jump}
+              className="press pointer-events-auto flex -translate-y-full items-center gap-1.5 rounded-full border-2 border-line bg-card/95 py-1.5 pl-1.5 pr-3.5 text-[13px] font-extrabold text-ink shadow-soft backdrop-blur"
+            >
+              <span className="grid size-6 place-items-center rounded-full bg-flame text-white">{curAbove ? <ArrowUp className="size-3.5" strokeWidth={3} /> : <ArrowDown className="size-3.5" strokeWidth={3} />}</span>
+              Kaldığın yer <span className="max-w-[9rem] truncate font-semibold text-ink-soft sm:max-w-[14rem]">· {stats.cur.l.title}</span>
+            </motion.button>
+          )}
+        </AnimatePresence>
+      </div>
+
       <div className="my-16 flex flex-col items-center gap-3 text-center">
         <Img src={rewardImg('crown')} alt="" className={clsx('size-24 object-contain', stats.pct < 100 && 'opacity-50 grayscale')} />
         <p className="text-xl font-black">{data.course.title} bitiş çizgisi</p>
         <p className="max-w-xs text-sm text-ink-soft">{stats.total - stats.done > 0 ? `${stats.total - stats.done} durak kaldı. Her gün bir adım yeter.` : 'Bu kursu bitirdin! Bir üst seviyeye geçmeye hazırsın.'}</p>
       </div>
 
-      <AnimatePresence>
-        {!currentVisible && stats.cur && (
-          <motion.button
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 16 }}
-            onClick={jump}
-            className="press fixed bottom-28 right-4 z-30 flex items-center gap-2 rounded-full bg-ink px-4 py-3 text-sm font-extrabold text-paper shadow-soft lg:bottom-8 lg:right-8 xl:right-[calc(20rem+4rem)]"
-          >
-            <MapPin className="size-4" /> Kaldığın yere dön
-          </motion.button>
-        )}
-      </AnimatePresence>
 
       <Modal open={picker} onClose={() => setPicker(false)}>
         <h2 className="mb-4 text-2xl font-extrabold">Kurs seç</h2>

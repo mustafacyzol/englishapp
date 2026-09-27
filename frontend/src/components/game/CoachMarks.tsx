@@ -6,7 +6,7 @@ import clsx from 'clsx'
 import { patch } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { TUTOR } from '@/lib/tutor'
-import { examName } from '@/lib/onboarding'
+import { examName, examOn } from '@/lib/onboarding'
 import { sfx } from '@/lib/fx'
 import { Img } from '@/components/ui/Img'
 
@@ -37,7 +37,7 @@ export function CoachMarks() {
   const marks = useMemo<Mark[]>(() => {
     if (!user) return []
     const first = user.name.split(' ')[0]
-    const exam = examName(user.exam_target)
+    const exam = examOn(user) ? examName(user.exam_target) ?? 'Sınav' : undefined
     return [
       { targets: ['here', 'path'], title: `Merhaba ${first}, burası senin yolun`, text: '“Buradasın” işareti kaldığın durağı gösterir. Dokun, dersi başlat. Her ünitenin sonunda bir kupa var.' },
       { targets: ['stats'], title: 'Serin, elmasın, canların', text: 'Her gün biraz çalış, alev büyüsün. Elmaslarla mağazadan dondurucu ve sandık alırsın.' },

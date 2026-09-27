@@ -17,6 +17,7 @@ import { useSiteConfig } from '@/lib/site'
 import { SideRail, type Dashboard } from './SideRail'
 import { Img } from '@/components/ui/Img'
 import { CoachMarks } from '@/components/game/CoachMarks'
+import { examOn } from '@/lib/onboarding'
 
 interface Item { to: string; label: string; icon: NavIcon; tone: string; badge?: string; match?: string[]; tour?: string; feature?: 'exam' | 'duel' | 'ai' | 'stories' }
 
@@ -81,20 +82,28 @@ export default function AppLayout() {
   const { user } = useAuth()
   const { t } = useLang()
   const { data: cfg } = useSiteConfig()
-  const on = (f?: Item['feature']) => !f || cfg?.site?.features?.[f] !== false
+  const on = (f?: Item['feature']) => !f || (cfg?.site?.features?.[f] !== false && (f !== 'exam' || examOn(user)))
   const loc = useLocation()
   const hub = HUBS.find((h) => h.tabs.some((x) => loc.pathname === x.to))
   const outlet = useOutlet()
   const [more, setMore] = useState(false)
   const { data } = useQuery({ queryKey: ['dashboard'], queryFn: () => get<Dashboard>('/dashboard'), refetchInterval: 60_000 })
   useEffect(() => setMore(false), [loc.pathname])
+  // Age group drives a few global touches (tint, type size) through one attribute.
+  useEffect(() => {
+    const el = document.documentElement
+    if (user?.age_group) el.dataset.age = user.age_group
+    else delete el.dataset.age
+    return () => { delete el.dataset.age }
+  }, [user?.age_group])
   if (!user) return null
   // The dashboard rail belongs to the home screen only; every other page gets the
   // full column so reading, chat and pricing have room to breathe.
   const withRail = loc.pathname === '/learn'
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-[1700px]">
+    <div className="relative isolate mx-auto flex min-h-dvh max-w-[1700px]">
+      <div aria-hidden className="app-backdrop pointer-events-none fixed inset-0 -z-10" />
       <aside className="sticky top-0 hidden h-dvh w-[256px] shrink-0 flex-col border-r-2 border-line bg-card/40 px-3 py-5 lg:flex">
         <Link to="/learn" className="mb-6 px-3"><Logo /></Link>
         <nav className="no-scrollbar flex flex-1 flex-col gap-5 overflow-y-auto" aria-label="Uygulama menüsü">
@@ -184,7 +193,7 @@ export default function AppLayout() {
         </div>
       </nav>
 
-      <MoreSheet open={more} onClose={() => setMore(false)} staff={!!user.is_staff} manager={user.institution_role === 'manager'} />
+      <MoreSheet open={more} onClose={() => setMore(false)} staff={!!user.is_staff} manager={user.institution_role === 'manager'} exam={on('exam')} />
       <CoachMarks />
     </div>
   )
@@ -226,11 +235,11 @@ function HubTabs({ tabs, path }: { tabs: (typeof HUBS)[number]['tabs']; path: st
   )
 }
 
-function MoreSheet({ open, onClose, staff, manager }: { open: boolean; onClose: () => void; staff: boolean; manager: boolean }) {
+function MoreSheet({ open, onClose, staff, manager, exam }: { open: boolean; onClose: () => void; staff: boolean; manager: boolean; exam: boolean }) {
   const { t } = useLang()
   const items: Item[] = [
     { to: '/stories', label: 'Hikâyeler', icon: IconBook, tone: 'butter' },
-    { to: '/exam', label: 'Sınav modu', icon: IconExam, tone: 'lilac' },
+    ...(exam ? [{ to: '/exam', label: 'Sınav modu', icon: IconExam, tone: 'lilac' }] : []),
     { to: '/ai', label: 'Defne', icon: IconTalk, tone: 'sage' },
     { to: '/leagues', label: 'Ligler', icon: IconCup, tone: 'butter' },
     { to: '/quests', label: 'Görevler', icon: IconQuest, tone: 'mint' },

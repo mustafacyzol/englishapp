@@ -250,6 +250,38 @@ html.dark {
   background-size: auto, auto, 22px 22px;
 }
 
+/*
+  The in-app canvas: one calm brand wash at the top, a hairline grid that fades
+  out within the first screen, and a cool wash bottom-right. Fixed, so content
+  scrolls over a still background instead of a busy pattern.
+*/
+@utility app-backdrop {
+  background:
+    radial-gradient(70rem 26rem at 30% -8rem, color-mix(in oklab, var(--age-tint, var(--color-flame)) 7%, transparent), transparent 70%),
+    radial-gradient(48rem 30rem at 100% 100%, color-mix(in oklab, var(--color-sky) 6%, transparent), transparent 70%);
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(color-mix(in oklab, var(--ink) 5%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklab, var(--ink) 5%, transparent) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(60rem 22rem at 40% 0, #000, transparent 75%);
+  }
+}
+
+/* Age-aware canvas: children get a warmer tint and a touch larger type and targets. */
+html[data-age='kid'] {
+  --age-tint: var(--color-butter);
+}
+html[data-age='kid'] body {
+  font-size: 17px;
+}
+html[data-age='teen'] {
+  --age-tint: var(--color-sky);
+}
+
 /* Boarding-pass notches: the ticket is two flush pieces, each bitten at the perforation. */
 @utility ticket-top {
   mask:

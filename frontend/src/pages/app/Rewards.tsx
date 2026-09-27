@@ -18,21 +18,26 @@ import { Empty, PageHeader, Progress, SkeletonPage, Tabs } from '@/components/ui
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 
-type Tab = 'vault' | 'yol' | 'redeem' | 'invite'
+type Tab = 'vault' | 'kupon' | 'yol' | 'redeem' | 'invite'
+const HASH: Record<string, Tab> = { '#yol': 'yol', '#kuponlar': 'kupon' }
 
 export default function Rewards() {
   const { hash } = useLocation()
-  const [tab, setTab] = useState<Tab>(() => (hash === '#yol' ? 'yol' : 'vault'))
+  const [tab, setTab] = useState<Tab>(() => HASH[hash] ?? 'vault')
   useEffect(() => {
-    if (hash === '#yol') setTab('yol')
+    if (HASH[hash]) setTab(HASH[hash])
   }, [hash])
+  // Partner gifts get their own tab the moment one is won, so they never hide among cards.
+  const coupons = useQuery({ queryKey: ['coupons'], queryFn: () => get<{ data: UserItem[] }>('/coupons') })
+  const live = coupons.data?.data.filter((c) => c.status === 'active').length ?? 0
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader kicker="Kazandıkların" title="Ödüller" />
       <div className="mb-8">
-        <Tabs value={tab} onChange={setTab} items={[{ value: 'vault', label: 'Kasam' }, { value: 'yol', label: 'Nasıl kazanırım?' }, { value: 'redeem', label: 'Kod kullan' }, { value: 'invite', label: 'Arkadaş davet et' }]} />
+        <Tabs value={tab} onChange={setTab} items={[{ value: 'vault', label: 'Kasam' }, ...(coupons.data?.data.length ? [{ value: 'kupon' as Tab, label: live ? `Kuponlarım (${live})` : 'Kuponlarım' }] : []), { value: 'yol', label: 'Nasıl kazanırım?' }, { value: 'redeem', label: 'Kod kullan' }, { value: 'invite', label: 'Arkadaş davet et' }]} />
       </div>
       {tab === 'vault' && <Vault />}
+      {tab === 'kupon' && <Coupons list={coupons.data?.data} />}
       {tab === 'yol' && <Roadmap />}
       {tab === 'redeem' && <Redeem />}
       {tab === 'invite' && <Invite />}
@@ -122,6 +127,59 @@ function Vault() {
       )}
       {chest && <ChestOpening chest={chest.item} odds={chest.odds} onOpen={() => openChest(chest)} onClose={() => setChest(null)} />}
     </>
+  )
+}
+
+/** Won partner gifts as tickets: brand, the offer, the code to copy, expiry and "I used it". */
+function Coupons({ list }: { list?: UserItem[] }) {
+  const qc = useQueryClient()
+  const toast = useToast()
+  const used = useMutation({
+    mutationFn: (id: number) => post(`/coupons/${id}/used`),
+    onSuccess: () => { qc.invalidateQueries({ queryKey: ['coupons'] }); qc.invalidateQueries({ queryKey: ['inventory'] }); toast('Kupon kullanıldı olarak işaretlendi', 'success') },
+    onError: (e: ApiError) => toast(e.first(), 'error'),
+  })
+  if (!list) return <SkeletonPage variant="cards" />
+  if (!list.length) return <Empty icon={<Img src={rewardImg('ticket')} alt="" className="size-12 object-contain opacity-60" />} title="Henüz kuponun yok" text="Gizemli sandıklardan bazen iş ortaklarımızın hediyeleri çıkar. Kazandığında burada görünür." />
+  const copy = (c: string) => { navigator.clipboard?.writeText(c).catch(() => {}); toast('Kod kopyalandı', 'success') }
+  return (
+    <div className="grid gap-5 md:grid-cols-2">
+      {list.map((c, i) => {
+        const m = c.meta ?? {}
+        const on = c.status === 'active'
+        const days = c.expires_at ? Math.max(0, Math.ceil((new Date(c.expires_at).getTime() - Date.now()) / 864e5)) : null
+        return (
+          <motion.article key={c.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className={clsx('relative flex overflow-hidden rounded-3xl border-2 border-line bg-card', !on && 'opacity-60 grayscale-[.6]')}>
+            <div className="w-2 shrink-0" style={{ background: m.color ?? 'var(--color-flame)' }} />
+            <div className="min-w-0 flex-1 p-5">
+              <div className="flex items-center gap-3">
+                {m.partner_logo ? <Img src={m.partner_logo} alt="" className="size-10 rounded-xl bg-paper-2 object-contain p-1" /> : <span className="grid size-10 place-items-center rounded-xl font-black text-white" style={{ background: m.color ?? 'var(--color-flame)' }}>{m.partner?.[0]}</span>}
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-black uppercase tracking-wider text-ink-soft">{m.partner}</p>
+                  <p className="font-display text-lg font-black leading-tight">{m.offer}</p>
+                </div>
+              </div>
+              {m.description && <p className="mt-2 text-sm text-ink-soft">{m.description}</p>}
+              <div className="mt-4 flex flex-wrap items-center gap-2">
+                <button onClick={() => on && c.code && copy(c.code)} disabled={!on} className="flex items-center gap-2 rounded-xl border-2 border-dashed border-ink/25 bg-paper-2 px-3 py-1.5 font-mono text-[15px] font-bold tracking-wider">
+                  {c.code} {on && <Copy className="size-4 text-ink-soft" />}
+                </button>
+                <span className={clsx('rounded-full px-2.5 py-1 text-xs font-black', on ? (days !== null && days <= 3 ? 'bg-berry/12 text-berry' : 'bg-mint/15 text-mint-deep') : 'bg-paper-2 text-ink-soft')}>
+                  {c.status === 'used' ? `Kullanıldı${m.used_at ? ` · ${dateTR(m.used_at)}` : ''}` : c.status === 'expired' ? 'Süresi doldu' : days === 0 ? 'Bugün son gün' : `${days} gün kaldı`}
+                </span>
+              </div>
+              {m.terms && <p className="mt-3 text-[11px] leading-snug text-ink-soft">{m.terms}</p>}
+              {on && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {m.partner_url && <a href={m.partner_url} target="_blank" rel="noreferrer" className="press rounded-xl bg-ink px-3.5 py-2 text-sm font-extrabold text-paper">Markaya git</a>}
+                  <button onClick={() => used.mutate(c.id)} disabled={used.isPending} className="rounded-xl border-2 border-line px-3.5 py-2 text-sm font-bold hover:border-ink/30"><Check className="mr-1 inline size-4" />Kullandım</button>
+                </div>
+              )}
+            </div>
+          </motion.article>
+        )
+      })}
+    </div>
   )
 }
 

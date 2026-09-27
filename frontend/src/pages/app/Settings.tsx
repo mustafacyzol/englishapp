@@ -1,14 +1,16 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useSearchParams } from 'react-router-dom'
+import { useMutation, useQuery, useQueryClient, type UseMutationResult } from '@tanstack/react-query'
+import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { LogOut, Monitor, Moon, Smartphone, Sun, Trash2 } from 'lucide-react'
+import { Bell, GraduationCap, LogOut, Monitor, Moon, Palette, Shield, Smartphone, Sun, Target, Trash2, User } from 'lucide-react'
 import { setTheme, useTheme } from '@/lib/theme'
 import { ApiError, del, get, patch, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { dateTR, GOALS, tl } from '@/lib/format'
 import { speak } from '@/lib/speech'
 import type { Me } from '@/lib/types'
-import { INTERESTS, STUDY_TIMES } from '@/lib/onboarding'
+import { EXAMS, INTERESTS, PACES, STUDY_TIMES, examOn } from '@/lib/onboarding'
 import { SKILL, SKILLS } from '@/lib/skills'
 import { Button } from '@/components/ui/Button'
 import { Input, Toggle } from '@/components/ui/Field'
@@ -16,35 +18,103 @@ import { Alert, Modal, PageHeader } from '@/components/ui/Misc'
 import { OtpInput } from '@/components/ui/OtpInput'
 import { useToast } from '@/components/ui/Toast'
 import { LangSelect } from '@/components/ui/LangSelect'
-import { EXAMS } from '@/lib/onboarding'
 
-function Section({ title, children, danger }: { title: string; children: ReactNode; danger?: boolean }) {
+function Section({ title, children, danger, hint }: { title: string; children: ReactNode; danger?: boolean; hint?: string }) {
   return (
-    <section className={clsx('ink-card mb-6 p-6', danger && 'border-berry')}>
-      <h2 className="mb-4 text-xl font-extrabold">{title}</h2>
-      {children}
+    <section className={clsx('ink-card mb-5 p-5 sm:p-6', danger && 'border-berry/60')}>
+      <h2 className="text-lg font-extrabold">{title}</h2>
+      {hint && <p className="mt-0.5 text-sm text-ink-soft">{hint}</p>}
+      <div className="mt-4">{children}</div>
     </section>
   )
 }
 
+function Label({ children, note }: { children: ReactNode; note?: string }) {
+  return <p className="mb-2 text-sm font-bold">{children} {note && <span className="font-normal text-ink-soft">{note}</span>}</p>
+}
+
+const pill = (on: boolean) => clsx('rounded-xl border-2 py-2 text-sm font-bold transition', on ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')
+
+type Tab = 'hesap' | 'ogrenme' | 'sinav' | 'gorunum' | 'bildirim' | 'guvenlik'
+
+const AGE = [
+  { key: 'kid', label: 'Çocuk', text: '7-12 yaş', emoji: '🧒' },
+  { key: 'teen', label: 'Genç', text: '13-17 yaş', emoji: '🎧' },
+  { key: 'adult', label: 'Yetişkin', text: '18+', emoji: '💼' },
+] as const
+
+/**
+ * Settings as a short list of sections, one open at a time: a side list on
+ * desktop, a scrollable segment row on phones. Nothing scrolls on forever and
+ * each section only shows what applies to this learner (exam mode never for children).
+ */
 export default function Settings() {
-  const [theme] = useTheme()
-  const { user, setUser, signOut } = useAuth()
+  const { user, setUser } = useAuth()
   const toast = useToast()
+  const [params, setParams] = useSearchParams()
   const save = useMutation({
     mutationFn: (b: Partial<Me> | Record<string, unknown>) => patch<{ user: Me }>('/account', b),
     onSuccess: (r) => { setUser(r.user); toast('Kaydedildi ✓', 'success') },
     onError: (e: ApiError) => toast(e.first(), 'error'),
   })
+  if (!user) return null
+  const kid = user.age_group === 'kid'
+  const tabs: { key: Tab; label: string; text: string; icon: typeof User }[] = [
+    { key: 'hesap', label: 'Hesap', text: 'Ad, yaş grubu, kurum', icon: User },
+    { key: 'ogrenme', label: 'Öğrenme', text: 'Hedef, seviye, ilgi alanı', icon: GraduationCap },
+    ...(kid ? [] : [{ key: 'sinav' as Tab, label: 'Sınav modu', text: examOn(user) ? 'Açık' : 'İsteğe bağlı', icon: Target }]),
+    { key: 'gorunum', label: 'Görünüm ve ses', text: 'Tema, dil, okuma hızı', icon: Palette },
+    { key: 'bildirim', label: 'Bildirimler', text: 'Hatırlatma, e-posta', icon: Bell },
+    { key: 'guvenlik', label: 'Güvenlik', text: 'Şifre, oturumlar, siparişler', icon: Shield },
+  ]
+  const want = params.get('s') as Tab | null
+  const tab: Tab = tabs.some((t) => t.key === want) ? want! : 'hesap'
+  const go = (k: Tab) => setParams(k === 'hesap' ? {} : { s: k }, { replace: true })
+
+  return (
+    <div className="mx-auto max-w-5xl">
+      <PageHeader title="Ayarlar" />
+      <div className="lg:grid lg:grid-cols-[240px_1fr] lg:gap-8">
+        <nav aria-label="Ayar bölümleri" className="no-scrollbar -mx-4 mb-5 flex gap-2 overflow-x-auto px-4 lg:sticky lg:top-24 lg:mx-0 lg:mb-0 lg:flex-col lg:self-start lg:overflow-visible lg:px-0">
+          {tabs.map((t) => {
+            const on = t.key === tab
+            return (
+              <button key={t.key} onClick={() => go(t.key)} aria-current={on ? 'page' : undefined} className={clsx('relative flex shrink-0 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-left transition lg:py-3', on ? 'text-paper' : 'text-ink hover:bg-ink/[0.05]')}>
+                {on && <motion.span layoutId="set-tab" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className="absolute inset-0 rounded-2xl bg-ink" />}
+                <t.icon className="relative size-[18px] shrink-0" />
+                <span className="relative">
+                  <span className="block whitespace-nowrap text-sm font-extrabold">{t.label}</span>
+                  <span className={clsx('hidden text-xs lg:block', on ? 'text-paper/70' : 'text-ink-soft')}>{t.text}</span>
+                </span>
+              </button>
+            )
+          })}
+        </nav>
+
+        <AnimatePresence mode="wait">
+          <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} transition={{ duration: 0.18 }} className="min-w-0">
+            {tab === 'hesap' && <AccountTab save={save} />}
+            {tab === 'ogrenme' && <LearningTab save={save} />}
+            {tab === 'sinav' && <ExamTab save={save} />}
+            {tab === 'gorunum' && <LookTab save={save} />}
+            {tab === 'bildirim' && <NotifyTab save={save} />}
+            {tab === 'guvenlik' && <><Security /><Orders /></>}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </div>
+  )
+}
+
+type Save = UseMutationResult<{ user: Me }, ApiError, Partial<Me> | Record<string, unknown>>
+
+function AccountTab({ save }: { save: Save }) {
+  const { user, signOut } = useAuth()
   const [name, setName] = useState(user?.name ?? '')
   const [username, setUsername] = useState(user?.username ?? '')
   if (!user) return null
-  const prefs = user.preferences
-
   return (
-    <div className="mx-auto max-w-2xl">
-      <PageHeader title="Ayarlar" />
-
+    <>
       <Section title="Profil">
         <form className="grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); save.mutate({ name, username }) }}>
           <Input label="Ad" value={name} onChange={(e) => setName(e.target.value)} />
@@ -53,31 +123,61 @@ export default function Settings() {
           <Button type="submit" loading={save.isPending} className="sm:col-span-2 sm:w-fit">Kaydet</Button>
         </form>
       </Section>
+      <Section title="Yaş grubu" hint="İçerik, Defne'nin konuşma tonu, iş ortağı hediyeleri ve rakip eşleşmesi buna göre ayarlanır.">
+        <div className="grid grid-cols-3 gap-2">
+          {AGE.map((a) => (
+            <button key={a.key} onClick={() => a.key !== 'kid' || user.age_group === 'kid' ? save.mutate({ age_group: a.key }) : undefined} disabled={a.key === 'kid' && user.age_group !== 'kid'} aria-pressed={user.age_group === a.key} className={clsx(pill(user.age_group === a.key), 'flex flex-col items-center gap-0.5 py-3 disabled:opacity-40')}>
+              <span className="text-xl" aria-hidden>{a.emoji}</span>
+              <span>{a.label}</span>
+              <span className={clsx('text-[11px] font-semibold', user.age_group === a.key ? 'text-paper/70' : 'text-ink-soft')}>{a.text}</span>
+            </button>
+          ))}
+        </div>
+        <p className="mt-3 text-xs text-ink-soft">Çocuk hesabı veli onayıyla kayıt sırasında açılır.</p>
+      </Section>
+      <JoinInstitution />
+      <Section title="Oturum" danger>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="secondary" onClick={signOut} icon={<LogOut className="size-4" />}>Çıkış yap</Button>
+          <DeleteAccount />
+        </div>
+      </Section>
+    </>
+  )
+}
 
-      <Section title="Öğrenme">
-        <p className="mb-2 text-sm font-bold">Günlük hedef</p>
-        <div className="mb-5 grid grid-cols-4 gap-2">
-          {[10, 20, 30, 50].map((x) => (
-            <button key={x} onClick={() => save.mutate({ daily_goal_xp: x })} className={clsx('rounded-xl border-2 border-line py-2 font-bold', user.daily_goal_xp === x ? 'bg-flame text-white shadow-hard-sm' : 'bg-card')}>{x} XP</button>
-          ))}
-        </div>
-        <p className="mb-2 text-sm font-bold">Seviye</p>
-        <div className="mb-5 grid grid-cols-6 gap-2">
-          {(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const).map((l) => (
-            <button key={l} onClick={() => save.mutate({ cefr_level: l })} className={clsx('rounded-xl border-2 border-line py-2 font-mono font-bold', user.cefr_level === l ? 'bg-sky text-white shadow-hard-sm' : 'bg-card')}>{l}</button>
-          ))}
-        </div>
-        <p className="mb-2 text-sm font-bold">Hedefin</p>
-        <div className="flex flex-wrap gap-2">
-          {GOALS.map((g) => (
-            <button key={g.key} onClick={() => save.mutate({ learning_goal: g.key })} className={clsx('rounded-xl border-2 border-line px-3 py-1.5 font-bold', user.learning_goal === g.key ? 'bg-butter text-ink shadow-hard-sm' : 'bg-card')}>{g.emoji} {g.label}</button>
+function LearningTab({ save }: { save: Save }) {
+  const { user } = useAuth()
+  if (!user) return null
+  const kid = user.age_group === 'kid'
+  return (
+    <>
+      <Section title="Günlük tempo" hint="Seri, bu hedefin en az 10 XP'lik kısmını tamamladığın günlerde uzar.">
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {PACES.map((p) => (
+            <button key={p.xp} onClick={() => save.mutate({ daily_goal_xp: p.xp })} className={clsx(pill(user.daily_goal_xp === p.xp), 'flex flex-col items-center py-2.5')}>
+              <span>{p.label}</span>
+              <span className={clsx('text-[11px] font-semibold', user.daily_goal_xp === p.xp ? 'text-paper/70' : 'text-ink-soft')}>{p.xp} XP · ~{p.minutes} dk</span>
+            </button>
           ))}
         </div>
       </Section>
-
-      <Section title="Öğrenme tercihlerin">
-        <p className="mb-4 text-sm text-ink-soft">Defne sohbetleri, hikâye önerileri ve günlük planın bu seçimlere göre hazırlanır.</p>
-        <p className="mb-2 text-sm font-bold">İlgi alanların</p>
+      <Section title="Seviye ve hedef">
+        <Label>Seviye</Label>
+        <div className="mb-5 grid grid-cols-6 gap-2">
+          {(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const).map((l) => (
+            <button key={l} onClick={() => save.mutate({ cefr_level: l })} className={clsx(pill(user.cefr_level === l), 'font-mono')}>{l}</button>
+          ))}
+        </div>
+        <Label>Neden öğreniyorsun?</Label>
+        <div className="flex flex-wrap gap-2">
+          {GOALS.filter((g) => !(kid && g.key === 'exam')).map((g) => (
+            <button key={g.key} onClick={() => save.mutate({ learning_goal: g.key })} className={clsx(pill(user.learning_goal === g.key), 'px-3')}>{g.emoji} {g.label}</button>
+          ))}
+        </div>
+      </Section>
+      <Section title="Kişiselleştirme" hint="Defne sohbetleri, hikâye önerileri ve günlük planın bu seçimlere göre hazırlanır.">
+        <Label>İlgi alanların</Label>
         <div className="mb-5 flex flex-wrap gap-2">
           {INTERESTS.map((o) => {
             const on = user.interests?.includes(o.key)
@@ -89,45 +189,63 @@ export default function Settings() {
             )
           })}
         </div>
-        <p className="mb-2 text-sm font-bold">Odak beceri</p>
+        <Label>Odak beceri</Label>
         <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {SKILLS.map((k) => (
-            <button key={k} onClick={() => save.mutate({ focus_skill: k })} className={clsx('flex items-center justify-center gap-1.5 rounded-xl border-2 py-2 text-sm font-bold', user.focus_skill === k ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>
-              {(() => { const I = SKILL[k].icon; return <I className="size-4" /> })()} {SKILL[k].label}
-            </button>
-          ))}
-        </div>
-        <p className="mb-2 text-sm font-bold">Çalışma saatin <span className="font-normal text-ink-soft">hatırlatmalar bu saate göre gelir</span></p>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {STUDY_TIMES.map((t) => (
-            <button key={t.key} onClick={() => save.mutate({ study_time: t.key })} className={clsx('rounded-xl border-2 py-2 text-sm font-bold', user.study_time === t.key ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>{t.label}</button>
-          ))}
-        </div>
-      </Section>
-
-      <Section title="Sınav hedefin">
-        <p className="mb-4 text-sm text-ink-soft">Seçtiğin sınava göre soru tipleri, okuma parçaları ve Defne’nin geri bildirimi ayarlanır.</p>
-        <div className="mb-4 grid gap-2 sm:grid-cols-3">
-          {EXAMS.map((e) => {
-            const on = user.exam_target === e.key
-            return (
-              <button key={e.key} onClick={() => save.mutate({ exam_target: on ? null : e.key })} aria-pressed={on} className={clsx('flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition', on ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>
-                <span className="grid h-9 min-w-12 place-items-center rounded-lg px-1.5 text-xs font-black text-white" style={{ background: e.color }}>{e.name}</span>
-                <span className="text-xs font-bold leading-tight">{e.label}</span>
-              </button>
-            )
+          {SKILLS.map((k) => {
+            const I = SKILL[k].icon
+            return <button key={k} onClick={() => save.mutate({ focus_skill: k })} className={clsx(pill(user.focus_skill === k), 'flex items-center justify-center gap-1.5')}><I className="size-4" /> {SKILL[k].label}</button>
           })}
         </div>
-        {user.exam_target && (
-          <Input label="Sınav tarihi" type="date" defaultValue={user.exam_date ?? ''} min={new Date(Date.now() + 864e5).toISOString().slice(0, 10)} onBlur={(e) => e.target.value !== (user.exam_date ?? '') && save.mutate({ exam_date: e.target.value || null })} hint="Geri sayım ve deneme planı için." />
-        )}
+        <Label note="hatırlatmalar bu saate göre gelir">Çalışma saatin</Label>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {STUDY_TIMES.map((t) => <button key={t.key} onClick={() => save.mutate({ study_time: t.key })} className={pill(user.study_time === t.key)}>{t.label}</button>)}
+        </div>
       </Section>
+    </>
+  )
+}
 
-      <JoinInstitution />
+function ExamTab({ save }: { save: Save }) {
+  const { user } = useAuth()
+  if (!user) return null
+  const on = examOn(user)
+  return (
+    <Section title="Sınav modu" hint="Herkesin hedefi sınav değil. Açarsan menüye Sınav modu eklenir, Defne ve günlük plan seçtiğin sınava göre çalışır.">
+      <div className="rounded-2xl bg-paper-2 px-4">
+        <Toggle label="Sınav modunu göster" description={on ? 'Menüde görünüyor.' : 'Kapalı. Menüde görünmez.'} checked={on} onChange={(v) => save.mutate({ preferences: { exam_mode: v } })} />
+      </div>
+      {on && (
+        <div className="mt-5">
+          <Label>Hangi sınava hazırlanıyorsun?</Label>
+          <div className="mb-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+            {EXAMS.map((e) => {
+              const sel = user.exam_target === e.key
+              return (
+                <button key={e.key} onClick={() => save.mutate({ exam_target: sel ? null : e.key })} aria-pressed={sel} className={clsx('flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition', sel ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>
+                  <span className="grid h-9 min-w-12 place-items-center rounded-lg px-1.5 text-xs font-black text-white" style={{ background: e.color }}>{e.name}</span>
+                  <span className="text-xs font-bold leading-tight">{e.label}</span>
+                </button>
+              )
+            })}
+          </div>
+          {user.exam_target && (
+            <Input label="Sınav tarihi" type="date" defaultValue={user.exam_date ?? ''} min={new Date(Date.now() + 864e5).toISOString().slice(0, 10)} onBlur={(e) => e.target.value !== (user.exam_date ?? '') && save.mutate({ exam_date: e.target.value || null })} hint="Geri sayım ve deneme planı için." />
+          )}
+        </div>
+      )}
+    </Section>
+  )
+}
 
-      <Section title="Görünüm, dil, ses ve bildirimler">
-        <p className="mb-2 text-sm font-bold">Tema</p>
-        <div className="mb-6 grid grid-cols-3 gap-2.5">
+function LookTab({ save }: { save: Save }) {
+  const [theme] = useTheme()
+  const { user } = useAuth()
+  if (!user) return null
+  const prefs = user.preferences
+  return (
+    <>
+      <Section title="Tema">
+        <div className="grid grid-cols-3 gap-2.5">
           {([['light', 'Açık', Sun], ['dark', 'Koyu', Moon], ['system', 'Sistem', Monitor]] as const).map(([v, l, I]) => (
             <button key={v} onClick={() => { setTheme(v); save.mutate({ preferences: { theme: v } }) }} aria-pressed={theme === v} className={clsx('press overflow-hidden rounded-2xl border-2 text-left transition', theme === v ? 'border-ink shadow-[0_3px_0_0_var(--ink)]' : 'border-line hover:border-ink/25')}>
               {/* a tiny preview of the app in that theme */}
@@ -141,34 +259,36 @@ export default function Settings() {
             </button>
           ))}
         </div>
-        <div className="mb-4 flex items-center justify-between gap-3 rounded-2xl bg-paper-2 px-4 py-3">
+      </Section>
+      <Section title="Dil ve ses">
+        <div className="mb-2 flex items-center justify-between gap-3 rounded-2xl bg-paper-2 px-4 py-3">
           <span>
             <span className="block font-bold">Arayüz dili</span>
             <span className="block text-xs text-ink-soft">Ders içeriği her zaman İngilizce.</span>
           </span>
           <LangSelect />
         </div>
-        <div className="divide-y-2 divide-line/10">
-          <Toggle label="Ses efektleri" checked={prefs.sound !== false} onChange={(v) => save.mutate({ preferences: { sound: v } })} />
-          <Toggle label="Seri hatırlatma e-postaları" description="Serin bitmek üzereyken akşam 20:00'de haber veririz." checked={prefs.email_reminders !== false} onChange={(v) => save.mutate({ preferences: { email_reminders: v } })} />
-          <Toggle label="Kampanya e-postaları" checked={user.marketing_opt_in} onChange={(v) => save.mutate({ marketing_opt_in: v })} />
-          <div className="py-3">
-            <p className="mb-2 font-bold">Okuma hızı ({(prefs.tts_rate ?? 0.95).toFixed(2)}x)</p>
-            <input type="range" min={0.6} max={1.3} step={0.05} defaultValue={prefs.tts_rate ?? 0.95} onChange={(e) => speak('This is how I will read to you.', { rate: Number(e.target.value) })} onMouseUp={(e) => save.mutate({ preferences: { tts_rate: Number((e.target as HTMLInputElement).value) } })} onTouchEnd={(e) => save.mutate({ preferences: { tts_rate: Number((e.target as HTMLInputElement).value) } })} className="w-full accent-[#FF5A36]" />
-          </div>
+        <Toggle label="Ses efektleri" checked={prefs.sound !== false} onChange={(v) => save.mutate({ preferences: { sound: v } })} />
+        <div className="pt-2">
+          <Label note="kaydırınca örnek okurum">Okuma hızı ({(prefs.tts_rate ?? 0.95).toFixed(2)}x)</Label>
+          <input type="range" min={0.6} max={1.3} step={0.05} defaultValue={prefs.tts_rate ?? 0.95} onChange={(e) => speak('This is how I will read to you.', { rate: Number(e.target.value) })} onMouseUp={(e) => save.mutate({ preferences: { tts_rate: Number((e.target as HTMLInputElement).value) } })} onTouchEnd={(e) => save.mutate({ preferences: { tts_rate: Number((e.target as HTMLInputElement).value) } })} className="w-full accent-[#FF5A36]" />
         </div>
       </Section>
+    </>
+  )
+}
 
-      <Security />
-      <Orders />
-
-      <Section title="Hesap" danger>
-        <div className="flex flex-wrap gap-3">
-          <Button variant="secondary" onClick={signOut} icon={<LogOut className="size-4" />}>Çıkış yap</Button>
-          <DeleteAccount />
-        </div>
-      </Section>
-    </div>
+function NotifyTab({ save }: { save: Save }) {
+  const { user } = useAuth()
+  if (!user) return null
+  const prefs = user.preferences
+  return (
+    <Section title="Bildirimler" hint="Az ama zamanında: yalnızca serin tehlikedeyken ve önemli bir şey olduğunda.">
+      <div className="divide-y-2 divide-line/10">
+        <Toggle label="Seri hatırlatma e-postaları" description="Serin bitmek üzereyken akşam 20:00'de haber veririz." checked={prefs.email_reminders !== false} onChange={(v) => save.mutate({ preferences: { email_reminders: v } })} />
+        {user.age_group !== 'kid' && <Toggle label="Kampanya e-postaları" description="Yeni paketler ve indirimler. Ayda en fazla iki kez." checked={user.marketing_opt_in} onChange={(v) => save.mutate({ marketing_opt_in: v })} />}
+      </div>
+    </Section>
   )
 }
 
@@ -186,7 +306,7 @@ function Security() {
   const err = change.error as ApiError | null
 
   return (
-    <Section title="Güvenlik">
+    <Section title="Güvenlik" hint="Şifreni değiştirince diğer cihazlardaki oturumlar kapanır.">
       <form className="mb-6 grid gap-3" onSubmit={(e: FormEvent) => { e.preventDefault(); change.mutate() }}>
         {err && <Alert tone="error">{err.first()}</Alert>}
         <Input label="Mevcut şifre" type="password" autoComplete="current-password" value={pw.current_password} onChange={(e) => setPw({ ...pw, current_password: e.target.value })} />
