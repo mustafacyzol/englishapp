@@ -8,6 +8,8 @@ use App\Models\RewardItem;
 use App\Models\Subscription;
 use App\Models\User;
 use App\Models\UserItem;
+use App\Notifications\PartnerGiftWon;
+use App\Support\Settings;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -170,7 +172,7 @@ class RewardService
     private function award(User $user, array $prize): array
     {
         if (($prize['type'] ?? null) === 'partner') {
-            $won = $this->grantPartnerGift($user);
+            $won = Settings::get('features.chest_partners', true) ? $this->grantPartnerGift($user) : null;
             if ($won) {
                 return ['Sandıktan iş ortağı hediyesi çıktı: '.$won->meta['offer'].'!', ['prize' => ['type' => 'partner', 'item' => $won->load('item')]]];
             }
@@ -188,7 +190,10 @@ class RewardService
 
     public function grantPartnerGift(User $user): ?UserItem
     {
-        $offers = PartnerOffer::query()->available()->with('partner')->lockForUpdate()->get();
+        // Adult-only offers (café, cinema...) never drop for children or teenagers.
+        $offers = PartnerOffer::query()->available()->with('partner')
+            ->when($user->age_group !== 'adult', fn ($q) => $q->where('audience', 'all'))
+            ->lockForUpdate()->get();
         $offer = $this->weighted($offers->all(), fn (PartnerOffer $o) => $o->weight);
         if (! $offer) {
             return null;
@@ -201,7 +206,7 @@ class RewardService
             $code = strtoupper($offer->code_prefix).'-'.strtoupper(Str::random(8));
         } while (UserItem::query()->where('code', $code)->exists());
 
-        return UserItem::query()->create([
+        $won = UserItem::query()->create([
             'user_id' => $user->id,
             'reward_item_id' => $item->id,
             'status' => 'active',
@@ -221,6 +226,9 @@ class RewardService
                 'offer_id' => $offer->id,
             ],
         ]);
+        $user->notify(new PartnerGiftWon($offer->partner->name, $offer->title, $won->expires_at->format('d.m.Y')));
+
+        return $won;
     }
 
     /**
@@ -228,12 +236,14 @@ class RewardService
      *
      * @return list<array{label:string, type:string, rarity:string, chance:float}>
      */
-    public function odds(RewardItem $chest): array
+    public function odds(RewardItem $chest, ?User $user = null): array
     {
         $pool = $chest->value['pool'] ?? [];
         $total = max(1, array_sum(array_column($pool, 'weight')));
         $items = RewardItem::query()->whereIn('key', array_filter(array_column($pool, 'item')))->get()->keyBy('key');
-        $partners = PartnerOffer::query()->available()->with('partner:id,name')->get();
+        $partners = Settings::get('features.chest_partners', true)
+            ? PartnerOffer::query()->available()->with('partner:id,name')->when($user && $user->age_group !== 'adult', fn ($q) => $q->where('audience', 'all'))->get()
+            : collect();
 
         $out = [];
         foreach ($pool as $entry) {

@@ -36,6 +36,8 @@ class PublicController extends Controller
                 'google' => Settings::get('features.social_login', true) && SocialToken::enabled('google') ? config('services.google.client_id') : null,
                 'apple' => Settings::get('features.social_login', true) && SocialToken::enabled('apple') ? config('services.apple.client_id') : null,
             ],
+            'tts' => (bool) config('services.elevenlabs.key'),
+            'ai' => (bool) config('dilgo.ai.api_key') && config('dilgo.ai.enabled'),
             'exams' => collect(Exams::EXAMS)->map(fn ($e, $k) => ['key' => $k, 'name' => $e['name'], 'full' => $e['full'], 'about' => $e['about']])->values(),
         ]);
     }

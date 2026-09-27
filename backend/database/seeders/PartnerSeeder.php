@@ -22,10 +22,10 @@ class PartnerSeeder extends Seeder
                 ['title' => 'İngilizce kitaplarda %15 indirim', 'description' => 'Graded reader ve roman seçkisinde tek kullanımlık.', 'code_prefix' => 'KTP', 'rarity' => 'rare', 'weight' => 6, 'stock' => 500, 'valid_days' => 45],
             ]],
             ['slug' => 'ornek-kahve', 'name' => 'Kahve dükkânı (örnek iş ortağı)', 'description' => 'Örnek kayıt: yönetim panelinden gerçek anlaşmayla değiştir.', 'color' => '#a0612d', 'offers' => [
-                ['title' => 'Bir kahve bizden', 'description' => 'Siparişini İngilizce ver, kahven hediye.', 'code_prefix' => 'KHV', 'rarity' => 'common', 'weight' => 10, 'stock' => 1000, 'valid_days' => 30],
+                ['title' => 'Bir kahve bizden', 'audience' => 'adult', 'description' => 'Siparişini İngilizce ver, kahven hediye.', 'code_prefix' => 'KHV', 'rarity' => 'common', 'weight' => 10, 'stock' => 1000, 'valid_days' => 30],
             ]],
             ['slug' => 'ornek-sinema', 'name' => 'Sinema (örnek iş ortağı)', 'description' => 'Örnek kayıt: yönetim panelinden gerçek anlaşmayla değiştir.', 'color' => '#7a4bd8', 'offers' => [
-                ['title' => 'Orijinal dilde film bileti 1+1', 'description' => 'Altyazısız seanslarda ikinci bilet hediye.', 'code_prefix' => 'SNM', 'rarity' => 'epic', 'weight' => 4, 'stock' => 200, 'valid_days' => 30],
+                ['title' => 'Orijinal dilde film bileti 1+1', 'audience' => 'adult', 'description' => 'Altyazısız seanslarda ikinci bilet hediye.', 'code_prefix' => 'SNM', 'rarity' => 'epic', 'weight' => 4, 'stock' => 200, 'valid_days' => 30],
             ]],
         ];
         foreach ($partners as $i => $p) {

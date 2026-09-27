@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\UserWord;
-use App\Models\XpEvent;
 use App\Services\GamificationService;
 use App\Services\SrsService;
 use Illuminate\Http\JsonResponse;
@@ -115,9 +114,9 @@ class WordController extends Controller
         }
         abort_if($count === 0 && empty($data['played']), 422, 'Tekrar edilecek kelime yok.');
 
-        // Word-game XP is capped per day so replaying the same deck can't farm the league.
-        $today = XpEvent::query()->where('user_id', $user->id)->whereIn('source', ['review', 'practice'])->where('created_at', '>=', now()->startOfDay())->sum('amount');
-        $xp = max(0, min(30, ($count + (int) ($data['played'] ?? 0)) * 2, 200 - (int) $today));
+        // Amounts come from the economy table; the daily cap for word games is applied centrally.
+        $e = config('dilgo.economy.xp');
+        $xp = $count * $e['review_per_word'] + (int) ($data['played'] ?? 0) * $e['practice_per_correct'];
         $summary = $game->record($user, $xp, $count ? 'review' : 'practice', null, ['reviews' => $count], ['reading' => 0.6, 'listening' => 0.25, 'writing' => 0.15]);
 
         return response()->json(['reviewed' => $count, 'reward' => $summary]);

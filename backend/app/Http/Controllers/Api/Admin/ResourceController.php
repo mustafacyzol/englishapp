@@ -229,6 +229,7 @@ class ResourceController extends Controller
                     'terms' => ['nullable', 'string', 'max:500'],
                     'code_prefix' => ['required', 'string', 'max:12', 'regex:/^[A-Za-z0-9]+$/'],
                     'rarity' => ['required', 'in:common,rare,epic,legendary'],
+                    'audience' => ['required', 'in:all,adult'],
                     'weight' => ['required', 'integer', 'min:0', 'max:1000'],
                     'stock' => ['nullable', 'integer', 'min:0'],
                     'valid_days' => ['required', 'integer', 'min:1', 'max:365'],

@@ -88,7 +88,8 @@ class StoryController extends Controller
         $first = ! $read->completed_at;
         $read->update(['progress' => 100, 'completed_at' => $read->completed_at ?? now(), 'quiz_score' => max($read->quiz_score ?? 0, $score)]);
 
-        $xp = $first ? 10 + (int) round($story->reading_minutes * 2) + (int) round($score / 10) : 5;
+        // first read: the base plus up to 5 for comprehension; re-reads are practice
+        $xp = $first ? (int) config('dilgo.economy.xp.story_first') + (int) floor($score / 20) : (int) config('dilgo.economy.xp.story_repeat');
         // Stories are read and, when the narration was played, listened to as well.
         $skills = ($data['listened'] ?? false) ? ['reading' => 0.6, 'listening' => 0.4] : ['reading' => 1];
         $summary = $game->record($user, $xp, 'story', $story->id, ['stories' => $first ? 1 : 0, 'minutes' => $data['minutes'] ?? $story->reading_minutes], $skills);

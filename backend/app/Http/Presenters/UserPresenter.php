@@ -34,6 +34,7 @@ class UserPresenter
             'study_time' => $user->study_time,
             'motivation' => $user->motivation,
             'exam_target' => $user->exam_target,
+            'age_group' => $user->age_group,
             'exam_date' => $user->exam_date?->toDateString(),
             'linked' => ['google' => (bool) $user->google_id, 'apple' => (bool) $user->apple_id],
             ...self::institution($user),

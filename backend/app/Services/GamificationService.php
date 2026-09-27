@@ -42,7 +42,7 @@ class GamificationService
             $user->refresh();
             $levelBefore = $user->level();
             $multiplier = $this->xpMultiplier($user);
-            $xp = (int) round($baseXp * $multiplier);
+            $xp = $this->capped($user, $source, (int) round($baseXp * $multiplier));
             $today = Period::today();
 
             if ($xp > 0) {
@@ -71,7 +71,8 @@ class GamificationService
             $activity->goal_met = $activity->goal_met || $goalJustMet;
             $activity->save();
 
-            $streakExtended = $xp > 0 ? $this->touchStreak($user) : false;
+            // The streak grows once a day, when today's study reaches a real session.
+            $streakExtended = $xp > 0 && $activity->xp >= (int) config('dilgo.economy.streak_min_xp', 10) ? $this->touchStreak($user) : false;
             $user->last_active_at = now();
             $user->save();
 
@@ -86,6 +87,7 @@ class GamificationService
 
             return [
                 'xp_gained' => $xp,
+                'capped' => $xp < (int) round($baseXp * $multiplier),
                 'skill_xp' => (object) $skillXp,
                 'multiplier' => $multiplier,
                 'xp_total' => $user->xp_total,
@@ -205,6 +207,22 @@ class GamificationService
             ->max(fn (UserItem $i) => (float) ($i->item->value['multiplier'] ?? 1));
 
         return max(1.0, (float) ($boost ?? 1));
+    }
+
+    /** XP left today for this activity's group (config dilgo.economy.daily_caps). */
+    public function capped(User $user, string $source, int $xp): int
+    {
+        $groups = config('dilgo.economy.groups', []);
+        $group = $groups[$source] ?? $source;
+        $cap = config("dilgo.economy.daily_caps.{$group}");
+        if ($cap === null || $xp <= 0) {
+            return max(0, $xp);
+        }
+        $sources = array_merge([$group], array_keys(array_filter($groups, fn ($g) => $g === $group)));
+        $today = XpEvent::query()->where('user_id', $user->id)->whereIn('source', $sources)
+            ->where('created_at', '>=', Period::now()->startOfDay()->utc())->sum('amount');
+
+        return max(0, min($xp, $cap - (int) $today));
     }
 
     /**

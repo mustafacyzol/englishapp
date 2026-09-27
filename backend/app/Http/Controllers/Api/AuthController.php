@@ -47,6 +47,7 @@ class AuthController extends Controller
             'study_time' => ['nullable', 'in:morning,lunch,evening,night'],
             'motivation' => ['nullable', 'in:confidence,job,abroad,exam,kids,hobby'],
             'exam_target' => ['nullable', Rule::in(Exams::keys())],
+            'age_group' => ['nullable', 'in:kid,teen,adult'],
             'exam_date' => ['nullable', 'date', 'after:today', 'before:+3 years'],
             'invite' => ['nullable', 'string', 'max:64'],
             'marketing_opt_in' => ['boolean'],
@@ -75,6 +76,7 @@ class AuthController extends Controller
             'study_time' => $data['study_time'] ?? null,
             'motivation' => $data['motivation'] ?? null,
             'exam_target' => $data['exam_target'] ?? null,
+            'age_group' => $data['age_group'] ?? null,
             'exam_date' => $data['exam_date'] ?? null,
             'marketing_opt_in' => $data['marketing_opt_in'] ?? false,
             'onboarded' => isset($data['learning_goal']),
@@ -170,6 +172,7 @@ class AuthController extends Controller
             'study_time' => ['nullable', 'in:morning,lunch,evening,night'],
             'motivation' => ['nullable', 'in:confidence,job,abroad,exam,kids,hobby'],
             'exam_target' => ['nullable', Rule::in(Exams::keys())],
+            'age_group' => ['nullable', 'in:kid,teen,adult'],
             'referral_code' => ['nullable', 'string', 'max:16'],
             'invite' => ['nullable', 'string', 'max:64'],
         ]);
@@ -203,6 +206,7 @@ class AuthController extends Controller
                 'study_time' => $data['study_time'] ?? null,
                 'motivation' => $data['motivation'] ?? null,
                 'exam_target' => $data['exam_target'] ?? null,
+                'age_group' => $data['age_group'] ?? null,
                 'onboarded' => isset($data['learning_goal']),
             ]);
             $user->forceFill([$column => $claims['sub'], 'email_verified_at' => $claims['email_verified'] ? now() : null])->save();

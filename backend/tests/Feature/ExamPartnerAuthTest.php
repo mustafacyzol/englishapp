@@ -9,6 +9,7 @@ use App\Models\PartnerOffer;
 use App\Models\RewardItem;
 use App\Models\User;
 use App\Models\UserItem;
+use App\Models\XpEvent;
 use App\Services\DuelService;
 use App\Services\InstitutionService;
 use App\Support\Settings;
@@ -169,12 +170,12 @@ class ExamPartnerAuthTest extends TestCase
 
         // Correct answers on starter words still earn a little XP ...
         $first = $this->actingAs($user)->postJson('/api/v1/review', ['reviews' => [], 'played' => 10])->assertOk();
-        $this->assertSame(20, $first->json('reward.xp_gained'));
+        $this->assertSame(10, $first->json('reward.xp_gained'));
         // ... but an empty submission is rejected and replays stop paying past the daily cap.
         $this->actingAs($user)->postJson('/api/v1/review', ['reviews' => []])->assertStatus(422);
         for ($i = 0; $i < 12; $i++) {
             $this->actingAs($user)->postJson('/api/v1/review', ['reviews' => [], 'played' => 30]);
         }
-        $this->assertLessThanOrEqual(200, \App\Models\XpEvent::query()->where('user_id', $user->id)->whereIn('source', ['review', 'practice'])->sum('amount'));
+        $this->assertLessThanOrEqual(60, XpEvent::query()->where('user_id', $user->id)->whereIn('source', ['review', 'practice'])->sum('amount'));
     }
 }

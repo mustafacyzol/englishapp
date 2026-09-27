@@ -133,7 +133,7 @@ class ExamController extends Controller
                 'ms' => $data['ms'] ?? 0,
             ]);
             $skills = $q->section === 'translation' ? ['reading' => .5, 'writing' => .5] : ($q->section === 'dialogue' ? ['reading' => .5, 'speaking' => .5] : ['reading' => .8, 'writing' => .2]);
-            $xp = $this->game->record($user, $correct ? 4 : 1, 'exam', $q->id, ['minutes' => 1], $skills)['xp_gained'] ?? 0;
+            $xp = $this->game->record($user, (int) config($correct ? 'dilgo.economy.xp.exam_correct' : 'dilgo.economy.xp.exam_attempt'), 'exam', $q->id, ['minutes' => 1], $skills)['xp_gained'] ?? 0;
         }
 
         return response()->json([

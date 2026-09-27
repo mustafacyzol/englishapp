@@ -264,7 +264,7 @@ class GameController extends Controller
                 // (each() stops on a false return, so no short-circuit expression here)
                 ->each(function (RewardItem $i) {
                     if ($i->type === 'chest') {
-                        $i->setAttribute('odds', $this->rewards->odds($i));
+                        $i->setAttribute('odds', $this->rewards->odds($i, request()->user()));
                     }
                 }),
             'gems' => $user->gems,
@@ -289,10 +289,30 @@ class GameController extends Controller
             'data' => $user->items()->with('item')->orderByRaw("CASE status WHEN 'available' THEN 0 WHEN 'active' THEN 1 ELSE 2 END")->latest()->limit(100)->get()
                 ->each(function (UserItem $i) {
                     if ($i->item?->type === 'chest' && $i->status === 'available') {
-                        $i->setAttribute('odds', $this->rewards->odds($i->item));
+                        $i->setAttribute('odds', $this->rewards->odds($i->item, request()->user()));
                     }
                 }),
         ]);
+    }
+
+    /** Partner gifts won from chests: "Kuponlarım". Expired ones are marked lazily. */
+    public function coupons(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $q = fn () => $user->items()->whereHas('item', fn ($i) => $i->where('type', 'partner_coupon'));
+        $q()->where('status', 'active')->whereNotNull('expires_at')->where('expires_at', '<', now())->update(['status' => 'expired']);
+
+        return response()->json(['data' => $q()->with('item')->orderByRaw("CASE status WHEN 'active' THEN 0 ELSE 1 END")->latest()->get()]);
+    }
+
+    /** The learner marks a partner code as used once they've redeemed it at the partner. */
+    public function couponUsed(Request $request, UserItem $userItem): JsonResponse
+    {
+        abort_unless($userItem->user_id === $request->user()->id && $userItem->item?->type === 'partner_coupon', 404);
+        abort_unless($userItem->status === 'active', 422, 'Bu kupon artık aktif değil.');
+        $userItem->update(['status' => 'used', 'meta' => array_merge($userItem->meta ?? [], ['used_at' => now()->toIso8601String()])]);
+
+        return response()->json(['item' => $userItem->fresh('item')]);
     }
 
     public function activate(Request $request, UserItem $userItem): JsonResponse

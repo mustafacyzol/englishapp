@@ -37,6 +37,14 @@ return [
         'client_id' => env('APPLE_CLIENT_ID'),
     ],
 
+    // Defne's voice. With a key set, calls use real speech audio and the avatar's
+    // mouth follows the audio level; without it the browser's own voice is used.
+    'elevenlabs' => [
+        'key' => env('ELEVENLABS_API_KEY'),
+        'voice_id' => env('ELEVENLABS_VOICE_ID', 'EXAVITQu4vr4xnSDxMaL'),
+        'model' => env('ELEVENLABS_MODEL', 'eleven_multilingual_v2'),
+    ],
+
     'slack' => [
         'notifications' => [
             'bot_user_oauth_token' => env('SLACK_BOT_USER_OAUTH_TOKEN'),

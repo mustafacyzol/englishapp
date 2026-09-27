@@ -38,6 +38,7 @@ class AccountController extends Controller
             'exam_target' => ['sometimes', 'nullable', Rule::in(Exams::keys())],
             'exam_date' => ['sometimes', 'nullable', 'date', 'after:today', 'before:+3 years'],
             'locale' => ['sometimes', 'in:tr,en'],
+            'age_group' => ['sometimes', 'nullable', 'in:kid,teen,adult'],
             'preferences' => ['sometimes', 'array'],
             'preferences.language' => ['sometimes', 'in:tr,en'],
             'preferences.tour_done' => ['sometimes', 'boolean'],

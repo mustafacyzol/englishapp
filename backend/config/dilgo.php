@@ -33,6 +33,45 @@ return [
         'allowed_origins' => array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,capacitor://localhost,https://localhost'))),
     ],
 
+    /*
+    | Economy. One table for every XP amount, the daily XP caps per activity and
+    | the gem faucets, so nothing is granted "by feel". Sources are grouped; once a
+    | group reaches its daily cap, more of that activity still counts for quests and
+    | skills but earns no further XP (and so can't farm the weekly league).
+    | See docs/ECONOMY.md for the reasoning behind each number.
+    */
+    'economy' => [
+        'xp' => [
+            'lesson_min' => 10,          // per lesson, from the lesson's own xp_reward (10-20)
+            'perfect_bonus' => 5,
+            'story_first' => 15,
+            'story_repeat' => 5,
+            'review_per_word' => 1,
+            'practice_per_correct' => 1,
+            'exam_correct' => 3,
+            'exam_attempt' => 1,
+            'duel_base' => 5,
+            'duel_per_correct' => 1,
+            'duel_win' => 5,
+            'ai_message' => 3,
+            'ai_spoken' => 4,
+            'writing' => 10,
+        ],
+        // daily XP cap per source group (null = no cap; lessons are already rationed by hearts)
+        'daily_caps' => [
+            'lesson' => null,
+            'story' => 120,
+            'words' => 60,       // review + practice
+            'exam' => 80,
+            'duel' => 150,
+            'ai' => 60,          // chat + writing
+            'quest' => null,
+        ],
+        'groups' => ['review' => 'words', 'practice' => 'words', 'writing' => 'ai'],
+        // the streak only grows on a real study session, not on a single tap
+        'streak_min_xp' => 10,
+    ],
+
     'gamification' => [
         'heart_regen_minutes' => 30,
         'heart_refill_gems' => 350,

@@ -176,12 +176,24 @@ TXT;
         $this->assertCanUse($user);
         $system = self::PERSONA."\n\nYou are now grading a piece of writing. Learner level: {$user->cefr_level}. "
             .'List at most 8 of the most useful mistakes. Keep corrected_text as close to the original as possible.'
+            .(($age = self::ageBrief($user->age_group)) ? "\n{$age}" : '')
             .(($exam = Exams::tutorBrief($user->exam_target)) ? "\n{$exam} Grade with that exam's writing criteria in mind." : '');
         $prompt = ($task ? "Writing task: {$task}\n" : '')
             .($targetWords ? 'Target words the learner tried to use: '.implode(', ', $targetWords).". Mention in strengths_tr which ones were used well.\n" : '')
             ."\nLearner text:\n\"\"\"\n{$text}\n\"\"\"";
 
         return $this->call($system, [['role' => 'user', 'content' => $prompt]], self::WRITING_SCHEMA);
+    }
+
+    /** Age-appropriate tone and safety rules. Children get the strictest version. */
+    public static function ageBrief(?string $group): ?string
+    {
+        return match ($group) {
+            'kid' => 'The learner is a child (7-12). Use very short, simple sentences, a warm and playful tone, lots of encouragement, and child-friendly topics only (school, family, animals, games, hobbies). Never ask for personal details such as full name, address, school name or photos. Refuse and gently redirect anything about dating, violence, alcohol, drugs, gambling or other adult themes.',
+            'teen' => 'The learner is a teenager (13-17). Be friendly and relatable (school, friends, music, sport, games, future plans), keep content age-appropriate, never ask for personal contact details, and redirect adult themes (dating advice, alcohol, drugs, gambling).',
+            'adult' => 'The learner is an adult. Use natural, respectful adult conversation.',
+            default => null,
+        };
     }
 
     private function systemPrompt(User $user, ?AiScenario $scenario, string $mode): string
@@ -200,7 +212,8 @@ TXT;
         $prompt = self::PERSONA."\n\nLearner profile:\n- Name: {$user->name}\n- CEFR level: {$user->cefr_level}\n- Goal: {$goalLabel}\n- Recently saved words: ".($words ?: 'none yet')
             .($interests ? "\n- Interests: {$interests} (pick examples and small-talk topics from these)" : '')
             .($focus ? "\n- Wants to improve most: {$focus}" : '')
-            .(($exam = Exams::tutorBrief($user->exam_target)) ? "\n- Exam goal: {$exam}" : '');
+            .(($exam = Exams::tutorBrief($user->exam_target)) ? "\n- Exam goal: {$exam}" : '')
+            .(($age = self::ageBrief($user->age_group)) ? "\n- Age: {$age}" : '');
 
         if ($scenario) {
             $goals = collect($scenario->goals ?? [])->map(fn ($g, $i) => "  {$i}. {$g}")->implode("\n");

@@ -9,6 +9,9 @@ use App\Services\AiTutorService;
 use App\Services\GamificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\HttpFoundation\Response;
 
 class AiController extends Controller
 {
@@ -71,7 +74,7 @@ class AiController extends Controller
         $message = $this->tutor->reply($conversation, strip_tags($data['text']));
         $spoken = (bool) ($data['spoken'] ?? false);
         // A spoken reply trains speaking (and listening to Defne's answer); a typed one trains writing.
-        $summary = $game->record($request->user(), $spoken ? 4 : 3, 'ai', $conversation->id, array_filter([
+        $summary = $game->record($request->user(), (int) config($spoken ? 'dilgo.economy.xp.ai_spoken' : 'dilgo.economy.xp.ai_message'), 'ai', $conversation->id, array_filter([
             'ai_messages' => 1,
             'speaking' => $spoken ? 1 : 0,
         ]), $spoken ? ['speaking' => 0.75, 'listening' => 0.25] : ['writing' => 0.75, 'reading' => 0.25]);
@@ -102,8 +105,42 @@ class AiController extends Controller
         ]);
         $user = $request->user();
         $result = $this->tutor->checkWriting($user, strip_tags($data['text']), $data['task'] ?? null, $data['target_words'] ?? []);
-        $summary = $game->record($user, 15, 'writing', null, ['ai_messages' => 1], ['writing' => 1]);
+        $summary = $game->record($user, (int) config('dilgo.economy.xp.writing'), 'writing', null, ['ai_messages' => 1], ['writing' => 1]);
 
         return response()->json(['result' => $result, 'reward' => $summary, 'usage' => $this->tutor->usageToday($user)]);
+    }
+
+    /**
+     * Defne's voice as real audio (mp3). Cached by text so repeated lines cost
+     * nothing. Returns 204 when no voice provider is configured; the app then
+     * falls back to the browser's speech synthesis.
+     */
+    public function tts(Request $request): Response
+    {
+        $data = $request->validate(['text' => ['required', 'string', 'max:600']]);
+        $cfg = config('services.elevenlabs');
+        if (empty($cfg['key'])) {
+            return response()->noContent();
+        }
+        $text = trim(strip_tags($data['text']));
+        $path = 'tts/'.sha1($cfg['voice_id'].'|'.$cfg['model'].'|'.$text).'.mp3';
+        $disk = Storage::disk('local');
+        if (! $disk->exists($path)) {
+            $res = Http::timeout(20)
+                ->withHeaders(['xi-api-key' => $cfg['key'], 'Accept' => 'audio/mpeg'])
+                ->post("https://api.elevenlabs.io/v1/text-to-speech/{$cfg['voice_id']}?output_format=mp3_44100_64", [
+                    'text' => $text,
+                    'model_id' => $cfg['model'],
+                    'voice_settings' => ['stability' => 0.5, 'similarity_boost' => 0.75],
+                ]);
+            if (! $res->successful()) {
+                report(new \RuntimeException('TTS failed: '.$res->status()));
+
+                return response()->noContent();
+            }
+            $disk->put($path, $res->body());
+        }
+
+        return response($disk->get($path), 200, ['Content-Type' => 'audio/mpeg', 'Cache-Control' => 'private, max-age=86400']);
     }
 }

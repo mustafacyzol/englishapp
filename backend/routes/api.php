@@ -109,6 +109,7 @@ Route::prefix('v1')->group(function () {
             Route::get('ai/conversations/{conversation}', [AiController::class, 'show']);
             Route::post('ai/conversations/{conversation}/messages', [AiController::class, 'send'])->middleware(['feature:ai', 'throttle:ai']);
             Route::delete('ai/conversations/{conversation}', [AiController::class, 'destroy']);
+            Route::post('ai/tts', [AiController::class, 'tts'])->middleware(['feature:ai', 'throttle:60,1']);
             Route::post('ai/writing', [AiController::class, 'writing'])->middleware(['feature:ai', 'throttle:ai']);
 
             // Gamification
@@ -125,6 +126,8 @@ Route::prefix('v1')->group(function () {
             Route::get('shop', [GameController::class, 'shop']);
             Route::post('shop/{item}/buy', [GameController::class, 'buy'])->middleware('throttle:30,1');
             Route::get('inventory', [GameController::class, 'inventory']);
+            Route::get('coupons', [GameController::class, 'coupons']);
+            Route::post('coupons/{userItem}/used', [GameController::class, 'couponUsed'])->middleware('throttle:30,1');
             Route::post('inventory/{userItem}/activate', [GameController::class, 'activate'])->middleware('throttle:30,1');
             Route::post('redeem', [GameController::class, 'redeem'])->middleware('throttle:redeem');
             Route::get('referrals', [GameController::class, 'referrals']);

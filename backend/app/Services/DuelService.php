@@ -211,7 +211,8 @@ class DuelService
             $reward = null;
             $chest = false;
             if ($status === 'finished') {
-                $xp = 5 + $correct * 2 + ($result === 'win' ? 5 : 0);
+                $e = config('dilgo.economy.xp');
+                $xp = $e['duel_base'] + $correct * $e['duel_per_correct'] + ($result === 'win' ? $e['duel_win'] : 0);
                 $weights = $skillCorrect ? array_map(fn ($c) => $c + 0.5, $skillCorrect) : array_fill_keys(Skills::ALL, 1);
                 $reward = $this->game->record($user, $xp, 'duel', $duel->id, ['duels' => 1, 'duel_wins' => $result === 'win' ? 1 : 0], $weights);
                 if ($result === 'win') {
@@ -387,6 +388,8 @@ class DuelService
     private function pickGhost(User $user): ?User
     {
         $base = User::query()->whereKeyNot($user->id)->where('is_banned', false)->whereNotNull('email_verified_at')->where('xp_total', '>', 0);
+        // Children and teenagers are only ever matched with their own age group, adults with adults.
+        $base->where(fn ($q) => $user->age_group ? $q->where('age_group', $user->age_group) : $q->whereNull('age_group')->orWhere('age_group', 'adult'));
 
         return (clone $base)->whereBetween('duel_trophies', [max(0, $user->duel_trophies - 200), $user->duel_trophies + 200])->inRandomOrder()->first()
             ?? (clone $base)->inRandomOrder()->first();
