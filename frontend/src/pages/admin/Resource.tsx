@@ -75,7 +75,7 @@ const CONFIG: Record<string, Cfg> = {
   'reward-items': {
     title: 'Ödül kartları',
     cols: [{ key: 'name', label: 'Ad' }, { key: 'type', label: 'Tür' }, { key: 'rarity', label: 'Nadirlik' }, { key: 'price_gems', label: 'Mağaza fiyatı', render: (r) => (r.price_gems ?? '-') as ReactNode }, { key: 'is_active', label: 'Aktif', render: bool('is_active') }],
-    fields: [{ key: 'name', label: 'Ad', type: 'text' }, { key: 'key', label: 'Anahtar', type: 'text' }, { key: 'type', label: 'Tür', type: 'select', options: ['streak_freeze', 'xp_boost', 'heart_refill', 'premium_days', 'gems', 'live_lesson', 'discount_coupon', 'avatar_frame', 'chest'] }, { key: 'rarity', label: 'Nadirlik', type: 'select', options: ['common', 'rare', 'epic', 'legendary'] }, { key: 'icon', label: 'İkon', type: 'select', options: ['snowflake', 'bolt', 'heart', 'gem', 'crown', 'school', 'ticket', 'frame', 'chest', 'gift', 'star'] }, { key: 'price_gems', label: 'Mağaza fiyatı (boş = satılmaz)', type: 'number' }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'is_active', label: 'Aktif', type: 'bool' }, { key: 'description', label: 'Açıklama', type: 'text', full: true }, { key: 'value', label: 'Değer (JSON) ör. {"days":7} · {"multiplier":2,"minutes":15} · {"amount":100}', type: 'json', full: true }],
+    fields: [{ key: 'name', label: 'Ad', type: 'text' }, { key: 'key', label: 'Anahtar', type: 'text' }, { key: 'type', label: 'Tür', type: 'select', options: ['streak_freeze', 'xp_boost', 'heart_refill', 'premium_days', 'gems', 'live_lesson', 'discount_coupon', 'avatar_frame', 'chest', 'partner_coupon'] }, { key: 'rarity', label: 'Nadirlik', type: 'select', options: ['common', 'rare', 'epic', 'legendary'] }, { key: 'icon', label: 'İkon', type: 'select', options: ['snowflake', 'bolt', 'heart', 'gem', 'crown', 'school', 'ticket', 'frame', 'chest', 'gift', 'star'] }, { key: 'price_gems', label: 'Mağaza fiyatı (boş = satılmaz)', type: 'number' }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'is_active', label: 'Aktif', type: 'bool' }, { key: 'description', label: 'Açıklama', type: 'text', full: true }, { key: 'value', label: 'Değer (JSON) ör. {"days":7} · {"multiplier":2,"minutes":15} · {"amount":100} · sandık: {"pool":[{"weight":40,"type":"gems","amount":150},{"weight":10,"type":"partner"},{"weight":5,"type":"item","item":"premium_3d"}]}', type: 'json', full: true }],
     defaults: { type: 'gems', rarity: 'common', icon: 'gift', is_active: true, position: 0, value: {} },
   },
   plans: {
@@ -124,8 +124,41 @@ const CONFIG: Record<string, Cfg> = {
     ),
     cols: [{ key: 'name', label: 'Kurum' }, { key: 'type', label: 'Tür', render: (r) => ({ school: 'Okul', course: 'Kurs', company: 'Şirket' } as Record<string, string>)[String(r.type)] ?? String(r.type) }, { key: 'city', label: 'Şehir' }, { key: 'seats', label: 'Koltuk' }, { key: 'join_code', label: 'Katılım kodu', render: (r) => <code className="rounded bg-paper-2 px-1.5 py-0.5 text-xs font-bold">{String(r.join_code ?? '-')}</code> }, { key: 'ends_at', label: 'Bitiş', render: (r) => (r.ends_at ? String(r.ends_at).slice(0, 10) : '-') }, { key: 'is_active', label: 'Aktif', render: bool('is_active') }],
     action: (r) => <Link to={`/admin/institutions/${r.id}`} className="inline-flex items-center gap-1 rounded-lg bg-sage/15 px-2 py-1 text-xs font-extrabold text-sage-deep hover:bg-sage/25 dark:text-sage"><BarChart3 className="size-3.5" /> Rapor</Link>,
-    fields: [{ key: 'name', label: 'Kurum adı', type: 'text', full: true }, { key: 'type', label: 'Tür', type: 'select', options: ['school', 'course', 'company'] }, { key: 'city', label: 'Şehir', type: 'text' }, { key: 'seats', label: 'Koltuk (öğrenci) sayısı', type: 'number' }, { key: 'is_active', label: 'Aktif', type: 'bool' }, { key: 'starts_at', label: 'Sözleşme başlangıcı', type: 'date' }, { key: 'ends_at', label: 'Sözleşme bitişi', type: 'date' }, { key: 'contact_name', label: 'Yetkili', type: 'text' }, { key: 'contact_email', label: 'Yetkili e-posta', type: 'text' }, { key: 'contact_phone', label: 'Telefon', type: 'text' }, { key: 'notes', label: 'Notlar', type: 'textarea', full: true }],
+    fields: [{ key: 'name', label: 'Kurum adı', type: 'text', full: true }, { key: 'type', label: 'Tür', type: 'select', options: ['school', 'course', 'company'] }, { key: 'city', label: 'Şehir', type: 'text' }, { key: 'seats', label: 'Koltuk (öğrenci) sayısı', type: 'number' }, { key: 'is_active', label: 'Aktif', type: 'bool' }, { key: 'starts_at', label: 'Sözleşme başlangıcı', type: 'date' }, { key: 'ends_at', label: 'Sözleşme bitişi', type: 'date' }, { key: 'contact_name', label: 'Yetkili', type: 'text' }, { key: 'contact_email', label: 'Yetkili e-posta', type: 'text' }, { key: 'contact_phone', label: 'Telefon', type: 'text' }, { key: 'logo_url', label: 'Logo (https)', type: 'text' }, { key: 'brand_color', label: 'Kurum rengi (#rrggbb)', type: 'text' }, { key: 'notes', label: 'Notlar', type: 'textarea', full: true }],
     defaults: { type: 'school', seats: 30, is_active: true },
+  },
+  partners: {
+    title: 'İş ortakları',
+    intro: (
+      <p className="mb-5 max-w-2xl text-sm text-ink-soft">
+        Gizemli sandıktan hediye ve kupon çıkan anlaşmalı markalar. Pasif bir iş ortağının teklifleri sandıktan düşmez. Teklifleri <Link to="/admin/r/partner-offers" className="font-bold underline">Sandık teklifleri</Link> sayfasından yönet.
+      </p>
+    ),
+    cols: [{ key: 'name', label: 'Marka', render: (r) => <span className="flex items-center gap-2"><span className="size-3 rounded-full" style={{ background: String(r.color ?? '#999') }} />{String(r.name)}</span> }, { key: 'slug', label: 'Kısa ad' }, { key: 'website', label: 'Web', render: (r) => (r.website ? <a href={String(r.website)} target="_blank" rel="noreferrer" className="text-sky underline">aç</a> : '-') }, { key: 'position', label: 'Sıra' }, { key: 'is_active', label: 'Aktif', render: bool('is_active') }],
+    fields: [{ key: 'name', label: 'Marka adı', type: 'text' }, { key: 'slug', label: 'Kısa ad (a-z, -)', type: 'text' }, { key: 'logo_url', label: 'Logo (https)', type: 'text', full: true }, { key: 'website', label: 'Web sitesi (https)', type: 'text' }, { key: 'color', label: 'Renk (#rrggbb)', type: 'text' }, { key: 'description', label: 'Açıklama', type: 'text', full: true }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'is_active', label: 'Aktif', type: 'bool' }],
+    defaults: { is_active: true, position: 0, color: '#e8403a' },
+  },
+  'partner-offers': {
+    title: 'Sandık teklifleri',
+    intro: (
+      <p className="mb-5 max-w-2xl text-sm text-ink-soft">
+        Sandıkta "İş ortağı hediyesi" çıktığında bu tekliflerden biri <b>ağırlığına göre</b> seçilir ve öğrenciye tek kullanımlık, kişisel bir kod üretilir. Stok dolunca teklif kendiliğinden düşer. Sandıktaki genel oranları <Link to="/admin/r/reward-items" className="font-bold underline">Ödül kartları</Link> içindeki sandık havuzundan ayarla.
+      </p>
+    ),
+    cols: [{ key: 'title', label: 'Teklif' }, { key: 'partner', label: 'Marka', render: (r) => String((r.partner as Row | null)?.name ?? '-') }, { key: 'rarity', label: 'Nadirlik' }, { key: 'weight', label: 'Ağırlık' }, { key: 'stock', label: 'Stok', render: (r) => `${r.awarded ?? 0}/${r.stock ?? '∞'}` }, { key: 'valid_days', label: 'Geçerlilik', render: (r) => `${r.valid_days} gün` }, { key: 'is_active', label: 'Aktif', render: bool('is_active') }],
+    fields: [{ key: 'partner_id', label: 'İş ortağı ID', type: 'number' }, { key: 'title', label: 'Teklif başlığı', type: 'text' }, { key: 'code_prefix', label: 'Kod ön eki (ör. KHV)', type: 'text' }, { key: 'rarity', label: 'Nadirlik', type: 'select', options: ['common', 'rare', 'epic', 'legendary'] }, { key: 'weight', label: 'Ağırlık (yüksek = daha sık)', type: 'number' }, { key: 'stock', label: 'Stok (boş = sınırsız)', type: 'number' }, { key: 'valid_days', label: 'Kod geçerliliği (gün)', type: 'number' }, { key: 'is_active', label: 'Aktif', type: 'bool' }, { key: 'description', label: 'Açıklama', type: 'text', full: true }, { key: 'terms', label: 'Koşullar', type: 'textarea', full: true }],
+    defaults: { rarity: 'rare', weight: 5, valid_days: 30, code_prefix: 'DG', is_active: true },
+  },
+  'exam-questions': {
+    title: 'Sınav soruları',
+    intro: (
+      <p className="mb-5 max-w-2xl text-sm text-ink-soft">
+        Sınav modundaki soru bankası. Cevap anahtarı öğrenciye gönderilmez, her cevap sunucuda değerlendirilir. Seçenek sırası 0'dan başlar (A = 0). Açıklamayı Türkçe yaz: öğrenci her sorudan sonra görür.
+      </p>
+    ),
+    cols: [{ key: 'prompt', label: 'Soru', render: (r) => <span className="line-clamp-2 max-w-md">{String(r.prompt)}</span> }, { key: 'section', label: 'Bölüm' }, { key: 'exams', label: 'Sınavlar', render: (r) => ((r.exams as string[]) ?? []).map((x) => x.toUpperCase()).join(', ') }, { key: 'cefr', label: 'Seviye' }, { key: 'answer', label: 'Cevap', render: (r) => 'ABCDEF'[Number(r.answer)] }, { key: 'is_active', label: 'Aktif', render: bool('is_active') }],
+    fields: [{ key: 'section', label: 'Bölüm', type: 'select', options: ['vocabulary', 'grammar', 'cloze', 'sentence_completion', 'translation', 'reading', 'dialogue', 'paragraph', 'irrelevant'] }, { key: 'cefr', label: 'Seviye', type: 'select', options: ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] }, { key: 'exams', label: 'Sınavlar (her satıra bir: yds, yokdil, ydt, ielts, toefl)', type: 'list' }, { key: 'answer', label: 'Doğru seçenek (0 = A)', type: 'number' }, { key: 'passage', label: 'Okuma parçası (isteğe bağlı)', type: 'textarea', full: true }, { key: 'prompt', label: 'Soru kökü', type: 'textarea', full: true }, { key: 'options', label: 'Seçenekler (her satıra bir)', type: 'list', full: true }, { key: 'explanation', label: 'Türkçe çözüm', type: 'textarea', full: true }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'is_active', label: 'Aktif', type: 'bool' }],
+    defaults: { section: 'grammar', cefr: 'B2', exams: ['yds', 'yokdil', 'ydt'], options: ['', '', '', '', ''], answer: 0, is_active: true, position: 0 },
   },
   'redeem-codes': {
     title: 'Hediye kodları',

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { ArrowLeft, Building2, Menu, X, BookOpen, Boxes, ClipboardList, Crown, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Quote, Receipt, ScrollText, Settings, ShieldCheck, Swords, Ticket, Trophy, Users } from 'lucide-react'
+import { ArrowLeft, Building2, Menu, X, BookOpen, Boxes, ClipboardList, Crown, FileQuestion, Gift, Handshake, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Quote, Receipt, ScrollText, Settings, ShieldCheck, Swords, Ticket, Trophy, Users } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import { ApiError, hasAdminToken, onApiError, post, setAdminToken } from '@/lib/api'
 import { Logo } from '@/components/game/Logo'
@@ -26,6 +26,7 @@ const GROUPS = [
     { to: '/admin/r/units', label: 'Üniteler', icon: LayoutList },
     { to: '/admin/r/lessons', label: 'Dersler', icon: ClipboardList },
     { to: '/admin/r/stories', label: 'Hikayeler', icon: BookOpen },
+    { to: '/admin/r/exam-questions', label: 'Sınav soruları', icon: FileQuestion, admin: true },
     { to: '/admin/r/scenarios', label: 'AI senaryoları', icon: MessagesSquare },
     { to: '/admin/r/blog-posts', label: 'Blog', icon: Newspaper },
     { to: '/admin/r/testimonials', label: 'Öğrenci yorumları', icon: Quote },
@@ -34,13 +35,15 @@ const GROUPS = [
   { title: 'Oyun & Büyüme', items: [
     { to: '/admin/r/achievements', label: 'Rozetler', icon: Trophy, admin: true },
     { to: '/admin/r/quests', label: 'Görevler', icon: Swords, admin: true },
-    { to: '/admin/r/reward-items', label: 'Ödül kartları', icon: Boxes, admin: true },
+    { to: '/admin/r/reward-items', label: 'Ödül kartları ve sandıklar', icon: Boxes, admin: true },
+    { to: '/admin/r/partners', label: 'İş ortakları', icon: Handshake, admin: true },
+    { to: '/admin/r/partner-offers', label: 'Sandık teklifleri', icon: Gift, admin: true },
     { to: '/admin/r/plans', label: 'Paketler', icon: Crown, admin: true },
     { to: '/admin/r/coupons', label: 'Kuponlar', icon: Ticket, admin: true },
     { to: '/admin/r/redeem-codes', label: 'Hediye kodları', icon: KeyRound, admin: true },
   ] },
   { title: 'Sistem', items: [
-    { to: '/admin/settings', label: 'Ayarlar', icon: Settings },
+    { to: '/admin/settings', label: 'Site ayarları', icon: Settings },
     { to: '/admin/audit', label: 'Denetim kaydı', icon: ScrollText, admin: true },
   ] },
 ]

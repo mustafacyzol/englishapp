@@ -237,15 +237,26 @@ class ResourceController extends Controller
             ],
             'exam-questions' => [
                 'model' => Models\ExamQuestion::class, 'search' => ['prompt', 'section'], 'order' => 'position', 'filters' => ['section', 'cefr', 'is_active'], 'role' => 'admin', 'visible' => ['answer', 'explanation'],
+                'before' => function (array $d) {
+                    foreach (['exams', 'options'] as $k) {
+                        if (isset($d[$k])) {
+                            $d[$k] = array_values(array_filter(array_map('trim', $d[$k]), fn ($x) => $x !== ''));
+                        }
+                    }
+                    abort_if(isset($d['options'], $d['answer']) && $d['answer'] >= count($d['options']), 422, 'Doğru seçenek, seçenek sayısından küçük olmalı.');
+                    abort_if(isset($d['exams']) && (! $d['exams'] || array_diff($d['exams'], Exams::keys())), 422, 'Sınavlar yalnızca yds, yokdil, ydt, ielts, toefl olabilir.');
+
+                    return $d;
+                },
                 'rules' => [
                     'exams' => ['required', 'array', 'min:1'],
-                    'exams.*' => ['in:yds,yokdil,ydt,ielts,toefl'],
+                    'exams.*' => ['nullable', 'string'],
                     'section' => ['required', 'in:'.implode(',', array_keys(Exams::SECTIONS))],
                     'cefr' => ['required', 'in:A1,A2,B1,B2,C1,C2'],
                     'passage' => ['nullable', 'string', 'max:5000'],
                     'prompt' => ['required', 'string', 'max:2000'],
                     'options' => ['required', 'array', 'min:2', 'max:6'],
-                    'options.*' => ['required', 'string', 'max:500'],
+                    'options.*' => ['nullable', 'string', 'max:500'],
                     'answer' => ['required', 'integer', 'min:0', 'max:5'],
                     'explanation' => ['nullable', 'string', 'max:2000'],
                     'position' => ['integer'],
