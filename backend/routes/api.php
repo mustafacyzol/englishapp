@@ -99,6 +99,7 @@ Route::prefix('v1')->group(function () {
             Route::post('words', [WordController::class, 'store'])->middleware('throttle:120,1');
             Route::delete('words/{word}', [WordController::class, 'destroy']);
             Route::get('review', [WordController::class, 'queue']);
+            Route::get('words/deck', [WordController::class, 'deck']);
             Route::post('review', [WordController::class, 'review'])->middleware('throttle:30,1');
 
             // AI teacher (speaking + writing)

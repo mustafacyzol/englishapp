@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\UserWord;
+use App\Models\XpEvent;
 use App\Services\GamificationService;
 use App\Services\SrsService;
 use Illuminate\Http\JsonResponse;
@@ -66,12 +67,42 @@ class WordController extends Controller
         return response()->json(['data' => $words, 'distractors' => $distractors]);
     }
 
+    /**
+     * A practice deck for the word games: due words first, then the least-known
+     * saved words; topped up with level-matched starter words (id = null) when the
+     * notebook is still thin, so the games are playable from day one.
+     */
+    public function deck(Request $request): JsonResponse
+    {
+        $n = min(30, max(6, (int) $request->query('n', 16)));
+        $user = $request->user();
+        $mine = $user->words()->whereNotNull('translation')
+            ->orderByRaw('CASE WHEN due_at <= ? THEN 0 ELSE 1 END', [now()])
+            ->orderBy('interval_days')->orderBy('due_at')
+            ->limit($n)->get(['id', 'word', 'translation', 'example', 'interval_days', 'due_at']);
+
+        $deck = $mine->map(fn ($w) => $w->only(['id', 'word', 'translation', 'example', 'interval_days']))->all();
+        if (count($deck) < $n) {
+            $starter = json_decode(file_get_contents(database_path('data/starter_words.json')), true);
+            $level = in_array($user->cefr_level, ['C1', 'C2'], true) ? 'B2' : $user->cefr_level;
+            $known = $mine->pluck('word')->map(fn ($w) => mb_strtolower($w))->all();
+            $pool = collect($starter[$level] ?? $starter['A1'])->reject(fn ($w) => in_array($w[0], $known, true))->shuffle();
+            foreach ($pool->take($n - count($deck)) as [$word, $tr, $ex]) {
+                $deck[] = ['id' => null, 'word' => $word, 'translation' => $tr, 'example' => $ex, 'interval_days' => 0];
+            }
+        }
+
+        return response()->json(['data' => array_values($deck), 'saved' => $mine->count()]);
+    }
+
     public function review(Request $request, SrsService $srs, GamificationService $game): JsonResponse
     {
         $data = $request->validate([
-            'reviews' => ['required', 'array', 'min:1', 'max:50'],
+            'reviews' => ['present', 'array', 'max:50'],
             'reviews.*.id' => ['required', 'integer'],
             'reviews.*.grade' => ['required', 'integer', 'between:0,5'],
+            // correct answers on starter words (not in the notebook yet), from the word games
+            'played' => ['nullable', 'integer', 'min:0', 'max:30'],
         ]);
         $user = $request->user();
         $words = $user->words()->whereIn('id', collect($data['reviews'])->pluck('id'))->get()->keyBy('id');
@@ -82,7 +113,12 @@ class WordController extends Controller
                 $count++;
             }
         }
-        $summary = $game->record($user, min(30, $count * 2), 'review', null, ['reviews' => $count], ['reading' => 0.7, 'listening' => 0.3]);
+        abort_if($count === 0 && empty($data['played']), 422, 'Tekrar edilecek kelime yok.');
+
+        // Word-game XP is capped per day so replaying the same deck can't farm the league.
+        $today = XpEvent::query()->where('user_id', $user->id)->whereIn('source', ['review', 'practice'])->where('created_at', '>=', now()->startOfDay())->sum('amount');
+        $xp = max(0, min(30, ($count + (int) ($data['played'] ?? 0)) * 2, 200 - (int) $today));
+        $summary = $game->record($user, $xp, $count ? 'review' : 'practice', null, ['reviews' => $count], ['reading' => 0.6, 'listening' => 0.25, 'writing' => 0.15]);
 
         return response()->json(['reviewed' => $count, 'reward' => $summary]);
     }

@@ -3,114 +3,203 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { Brain, Layers, Search, Trash2, Volume2 } from 'lucide-react'
+import { ArrowRight, BookmarkPlus, Check, Headphones, Layers, Puzzle, Search, Shuffle, Timer, Trash2, Volume2, X } from 'lucide-react'
 import { del, get, post } from '@/lib/api'
 import { speak } from '@/lib/speech'
+import { celebrate, sfx } from '@/lib/fx'
 import type { RewardSummary } from '@/lib/types'
-import { Button, LinkButton } from '@/components/ui/Button'
-import { Empty, PageHeader, Progress, SkeletonPage, Tabs } from '@/components/ui/Misc'
+import { Button } from '@/components/ui/Button'
+import { Empty, PageHeader, SkeletonPage, Spinner, Tabs } from '@/components/ui/Misc'
 import { useReward } from '@/components/game/RewardProvider'
-import { useAuth } from '@/lib/auth'
+import { ListenType, Restart, Scramble, SpeedMatch, SwipeDeck, TrueFalse, type DeckWord, type Outcome } from './games/WordGames'
 
 interface Word { id: number; word: string; translation: string | null; example: string | null; interval_days: number; due_at: string | null; source: string | null }
+type GameKey = 'swipe' | 'match' | 'truefalse' | 'listen' | 'scramble'
+
+const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; tone: string; badge?: string }[] = [
+  { key: 'swipe', title: 'Kaydır kartları', text: 'Sağa biliyorum, sola tekrar. Mobilde parmağınla kaydır.', icon: Layers, tone: 'from-flame to-berry', badge: 'Favori' },
+  { key: 'match', title: 'Hızlı eşleştir', text: '45 saniyede İngilizce ve Türkçeyi eşle, seri yap.', icon: Timer, tone: 'from-sky to-lilac' },
+  { key: 'truefalse', title: 'Doğru mu?', text: '30 saniyelik blitz: çeviri doğru mu, yanlış mı?', icon: Check, tone: 'from-mint to-sage' },
+  { key: 'listen', title: 'Dinle ve yaz', text: 'Duyduğun kelimeyi yaz, kulağını ve yazımını çalıştır.', icon: Headphones, tone: 'from-lilac to-sky' },
+  { key: 'scramble', title: 'Harf karıştır', text: 'Karışık harflerden kelimeyi yeniden kur.', icon: Puzzle, tone: 'from-butter to-flame' },
+]
 
 export default function Practice() {
-  const [tab, setTab] = useState<'review' | 'words'>('review')
+  const [tab, setTab] = useState<'games' | 'words'>('games')
+  const [game, setGame] = useState<GameKey | null>(null)
+  if (game) return <GameRun game={game} onExit={() => setGame(null)} onSwitch={setGame} />
   return (
-    <div className="mx-auto max-w-3xl">
-      <PageHeader kicker="Aralıklı tekrar" title="Pratik" />
+    <div className="mx-auto max-w-4xl">
+      <PageHeader kicker="Aralıklı tekrar + oyunlar" title="Kelime pratiği" />
       <div className="mb-6">
-        <Tabs value={tab} onChange={setTab} items={[{ value: 'review', label: 'Kelime tekrarı' }, { value: 'words', label: 'Kelime defterim' }]} />
+        <Tabs value={tab} onChange={setTab} items={[{ value: 'games', label: 'Oyunlar' }, { value: 'words', label: 'Kelime defterim' }]} />
       </div>
-      {tab === 'review' ? <Review /> : <WordList />}
+      {tab === 'games' ? <GamePicker onPick={setGame} /> : <WordList />}
     </div>
   )
 }
 
-function Review() {
+function GamePicker({ onPick }: { onPick: (g: GameKey) => void }) {
+  const { data } = useQuery({ queryKey: ['words', '', ''], queryFn: () => get<{ stats: { total: number; due: number; mastered: number } }>('/words') })
+  const st = data?.stats
+  return (
+    <>
+      {st && (
+        <div className="mb-6 flex flex-wrap items-center gap-x-8 gap-y-3 rounded-3xl border-2 border-line bg-card px-5 py-4">
+          <Stat v={st.due} l="tekrar zamanı" c="text-flame" />
+          <Stat v={st.total} l="defterde" />
+          <Stat v={st.mastered} l="ustalaşıldı" c="text-mint-deep" />
+          <p className="basis-full text-sm text-ink-soft sm:ml-auto sm:basis-auto">{st.total < 8 ? 'Defterin dolana kadar seviyene uygun başlangıç kelimeleriyle oynarsın.' : 'Oyunlar önce tekrar zamanı gelen kelimeleri getirir.'}</p>
+        </div>
+      )}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {GAMES.map((g, i) => (
+          <motion.button
+            key={g.key}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.05 }}
+            onClick={() => onPick(g.key)}
+            className={clsx('press group relative flex flex-col overflow-hidden rounded-[28px] border-2 border-line bg-card text-left shadow-hard transition hover:border-ink/25', i === 0 && 'sm:col-span-2 lg:col-span-1 lg:row-span-2')}
+          >
+            <span className={clsx('relative grid place-items-center overflow-hidden bg-gradient-to-br text-white', g.tone, i === 0 ? 'h-40 lg:h-64' : 'h-28')}>
+              <span aria-hidden className="absolute -right-6 -top-8 size-32 rounded-full bg-white/15" />
+              <span aria-hidden className="absolute -bottom-10 left-6 size-24 rounded-full bg-black/10" />
+              {i === 0 ? <SwipeArt /> : <g.icon className="size-12 drop-shadow transition duration-300 group-hover:scale-110" strokeWidth={2.2} />}
+              {g.badge && <span className="absolute left-4 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#1f2433]">{g.badge}</span>}
+            </span>
+            <span className="flex flex-1 flex-col p-4">
+              <span className="flex items-center justify-between font-display text-xl font-black">{g.title}<ArrowRight className="size-5 text-ink-soft transition group-hover:translate-x-0.5 group-hover:text-ink" /></span>
+              <span className="mt-1 text-sm text-ink-soft">{g.text}</span>
+            </span>
+          </motion.button>
+        ))}
+      </div>
+    </>
+  )
+}
+
+/** Three fanned cards hinting at the swipe gesture. */
+function SwipeArt() {
+  return (
+    <span className="relative h-28 w-24 lg:h-40 lg:w-32">
+      <motion.span className="absolute inset-0 rounded-2xl bg-white/35" animate={{ rotate: -12, x: -18 }} />
+      <motion.span className="absolute inset-0 rounded-2xl bg-white/55" animate={{ rotate: 8, x: 16 }} />
+      <motion.span className="absolute inset-0 grid place-items-center rounded-2xl bg-white font-display text-xl font-black text-[#1f2433] shadow-lg lg:text-2xl" animate={{ x: [0, 26, 0, -26, 0], rotate: [0, 8, 0, -8, 0] }} transition={{ repeat: Infinity, duration: 4, ease: 'easeInOut' }}>
+        hello
+      </motion.span>
+    </span>
+  )
+}
+
+function Stat({ v, l, c }: { v: number; l: string; c?: string }) {
+  return (
+    <span>
+      <span className={clsx('block font-display text-3xl font-black leading-none tabular-nums', c)}>{v}</span>
+      <span className="text-xs font-bold uppercase tracking-wide text-ink-soft">{l}</span>
+    </span>
+  )
+}
+
+function GameRun({ game, onExit, onSwitch }: { game: GameKey; onExit: () => void; onSwitch: (g: GameKey) => void }) {
   const qc = useQueryClient()
   const showReward = useReward()
-  const { user } = useAuth()
-  const { data, isLoading, refetch } = useQuery({ queryKey: ['review'], queryFn: () => get<{ data: Word[] }>('/review') })
-  const [i, setI] = useState(0)
-  const [flip, setFlip] = useState(false)
-  const [grades, setGrades] = useState<{ id: number; grade: number }[]>([])
+  const [round, setRound] = useState(0)
+  const [result, setResult] = useState<{ outcomes: Outcome[]; score?: number; saved: number } | null>(null)
+  const { data, isLoading } = useQuery({ queryKey: ['deck', game, round], queryFn: () => get<{ data: DeckWord[] }>(`/words/deck?n=${game === 'match' ? 24 : 16}`), gcTime: 0, staleTime: Infinity })
+  const meta = GAMES.find((g) => g.key === game)!
 
   const submit = useMutation({
-    mutationFn: async (g: { id: number; grade: number }[]) => {
-      const r = await post<{ reward: RewardSummary }>('/review', { reviews: g })
-      const correct = g.filter((x) => x.grade >= 3).length
-      if (correct >= 5 && user && !user.hearts.unlimited && user.hearts.hearts < 5) await post('/hearts/earn', { correct }).catch(() => {})
-      return r
+    mutationFn: async ({ outcomes, score }: { outcomes: Outcome[]; score?: number }) => {
+      // Words you didn't know that aren't in your notebook yet get saved for spaced repetition.
+      const toSave = outcomes.filter((o) => !o.known && o.w.id === null)
+      await Promise.all(toSave.map((o) => post('/words', { word: o.w.word, translation: o.w.translation, example: o.w.example, source: 'manual' }).catch(() => null)))
+      const reviews = outcomes.filter((o) => o.w.id !== null).map((o) => ({ id: o.w.id!, grade: o.known ? 4 : 1 }))
+      const played = Math.min(30, outcomes.filter((o) => o.w.id === null && o.known).length)
+      const r = reviews.length || played ? await post<{ reward: RewardSummary }>('/review', { reviews, played }).catch(() => null) : null
+      // Practice also refills hearts (5+ right answers earn one back).
+      const correct = outcomes.filter((o) => o.known).length
+      if (correct >= 5) await post('/hearts/earn', { correct }).catch(() => null)
+      return { outcomes, score, saved: toSave.length, reward: r?.reward }
     },
     onSuccess: (r) => {
-      showReward(r.reward, 'Tekrar tamam!')
+      setResult(r)
+      const known = r.outcomes.filter((o) => o.known).length
+      if (r.outcomes.length && known / r.outcomes.length >= 0.8) {
+        sfx.complete()
+        celebrate()
+      }
+      if (r.reward?.xp_gained) showReward(r.reward, 'Pratik tamam!')
       qc.invalidateQueries({ queryKey: ['words'] })
       qc.invalidateQueries({ queryKey: ['dashboard'] })
-      setI(0)
-      setGrades([])
-      refetch()
     },
   })
-
-  if (isLoading) return <SkeletonPage variant="list" />
-  const words = data?.data ?? []
-  if (!words.length)
-    return (
-      <Empty
-        icon={<Brain className="size-8" />}
-        title="Tekrar edilecek kelime yok"
-        text="Hikaye okurken bilmediğin kelimelere dokunup kaydet; zamanı gelince burada tekrar edeceğiz."
-        action={<LinkButton to="/stories">Hikaye oku</LinkButton>}
-      />
-    )
-
-  const w = words[i]
-  const grade = (g: number) => {
-    const next = [...grades, { id: w.id, grade: g }]
-    setGrades(next)
-    setFlip(false)
-    if (i + 1 >= words.length) submit.mutate(next)
-    else setI(i + 1)
+  const finish = (outcomes: Outcome[], score?: number) => submit.mutate({ outcomes, score })
+  const again = () => {
+    setResult(null)
+    setRound((r) => r + 1)
   }
 
   return (
-    <div>
+    <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-center gap-3">
-        <Progress value={i} max={words.length} color="bg-mint" tall className="flex-1" />
-        <span className="font-mono text-sm font-bold">{i + 1}/{words.length}</span>
+        <button onClick={onExit} aria-label="Oyunlardan çık" className="grid size-10 place-items-center rounded-xl text-ink-soft hover:bg-paper-2"><X className="size-6" /></button>
+        <p className="font-display text-xl font-black">{meta.title}</p>
       </div>
-      <p className="mb-4 text-center text-sm font-semibold text-ink-soft">Kartı çevir, sonra kelimeyi ne kadar iyi hatırladığını seç. Doğru cevaplarla can da kazanırsın ❤️</p>
-      <div className="mx-auto h-72 max-w-md [perspective:1100px]">
-        <motion.button onClick={() => { setFlip((f) => !f); if (!flip) speak(w.word) }} className="relative size-full" style={{ transformStyle: 'preserve-3d' }} animate={{ rotateY: flip ? 180 : 0 }} transition={{ type: 'spring', stiffness: 200, damping: 20 }}>
-          <div className="ink-card absolute inset-0 flex flex-col items-center justify-center gap-3 p-6 shadow-hard-lg" style={{ backfaceVisibility: 'hidden' }}>
-            <span className="text-xs font-extrabold uppercase tracking-widest text-ink-soft">İngilizce</span>
-            <span className="font-display text-5xl font-extrabold">{w.word}</span>
-            <span className="text-sm text-ink-soft">Çevirmek için dokun</span>
-          </div>
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-[22px] border-2 border-line bg-butter p-6 text-ink shadow-hard-lg" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
-            <span className="text-xs font-extrabold uppercase tracking-widest opacity-60">Türkçe</span>
-            <span className="font-display text-4xl font-extrabold">{w.translation || '-'}</span>
-            {w.example && <span className="line-clamp-3 text-center font-read text-sm italic">“{w.example}”</span>}
-            <span onClick={(e) => { e.stopPropagation(); speak(w.word) }} className="grid size-10 place-items-center rounded-full border-2 border-line bg-card"><Volume2 className="size-5" /></span>
-          </div>
-        </motion.button>
-      </div>
-      <AnimatePresence>
-        {flip && (
-          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ opacity: 0 }} className="mx-auto mt-8 grid max-w-md grid-cols-4 gap-2">
-            {[
-              [0, 'Unuttum', 'danger'],
-              [3, 'Zor', 'secondary'],
-              [4, 'İyi', 'success'],
-              [5, 'Kolay', 'butter'],
-            ].map(([g, l, v]) => (
-              <Button key={g as number} size="sm" variant={v as 'danger'} onClick={() => grade(g as number)} loading={submit.isPending && i + 1 >= words.length}>{l as string}</Button>
-            ))}
+      {isLoading || !data ? (
+        <Spinner className="min-h-[40vh]" />
+      ) : data.data.length < 4 ? (
+        <Empty icon={<Layers className="size-8" />} title="Kelime yetersiz" text="Hikâyelerde kelimelere dokunup deftere ekle, sonra geri gel." action={<Link to="/stories" className="font-bold text-flame">Hikâyelere git</Link>} />
+      ) : result ? (
+        <Result r={result} onAgain={again} onExit={onExit} onSwitch={onSwitch} current={game} />
+      ) : submit.isPending ? (
+        <Spinner className="min-h-[40vh]" label="Sonuçlar kaydediliyor" />
+      ) : (
+        <AnimatePresence mode="wait">
+          <motion.div key={`${game}-${round}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+            {game === 'swipe' && <SwipeDeck deck={data.data} onFinish={finish} />}
+            {game === 'match' && <SpeedMatch deck={data.data} onFinish={finish} />}
+            {game === 'truefalse' && <TrueFalse deck={data.data} onFinish={finish} />}
+            {game === 'listen' && <ListenType deck={data.data} onFinish={finish} />}
+            {game === 'scramble' && <Scramble deck={data.data} onFinish={finish} />}
           </motion.div>
-        )}
-      </AnimatePresence>
+        </AnimatePresence>
+      )}
     </div>
+  )
+}
+
+function Result({ r, onAgain, onExit, onSwitch, current }: { r: { outcomes: Outcome[]; score?: number; saved: number }; onAgain: () => void; onExit: () => void; onSwitch: (g: GameKey) => void; current: GameKey }) {
+  const known = r.outcomes.filter((o) => o.known)
+  const missed = r.outcomes.filter((o) => !o.known)
+  const nextGame = GAMES[(GAMES.findIndex((g) => g.key === current) + 1) % GAMES.length]
+  return (
+    <motion.div initial={{ scale: 0.97, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+      <div className="rounded-[28px] border-2 border-line bg-card p-6 text-center">
+        {r.score !== undefined && <p className="font-display text-6xl font-black tabular-nums">{r.score}<span className="text-2xl text-ink-soft"> puan</span></p>}
+        <p className={clsx('font-display font-black', r.score !== undefined ? 'mt-2 text-xl' : 'text-4xl')}><span className="text-mint-deep">{known.length} biliyorum</span> · <span className="text-berry">{missed.length} tekrar</span></p>
+        {r.saved > 0 && <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-sky/10 px-3 py-1 text-sm font-bold text-sky"><BookmarkPlus className="size-4" /> {r.saved} yeni kelime defterine eklendi</p>}
+        <div className="mt-6 flex flex-wrap justify-center gap-2">
+          <Restart onClick={onAgain} />
+          <Button onClick={() => onSwitch(nextGame.key)} icon={<Shuffle className="size-4" />}>{nextGame.title}</Button>
+          <Button variant="ghost" onClick={onExit}>Oyunlar</Button>
+        </div>
+      </div>
+      {missed.length > 0 && (
+        <div className="mt-5">
+          <p className="mb-2 text-sm font-black uppercase tracking-widest text-ink-soft">Tekrar edilecekler</p>
+          <ul className="grid gap-2 sm:grid-cols-2">
+            {missed.map((o) => (
+              <li key={o.w.word} className="flex items-center gap-3 rounded-2xl border-2 border-line bg-card px-4 py-2.5">
+                <button onClick={() => speak(o.w.word)} className="text-sky" aria-label="Dinle"><Volume2 className="size-5" /></button>
+                <span className="font-extrabold">{o.w.word}</span>
+                <span className="ml-auto truncate text-sm text-ink-soft">{o.w.translation}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </motion.div>
   )
 }
 
