@@ -410,12 +410,20 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   }
   if ((m = path.match(/^\/duel\/(\d+)\/finish$/)) && activeDuel) {
     const ov = db['/duel']
-    const pts = (ok: boolean, ms: number) => (ok ? 100 + Math.max(0, 50 - Math.floor(ms / 400)) : 0)
+    // Same blitz scoring as DuelService::score (speed bonus, combo multiplier up to x2).
+    const pts = (ok: boolean, ms: number) => (ok ? 100 + Math.max(0, 60 - Math.floor(ms / 200)) : 0)
+    const run = (xs: [boolean, number][]) => {
+      let c = 0
+      return xs.reduce((s, [ok, ms]) => {
+        c = ok ? c + 1 : 0
+        return s + Math.round(pts(ok, ms) * (ok ? Math.min(2, 1 + 0.25 * (c - 1)) : 0))
+      }, 0)
+    }
     const items = activeDuel.rounds.flatMap((r: Json) => r.items.map((it: Json) => ({ ...it, skill: r.skill })))
     const answers: Json[] = body.answers ?? []
-    const results = items.map((it: Json, i: number) => gradeEx(it.ex, answers[i]?.[0]))
-    const score = items.reduce((s: number, _: Json, i: number) => s + pts(results[i], answers[i]?.[1] ?? 20000), 0)
-    const ghost = items.reduce((s: number, it: Json) => s + pts(it.ghost.correct, it.ghost.ms), 0)
+    const results = items.map((it: Json, i: number) => (answers[i]?.[1] ?? 12000) <= 13500 && gradeEx(it.ex, answers[i]?.[0]))
+    const score = run(items.map((_: Json, i: number) => [results[i], answers[i]?.[1] ?? 12000]))
+    const ghost = run(items.map((it: Json) => [it.ghost.correct, it.ghost.ms]))
     const result = score > ghost ? 'win' : score < ghost ? 'loss' : 'draw'
     const delta = result === 'win' ? 24 + Math.min(8, Math.floor((score - ghost) / 60)) : result === 'draw' ? 4 : -Math.min(12, ov.me.trophies)
     const before = ov.me.rank

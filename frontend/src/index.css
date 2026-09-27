@@ -261,3 +261,14 @@ html.dark {
     radial-gradient(circle 13px at 0 0, transparent 98%, #000) left / 51% 100% no-repeat,
     radial-gradient(circle 13px at 100% 0, transparent 98%, #000) right / 51% 100% no-repeat;
 }
+
+/* The duel arena is always night-mode: tokens redefined locally, whatever the app theme. */
+.arena-dark {
+  --paper: #0c0f17;
+  --paper-2: #1a2030;
+  --card: #151a26;
+  --ink: #eef0f4;
+  --ink-soft: #9aa1b2;
+  --line: #262d3d;
+  color-scheme: dark;
+}
