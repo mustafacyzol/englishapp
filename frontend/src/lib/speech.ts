@@ -135,3 +135,87 @@ export function similarity(a: string, b: string) {
 export function normalize(s: string) {
   return s.toLowerCase().replace(/[’']/g, '').replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim()
 }
+
+type VoiceOpts = { rate?: number; voice?: string; onStart?: () => void; onEnd?: () => void; onBoundary?: (charIndex: number) => void; onLevel?: (level: number) => void }
+
+let audioCtx: AudioContext | null = null
+let current: { stop: () => void } | null = null
+
+/**
+ * Defne's voice. When the server has a neural voice configured (POST /ai/tts) the
+ * reply is real audio, and `onLevel` reports its loudness 0..1 every frame, so the
+ * avatar's mouth opens with the actual syllables and closes in the pauses. Without
+ * it, the browser voice is used and each spoken word gives the mouth a short pulse.
+ */
+export async function speakNeural(text: string, opts: VoiceOpts = {}) {
+  current?.stop()
+  const { postBlob } = await import('./api')
+  const blob = await postBlob('/ai/tts', { text })
+  if (!blob) {
+    let pulse = 0
+    let raf = 0
+    const decay = () => {
+      pulse *= 0.86
+      opts.onLevel?.(pulse)
+      raf = requestAnimationFrame(decay)
+    }
+    speak(text, {
+      ...opts,
+      onStart: () => {
+        opts.onStart?.()
+        raf = requestAnimationFrame(decay)
+      },
+      onBoundary: (i) => {
+        pulse = 1
+        opts.onBoundary?.(i)
+      },
+      onEnd: () => {
+        cancelAnimationFrame(raf)
+        opts.onLevel?.(0)
+        opts.onEnd?.()
+      },
+    })
+    current = { stop: () => { cancelAnimationFrame(raf); stopSpeaking() } }
+    return
+  }
+
+  const url = URL.createObjectURL(blob)
+  const el = new Audio(url)
+  el.playbackRate = Math.min(1.15, Math.max(0.8, opts.rate ?? 1))
+  audioCtx ??= new AudioContext()
+  if (audioCtx.state === 'suspended') void audioCtx.resume()
+  const src = audioCtx.createMediaElementSource(el)
+  const analyser = audioCtx.createAnalyser()
+  analyser.fftSize = 512
+  src.connect(analyser).connect(audioCtx.destination)
+  const buf = new Uint8Array(analyser.fftSize)
+  let raf = 0
+  const tick = () => {
+    analyser.getByteTimeDomainData(buf)
+    let sum = 0
+    for (const v of buf) sum += ((v - 128) / 128) ** 2
+    opts.onLevel?.(Math.min(1, Math.sqrt(sum / buf.length) * 4))
+    if (el.duration) opts.onBoundary?.(Math.round((el.currentTime / el.duration) * text.length))
+    raf = requestAnimationFrame(tick)
+  }
+  const done = () => {
+    cancelAnimationFrame(raf)
+    opts.onLevel?.(0)
+    URL.revokeObjectURL(url)
+    opts.onEnd?.()
+  }
+  el.onplay = () => {
+    opts.onStart?.()
+    raf = requestAnimationFrame(tick)
+  }
+  el.onended = done
+  el.onerror = done
+  current = { stop: () => { el.pause(); done() } }
+  await el.play().catch(done)
+}
+
+export function stopVoice() {
+  current?.stop()
+  current = null
+  stopSpeaking()
+}

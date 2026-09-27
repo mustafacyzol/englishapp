@@ -131,3 +131,18 @@ export const post = <T>(path: string, body: unknown = {}, admin = false) => api<
 export const put = <T>(path: string, body: unknown, admin = false) => api<T>(path, { method: 'PUT', body, admin })
 export const patch = <T>(path: string, body: unknown, admin = false) => api<T>(path, { method: 'PATCH', body, admin })
 export const del = <T>(path: string, admin = false) => api<T>(path, { method: 'DELETE', admin })
+
+/** POSTs and returns the raw body (e.g. an mp3), or null on 204 / error / demo. */
+export async function postBlob(path: string, body: unknown): Promise<Blob | null> {
+  if (DEMO) return null
+  try {
+    const res = await fetch(BASE + path, {
+      method: 'POST',
+      headers: { Accept: 'audio/mpeg', 'Content-Type': 'application/json', 'X-Client': 'dilgo-app', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      body: JSON.stringify(body),
+    })
+    return res.status === 200 ? await res.blob() : null
+  } catch {
+    return null
+  }
+}

@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { Captions, CaptionsOff, Languages, Lightbulb, Mic, MicOff, PhoneOff, Repeat2 } from 'lucide-react'
 import { TUTOR } from '@/lib/tutor'
-import { canListen, listen, speak, stopSpeaking } from '@/lib/speech'
+import { canListen, listen, speakNeural, stopVoice as stopSpeaking } from '@/lib/speech'
 import { ensureMic } from '@/lib/mic'
 
 export interface CallMsg {
@@ -47,6 +47,8 @@ export function VoiceCall({
   const stopListen = useRef<() => void>(() => {})
   const lastSpoken = useRef<number | null>(null)
   const [talking, setTalking] = useState(false)
+  // mouth openness 0..1, driven by the real audio level (see speakNeural)
+  const [level, setLevel] = useState<number | null>(null)
   const [caption, setCaption] = useState({ text: '', upto: 0 })
   const [listening, setListening] = useState(false)
   const [heard, setHeard] = useState('')
@@ -111,8 +113,9 @@ export function VoiceCall({
   const say = useCallback(
     (text: string) => {
       setCaption({ text, upto: 0 })
-      speak(text, {
+      void speakNeural(text, {
         rate,
+        onLevel: setLevel,
         onStart: () => {
           setTalking(true)
           startTalkLoop()
@@ -133,6 +136,7 @@ export function VoiceCall({
   const playGreeting = useCallback(() => {
     const v = talkRef.current
     if (!v) return
+    setLevel(null) // the recorded greeting is already lip-synced
     setCaption({ text: GREETING, upto: 0 })
     v.muted = false
     v.loop = false
@@ -210,7 +214,7 @@ export function VoiceCall({
       <main className="relative z-10 flex min-h-0 flex-1 flex-col items-center justify-center gap-4 px-4 py-4">
         <div className="relative aspect-[3/4] h-full max-h-[min(62dvh,640px)] w-auto max-w-full overflow-hidden rounded-[32px] shadow-[0_30px_80px_-20px_rgba(0,0,0,0.7)] ring-1 ring-white/10">
           <video ref={idleRef} src={TUTOR.video.idle} poster={TUTOR.portrait} muted loop playsInline autoPlay preload="auto" className="absolute inset-0 size-full object-cover" />
-          <video ref={talkRef} src={TUTOR.video.talk} poster={TUTOR.portrait} muted loop playsInline preload="auto" className={clsx('absolute inset-0 size-full object-cover transition-opacity duration-200', talking ? 'opacity-100' : 'opacity-0')} />
+          <video ref={talkRef} src={TUTOR.video.talk} poster={TUTOR.portrait} muted loop playsInline preload="auto" className="absolute inset-0 size-full object-cover transition-opacity duration-75" style={{ opacity: talking ? (level === null ? 1 : Math.min(1, 0.15 + level * 1.5)) : 0 }} />
           <span className={clsx('absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-extrabold backdrop-blur', talking ? 'bg-sage/80' : listening ? 'bg-flame/80' : 'bg-black/40')}>
             {talking ? <Bars /> : listening ? <Mic className="size-3.5" /> : null}
             {status}
