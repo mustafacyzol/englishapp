@@ -80,6 +80,11 @@ BRAND_SUPPORT_EMAIL=destek@dilgo.app
 
 ADMIN_REQUIRE_EMAIL_OTP=true
 TURNSTILE_SECRET_KEY=               # Cloudflare Turnstile (isteğe bağlı ama önerilir)
+AUTH_TOKEN_TTL_DAYS=60              # "Beni hatırla" süresi (panelden de değiştirilebilir)
+
+# Google / Apple ile giriş (boşsa butonlar "yakında" der)
+GOOGLE_CLIENT_ID=                   # Google Cloud Console > OAuth istemci kimliği (Web)
+APPLE_CLIENT_ID=                    # Apple Developer > Services ID (ör. app.dilgo.web)
 
 ANTHROPIC_API_KEY=sk-ant-...        # Defne (AI öğretmen)
 AI_MODEL=claude-opus-5

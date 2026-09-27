@@ -158,4 +158,23 @@ class ExamPartnerAuthTest extends TestCase
         // A late answer earns no speed bonus.
         $this->assertSame(100, DuelService::points(true, DuelService::ITEM_MS));
     }
+
+    public function test_word_deck_tops_up_with_starter_words_and_game_xp_is_capped(): void
+    {
+        $this->seed(GameSeeder::class);
+        $user = $this->learner(['cefr_level' => 'B1']);
+        $deck = $this->actingAs($user)->getJson('/api/v1/words/deck?n=10')->assertOk()->json('data');
+        $this->assertCount(10, $deck);
+        $this->assertNull($deck[0]['id']); // empty notebook: all starter words
+
+        // Correct answers on starter words still earn a little XP ...
+        $first = $this->actingAs($user)->postJson('/api/v1/review', ['reviews' => [], 'played' => 10])->assertOk();
+        $this->assertSame(20, $first->json('reward.xp_gained'));
+        // ... but an empty submission is rejected and replays stop paying past the daily cap.
+        $this->actingAs($user)->postJson('/api/v1/review', ['reviews' => []])->assertStatus(422);
+        for ($i = 0; $i < 12; $i++) {
+            $this->actingAs($user)->postJson('/api/v1/review', ['reviews' => [], 'played' => 30]);
+        }
+        $this->assertLessThanOrEqual(200, \App\Models\XpEvent::query()->where('user_id', $user->id)->whereIn('source', ['review', 'practice'])->sum('amount'));
+    }
 }
