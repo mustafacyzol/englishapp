@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\AiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\BillingController;
 use App\Http\Controllers\Api\DuelController;
+use App\Http\Controllers\Api\ExamController;
 use App\Http\Controllers\Api\GameController;
 use App\Http\Controllers\Api\InstitutionController;
 use App\Http\Controllers\Api\LearnController;
@@ -42,6 +43,7 @@ Route::prefix('v1')->group(function () {
         Route::post('login', [AuthController::class, 'login']);
         Route::post('forgot-password', [AuthController::class, 'forgotPassword'])->middleware('throttle:otp');
         Route::post('reset-password', [AuthController::class, 'resetPassword']);
+        Route::post('social/{provider}', [AuthController::class, 'social'])->whereIn('provider', ['google', 'apple']);
     });
 
     Route::middleware(['auth:sanctum', 'active'])->group(function () {
@@ -68,6 +70,7 @@ Route::prefix('v1')->group(function () {
         Route::post('invites/{token}/accept', [InstitutionController::class, 'accept'])->middleware('throttle:10,1');
         Route::post('institution/join', [InstitutionController::class, 'join'])->middleware('throttle:10,1');
         Route::get('institution', [InstitutionController::class, 'show']);
+        Route::patch('institution', [InstitutionController::class, 'update'])->middleware('throttle:20,1');
         Route::post('institution/invite', [InstitutionController::class, 'invite'])->middleware('throttle:20,1');
         Route::delete('institution/members/{member}', [InstitutionController::class, 'removeMember']);
         Route::post('notifications/read', [AccountController::class, 'readNotifications']);
@@ -101,11 +104,11 @@ Route::prefix('v1')->group(function () {
             // AI teacher (speaking + writing)
             Route::get('ai/scenarios', [AiController::class, 'scenarios']);
             Route::get('ai/conversations', [AiController::class, 'conversations']);
-            Route::post('ai/conversations', [AiController::class, 'start'])->middleware('throttle:ai');
+            Route::post('ai/conversations', [AiController::class, 'start'])->middleware(['feature:ai', 'throttle:ai']);
             Route::get('ai/conversations/{conversation}', [AiController::class, 'show']);
-            Route::post('ai/conversations/{conversation}/messages', [AiController::class, 'send'])->middleware('throttle:ai');
+            Route::post('ai/conversations/{conversation}/messages', [AiController::class, 'send'])->middleware(['feature:ai', 'throttle:ai']);
             Route::delete('ai/conversations/{conversation}', [AiController::class, 'destroy']);
-            Route::post('ai/writing', [AiController::class, 'writing'])->middleware('throttle:ai');
+            Route::post('ai/writing', [AiController::class, 'writing'])->middleware(['feature:ai', 'throttle:ai']);
 
             // Gamification
             Route::get('me/calendar', [GameController::class, 'calendar']);
@@ -114,7 +117,7 @@ Route::prefix('v1')->group(function () {
             Route::get('quests', [GameController::class, 'quests']);
             Route::post('quests/{userQuest}/claim', [GameController::class, 'claimQuest']);
             Route::get('achievements', [GameController::class, 'achievements']);
-            Route::get('league', [GameController::class, 'league']);
+            Route::get('league', [GameController::class, 'league'])->middleware('feature:leagues');
             Route::get('hearts', [GameController::class, 'hearts']);
             Route::post('hearts/refill', [GameController::class, 'refillHearts']);
             Route::post('hearts/earn', [GameController::class, 'earnHeart'])->middleware('throttle:10,60');
@@ -127,9 +130,14 @@ Route::prefix('v1')->group(function () {
             Route::get('rewards/roadmap', [GameController::class, 'roadmap']);
 
             // Gölge Düellosu
-            Route::get('duel', [DuelController::class, 'index']);
-            Route::post('duel', [DuelController::class, 'start'])->middleware('throttle:20,1');
+            Route::get('duel', [DuelController::class, 'index'])->middleware('feature:duel');
+            Route::post('duel', [DuelController::class, 'start'])->middleware(['feature:duel', 'throttle:20,1']);
             Route::post('duel/{duel}/finish', [DuelController::class, 'finish'])->middleware('throttle:30,1');
+
+            // Sınav modu (YDS, YÖKDİL, YDT, IELTS, TOEFL)
+            Route::get('exam', [ExamController::class, 'index'])->middleware('feature:exam');
+            Route::get('exam/practice', [ExamController::class, 'practice'])->middleware(['feature:exam', 'throttle:60,1']);
+            Route::post('exam/answer', [ExamController::class, 'answer'])->middleware(['feature:exam', 'throttle:120,1']);
 
             // Billing
             Route::post('checkout/quote', [BillingController::class, 'quote'])->middleware('throttle:redeem');

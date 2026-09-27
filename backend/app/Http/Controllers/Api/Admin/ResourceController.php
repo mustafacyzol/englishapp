@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Admin;
 use App\Http\Controllers\Controller;
 use App\Models;
 use App\Support\Audit;
+use App\Support\Exams;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -202,6 +203,53 @@ class ResourceController extends Controller
                     'ends_at' => ['nullable', 'date', 'after_or_equal:starts_at'],
                     'is_active' => ['boolean'],
                     'notes' => ['nullable', 'string', 'max:2000'],
+                    'logo_url' => ['nullable', 'url:https', 'max:500'],
+                    'brand_color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+                ],
+            ],
+            'partners' => [
+                'model' => Models\Partner::class, 'search' => ['name', 'slug'], 'order' => 'position', 'filters' => ['is_active'], 'role' => 'admin',
+                'rules' => [
+                    'name' => ['required', 'string', 'max:80'],
+                    'slug' => ['required', 'alpha_dash', 'max:80', Rule::unique('partners')->ignore($id)],
+                    'logo_url' => ['nullable', 'url:https', 'max:500'],
+                    'website' => ['nullable', 'url:https', 'max:300'],
+                    'description' => ['nullable', 'string', 'max:300'],
+                    'color' => ['nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+                    'is_active' => ['boolean'],
+                    'position' => ['integer'],
+                ],
+            ],
+            'partner-offers' => [
+                'model' => Models\PartnerOffer::class, 'search' => ['title', 'code_prefix'], 'order' => '-id', 'filters' => ['partner_id', 'is_active', 'rarity'], 'with' => ['partner:id,name'], 'role' => 'admin',
+                'rules' => [
+                    'partner_id' => ['required', 'integer', 'exists:partners,id'],
+                    'title' => ['required', 'string', 'max:120'],
+                    'description' => ['nullable', 'string', 'max:300'],
+                    'terms' => ['nullable', 'string', 'max:500'],
+                    'code_prefix' => ['required', 'string', 'max:12', 'regex:/^[A-Za-z0-9]+$/'],
+                    'rarity' => ['required', 'in:common,rare,epic,legendary'],
+                    'weight' => ['required', 'integer', 'min:0', 'max:1000'],
+                    'stock' => ['nullable', 'integer', 'min:0'],
+                    'valid_days' => ['required', 'integer', 'min:1', 'max:365'],
+                    'is_active' => ['boolean'],
+                ],
+            ],
+            'exam-questions' => [
+                'model' => Models\ExamQuestion::class, 'search' => ['prompt', 'section'], 'order' => 'position', 'filters' => ['section', 'cefr', 'is_active'], 'role' => 'admin', 'visible' => ['answer', 'explanation'],
+                'rules' => [
+                    'exams' => ['required', 'array', 'min:1'],
+                    'exams.*' => ['in:yds,yokdil,ydt,ielts,toefl'],
+                    'section' => ['required', 'in:'.implode(',', array_keys(Exams::SECTIONS))],
+                    'cefr' => ['required', 'in:A1,A2,B1,B2,C1,C2'],
+                    'passage' => ['nullable', 'string', 'max:5000'],
+                    'prompt' => ['required', 'string', 'max:2000'],
+                    'options' => ['required', 'array', 'min:2', 'max:6'],
+                    'options.*' => ['required', 'string', 'max:500'],
+                    'answer' => ['required', 'integer', 'min:0', 'max:5'],
+                    'explanation' => ['nullable', 'string', 'max:2000'],
+                    'position' => ['integer'],
+                    'is_active' => ['boolean'],
                 ],
             ],
             'contact-messages' => [
@@ -235,7 +283,7 @@ class ResourceController extends Controller
                     'key' => ['required', 'alpha_dash', 'max:80', Rule::unique('reward_items')->ignore($id)],
                     'name' => ['required', 'string', 'max:120'],
                     'description' => ['nullable', 'string', 'max:255'],
-                    'type' => ['required', 'in:streak_freeze,xp_boost,heart_refill,premium_days,gems,live_lesson,discount_coupon,avatar_frame,chest'],
+                    'type' => ['required', 'in:streak_freeze,xp_boost,heart_refill,premium_days,gems,live_lesson,discount_coupon,avatar_frame,chest,partner_coupon'],
                     'value' => ['nullable', 'array'],
                     'price_gems' => ['nullable', 'integer', 'min:0'],
                     'icon' => ['required', 'string', 'max:40'],
@@ -271,6 +319,12 @@ class ResourceController extends Controller
         return $cfg;
     }
 
+    /** Admins see fields the public API hides (e.g. an exam question's answer key). */
+    private function reveal(array $cfg, Model $m): Model
+    {
+        return isset($cfg['visible']) ? $m->makeVisible($cfg['visible']) : $m;
+    }
+
     public function index(Request $request, string $resource): JsonResponse
     {
         $cfg = $this->config($resource);
@@ -292,14 +346,14 @@ class ResourceController extends Controller
         }
         $q->orderBy(ltrim($order, '-'), str_starts_with($order, '-') ? 'desc' : 'asc');
 
-        return response()->json($q->paginate(min(100, (int) $request->query('per_page', 25))));
+        return response()->json($q->paginate(min(100, (int) $request->query('per_page', 25)))->through(fn ($m) => $this->reveal($cfg, $m)));
     }
 
     public function show(string $resource, int $id): JsonResponse
     {
         $cfg = $this->config($resource, $id);
 
-        return response()->json(['data' => $cfg['model']::query()->with($cfg['with'] ?? [])->findOrFail($id)]);
+        return response()->json(['data' => $this->reveal($cfg, $cfg['model']::query()->with($cfg['with'] ?? [])->findOrFail($id))]);
     }
 
     public function store(Request $request, string $resource): JsonResponse
@@ -310,7 +364,7 @@ class ResourceController extends Controller
         $record = $cfg['model']::query()->create($data);
         Audit::log("admin.{$resource}.created", $request->user(), $record);
 
-        return response()->json(['data' => $record], 201);
+        return response()->json(['data' => $this->reveal($cfg, $record)], 201);
     }
 
     public function update(Request $request, string $resource, int $id): JsonResponse
@@ -323,7 +377,7 @@ class ResourceController extends Controller
         $record->update($data);
         Audit::log("admin.{$resource}.updated", $request->user(), $record, ['fields' => array_keys($data)]);
 
-        return response()->json(['data' => $record->fresh()]);
+        return response()->json(['data' => $this->reveal($cfg, $record->fresh())]);
     }
 
     public function destroy(Request $request, string $resource, int $id): JsonResponse

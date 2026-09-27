@@ -260,7 +260,8 @@ class GameController extends Controller
         $user = $request->user();
 
         return response()->json([
-            'items' => RewardItem::query()->where('is_active', true)->whereNotNull('price_gems')->orderBy('position')->get(),
+            'items' => RewardItem::query()->where('is_active', true)->whereNotNull('price_gems')->orderBy('position')->get()
+                ->each(fn (RewardItem $i) => $i->type === 'chest' && $i->setAttribute('odds', $this->rewards->odds($i))),
             'gems' => $user->gems,
             'heart_refill_gems' => (int) Settings::get('gamification.heart_refill_gems'),
         ]);
@@ -280,7 +281,8 @@ class GameController extends Controller
         $user->items()->where('status', 'active')->whereNotNull('expires_at')->where('expires_at', '<', now())->update(['status' => 'expired']);
 
         return response()->json([
-            'data' => $user->items()->with('item')->orderByRaw("CASE status WHEN 'available' THEN 0 WHEN 'active' THEN 1 ELSE 2 END")->latest()->limit(100)->get(),
+            'data' => $user->items()->with('item')->orderByRaw("CASE status WHEN 'available' THEN 0 WHEN 'active' THEN 1 ELSE 2 END")->latest()->limit(100)->get()
+                ->each(fn (UserItem $i) => $i->item?->type === 'chest' && $i->status === 'available' && $i->setAttribute('odds', $this->rewards->odds($i->item))),
         ]);
     }
 

@@ -43,12 +43,12 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'username', 'email', 'password', 'avatar', 'locale', 'timezone',
         'cefr_level', 'learning_goal', 'daily_goal_xp', 'onboarded', 'marketing_opt_in', 'preferences',
-        'focus_skill', 'interests', 'study_time', 'motivation',
+        'focus_skill', 'interests', 'study_time', 'motivation', 'exam_target', 'exam_date',
     ];
 
     protected $hidden = [
         'password', 'remember_token', 'two_factor_secret', 'two_factor_recovery_codes',
-        'failed_logins', 'locked_until', 'last_login_ip', 'deleted_at',
+        'failed_logins', 'locked_until', 'last_login_ip', 'deleted_at', 'google_id', 'apple_id',
     ];
 
     protected function casts(): array
@@ -61,6 +61,7 @@ class User extends Authenticatable
             'is_banned' => 'boolean',
             'preferences' => 'array',
             'interests' => 'array',
+            'exam_date' => 'date',
             'streak_last_date' => 'date',
             'premium_until' => 'datetime',
             'locked_until' => 'datetime',

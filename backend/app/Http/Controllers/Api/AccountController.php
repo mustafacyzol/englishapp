@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Presenters\UserPresenter;
 use App\Services\OtpService;
 use App\Support\Audit;
+use App\Support\Exams;
 use App\Support\Totp;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -34,7 +35,11 @@ class AccountController extends Controller
             'interests.*' => ['string', 'in:travel,career,movies,music,games,sports,tech,food'],
             'study_time' => ['sometimes', 'nullable', 'in:morning,lunch,evening,night'],
             'motivation' => ['sometimes', 'nullable', 'in:confidence,job,abroad,exam,kids,hobby'],
+            'exam_target' => ['sometimes', 'nullable', Rule::in(Exams::keys())],
+            'exam_date' => ['sometimes', 'nullable', 'date', 'after:today', 'before:+3 years'],
+            'locale' => ['sometimes', 'in:tr,en'],
             'preferences' => ['sometimes', 'array'],
+            'preferences.language' => ['sometimes', 'in:tr,en'],
             'preferences.tour_done' => ['sometimes', 'boolean'],
             'preferences.email_reminders' => ['sometimes', 'boolean'],
             'preferences.sound' => ['sometimes', 'boolean'],

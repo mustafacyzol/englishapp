@@ -7,7 +7,9 @@ use App\Models\Plan;
 use App\Models\Story;
 use App\Models\Testimonial;
 use App\Models\User;
+use App\Support\Exams;
 use App\Support\Settings;
+use App\Support\SocialToken;
 use App\Support\Turnstile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
@@ -29,6 +31,12 @@ class PublicController extends Controller
             'school_whatsapp' => Settings::get('school.whatsapp'),
             'league_tiers' => config('dilgo.gamification.league.tiers'),
             'daily_goal_options' => config('dilgo.gamification.daily_goal_options'),
+            'site' => collect(Settings::all())->only(Settings::PUBLIC)->undot(),
+            'social_login' => [
+                'google' => Settings::get('features.social_login', true) && SocialToken::enabled('google') ? config('services.google.client_id') : null,
+                'apple' => Settings::get('features.social_login', true) && SocialToken::enabled('apple') ? config('services.apple.client_id') : null,
+            ],
+            'exams' => collect(Exams::EXAMS)->map(fn ($e, $k) => ['key' => $k, 'name' => $e['name'], 'full' => $e['full'], 'about' => $e['about']])->values(),
         ]);
     }
 

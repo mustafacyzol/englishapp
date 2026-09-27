@@ -12,6 +12,7 @@ use App\Models\AiMessage;
 use App\Models\AiScenario;
 use App\Models\DailyActivity;
 use App\Models\User;
+use App\Support\Exams;
 use App\Support\Period;
 use App\Support\Settings;
 use Illuminate\Support\Facades\Log;
@@ -174,7 +175,8 @@ TXT;
     {
         $this->assertCanUse($user);
         $system = self::PERSONA."\n\nYou are now grading a piece of writing. Learner level: {$user->cefr_level}. "
-            .'List at most 8 of the most useful mistakes. Keep corrected_text as close to the original as possible.';
+            .'List at most 8 of the most useful mistakes. Keep corrected_text as close to the original as possible.'
+            .(($exam = Exams::tutorBrief($user->exam_target)) ? "\n{$exam} Grade with that exam's writing criteria in mind." : '');
         $prompt = ($task ? "Writing task: {$task}\n" : '')
             .($targetWords ? 'Target words the learner tried to use: '.implode(', ', $targetWords).". Mention in strengths_tr which ones were used well.\n" : '')
             ."\nLearner text:\n\"\"\"\n{$text}\n\"\"\"";
@@ -197,7 +199,8 @@ TXT;
 
         $prompt = self::PERSONA."\n\nLearner profile:\n- Name: {$user->name}\n- CEFR level: {$user->cefr_level}\n- Goal: {$goalLabel}\n- Recently saved words: ".($words ?: 'none yet')
             .($interests ? "\n- Interests: {$interests} (pick examples and small-talk topics from these)" : '')
-            .($focus ? "\n- Wants to improve most: {$focus}" : '');
+            .($focus ? "\n- Wants to improve most: {$focus}" : '')
+            .(($exam = Exams::tutorBrief($user->exam_target)) ? "\n- Exam goal: {$exam}" : '');
 
         if ($scenario) {
             $goals = collect($scenario->goals ?? [])->map(fn ($g, $i) => "  {$i}. {$g}")->implode("\n");

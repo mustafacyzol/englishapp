@@ -12,7 +12,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call([ContentSeeder::class, GameSeeder::class, CourseSeeder::class, BlogSeeder::class, TestimonialSeeder::class]);
+        $this->call([ContentSeeder::class, GameSeeder::class, CourseSeeder::class, BlogSeeder::class, TestimonialSeeder::class, ExamSeeder::class, PartnerSeeder::class]);
 
         if (! app()->isProduction()) {
             // Local demo accounts, production admins are created with `php artisan dilgo:admin`.

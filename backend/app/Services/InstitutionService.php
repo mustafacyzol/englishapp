@@ -151,7 +151,7 @@ class InstitutionService
         $active = $students->filter(fn ($r) => $r['status'] === 'active');
 
         return [
-            'institution' => $inst->only(['id', 'name', 'type', 'city', 'seats', 'join_code', 'starts_at', 'ends_at', 'is_active']) + [
+            'institution' => $inst->only(['id', 'name', 'type', 'city', 'seats', 'join_code', 'starts_at', 'ends_at', 'is_active', 'logo_url', 'brand_color', 'contact_name', 'contact_email', 'contact_phone']) + [
                 'seats_used' => $inst->seatsUsed(),
                 'current' => $inst->isCurrent(),
             ],

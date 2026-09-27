@@ -7,6 +7,7 @@ use App\Http\Presenters\UserPresenter;
 use App\Models\Institution;
 use App\Models\InstitutionMember;
 use App\Services\InstitutionService;
+use App\Support\Audit;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -46,6 +47,23 @@ class InstitutionController extends Controller
     public function show(Request $request): JsonResponse
     {
         return response()->json($this->service->report($this->managed($request)));
+    }
+
+    /** Managers can brand their panel (logo, colour) and keep contact details current. */
+    public function update(Request $request): JsonResponse
+    {
+        $inst = $this->managed($request);
+        $data = $request->validate([
+            'logo_url' => ['sometimes', 'nullable', 'url:https', 'max:500'],
+            'brand_color' => ['sometimes', 'nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            'contact_name' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'contact_email' => ['sometimes', 'nullable', 'email', 'max:190'],
+            'contact_phone' => ['sometimes', 'nullable', 'string', 'max:40'],
+        ]);
+        $inst->update($data);
+        Audit::log('institution.updated', $request->user(), $inst, ['keys' => array_keys($data)]);
+
+        return response()->json($this->service->report($inst->fresh()));
     }
 
     public function invite(Request $request): JsonResponse

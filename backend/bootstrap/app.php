@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\EnsureActiveAccount;
+use App\Http\Middleware\EnsureFeature;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\EnsureVerified;
 use App\Http\Middleware\ForceJson;
@@ -27,6 +28,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => EnsureRole::class,
             'active' => EnsureActiveAccount::class,
             'verified.api' => EnsureVerified::class,
+            'feature' => EnsureFeature::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

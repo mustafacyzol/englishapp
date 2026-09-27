@@ -16,12 +16,20 @@ use Illuminate\Support\Facades\DB;
  * levels, so you can duel anyone at any time; when your ghost wins while you
  * are away it earns you trophies (and you get told about it).
  *
- * One duel = four rounds (reading, listening, speaking, writing), two quick
- * items each. Right answers score 100, speed adds up to 50.
+ * One duel = four blitz rounds (reading, listening, speaking, writing), three
+ * quick items each on a 12-second clock. A right answer scores 100 plus up to 60
+ * for speed, and a run of right answers multiplies it (x1.25, x1.5 ... up to x2),
+ * so a streak can swing the whole race. The ghost is scored the same way.
  */
 class DuelService
 {
-    public const ITEMS_PER_ROUND = 2;
+    public const ITEMS_PER_ROUND = 3;
+
+    public const ITEM_MS = 12000;
+
+    public const COMBO_STEP = 0.25;
+
+    public const COMBO_MAX = 2.0;
 
     public const FREE_PER_DAY = 5;
 
@@ -131,24 +139,25 @@ class DuelService
 
         $items = $this->flatItems($duel);
         $results = [];
-        $score = 0;
+        $run = [];
         $skillCorrect = [];
         foreach ($items as $i => [$skill, $item]) {
-            [$given, $ms] = [$answers[$i][0] ?? null, (int) ($answers[$i][1] ?? 20000)];
-            $ok = LessonService::gradeOne($item['ex'], $given);
+            [$given, $ms] = [$answers[$i][0] ?? null, (int) ($answers[$i][1] ?? self::ITEM_MS)];
+            // An answer after the clock ran out never counts.
+            $ok = $ms <= self::ITEM_MS + 1500 && LessonService::gradeOne($item['ex'], $given);
             $results[] = $ok;
-            $score += self::points($ok, $ms);
+            $run[] = [$ok, $ms];
             $skillCorrect[$skill] = ($skillCorrect[$skill] ?? 0) + ($ok ? 1 : 0);
         }
 
-        return $this->settle($duel, $score, $results, 'finished', $skillCorrect);
+        return $this->settle($duel, self::score($run)['total'], $results, 'finished', $skillCorrect);
     }
 
     private function settle(Duel $duel, int $score, array $results, string $status, array $skillCorrect = []): array
     {
         return DB::transaction(function () use ($duel, $score, $results, $status, $skillCorrect) {
             $user = $duel->user()->lockForUpdate()->first();
-            $ghostScore = collect($this->flatItems($duel))->sum(fn ($p) => self::points($p[1]['ghost']['correct'], $p[1]['ghost']['ms']));
+            $ghostScore = self::score(collect($this->flatItems($duel))->map(fn ($p) => [$p[1]['ghost']['correct'], $p[1]['ghost']['ms']])->all())['total'];
             $result = $score > $ghostScore ? 'win' : ($score < $ghostScore ? 'loss' : 'draw');
 
             $delta = match ($result) {
@@ -294,6 +303,7 @@ class DuelService
             ]),
             'ranks' => self::RANKS,
             'items_per_round' => self::ITEMS_PER_ROUND,
+            'rules' => self::rules(),
         ];
     }
 
@@ -302,6 +312,7 @@ class DuelService
     {
         return [
             'id' => $duel->id,
+            'rules' => self::rules(),
             'ghost' => [
                 'name' => $duel->ghost_name,
                 'trophies' => $duel->ghost_trophies,
@@ -319,10 +330,35 @@ class DuelService
 
     public static function points(bool $correct, int $ms): int
     {
-        return $correct ? 100 + max(0, 50 - intdiv(max(0, $ms), 400)) : 0;
+        return $correct ? 100 + max(0, 60 - intdiv(max(0, $ms), 200)) : 0;
     }
 
-    /** @return list<array{0:string,1:array}> [skill, item] pairs in play order */
+    /**
+     * Scores a run of [correct, ms] answers with the combo multiplier.
+     *
+     * @param  list<array{0:bool,1:int}>  $run
+     * @return array{total:int, items:list<int>, best_combo:int}
+     */
+    public static function score(array $run): array
+    {
+        $combo = 0;
+        $best = 0;
+        $items = [];
+        foreach ($run as [$ok, $ms]) {
+            $combo = $ok ? $combo + 1 : 0;
+            $best = max($best, $combo);
+            $mult = $ok ? min(self::COMBO_MAX, 1 + self::COMBO_STEP * ($combo - 1)) : 0;
+            $items[] = (int) round(self::points((bool) $ok, (int) $ms) * $mult);
+        }
+
+        return ['total' => array_sum($items), 'items' => $items, 'best_combo' => $best];
+    }
+
+    public static function rules(): array
+    {
+        return ['item_ms' => self::ITEM_MS, 'combo_step' => self::COMBO_STEP, 'combo_max' => self::COMBO_MAX, 'base' => 100, 'speed_max' => 60, 'speed_ms_per_point' => 200];
+    }
+
     private function flatItems(Duel $duel): array
     {
         $out = [];
@@ -368,7 +404,7 @@ class DuelService
     {
         $p = min(0.92, 0.5 + 0.07 * $level);
         $correct = mt_rand() / mt_getrandmax() < $p;
-        $ms = max(1800, mt_rand(3000, 9500) - $level * 350);
+        $ms = max(1500, mt_rand(2600, 8200) - $level * 300);
 
         return ['correct' => $correct, 'ms' => $ms];
     }
