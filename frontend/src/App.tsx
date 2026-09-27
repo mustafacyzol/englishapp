@@ -30,7 +30,12 @@ const Practice = lazy(() => import('./pages/app/Practice'))
 const AiHub = lazy(() => import('./pages/app/AiHub'))
 const Duel = lazy(() => import('./pages/app/Duel'))
 const Exam = lazy(() => import('./pages/app/Exam'))
-const Institution = lazy(() => import('./pages/app/Institution'))
+const InstitutionLayout = lazy(() => import('./layouts/InstitutionLayout'))
+const InstOverview = lazy(() => import('./pages/institution/Panel').then((m) => ({ default: m.InstitutionOverview })))
+const InstStudents = lazy(() => import('./pages/institution/Panel').then((m) => ({ default: m.InstitutionStudents })))
+const InstClasses = lazy(() => import('./pages/institution/Panel').then((m) => ({ default: m.InstitutionClasses })))
+const InstInvites = lazy(() => import('./pages/institution/Panel').then((m) => ({ default: m.InstitutionInvites })))
+const InstSettings = lazy(() => import('./pages/institution/Panel').then((m) => ({ default: m.InstitutionSettings })))
 const InstitutionDetail = lazy(() => import('./pages/admin/InstitutionDetail'))
 const Invite = lazy(() => import('./pages/institution/Invite'))
 const AiChat = lazy(() => import('./pages/app/AiChat'))
@@ -96,6 +101,13 @@ export default function App() {
         <Route path="/verify-email" element={<Guard verified={false}><VerifyEmail /></Guard>} />
 
         <Route path="/lesson/:id" element={<Guard><LessonPlayer /></Guard>} />
+        <Route path="/kurum" element={<Guard><InstitutionLayout /></Guard>}>
+          <Route index element={<InstOverview />} />
+          <Route path="ogrenciler" element={<InstStudents />} />
+          <Route path="siniflar" element={<InstClasses />} />
+          <Route path="davetler" element={<InstInvites />} />
+          <Route path="ayarlar" element={<InstSettings />} />
+        </Route>
         <Route element={<Guard><AppLayout /></Guard>}>
           <Route path="/learn" element={<Learn />} />
           <Route path="/stories" element={<Stories />} />
@@ -106,7 +118,6 @@ export default function App() {
           <Route path="/ai/:id" element={<AiChat />} />
           <Route path="/duel" element={<Duel />} />
           <Route path="/exam" element={<Exam />} />
-          <Route path="/kurum" element={<Institution />} />
           <Route path="/leagues" element={<Leagues />} />
           <Route path="/quests" element={<Quests />} />
           <Route path="/profile" element={<Profile />} />

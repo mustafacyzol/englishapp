@@ -26,16 +26,16 @@ export interface Member {
   skills: Record<SkillKey, { level: number; xp: number }> | null
 }
 export interface InstitutionReport {
-  institution: { id: number; name: string; type: string; city: string | null; seats: number; seats_used: number; join_code: string; starts_at: string | null; ends_at: string | null; is_active: boolean; current: boolean }
+  institution: { id: number; name: string; type: string; city: string | null; seats: number; seats_used: number; join_code: string; starts_at: string | null; ends_at: string | null; is_active: boolean; current: boolean; logo_url?: string | null; brand_color?: string | null; contact_name?: string | null; contact_email?: string | null; contact_phone?: string | null }
   summary: { students: number; active: number; invited: number; active_this_week: number; week_xp: number; avg_streak: number; skills: Record<SkillKey, number> }
   classes: string[]
   members: Member[]
 }
 export interface InviteRow { email: string; name?: string; class_name?: string }
 
-const TYPE: Record<string, string> = { school: 'Okul', course: 'Kurs', company: 'Şirket' }
+export const TYPE: Record<string, string> = { school: 'Okul', course: 'Kurs', company: 'Şirket' }
 
-function ago(iso: string | null) {
+export function ago(iso: string | null) {
   if (!iso) return 'hiç girmedi'
   const h = (Date.now() - new Date(iso).getTime()) / 36e5
   if (h < 1) return 'az önce'
@@ -57,7 +57,7 @@ export function parseRows(text: string, defaultClass: string): InviteRow[] {
  * Seat usage, weekly activity, the class's four-skill balance and per-student
  * progress, shared by the institution panel (/kurum) and the admin view.
  */
-export function Report({ data, onInvite, onRemove, inviting, admin }: { data: InstitutionReport; onInvite: (rows: InviteRow[], role: 'student' | 'manager') => Promise<unknown>; onRemove: (id: number) => void; inviting?: boolean; admin?: boolean }) {
+export function Report({ data, onInvite, onRemove, inviting, admin, view = 'all' }: { data: InstitutionReport; onInvite: (rows: InviteRow[], role: 'student' | 'manager') => Promise<unknown>; onRemove: (id: number) => void; inviting?: boolean; admin?: boolean; view?: 'all' | 'overview' | 'students' }) {
   const { institution: inst, summary } = data
   const [cls, setCls] = useState<string>('all')
   const [q, setQ] = useState('')
@@ -85,6 +85,7 @@ export function Report({ data, onInvite, onRemove, inviting, admin }: { data: In
   return (
     <div className="space-y-6">
       {/* ------------------------------------------------ Contract + seats */}
+      {view !== 'students' && <>
       <section className="grid gap-4 lg:grid-cols-[1.4fr_1fr] [&>*]:min-w-0">
         <div className="rounded-3xl border-2 border-line bg-card p-5 sm:p-6">
           <p className="text-xs font-black uppercase tracking-[0.14em] text-ink-soft">{TYPE[inst.type] ?? inst.type}{inst.city ? ` · ${inst.city}` : ''}</p>
@@ -134,8 +135,10 @@ export function Report({ data, onInvite, onRemove, inviting, admin }: { data: In
         </div>
       </section>
 
+      </>}
+
       {/* ------------------------------------------------ Students */}
-      <section>
+      {view !== 'overview' && <section>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
           <h3 className="flex items-center gap-2 text-xl"><Users className="size-5" /> Öğrenciler</h3>
           <label className="relative">
@@ -195,7 +198,7 @@ export function Report({ data, onInvite, onRemove, inviting, admin }: { data: In
           ))}
           {!rows.length && <p className="p-6 text-center text-ink-soft">Bu filtrede öğrenci yok.</p>}
         </div>
-      </section>
+      </section>}
 
       {admin && (
         <section>
@@ -212,7 +215,7 @@ export function Report({ data, onInvite, onRemove, inviting, admin }: { data: In
   )
 }
 
-function Kpi({ label, value, sub, icon }: { label: string; value: React.ReactNode; sub: string; icon?: React.ReactNode }) {
+export function Kpi({ label, value, sub, icon }: { label: string; value: React.ReactNode; sub: string; icon?: React.ReactNode }) {
   return (
     <div className="rounded-2xl border-2 border-line bg-card p-4">
       <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-ink-soft">{icon}{label}</p>
@@ -222,11 +225,11 @@ function Kpi({ label, value, sub, icon }: { label: string; value: React.ReactNod
   )
 }
 
-function InvitedPill() {
+export function InvitedPill() {
   return <span className="ml-1 rounded-md bg-butter/30 px-1.5 py-0.5 text-[10px] font-black uppercase">davetli</span>
 }
 
-function SkillBars({ m }: { m: Member }) {
+export function SkillBars({ m }: { m: Member }) {
   if (!m.skills) return <span className="text-xs text-ink-soft">-</span>
   const max = Math.max(1, ...SKILLS.map((k) => m.skills![k]?.xp ?? 0))
   return (
@@ -244,7 +247,7 @@ function RemoveBtn({ m, onRemove }: { m: Member; onRemove: (id: number) => void 
   )
 }
 
-function InviteModal({ open, onClose, onInvite, loading, admin, classes, seatsLeft }: { open: boolean; onClose: () => void; onInvite: (rows: InviteRow[], role: 'student' | 'manager') => Promise<unknown>; loading?: boolean; admin?: boolean; classes: string[]; seatsLeft: number }) {
+export function InviteModal({ open, onClose, onInvite, loading, admin, classes, seatsLeft }: { open: boolean; onClose: () => void; onInvite: (rows: InviteRow[], role: 'student' | 'manager') => Promise<unknown>; loading?: boolean; admin?: boolean; classes: string[]; seatsLeft: number }) {
   const [text, setText] = useState('')
   const [cls, setCls] = useState('')
   const [role, setRole] = useState<'student' | 'manager'>('student')
