@@ -153,13 +153,13 @@ export default function Register() {
   }
   const go = (i: number) => up({ step: flow[Math.min(total - 1, Math.max(0, i))] })
   const next = () => go(step + 1)
-  // Single-choice questions move on by themselves after a short beat.
-  const pick = (patch: Partial<Draft>) => () => {
-    up(patch)
-    const f = flowFor({ ...d, ...patch })
-    const nextStep = f[Math.min(f.length - 1, f.indexOf(d.step) + 1)]
-    setTimeout(() => up({ step: nextStep }), 220)
-  }
+  // Choices only select; moving on is always an explicit "Devam", so nobody skips a step by accident.
+  const pick = (patch: Partial<Draft>) => () => up(patch)
+  const nextBtn = (ok: boolean, label = 'Devam') => (
+    <motion.div initial={false} animate={{ opacity: ok ? 1 : 0.55 }} className="pt-2">
+      <Button block size="lg" disabled={!ok} onClick={next} icon={<ArrowRight className="size-5" />}>{label}</Button>
+    </motion.div>
+  )
 
   const who = firstName ? `${firstName}, ` : ''
   const Q: Record<StepKey, { title: ReactNode; sub: string }> = {
@@ -251,22 +251,18 @@ export default function Register() {
                 )
               })}
               <p className="text-center text-xs text-ink-soft sm:col-span-3">Yaş grubunu sonradan ayda bir değiştirebilirsin. Çocuk hesabı veli onayıyla açılır.</p>
+              <div className="sm:col-span-3">{nextBtn(canNext.age)}</div>
             </div>
           )}
 
           {key === 'goal' && (
             <div className="space-y-4">
-              {d.age !== 'kid' && (
-                <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-line p-3.5 transition hover:border-ink/25">
-                  <input type="checkbox" checked={d.examOpt} onChange={(e) => up({ examOpt: e.target.checked })} className="size-5 accent-[#e8403a]" />
-                  <span className="text-sm"><b>Ayrıca bir sınava hazırlanıyorum</b> <span className="text-ink-soft">(YDS, YÖKDİL, YDT, IELTS, TOEFL). Seçersen sınav modu açılır.</span></span>
-                </label>
-              )}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
                 {MOTIVATIONS.filter((o) => !(d.age === 'kid' && o.key === 'exam')).map((o) => (
                   <PhotoCard key={o.key} photo={o.photo} title={o.label} text={o.text} selected={d.motivation === o.key} onClick={pick({ motivation: o.key })} />
                 ))}
               </div>
+              {nextBtn(canNext.goal, d.motivation === 'exam' ? 'Sınavımı seçeyim' : 'Devam')}
             </div>
           )}
 
@@ -320,6 +316,7 @@ export default function Register() {
                   </button>
                 )
               })}
+              <div className="sm:col-span-2">{nextBtn(canNext.focus)}</div>
             </div>
           )}
 
@@ -337,6 +334,7 @@ export default function Register() {
                 </button>
               ))}
               <Link to="/placement?from=register" className="inline-flex items-center gap-1.5 pt-1 text-sm font-bold text-flame hover:underline">Emin değilim, 3 dakikalık seviye testine gir <ArrowRight className="size-4" /></Link>
+              {nextBtn(canNext.level)}
             </div>
           )}
 

@@ -3,12 +3,10 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, AudioLines, ChevronRight, Lock, MessageSquareText, Phone, Sparkles } from 'lucide-react'
+import { ArrowRight, AudioLines, ChevronRight, Lock, MessageSquareText, PenLine, Phone, Sparkles } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { rewardImg, scenarioImg } from '@/lib/assets'
 import { TUTOR } from '@/lib/tutor'
-import { SKILL } from '@/lib/skills'
-import type { SkillKey } from '@/lib/types'
 import { SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { useAuth } from '@/lib/auth'
@@ -87,6 +85,12 @@ export default function AiHub() {
               >
                 <MessageSquareText className="size-5" /> Yazışarak
               </button>
+              <Link
+                to="/ai/writing"
+                className="press flex h-14 items-center gap-2 rounded-2xl border-2 border-white/15 bg-white/5 px-5 font-display font-extrabold uppercase tracking-wide text-white hover:bg-white/10"
+              >
+                <PenLine className="size-5" /> Yazma atölyesi
+              </Link>
             </div>
             <dl className="grid max-w-md grid-cols-3 gap-3 border-t border-white/10 pt-5 text-sm">
               <div><dt className="text-white/50">Seviyen</dt><dd className="font-display text-xl font-black">{user?.cefr_level}</dd></div>
@@ -102,63 +106,6 @@ export default function AiHub() {
             <video src={TUTOR.video.idle} poster={TUTOR.portrait} muted loop autoPlay playsInline className="absolute inset-0 size-full object-cover object-[50%_20%]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#141a24] via-transparent to-transparent md:bg-gradient-to-r" />
           </div>
-        </div>
-      </section>
-
-      {/* ---------------------------------------------------------- Modes */}
-      <section>
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
-          <div>
-            <h2 className="text-2xl">Nasıl çalışmak istersin?</h2>
-            <p className="text-ink-soft">Her mod farklı becerilere puan yazar. Bugün hangisi sana iyi gelir?</p>
-          </div>
-        </div>
-        <div className="grid gap-4 lg:grid-cols-3">
-          <ModeTile
-            title="Sesli arama"
-            text="Defne ile yüz yüze konuş; telaffuzun ve cümlen anında düzelsin."
-            skills={['speaking', 'listening']}
-            minutes="5-10 dk"
-            onClick={() => start.mutate({ mode: 'speaking', call: true })}
-            loading={start.isPending}
-            preview={
-              <div className="flex w-full items-center gap-2.5 rounded-2xl bg-paper-2 px-3 py-2.5">
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-sage text-white"><Phone className="size-4" /></span>
-                <span className="flex h-7 flex-1 items-center gap-[3px]" aria-hidden>
-                  {[5, 9, 14, 8, 18, 11, 6, 15, 9, 12, 7, 4].map((h, i) => (
-                    <motion.span key={i} className="w-[3px] rounded-full bg-sage" animate={{ height: [h, h * 0.4, h] }} transition={{ repeat: Infinity, duration: 1 + (i % 4) * 0.2, delay: i * 0.05 }} />
-                  ))}
-                </span>
-                <span className="font-mono text-[11px] font-bold text-ink-soft">00:42</span>
-              </div>
-            }
-          />
-          <ModeTile
-            title="Yazılı sohbet"
-            text="Acele etmeden yaz, her mesajda küçük bir düzeltme al."
-            skills={['writing', 'reading']}
-            minutes="Serbest"
-            onClick={() => start.mutate({ mode: 'chat' })}
-            loading={start.isPending}
-            preview={
-              <div className="flex w-full flex-col gap-1.5 text-[11px] font-bold">
-                <span className="w-fit max-w-[85%] rounded-2xl rounded-bl-md bg-sage/15 px-2.5 py-1.5 text-ink">What did you do today?</span>
-                <span className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-ink px-2.5 py-1.5 text-paper">I <s className="opacity-60">go</s> <b className="text-butter">went</b> to the gym.</span>
-              </div>
-            }
-          />
-          <ModeTile
-            title="Yazma atölyesi"
-            text="Bir görev seç, metnini yaz; Defne hataları üstünde işaretlesin."
-            skills={['writing']}
-            minutes="10-15 dk"
-            to="/ai/writing"
-            preview={
-              <p className="w-full rounded-xl bg-paper-2 px-2.5 py-2 text-[11px] font-semibold leading-relaxed text-ink">
-                Last summer I <u className="decoration-berry decoration-wavy decoration-2 underline-offset-2">have visited</u> my grandmother in İzmir and we <u className="decoration-mint decoration-2 underline-offset-2">cooked together</u>.
-              </p>
-            }
-          />
         </div>
       </section>
 
@@ -240,30 +187,4 @@ export default function AiHub() {
   )
 }
 
-function SkillChip({ k, dark }: { k: SkillKey; dark?: boolean }) {
-  const S = SKILL[k]
-  return (
-    <span className={clsx('flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold', dark ? 'bg-white/12 text-white' : [S.soft, S.text])}>
-      <S.icon className="size-3" /> {S.label}
-    </span>
-  )
-}
 
-function ModeTile({ title, text, skills, minutes, preview, onClick, to, loading }: { title: string; text: string; skills: SkillKey[]; minutes: string; preview: React.ReactNode; onClick?: () => void; to?: string; loading?: boolean }) {
-  const cls = 'group relative flex h-full flex-col gap-4 overflow-hidden rounded-[28px] border-2 border-line bg-card p-5 text-left transition hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-soft'
-  const inner = (
-    <>
-      <div className="flex min-h-[64px] items-center transition duration-300 group-hover:scale-[1.02]">{preview}</div>
-      <div className="min-w-0 flex-1">
-        <p className="flex items-center justify-between font-display text-xl font-black leading-tight">{title}<ChevronRight className="size-5 text-ink-soft transition group-hover:translate-x-1" /></p>
-        <p className="mt-1 text-sm text-ink-soft">{text}</p>
-        <div className="mt-3 flex flex-wrap items-center gap-1.5">
-          {skills.map((k) => <SkillChip key={k} k={k} />)}
-          <span className="rounded-full bg-paper-2 px-2 py-0.5 text-[11px] font-extrabold text-ink-soft">{minutes}</span>
-        </div>
-      </div>
-      {loading && <span className="absolute right-4 top-4 size-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-40" />}
-    </>
-  )
-  return to ? <Link to={to} className={cls}>{inner}</Link> : <button onClick={onClick} disabled={loading} className={cls}>{inner}</button>
-}
