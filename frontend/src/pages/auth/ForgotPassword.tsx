@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert } from '@/components/ui/Misc'
 import { OtpInput } from '@/components/ui/OtpInput'
-import { AuthShell } from './AuthShell'
+import { AuthCard } from './AuthShell'
 import { Turnstile } from './Turnstile'
 
 export default function ForgotPassword() {
@@ -31,7 +31,7 @@ export default function ForgotPassword() {
   const err = (request.error ?? reset.error) as ApiError | null
 
   return (
-    <AuthShell
+    <AuthCard
       title={request.isSuccess ? 'Yeni şifreni belirle' : 'Şifreni mi unuttun?'}
       subtitle={request.isSuccess ? 'E-postana gelen 6 haneli kodu ve yeni şifreni gir.' : 'Hesabına kayıtlı e-postayı yaz, sana bir sıfırlama kodu gönderelim.'}
       footer={<Link to="/login" className="font-extrabold text-flame">Girişe dön</Link>}
@@ -52,6 +52,6 @@ export default function ForgotPassword() {
           <p className="text-center text-sm text-ink-soft">Kod gelmediyse birkaç dakika bekle veya <button type="button" className="font-bold text-flame" onClick={() => request.mutate()}>tekrar gönder</button>.</p>
         </form>
       )}
-    </AuthShell>
+    </AuthCard>
   )
 }

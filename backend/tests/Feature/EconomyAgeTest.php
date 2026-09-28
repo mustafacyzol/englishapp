@@ -96,12 +96,12 @@ class EconomyAgeTest extends TestCase
     public function test_avatars_standard_for_all_premium_only_while_premium(): void
     {
         $user = $this->learner();
-        $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'fox'])->assertOk()->assertJsonPath('user.avatar', 'fox');
-        $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'dragon'])->assertForbidden();
+        $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'hoodie'])->assertOk()->assertJsonPath('user.avatar', 'hoodie');
+        $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'pilot'])->assertForbidden();
         $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'not-a-real-one'])->assertUnprocessable();
 
         $user->forceFill(['premium_until' => now()->addDays(3)])->save();
-        $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'dragon'])->assertOk()->assertJsonPath('user.avatar', 'dragon');
+        $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'pilot'])->assertOk()->assertJsonPath('user.avatar', 'pilot');
 
         // When Premium ends the premium avatar is no longer shown.
         $user->forceFill(['premium_until' => now()->subDay()])->save();

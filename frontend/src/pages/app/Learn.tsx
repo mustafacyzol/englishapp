@@ -72,7 +72,11 @@ export default function Learn() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <ContinueCard data={data} stats={stats} onJump={jump} onPick={() => setPicker(true)} />
+      {/* The "where you left off" bar stays pinned under the header instead of popping in:
+          when your stop scrolls away it simply shows which way it is. */}
+      <div className="sticky top-[66px] z-20 -mx-1 px-1 pb-2 pt-2">
+        <ContinueCard data={data} stats={stats} onJump={jump} onPick={() => setPicker(true)} away={!currentVisible ? (curAbove ? 'up' : 'down') : null} />
+      </div>
 
       <div className="mt-8">
         {data.units.map((unit, ui) => (
@@ -80,25 +84,6 @@ export default function Learn() {
         ))}
       </div>
 
-      {/* A small pill that rides along the bottom of the path column (not a floating
-          corner button over other content) and points toward where you left off. */}
-      <div className="pointer-events-none sticky bottom-[calc(env(safe-area-inset-bottom)+5.75rem)] z-20 flex h-0 items-end justify-center lg:bottom-6">
-        <AnimatePresence>
-          {!currentVisible && stats.cur && (
-            <motion.button
-              initial={{ opacity: 0, y: 10, scale: 0.9 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.9 }}
-              transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-              onClick={jump}
-              className="press pointer-events-auto flex shrink-0 items-center gap-1.5 rounded-full border-2 border-line bg-card/95 py-1.5 pl-1.5 pr-3.5 text-[13px] font-extrabold text-ink shadow-soft backdrop-blur"
-            >
-              <span className="grid size-6 place-items-center rounded-full bg-flame text-white">{curAbove ? <ArrowUp className="size-3.5" strokeWidth={3} /> : <ArrowDown className="size-3.5" strokeWidth={3} />}</span>
-              Kaldığın yer <span className="max-w-[9rem] truncate font-semibold text-ink-soft sm:max-w-[14rem]">· {stats.cur.l.title}</span>
-            </motion.button>
-          )}
-        </AnimatePresence>
-      </div>
 
       <div className="my-16 flex flex-col items-center gap-3 text-center">
         <Img src={rewardImg('crown')} alt="" className={clsx('size-24 object-contain', stats.pct < 100 && 'opacity-50 grayscale')} />
@@ -126,7 +111,7 @@ export default function Learn() {
 
 /* ------------------------------------------------------------------ Resume */
 
-function ContinueCard({ data, stats, onJump, onPick }: { data: PathData; stats: Stats; onJump: () => void; onPick: () => void }) {
+function ContinueCard({ data, stats, onJump, onPick, away }: { data: PathData; stats: Stats; onJump: () => void; onPick: () => void; away: 'up' | 'down' | null }) {
   const nav = useNavigate()
   const cur = stats.cur
   const unit = cur?.u
@@ -135,7 +120,7 @@ function ContinueCard({ data, stats, onJump, onPick }: { data: PathData; stats: 
   const C = 2 * Math.PI * R
   const go = () => (cur && (cur.l.kind === 'lesson' || cur.l.kind === 'checkpoint') ? nav(`/lesson/${cur.l.id}`) : onJump())
   return (
-    <section className="flex items-center gap-3 rounded-2xl border-2 border-line bg-card p-2.5 pr-3 sm:gap-4 sm:p-3 sm:pr-4">
+    <section className="flex items-center gap-3 rounded-2xl border-2 border-line bg-card/95 p-2.5 pr-3 shadow-[0_8px_24px_-16px_rgba(31,36,51,.35)] backdrop-blur sm:gap-4 sm:p-3 sm:pr-4">
       <button onClick={onPick} title="Kurs değiştir" className="flex shrink-0 items-center gap-1 rounded-xl py-1 pl-1 pr-1.5 hover:bg-paper-2">
         <span className="grid size-10 place-items-center rounded-xl text-sm font-black text-white" style={{ background: data.course.color }}>{data.course.cefr_level}</span>
         <ChevronDown className="size-4 text-ink-soft" />
@@ -143,7 +128,10 @@ function ContinueCard({ data, stats, onJump, onPick }: { data: PathData; stats: 
 
       {cur && unit ? (
         <button onClick={onJump} className="min-w-0 flex-1 text-left" title="Yolda göster">
-          <span className="flex items-center gap-1 text-[11px] font-black uppercase tracking-[0.12em] text-flame"><MapPin className="size-3" /> Kaldığın yer</span>
+          <span className="flex items-center gap-1 text-[11px] font-black uppercase tracking-[0.12em] text-flame">
+            {away ? (away === 'up' ? <ArrowUp className="size-3" strokeWidth={3} /> : <ArrowDown className="size-3" strokeWidth={3} />) : <MapPin className="size-3" />}
+            {away ? 'Kaldığın yere git' : 'Kaldığın yer'}
+          </span>
           <span className="block truncate font-display text-[17px] font-black leading-tight">{cur.l.title}</span>
           <span className="mt-1 flex items-center gap-2">
             <span className="flex gap-0.5" aria-hidden>

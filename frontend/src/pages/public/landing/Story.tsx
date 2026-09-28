@@ -87,7 +87,7 @@ export function Hero3D({ learners }: { learners?: number }) {
     rawX.set(((e.clientX - r.left) / r.width - 0.5) * 40)
     rawY.set(((e.clientY - r.top) / r.height - 0.5) * 30)
   }
-  const faces = ['headphones', 'fox', 'beanie', 'reader', 'grandpa']
+  const faces = ['headphones', 'granny', 'cap', 'hijab', 'beard']
 
   return (
     <section ref={ref} onPointerMove={move} className="relative isolate overflow-hidden">

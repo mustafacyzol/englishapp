@@ -123,7 +123,8 @@ class User extends Authenticatable
     /** The avatar to show: a premium one only while Premium is active, otherwise none (initial). */
     public function displayAvatar(): ?string
     {
-        if (! $this->avatar) {
+        $known = array_merge(config('dilgo.avatars.standard', []), config('dilgo.avatars.premium', []));
+        if (! $this->avatar || ! in_array($this->avatar, $known, true)) {
             return null;
         }
 

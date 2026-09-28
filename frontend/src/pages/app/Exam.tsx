@@ -9,11 +9,10 @@ import { useAuth } from '@/lib/auth'
 import { EXAMS } from '@/lib/onboarding'
 import { celebrate, sfx } from '@/lib/fx'
 import type { ExamKey, Me } from '@/lib/types'
-import { TUTOR } from '@/lib/tutor'
 import { Button } from '@/components/ui/Button'
 import { PageHeader, Spinner } from '@/components/ui/Misc'
-import { Img } from '@/components/ui/Img'
 import { useToast } from '@/components/ui/Toast'
+import { higoImg } from '@/components/game/Higo'
 
 interface SectionStat { key: string; label: string; hint: string; answered: number; accuracy: number | null; questions: number }
 interface Overview {
@@ -91,9 +90,9 @@ export default function Exam() {
 
         <div className="flex flex-col rounded-[28px] border-2 border-line bg-card p-5">
           <div className="flex items-start gap-3">
-            <Img src={TUTOR.avatar} alt="" className="size-12 shrink-0 rounded-full bg-sage/15 object-cover" />
+            <img src={higoImg('read')} alt="" className="size-14 shrink-0 object-contain" />
             <div className="min-w-0">
-              <p className="text-xs font-black uppercase tracking-widest text-ink-soft">{TUTOR.name}’nin önerisi</p>
+              <p className="text-xs font-black uppercase tracking-widest text-ink-soft">Higo’nun önerisi</p>
               <p className="mt-1 font-display text-xl font-black leading-snug">{weakest ? weakest.accuracy !== null ? `${weakest.label} isabetin %${weakest.accuracy}. Bugün buna 10 dakika ver.` : `${weakest.label} bölümünü henüz denemedin, oradan başlayalım.` : 'Karma bir setle ısın.'}</p>
             </div>
           </div>

@@ -11,16 +11,15 @@ import { storage } from '@/lib/storage'
 import type { Cefr, Me, SkillKey } from '@/lib/types'
 import { SKILL, SKILLS } from '@/lib/skills'
 import { EXAMS, FOCUS_TEXT, INTERESTS, MOTIVATIONS, PACES, STUDY_TIMES } from '@/lib/onboarding'
-import { TUTOR } from '@/lib/tutor'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert } from '@/components/ui/Misc'
-import { Defne } from '@/components/game/Defne'
 import { Img } from '@/components/ui/Img'
 import { AuthShell } from './AuthShell'
 import { Turnstile } from './Turnstile'
 import { SocialButtons } from '@/components/auth/SocialButtons'
 import { MobilePass, PassPanel } from './BoardingPass'
+import { higoImg } from '@/components/game/Higo'
 
 const LEVELS: { v: Cefr; t: string; d: string }[] = [
   { v: 'A1', t: 'Sıfırdan başlıyorum', d: 'Birkaç kelime biliyorum' },
@@ -161,7 +160,7 @@ export default function Register() {
   const who = firstName ? `${firstName}, ` : ''
   const Q: Record<StepKey, { title: ReactNode; sub: string }> = {
     age: { title: `${who}kaç yaşındasın?`, sub: 'Dersler, Defne’nin konuşma tarzı, rakiplerin ve ödüller yaşına göre ayarlanır.' },
-    name: { title: 'Merhaba! Sana nasıl hitap edelim?', sub: `Ben ${TUTOR.name}, İngilizce koçun. Planını birlikte kuralım, 1 dakika sürer.` },
+    name: { title: 'Merhaba! Sana nasıl hitap edelim?', sub: 'Birkaç soruyla planını kuralım, 1 dakika sürer.' },
     goal: { title: `${who}İngilizce seni nereye götürsün?`, sub: 'Hedefin derslerdeki örnekleri ve senaryoları belirler.' },
     exam: { title: 'Hangi sınava hazırlanıyorsun?', sub: 'Okuma parçaları, soru tipleri ve Defne’nin geri bildirimleri bu sınava göre ayarlanır.' },
     interests: { title: 'Hangi konular seni heyecanlandırır?', sub: 'Hikâyeler ve Defne ile sohbetler bunlardan seçilir. Birden fazla seçebilirsin.' },
@@ -208,8 +207,8 @@ export default function Register() {
           {key === 'name' && (
             <form onSubmit={(e) => { e.preventDefault(); if (canNext.name) next() }} className="space-y-5">
               <div className="flex items-center gap-4 rounded-3xl bg-paper-2/70 p-4">
-                <Defne className="size-14" />
-                <p className="font-semibold text-ink-soft">“Adını bilirsem sohbetlerimiz çok daha doğal olur.”</p>
+                <img src={higoImg('wave')} alt="Higo" className="size-16 shrink-0 object-contain" />
+                <p className="font-semibold text-ink-soft">“Ben Higo, DilGO rehberin. Adını yaz, planını sana özel kuralım.”</p>
               </div>
               <Input label="Adın" autoComplete="given-name" value={d.name} onChange={(e) => up({ name: e.target.value })} autoFocus placeholder="ör. Deniz" maxLength={60} />
               <Button type="submit" block size="lg" disabled={!canNext.name} icon={<ArrowRight className="size-5" />}>Devam</Button>

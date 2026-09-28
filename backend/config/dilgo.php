@@ -113,8 +113,8 @@ return [
     | Premium ones can only be chosen (and are only shown) while Premium is active.
     */
     'avatars' => [
-        'standard' => ['fox', 'headphones', 'panda', 'beanie', 'cat', 'reader', 'bear', 'grandpa', 'penguin'],
-        'premium' => ['astronaut', 'wizard', 'lion', 'neon', 'samurai', 'mermaid', 'dragon', 'jazz', 'phoenix'],
+        'standard' => ['headphones', 'beard', 'braids', 'cap', 'granny', 'hoodie', 'hijab', 'grandpa', 'ponytail'],
+        'premium' => ['astronaut', 'wizard', 'king', 'pilot', 'scientist', 'chef', 'jazz', 'detective', 'explorer'],
     ],
 
     'referral' => [

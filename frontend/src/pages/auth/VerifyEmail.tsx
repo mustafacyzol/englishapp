@@ -8,7 +8,7 @@ import type { Me } from '@/lib/types'
 import { OtpInput } from '@/components/ui/OtpInput'
 import { Alert } from '@/components/ui/Misc'
 import { celebrate } from '@/lib/fx'
-import { AuthShell } from './AuthShell'
+import { AuthCard } from './AuthShell'
 
 export default function VerifyEmail() {
   const { user, setUser, signOut } = useAuth()
@@ -42,7 +42,7 @@ export default function VerifyEmail() {
   const err = verify.error as ApiError | null
 
   return (
-    <AuthShell title="E-postanı doğrula" subtitle={<><b className="text-ink">{user?.email}</b> adresine 6 haneli bir kod gönderdik.</>}>
+    <AuthCard title="E-postanı doğrula" subtitle={<><b className="text-ink">{user?.email}</b> adresine 6 haneli bir kod gönderdik.</>}>
       <div className="mx-auto mb-8 grid size-20 place-items-center rounded-full bg-sky/10 text-sky">
         <MailCheck className="size-10" />
       </div>
@@ -58,6 +58,6 @@ export default function VerifyEmail() {
         </p>
         <button onClick={signOut} className="text-sm font-bold text-ink-soft underline">Farklı bir hesapla giriş yap</button>
       </div>
-    </AuthShell>
+    </AuthCard>
   )
 }

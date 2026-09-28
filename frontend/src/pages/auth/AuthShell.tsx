@@ -1,5 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
+import { img } from '@/lib/assets'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { Star } from 'lucide-react'
@@ -130,6 +131,34 @@ export function AuthShell({ title, subtitle, children, footer, wide, slides = LO
           {subtitle && <p className="mt-2 text-lg text-ink-soft">{subtitle}</p>}
           <div className="mt-8">{children}</div>
           {footer && <div className="mt-8 text-center font-semibold text-ink-soft">{footer}</div>}
+        </motion.div>
+      </main>
+    </div>
+  )
+}
+
+/**
+ * The quiet auth layout used by sign-in, password reset and e-mail verification:
+ * one centred card on a calm backdrop, no photo panel, Higo at the top.
+ */
+export function AuthCard({ title, subtitle, children, footer, pose = 'think' }: { title: ReactNode; subtitle?: ReactNode; children: ReactNode; footer?: ReactNode; pose?: 'think' | 'wave' | 'read' | 'thumbs' }) {
+  return (
+    <div className="auth-backdrop relative flex min-h-dvh flex-col overflow-hidden">
+      <header className="relative z-10 flex items-center justify-between px-5 py-3 sm:px-8">
+        <Link to="/" aria-label="DilGO ana sayfa"><Logo small /></Link>
+        <LangSelect />
+      </header>
+      <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-8 pt-2">
+        <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[420px]">
+          <div className="rounded-[28px] border-2 border-line bg-card p-5 shadow-soft sm:p-7">
+            <div className="mb-6 flex flex-col items-center text-center">
+              <img src={img(`higo/${pose}.webp`)} alt="" className="mb-2 size-16 object-contain" />
+              <h1 className="text-[26px] leading-tight">{title}</h1>
+              {subtitle && <p className="mt-1 text-[15px] text-ink-soft">{subtitle}</p>}
+            </div>
+            {children}
+          </div>
+          {footer && <p className="mt-4 text-center font-semibold text-ink-soft">{footer}</p>}
         </motion.div>
       </main>
     </div>

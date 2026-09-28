@@ -9,15 +9,14 @@ import { ApiError, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { useLang } from '@/lib/i18n'
 import type { Me } from '@/lib/types'
-import { TUTOR } from '@/lib/tutor'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert } from '@/components/ui/Misc'
-import { Img } from '@/components/ui/Img'
 import { Logo } from '@/components/game/Logo'
 import { LangSelect } from '@/components/ui/LangSelect'
 import { SocialButtons } from '@/components/auth/SocialButtons'
 import { Turnstile } from './Turnstile'
+import { higoImg } from '@/components/game/Higo'
 
 /**
  * Sign-in is deliberately quiet: one centred card, the fastest options first
@@ -61,10 +60,7 @@ export default function Login() {
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[420px]">
           <div className="rounded-[28px] border-2 border-line bg-card p-5 shadow-soft sm:p-7">
             <div className="mb-5 flex flex-col items-center text-center">
-              <span className="relative mb-3">
-                <Img src={TUTOR.avatar} alt="" className="size-12 rounded-full bg-sage/15 object-cover ring-4 ring-card" />
-                <motion.span initial={{ rotate: -20 }} animate={{ rotate: [0, 18, -6, 14, 0] }} transition={{ delay: 0.5, duration: 1.1 }} className="absolute -right-2 -top-1 origin-bottom-left text-2xl" aria-hidden>👋</motion.span>
-              </span>
+              <motion.img src={higoImg('wave')} alt="Higo" className="mb-2 size-16 object-contain" initial={{ scale: 0.6, rotate: -10 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 14, delay: 0.15 }} />
               <h1 className="text-[26px] leading-tight">{t('Tekrar hoş geldin')}</h1>
               <p className="mt-1 text-[15px] text-ink-soft">{t('Hesabına giriş yap ve kaldığın yerden devam et.')}</p>
             </div>

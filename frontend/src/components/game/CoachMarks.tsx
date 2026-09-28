@@ -7,7 +7,7 @@ import { patch } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { TUTOR } from '@/lib/tutor'
 import { examName, examOn } from '@/lib/onboarding'
-import { Img } from '@/components/ui/Img'
+import { higoImg } from './Higo'
 
 interface Mark {
   /** data-tour value(s) to spotlight, first visible one wins */
@@ -163,7 +163,7 @@ export function CoachMarks() {
           style={cardStyle}
         >
           <div className="flex items-start gap-3">
-            <Img src={TUTOR.avatar} alt="" className="size-11 shrink-0 rounded-full bg-sage/15 object-cover" />
+            <img src={higoImg(i === 0 ? 'wave' : i === marks.length - 1 ? 'cheer' : 'point')} alt="Higo" className="size-12 shrink-0 object-contain" />
             <div className="min-w-0 flex-1">
               <p className="font-display text-lg font-black leading-tight">{m.title}</p>
               <p className="mt-1 text-sm leading-relaxed text-ink-soft">{m.text}</p>

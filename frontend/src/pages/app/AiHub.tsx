@@ -113,32 +113,26 @@ export default function AiHub() {
             <p className="text-ink-soft">Her mod farklı becerilere puan yazar. Bugün hangisi sana iyi gelir?</p>
           </div>
         </div>
-        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr] lg:grid-rows-2">
-          {/* The featured mode: talking, the hardest skill to practise alone. */}
-          <motion.button
-            whileHover={{ y: -3 }}
-            whileTap={{ scale: 0.99 }}
-            disabled={start.isPending}
+        <div className="grid gap-4 lg:grid-cols-3">
+          <ModeTile
+            title="Sesli arama"
+            text="Defne ile yüz yüze konuş; telaffuzun ve cümlen anında düzelsin."
+            skills={['speaking', 'listening']}
+            minutes="5-10 dk"
             onClick={() => start.mutate({ mode: 'speaking', call: true })}
-            className="group relative isolate flex min-h-[260px] overflow-hidden rounded-[28px] bg-[#141926] text-left text-white lg:row-span-2 lg:min-h-[340px]"
-          >
-            <Img src={TUTOR.portrait} alt="" className="absolute inset-y-0 right-0 -z-10 h-full w-[62%] object-cover object-top transition duration-700 group-hover:scale-105" />
-            <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-[#141926] via-[#141926]/90 to-transparent" />
-            <div className="flex max-w-[62%] flex-col p-6 sm:p-7">
-              <span className="flex w-fit items-center gap-1.5 rounded-full bg-sage px-2.5 py-1 text-[11px] font-black uppercase tracking-wider"><span className="size-1.5 animate-pulse rounded-full bg-white" /> Önerilen</span>
-              <p className="mt-4 font-display text-3xl font-black leading-[1.05] sm:text-4xl">Sesli arama</p>
-              <p className="mt-2 text-[15px] leading-relaxed text-white/75">{TUTOR.name}’yi görerek konuş. Telaffuzun ve cümlen anında, nazikçe düzelsin.</p>
-              <div className="mt-4 flex flex-wrap gap-1.5">
-                {(['speaking', 'listening'] as SkillKey[]).map((k) => <SkillChip key={k} k={k} dark />)}
-                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-extrabold text-white/80">5-10 dk</span>
+            loading={start.isPending}
+            preview={
+              <div className="flex w-full items-center gap-2.5 rounded-2xl bg-paper-2 px-3 py-2.5">
+                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-sage text-white"><Phone className="size-4" /></span>
+                <span className="flex h-7 flex-1 items-center gap-[3px]" aria-hidden>
+                  {[5, 9, 14, 8, 18, 11, 6, 15, 9, 12, 7, 4].map((h, i) => (
+                    <motion.span key={i} className="w-[3px] rounded-full bg-sage" animate={{ height: [h, h * 0.4, h] }} transition={{ repeat: Infinity, duration: 1 + (i % 4) * 0.2, delay: i * 0.05 }} />
+                  ))}
+                </span>
+                <span className="font-mono text-[11px] font-bold text-ink-soft">00:42</span>
               </div>
-              <span className="mt-auto flex w-fit items-center gap-2 rounded-2xl bg-white px-4 py-2.5 pt-2.5 font-extrabold text-[#141926] transition group-hover:gap-3">
-                <Phone className="size-4" /> Aramayı başlat
-                {start.isPending && <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-50" />}
-              </span>
-            </div>
-          </motion.button>
-
+            }
+          />
           <ModeTile
             title="Yazılı sohbet"
             text="Acele etmeden yaz, her mesajda küçük bir düzeltme al."
@@ -256,19 +250,18 @@ function SkillChip({ k, dark }: { k: SkillKey; dark?: boolean }) {
 }
 
 function ModeTile({ title, text, skills, minutes, preview, onClick, to, loading }: { title: string; text: string; skills: SkillKey[]; minutes: string; preview: React.ReactNode; onClick?: () => void; to?: string; loading?: boolean }) {
-  const cls = 'group relative grid h-full grid-cols-[1fr_auto] items-center gap-4 overflow-hidden rounded-[28px] border-2 border-line bg-card p-5 text-left transition hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-soft sm:grid-cols-[1fr_190px]'
+  const cls = 'group relative flex h-full flex-col gap-4 overflow-hidden rounded-[28px] border-2 border-line bg-card p-5 text-left transition hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-soft'
   const inner = (
     <>
-      <div className="min-w-0">
-        <p className="font-display text-xl font-black leading-tight">{title}</p>
+      <div className="flex min-h-[64px] items-center transition duration-300 group-hover:scale-[1.02]">{preview}</div>
+      <div className="min-w-0 flex-1">
+        <p className="flex items-center justify-between font-display text-xl font-black leading-tight">{title}<ChevronRight className="size-5 text-ink-soft transition group-hover:translate-x-1" /></p>
         <p className="mt-1 text-sm text-ink-soft">{text}</p>
         <div className="mt-3 flex flex-wrap items-center gap-1.5">
           {skills.map((k) => <SkillChip key={k} k={k} />)}
           <span className="rounded-full bg-paper-2 px-2 py-0.5 text-[11px] font-extrabold text-ink-soft">{minutes}</span>
         </div>
       </div>
-      <div className="hidden transition duration-300 group-hover:-rotate-1 group-hover:scale-[1.03] sm:flex">{preview}</div>
-      <ChevronRight className="size-5 text-ink-soft transition group-hover:translate-x-1 sm:hidden" />
       {loading && <span className="absolute right-4 top-4 size-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-40" />}
     </>
   )

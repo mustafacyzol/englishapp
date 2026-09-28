@@ -9,7 +9,6 @@ interface Toast {
   key: string
   text: ReactNode
   tone: Tone
-  count: number
 }
 const Ctx = createContext<(text: ReactNode, tone?: Tone) => void>(() => {})
 
@@ -17,8 +16,8 @@ const ICON = { info: Info, success: CheckCircle2, error: XCircle }
 
 /**
  * One notice at a time. A new message replaces the one on screen instead of stacking
- * under it, and the same message sent again only bumps a small counter and restarts
- * the timer, so hammering a button never floods the top of the screen.
+ * under it; the same message sent again while it is showing is simply kept (no
+ * counter, no re-animation), so tapping a button repeatedly still shows one notice.
  */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toast, setToast] = useState<Toast | null>(null)
@@ -36,7 +35,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     const repeat = lastKey.current === key
     // Toasts are silent: saving a setting or copying a code is not an event worth a sound.
     lastKey.current = key
-    setToast((cur) => (repeat && cur ? { ...cur, count: cur.count + 1 } : { id: Date.now() + Math.random(), key, text, tone, count: 1 }))
+    if (!repeat) setToast({ id: Date.now() + Math.random(), key, text, tone })
     window.clearTimeout(timer.current)
     timer.current = window.setTimeout(() => {
       lastKey.current = ''
@@ -67,13 +66,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               >
                 <Icon className={clsx('size-5 shrink-0', toast.tone === 'info' && 'text-sky')} />
                 <span className="min-w-0">{toast.text}</span>
-                <AnimatePresence>
-                  {toast.count > 1 && (
-                    <motion.span key={toast.count} initial={{ scale: 0.4 }} animate={{ scale: 1 }} className={clsx('rounded-full px-1.5 text-xs font-black tabular-nums', toast.tone === 'info' ? 'bg-paper-2' : 'bg-white/25')}>
-                      ×{toast.count}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
                 <button onClick={close} aria-label="Kapat" className="ml-1 grid size-7 shrink-0 place-items-center rounded-full opacity-70 transition hover:bg-black/10 hover:opacity-100">
                   <X className="size-4" />
                 </button>

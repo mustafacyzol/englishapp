@@ -5,7 +5,6 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { Check, Gem, Infinity as InfinityIcon, Keyboard, Mic, MicOff, Snail, Volume2, X } from 'lucide-react'
 import { img, rewardImg } from '@/lib/assets'
-import { Defne } from '@/components/game/Defne'
 import { higoImg } from '@/components/game/Higo'
 import { SKILL } from '@/lib/skills'
 import type { SkillKey } from '@/lib/types'
@@ -462,7 +461,7 @@ function SpotError({ ex, value, setValue, locked }: { ex: Extract<Exercise, { ty
 
       {locked && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mt-6 flex gap-3 rounded-2xl bg-butter/15 p-4">
-          <Defne className="size-11 shrink-0" />
+          <img src={higoImg('think')} alt="" className="size-12 shrink-0 object-contain" />
           <p className="text-[15px] leading-relaxed">{ex.explanation_tr}</p>
         </motion.div>
       )}
@@ -526,7 +525,7 @@ function DialogueScene({ ex, value, setValue, locked, ttsRate }: { ex: Extract<E
 
       {locked && ex.note_tr && (
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-6 flex gap-3 rounded-2xl bg-butter/15 p-4">
-          <Defne className="size-11 shrink-0" />
+          <img src={higoImg('think')} alt="" className="size-12 shrink-0 object-contain" />
           <p className="text-[15px] leading-relaxed">{ex.note_tr}</p>
         </motion.div>
       )}
@@ -595,7 +594,7 @@ function TileBuilder({ ex, value, setValue, locked }: { ex: Extract<Exercise, { 
 
   return (
     <div>
-      <div className="mb-6 flex items-start gap-3"><Defne className="size-14" /><p className="relative rounded-2xl border-2 border-line bg-card px-5 py-4 text-xl font-bold">{ex.prompt}</p></div>
+      <div className="mb-6 flex items-start gap-3"><img src={higoImg('point')} alt="" className="size-16 shrink-0 object-contain" /><p className="relative rounded-2xl border-2 border-line bg-card px-5 py-4 text-xl font-bold">{ex.prompt}</p></div>
       {typing ? (
         <textarea value={(value as string) ?? ''} onChange={(e) => setValue(e.target.value)} disabled={locked} autoFocus placeholder="İngilizce yaz…" className="min-h-32 w-full rounded-2xl border-2 border-line bg-card p-4 text-lg font-semibold shadow-hard-sm focus:outline-none" />
       ) : (
