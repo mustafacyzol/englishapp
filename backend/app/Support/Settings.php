@@ -30,11 +30,11 @@ class Settings
         'contact.email' => 'dilgo.brand.support_email',
         'contact.phone' => null,
         'contact.address' => null,
-        'social.instagram' => null,
-        'social.youtube' => null,
-        'social.tiktok' => null,
-        'social.linkedin' => null,
-        'social.x' => null,
+        'social.instagram' => 'https://www.instagram.com/dilgoapp', // örnek adres, Yönetim > Site ayarları'ndan kendi hesabınızla değiştirin
+        'social.youtube' => 'https://www.youtube.com/@dilgoapp', // örnek adres, Yönetim > Site ayarları'ndan kendi hesabınızla değiştirin
+        'social.tiktok' => 'https://www.tiktok.com/@dilgoapp', // örnek adres, Yönetim > Site ayarları'ndan kendi hesabınızla değiştirin
+        'social.linkedin' => 'https://www.linkedin.com/company/dilgoapp', // örnek adres, Yönetim > Site ayarları'ndan kendi hesabınızla değiştirin
+        'social.x' => 'https://x.com/dilgoapp', // örnek adres, Yönetim > Site ayarları'ndan kendi hesabınızla değiştirin
         'seo.description' => null,
         // Feature switches, off hides the feature everywhere for learners.
         'features.duel' => true,

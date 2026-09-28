@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
-import { AnimatePresence, motion, useInView, useMotionValue, useReducedMotion, useSpring, useTransform } from 'motion/react'
+import { AnimatePresence, motion, useInView, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, Check, Crown, Flame, GraduationCap, Sparkles } from 'lucide-react'
+import { ArrowRight, Check, Crown, Flame, Sparkles } from 'lucide-react'
 import { img, PHOTO } from '@/lib/assets'
 import { tl } from '@/lib/format'
 import type { Plan } from '@/lib/types'
@@ -61,7 +61,6 @@ export function HeroPro() {
   const sy = useSpring(my, { stiffness: 70, damping: 18 })
   const near = (d: number) => ({ x: useTransform(sx, (v) => v * d), y: useTransform(sy, (v) => v * d) }) // eslint-disable-line react-hooks/rules-of-hooks
   const a = near(0.6)
-  const b = near(1.2)
   const c = near(0.9)
   const ph = near(0.3)
   const move = (e: React.PointerEvent) => {
@@ -84,10 +83,7 @@ export function HeroPro() {
 
       <div className="mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-10 lg:grid-cols-[1.05fr_1fr] lg:pb-24 lg:pt-16">
         <div>
-          <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease }} className="text-[13px] font-black uppercase tracking-[0.18em] text-flame">
-            Bayrak Dil Okulları · Dijital İngilizce
-          </motion.p>
-          <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.7, ease }} className="mt-4 font-display text-[clamp(2.6rem,5.8vw,4.6rem)] font-black leading-[1.06] tracking-[-0.02em]">
+          <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.7, ease }} className="font-display text-[clamp(2.6rem,5.8vw,4.6rem)] font-black leading-[1.06] tracking-[-0.02em]">
             İngilizceyi her yaşta,{' '}
             <span className="bg-gradient-to-r from-flame via-[#ff7a3d] to-[#ffb020] bg-clip-text pb-1 text-transparent">kendi hızında</span> öğren.
           </motion.h1>
@@ -125,14 +121,6 @@ export function HeroPro() {
             <p className="mt-1 text-[11px] text-ink-soft">“agree” zaten fiil, “am” gerekmez.</p>
           </motion.div>
 
-          <motion.div style={b} initial={{ opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7, type: 'spring', stiffness: 140, damping: 16 }} className="absolute right-0 top-[58%] w-[200px] rounded-2xl bg-card p-3.5 shadow-[0_20px_40px_-18px_rgba(31,36,51,.35)] ring-1 ring-line">
-            <p className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-lilac"><GraduationCap className="size-3.5" /> YDS denemesi</p>
-            <div className="mt-2 flex items-end gap-3">
-              <p className="font-display text-3xl font-black leading-none">%72</p>
-              <p className="pb-0.5 text-xs font-bold text-mint-deep">+9 bu hafta</p>
-            </div>
-            <div className="mt-2 flex h-8 items-end gap-1">{[40, 52, 48, 60, 66, 72].map((h, k) => <motion.span key={k} className="flex-1 rounded-t bg-lilac/70" initial={{ height: 0 }} animate={{ height: Math.round(h * 0.4) }} transition={{ delay: 0.9 + k * 0.06, duration: 0.5 }} />)}</div>
-          </motion.div>
 
           <motion.div style={c} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.85, type: 'spring', stiffness: 140, damping: 16 }} className="absolute bottom-[4%] left-[6%] flex items-center gap-3 rounded-2xl bg-[#141926] px-4 py-3 text-white shadow-[0_20px_40px_-18px_rgba(0,0,0,.5)]">
             <span className="grid size-10 place-items-center rounded-xl bg-flame/20"><Flame className="size-5 fill-flame text-flame" /></span>
@@ -236,70 +224,108 @@ const HIGO_STEPS: { pose: HigoPose; kicker: string; title: string; text: string;
   { pose: 'music', kicker: 'Oyun', title: 'Kelimeleri oyunla hatırlatır', text: 'Kelime yağmuru, balon kurtar, hafıza kartları. Ezber değil, keyifli tekrar.', bubble: 'Let’s play!' },
 ]
 
+/** Small effects that play around Higo for each role. */
+function HigoFx({ pose }: { pose: HigoPose }) {
+  if (pose === 'cheer')
+    return (
+      <>
+        {Array.from({ length: 14 }, (_, k) => {
+          const ang = (k / 14) * Math.PI * 2
+          return <motion.span key={k} className="absolute left-1/2 top-1/2 size-2.5 rounded-sm" style={{ background: ['#ff5a36', '#ffc233', '#2f7cf6', '#22b573', '#8f7cf8'][k % 5] }} initial={{ x: 0, y: 0, opacity: 1, rotate: 0 }} animate={{ x: Math.cos(ang) * 170, y: Math.sin(ang) * 170, opacity: 0, rotate: 200 }} transition={{ duration: 1.1, ease: 'easeOut', delay: 0.15 }} />
+        })}
+      </>
+    )
+  if (pose === 'think')
+    return (
+      <div className="absolute right-[6%] top-[10%] flex items-end gap-1.5">
+        {[10, 14, 22].map((sz, k) => <motion.span key={k} className="rounded-full bg-white shadow-soft ring-1 ring-black/5" style={{ width: sz, height: sz }} initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.2 + k * 0.18 }} />)}
+        <motion.span className="rounded-2xl bg-white px-3 py-1.5 font-display text-xl font-black text-[#1f2433] shadow-soft ring-1 ring-black/5" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.75 }}>?</motion.span>
+      </div>
+    )
+  if (pose === 'music')
+    return (
+      <>
+        {['♪', '♫', '♪', '♬'].map((n, k) => <motion.span key={k} className="absolute font-display text-3xl font-black text-flame" style={{ left: `${20 + k * 18}%`, top: '30%' }} initial={{ opacity: 0, y: 0 }} animate={{ opacity: [0, 1, 0], y: -90, x: k % 2 ? 16 : -16 }} transition={{ duration: 2, delay: k * 0.35, repeat: Infinity, repeatDelay: 0.4 }}>{n}</motion.span>)}
+      </>
+    )
+  return null
+}
+
+/** How Higo moves into each pose: a hop, a jump, a thoughtful tilt, a sway. */
+const ENTER: Record<string, object> = {
+  wave: { initial: { opacity: 0, y: 60, rotate: -10 }, animate: { opacity: 1, y: 0, rotate: [0, -4, 4, 0] } },
+  cheer: { initial: { opacity: 0, y: 40, scale: 0.8 }, animate: { opacity: 1, y: [40, -50, 0], scale: [0.8, 1.08, 1] } },
+  think: { initial: { opacity: 0, x: -40, rotate: -12 }, animate: { opacity: 1, x: 0, rotate: [-12, 6, -3, 0] } },
+  music: { initial: { opacity: 0, scale: 0.7 }, animate: { opacity: 1, scale: 1, rotate: [0, -6, 6, -6, 0] } },
+}
+
 /**
- * Meet Higo: a stage with the mascot on a soft pedestal, English phrases orbiting
- * him, and four roles that play one after another on their own (click to jump).
- * Each change springs Higo into his new pose.
+ * Meet Higo: as you scroll, Higo stays on screen beside four short roles and
+ * changes pose for each, with its own entrance and a small effect (confetti for
+ * celebrating, thought bubbles for thinking, notes for playing). The line behind
+ * him fills as you go. On phones he rides along at the top of the section.
  */
 export function MeetHigoPro() {
   const ref = useRef<HTMLElement>(null)
-  const inView = useInView(ref, { amount: 0.4 })
-  const { i, pick, progress, bind } = useAutoplay(HIGO_STEPS.length, 4200, inView)
-  const reduced = useReducedMotion()
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start center', 'end center'] })
+  const [i, setI] = useState(0)
+  useMotionValueEvent(scrollYProgress, 'change', (v) => setI(Math.max(0, Math.min(HIGO_STEPS.length - 1, Math.floor(v * HIGO_STEPS.length)))))
+  const fill = useTransform(scrollYProgress, [0, 1], ['0%', '100%'])
   const cur = HIGO_STEPS[i]
-  const orbit = ['Hello!', 'Well done!', 'Let’s go!', 'Nice try!', 'You got it!']
+  const reduced = useReducedMotion()
+  const stage = (small?: boolean) => (
+    <div className={clsx('relative mx-auto grid place-items-center', small ? 'size-36' : 'aspect-square w-full max-w-[400px]')}>
+      <span aria-hidden className={clsx('absolute rounded-full bg-gradient-to-br from-flame/20 via-butter/20 to-sky/15', small ? 'inset-2 blur-xl' : 'inset-[8%] blur-2xl')} />
+      <span aria-hidden className="absolute bottom-[8%] h-[8%] w-[50%] rounded-[50%] bg-ink/10 blur-md" />
+      <AnimatePresence mode="popLayout" initial={false}>
+        <motion.img
+          key={cur.pose}
+          src={higoImg(cur.pose)}
+          alt="Higo"
+          className="relative z-10 w-[72%] drop-shadow-[0_24px_24px_rgba(190,60,20,.25)]"
+          {...(reduced ? {} : ENTER[cur.pose])}
+          exit={{ opacity: 0, scale: 0.85, transition: { duration: 0.2 } }}
+          transition={{ duration: 0.7, ease }}
+        />
+      </AnimatePresence>
+      {!small && !reduced && <AnimatePresence mode="wait"><motion.div key={cur.pose} className="pointer-events-none absolute inset-0" exit={{ opacity: 0 }}><HigoFx pose={cur.pose} /></motion.div></AnimatePresence>}
+      {!small && (
+        <AnimatePresence mode="wait">
+          <motion.span key={cur.bubble} initial={{ opacity: 0, scale: 0.6, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ type: 'spring', stiffness: 380, damping: 20, delay: 0.25 }} className="absolute left-[4%] top-[12%] z-20 rounded-2xl rounded-br-md bg-ink px-3.5 py-2 font-display text-lg font-black text-paper shadow-soft">
+            {cur.bubble}
+          </motion.span>
+        </AnimatePresence>
+      )}
+    </div>
+  )
   return (
-    <section ref={ref} className="px-5 py-10 md:py-16" aria-label="Higo ile tanış" {...bind}>
-      <div className="relative mx-auto grid max-w-6xl items-center gap-10 overflow-hidden rounded-[40px] bg-gradient-to-br from-[#fff6ec] via-[#fff1ea] to-[#fdeee6] p-6 ring-1 ring-black/5 sm:p-10 lg:grid-cols-[1fr_1.05fr] lg:p-14 dark:from-[#1d1a1f] dark:via-[#1b1b22] dark:to-[#1a1c24]">
-        {/* stage */}
-        <div className="relative mx-auto grid aspect-square w-full max-w-[420px] place-items-center">
-          <span aria-hidden className="absolute bottom-[12%] h-[14%] w-[62%] rounded-[50%] bg-gradient-to-b from-flame/25 to-transparent blur-md" />
-          <span aria-hidden className="absolute bottom-[14%] h-[10%] w-[56%] rounded-[50%] border-2 border-flame/20 bg-white/60 dark:bg-white/5" />
-          <motion.div aria-hidden className="absolute inset-[4%] rounded-full border border-dashed border-flame/25" animate={reduced ? undefined : { rotate: 360 }} transition={{ repeat: Infinity, duration: 50, ease: 'linear' }}>
-            {orbit.map((w, k) => {
-              const ang = (k / orbit.length) * Math.PI * 2
-              return (
-                <motion.span key={w} className="absolute -translate-x-1/2 -translate-y-1/2 whitespace-nowrap rounded-full bg-white px-2.5 py-1 text-[11px] font-black text-[#1f2433] shadow-soft ring-1 ring-black/5" style={{ left: `${50 + Math.cos(ang) * 50}%`, top: `${50 + Math.sin(ang) * 50}%` }} animate={reduced ? undefined : { rotate: -360 }} transition={{ repeat: Infinity, duration: 50, ease: 'linear' }}>
-                  {w}
-                </motion.span>
-              )
-            })}
-          </motion.div>
-          <AnimatePresence mode="popLayout" initial={false}>
-            <motion.img key={cur.pose} src={higoImg(cur.pose)} alt="Higo" className="relative z-10 w-[62%] drop-shadow-[0_24px_24px_rgba(190,60,20,.25)]" initial={{ opacity: 0, y: 30, scale: 0.8, rotate: -8 }} animate={{ opacity: 1, y: 0, scale: 1, rotate: 0 }} exit={{ opacity: 0, y: -20, scale: 0.9, rotate: 6 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} />
-          </AnimatePresence>
-          <AnimatePresence mode="wait">
-            <motion.span key={cur.bubble} initial={{ opacity: 0, scale: 0.6, y: 10 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ type: 'spring', stiffness: 380, damping: 20, delay: 0.15 }} className="absolute right-[6%] top-[14%] z-20 rounded-2xl rounded-bl-md bg-[#1f2433] px-3.5 py-2 font-display text-lg font-black text-white shadow-soft">
-              {cur.bubble}
-            </motion.span>
-          </AnimatePresence>
-        </div>
-
-        {/* roles */}
-        <div>
-          <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Tanış: Higo</p>
-          <h2 className="mt-3 font-display text-[clamp(2rem,4.2vw,3.1rem)] font-black leading-[1.08] tracking-tight">Konuşmayı öğrenmiş bir baloncuk. Senin çalışma arkadaşın.</h2>
-          <div className="mt-7 space-y-2">
-            {HIGO_STEPS.map((s, k) => {
-              const on = k === i
-              return (
-                <button key={s.title} onClick={() => pick(k)} aria-current={on} className={clsx('relative block w-full overflow-hidden rounded-2xl px-4 py-3 text-left transition', on ? 'bg-white shadow-[0_12px_30px_-16px_rgba(31,36,51,.35)] dark:bg-white/10' : 'hover:bg-white/50 dark:hover:bg-white/5')}>
-                  <span className="flex items-center gap-3">
-                    <span className={clsx('text-[11px] font-black uppercase tracking-wider', on ? 'text-flame' : 'text-ink-soft')}>{s.kicker}</span>
-                    <span className={clsx('font-display text-lg font-black', !on && 'text-ink/70')}>{s.title}</span>
-                  </span>
-                  <AnimatePresence initial={false}>
-                    {on && (
-                      <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease }} className="overflow-hidden text-[15px] text-ink-soft">
-                        <span className="block pt-1">{s.text}</span>
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                  {on && <span className="absolute inset-x-4 bottom-0 h-[2px] rounded bg-line"><span className="block h-full rounded bg-flame" style={{ width: `${progress * 100}%` }} /></span>}
-                </button>
-              )
-            })}
+    <section ref={ref} className="relative mx-auto max-w-6xl px-5 py-16" aria-label="Higo ile tanış">
+      <div className="mb-6 max-w-2xl lg:mb-0">
+        <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Tanış: Higo</p>
+        <h2 className="mt-3 font-display text-[clamp(2rem,4.2vw,3.1rem)] font-black leading-[1.08] tracking-tight">Konuşmayı öğrenmiş bir baloncuk. Senin çalışma arkadaşın.</h2>
+      </div>
+      <div className="relative grid gap-8 lg:grid-cols-[1fr_1fr]">
+        {/* Higo follows you */}
+        <div className="sticky top-[72px] z-10 -mx-5 bg-card/85 px-5 py-2 backdrop-blur lg:top-0 lg:mx-0 lg:flex lg:h-dvh lg:items-center lg:bg-transparent lg:p-0 lg:backdrop-blur-0">
+          <div className="hidden w-full lg:block">{stage()}</div>
+          <div className="flex items-center gap-3 lg:hidden">
+            <div className="shrink-0">{stage(true)}</div>
+            <AnimatePresence mode="wait"><motion.p key={cur.kicker} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="font-display text-lg font-black">{cur.bubble}</motion.p></AnimatePresence>
           </div>
+        </div>
+        {/* the roles scroll past */}
+        <div className="relative">
+          <span aria-hidden className="absolute left-[19px] top-[20vh] h-[calc(100%-40vh)] w-[3px] rounded bg-line"><motion.span className="block w-full rounded bg-flame" style={{ height: fill }} /></span>
+          {HIGO_STEPS.map((s2, k) => (
+            <motion.div key={s2.title} className="relative flex min-h-[62vh] items-center pl-14 lg:min-h-[80vh]" initial={{ opacity: 0.25 }} whileInView={{ opacity: 1 }} viewport={{ amount: 0.6 }} transition={{ duration: 0.4 }}>
+              <span className={clsx('absolute left-0 grid size-10 place-items-center rounded-full font-display font-black transition-colors duration-300', k <= i ? 'bg-flame text-white' : 'bg-paper-2 text-ink-soft')}>{k + 1}</span>
+              <motion.div initial={{ y: 30 }} whileInView={{ y: 0 }} viewport={{ amount: 0.6 }} transition={{ duration: 0.5, ease }}>
+                <p className="text-xs font-black uppercase tracking-[0.2em] text-flame">{s2.kicker}</p>
+                <h3 className="mt-2 font-display text-[clamp(1.6rem,3vw,2.3rem)] font-black leading-tight">{s2.title}</h3>
+                <p className="mt-3 max-w-md text-lg text-ink-soft">{s2.text}</p>
+              </motion.div>
+            </motion.div>
+          ))}
         </div>
       </div>
     </section>
@@ -392,26 +418,27 @@ export function Strengths() {
 const FREE = ['Tüm ders yolu', 'Seçili hikâyeler', 'Kelime oyunları', 'Günde 10 Defne mesajı']
 
 /**
- * Pricing on a dark stage: a free column and the paid plans, the featured one
- * lifted with a glowing border and Higo on top. Each paid plan shows its monthly
- * equivalent and the saving, so the comparison is instant.
+ * Pricing, light and calm: a free column and the paid plans on the page itself.
+ * Each paid plan shows what it costs per day (the honest way to compare), its
+ * monthly equivalent and the saving; the featured one gets a glowing outline
+ * and Higo on top.
  */
 export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, hazır olunca yüksel.', sub = 'Temel her şey ücretsiz. Premium sınırları kaldırır, canlı ders ve daha fazla konuşma pratiği ekler.' }: { plans: Plan[]; cta?: (p: Plan) => ReactNode; embedded?: boolean; title?: string; sub?: string }) {
   const monthly = plans.find((p) => p.duration_days <= 31) ?? plans[0]
   const perMonth = (p: Plan) => Number(p.price) / Math.max(1, Math.round(p.duration_days / 30))
+  const perDay = (p: Plan) => Number(p.price) / Math.max(1, p.duration_days)
   const saving = (p: Plan) => (monthly && p !== monthly ? Math.round((1 - perMonth(p) / Number(monthly.price)) * 100) : 0)
+  const day = (n: number) => `₺${n.toFixed(n < 10 ? 1 : 0).replace('.', ',')}`
   return (
-    <section id={embedded ? undefined : 'paketler'} className={clsx('relative overflow-hidden bg-[#0f131c] text-white', embedded ? 'rounded-[32px] py-12' : 'py-24')}>
-      <div aria-hidden className="absolute inset-0 [background:radial-gradient(50rem_26rem_at_50%_0%,rgba(255,90,54,.22),transparent_70%)]" />
-      <div aria-hidden className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] [background-size:56px_56px]" />
-      <div className="relative mx-auto max-w-6xl px-5">
+    <section id={embedded ? undefined : 'paketler'} className={clsx('relative', embedded ? 'py-4' : 'py-24')}>
+      <div className="mx-auto max-w-6xl px-5">
         <div className="mx-auto mb-14 max-w-2xl text-center">
-          <p className="text-sm font-black uppercase tracking-[0.2em] text-butter">Paketler</p>
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Paketler</p>
           <h2 className="mt-3 font-display text-[clamp(2.1rem,4.6vw,3.4rem)] font-black leading-[1.06] tracking-tight">{title}</h2>
-          <p className="mt-4 text-lg text-white/65">{sub}</p>
+          <p className="mt-4 text-lg text-ink-soft">{sub}</p>
         </div>
 
- <div className={clsx('grid items-stretch gap-5 md:grid-cols-2', embedded ? 'lg:grid-cols-3' : 'lg:grid-cols-4')}>
+        <div className={clsx('grid items-stretch gap-5 md:grid-cols-2', embedded ? 'lg:grid-cols-3' : 'lg:grid-cols-4')}>
           {!embedded && <PriceCard name="Ücretsiz" tagline="Her zaman" price="₺0" note="Kredi kartı gerekmez" features={FREE} cta={<LinkButton to="/register" block variant="secondary">Ücretsiz başla</LinkButton>} />}
           {plans.map((p) => (
             <PriceCard
@@ -421,7 +448,8 @@ export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, ha
               tagline={p.tagline ?? ''}
               price={tl(p.price)}
               was={p.compare_at_price ? tl(p.compare_at_price) : undefined}
-              note={p !== monthly ? `ayda ${tl(String(Math.round(perMonth(p))))}` : 'aylık yenilenmez'}
+              daily={day(perDay(p))}
+              note={p !== monthly ? `ayda ${tl(String(Math.round(perMonth(p))))}` : 'otomatik yenilenmez'}
               badge={p.is_featured ? 'En popüler' : saving(p) > 0 ? `%${saving(p)} tasarruf` : undefined}
               features={p.features ?? []}
               cta={cta ? cta(p) : <LinkButton to="/register" block variant={p.is_featured ? 'primary' : 'dark'}>{p.is_featured ? 'Premium’a başla' : 'Seç'}</LinkButton>}
@@ -429,33 +457,41 @@ export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, ha
           ))}
         </div>
 
-        <ul className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm font-semibold text-white/55">
-          {(embedded ? ['Otomatik yenileme yok', 'Güvenli ödeme', 'Tek seferlik ödeme'] : ['Otomatik yenileme yok', 'İstediğin an iptal', 'Kurumlara özel fiyat']).map((t) => <li key={t} className="flex items-center gap-1.5"><Check className="size-4 text-mint" strokeWidth={3} />{t}</li>)}
+        <ul className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm font-semibold text-ink-soft">
+          {(embedded ? ['Otomatik yenileme yok', 'Güvenli ödeme', 'Tek seferlik ödeme'] : ['Otomatik yenileme yok', 'İstediğin an iptal', 'Kurumlara özel fiyat']).map((t) => <li key={t} className="flex items-center gap-1.5"><Check className="size-4 text-mint-deep" strokeWidth={3} />{t}</li>)}
         </ul>
       </div>
     </section>
   )
 }
 
-function PriceCard({ name, tagline, price, was, note, badge, features, cta, featured }: { name: string; tagline: string; price: string; was?: string; note: string; badge?: string; features: string[]; cta: ReactNode; featured?: boolean }) {
+function PriceCard({ name, tagline, price, was, note, badge, features, cta, featured, daily }: { name: string; tagline: string; price: string; was?: string; note: string; badge?: string; features: string[]; cta: ReactNode; featured?: boolean; daily?: string }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.5, ease }} className={clsx('relative rounded-[28px] p-[2px]', featured ? 'bg-gradient-to-b from-flame via-[#ff8a3d] to-butter shadow-[0_30px_80px_-20px_rgba(255,90,54,.55)] lg:-my-4' : 'bg-white/10')}>
-      {featured && <img src={higoImg('thumbs')} alt="" className="absolute -right-3 -top-12 z-10 w-20 drop-shadow-[0_10px_12px_rgba(0,0,0,.4)]" />}
-      <div className={clsx('flex h-full flex-col rounded-[26px] p-6', featured ? 'bg-[#1a1f2c]' : 'bg-[#141926]')}>
+    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.5, ease }} className={clsx('relative rounded-[28px] p-[2px]', featured ? 'bg-[conic-gradient(from_var(--a),#ff5a36,#ffc233,#ff8a3d,#ff5a36)] shadow-[0_30px_70px_-30px_rgba(255,90,54,.55)] [animation:spin-border_6s_linear_infinite] lg:-my-3' : 'bg-line')}>
+      {featured && <img src={higoImg('thumbs')} alt="" className="absolute -right-3 -top-12 z-10 w-20 drop-shadow-[0_10px_12px_rgba(160,40,10,.25)]" />}
+      <div className="flex h-full flex-col rounded-[26px] bg-card p-6">
         <div className="flex items-center gap-2">
           <p className="font-display text-xl font-black">{name}</p>
-          {featured && <Crown className="size-4 text-butter" />}
+          {featured && <Crown className="size-4 text-butter-deep" />}
         </div>
-        <p className="text-sm text-white/55">{tagline}</p>
-        {badge && <span className={clsx('mt-3 w-fit rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider', featured ? 'bg-flame text-white' : 'bg-mint/15 text-mint')}>{badge}</span>}
-        <div className="mt-5 flex items-end gap-2">
+        <p className="text-sm text-ink-soft">{tagline}</p>
+        <div className="mt-3 flex min-h-6 flex-wrap gap-1.5">
+          {badge && <span className={clsx('rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider', featured ? 'bg-flame text-white' : 'bg-mint/15 text-mint-deep')}>{badge}</span>}
+        </div>
+        <div className="mt-3 flex items-end gap-2">
           <p className="font-display text-5xl font-black leading-none tracking-tight">{price}</p>
-          {was && <p className="pb-1 text-sm font-bold text-white/40 line-through">{was}</p>}
+          {was && <p className="pb-1 text-sm font-bold text-ink-soft line-through">{was}</p>}
         </div>
-        <p className="mt-1.5 text-sm font-bold text-white/60">{note}</p>
-        <ul className="mt-6 flex-1 space-y-2.5">
+        <p className="mt-1.5 text-sm font-bold text-ink-soft">{note}</p>
+        {daily && (
+          <p className="mt-4 flex items-center gap-2 rounded-2xl bg-paper-2 px-3 py-2 text-sm">
+            <span className="font-display text-lg font-black text-flame">{daily}</span>
+            <span className="font-semibold text-ink-soft">günlük maliyet</span>
+          </p>
+        )}
+        <ul className="mt-5 flex-1 space-y-2.5">
           {features.map((f) => (
-            <li key={f} className="flex gap-2.5 text-[14px] text-white/85"><span className={clsx('mt-0.5 grid size-5 shrink-0 place-items-center rounded-full', featured ? 'bg-flame' : 'bg-white/10')}>{featured ? <Sparkles className="size-3" /> : <Check className="size-3" strokeWidth={3.5} />}</span>{f}</li>
+            <li key={f} className="flex gap-2.5 text-[14px]"><span className={clsx('mt-0.5 grid size-5 shrink-0 place-items-center rounded-full', featured ? 'bg-flame text-white' : 'bg-paper-2 text-ink')}>{featured ? <Sparkles className="size-3" /> : <Check className="size-3" strokeWidth={3.5} />}</span>{f}</li>
           ))}
         </ul>
         <div className="mt-7">{cta}</div>

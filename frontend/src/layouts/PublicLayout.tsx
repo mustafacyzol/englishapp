@@ -14,19 +14,17 @@ import { useSiteConfig } from '@/lib/site'
 import { LinkButton } from '@/components/ui/Button'
 import { PageTransition } from '@/components/motion/Page'
 
-/** Primary sections, the full row shows from lg; below that everything lives in the sheet. */
+/** A short main menu: who we are, who it's for, what it costs, and the blog. */
 const LINKS = [
-  { to: '/#nasil', label: 'Nasıl çalışır' },
-  { to: '/#kimler-icin', label: 'Kimler için' },
-  { to: '/#dene', label: 'Dene' },
+  { to: '/about', label: 'Hakkımızda' },
   { to: '/#kurumlar', label: 'Kurumlar' },
   { to: '/#paketler', label: 'Fiyatlar' },
   { to: '/blog', label: 'Blog' },
 ]
 const MORE = [
-  { to: '/about', label: 'Hakkımızda' },
-  { to: '/placement', label: 'Seviye testi' },
   { to: '/contact', label: 'İletişim' },
+  { to: '/placement', label: 'Seviye testi' },
+  { to: '/#sss', label: 'Sık sorulanlar' },
 ]
 
 /** A link is active when its path matches and, for section links, the hash matches too. */
@@ -91,13 +89,13 @@ function SiteHeader({ onMenu }: { onMenu: () => void }) {
     <header className="safe-top sticky top-0 z-40 px-3 pt-2 sm:px-4 lg:pt-3">
       <div
         className={clsx(
-          'mx-auto flex h-16 items-center gap-3 rounded-full pl-4 pr-2 transition-all duration-300 sm:pl-5',
-          scrolled ? 'max-w-5xl border border-line bg-card/85 shadow-[0_10px_40px_-12px_rgba(31,36,51,.25)] backdrop-blur-xl' : 'max-w-6xl border border-transparent',
+          'mx-auto flex h-16 w-full max-w-6xl items-center gap-2 rounded-full pl-4 pr-2 transition-[background-color,box-shadow,border-color] duration-300 sm:gap-3 sm:pl-5',
+          scrolled ? 'border border-line bg-card/85 shadow-[0_10px_40px_-12px_rgba(31,36,51,.25)] backdrop-blur-xl' : 'border border-transparent',
         )}
       >
         <Link to="/" aria-label="DilGO ana sayfa" className="shrink-0"><Logo /></Link>
 
-        <nav aria-label="Ana menü" className="mx-auto hidden items-center xl:flex" onMouseLeave={() => setHover(null)}>
+        <nav aria-label="Ana menü" className="mx-auto hidden items-center lg:flex" onMouseLeave={() => setHover(null)}>
           {LINKS.map((l) => {
             const active = isActive(l.to)
             return (
@@ -110,8 +108,8 @@ function SiteHeader({ onMenu }: { onMenu: () => void }) {
           })}
         </nav>
 
-        <div className="ml-auto flex shrink-0 items-center gap-1.5 xl:ml-0">
-          <LangSelect className="hidden sm:block" />
+        <div className="ml-auto flex shrink-0 items-center gap-1.5 lg:ml-0">
+          <LangSelect className="hidden xl:block" />
           {user ? (
             <span className="hidden sm:block"><LinkButton to="/learn" size="sm">{t('Uygulamaya git')}</LinkButton></span>
           ) : (
@@ -123,7 +121,7 @@ function SiteHeader({ onMenu }: { onMenu: () => void }) {
           <button
             onClick={onMenu}
             aria-label="Menüyü aç"
-            className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm xl:hidden"
+            className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm lg:hidden"
           >
             <Menu className="size-5" />
           </button>
@@ -161,7 +159,7 @@ function MenuSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
           role="dialog"
           aria-modal="true"
           aria-label="Menü"
-          className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-card xl:hidden"
+          className="fixed inset-0 z-50 flex flex-col overflow-y-auto bg-card lg:hidden"
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -12 }}
@@ -236,49 +234,15 @@ const SOCIAL_ICON: Record<string, (p: { className?: string }) => React.JSX.Eleme
 }
 
 const COLS: { title: string; links: [string, string][] }[] = [
-  {
-    title: 'Uygulama',
-    links: [
-      ['/register', 'Ücretsiz başla'],
-      ['/placement', 'Seviye testi'],
-      ['/#nasil', 'Nasıl çalışır'],
-      ['/#dene', 'Kaydolmadan dene'],
-      ['/#oduller', 'Ödül sistemi'],
-      ['/#paketler', 'Paketler ve fiyatlar'],
-      ['/login', 'Giriş yap'],
-    ],
-  },
-  {
-    title: 'Kurum',
-    links: [
-      ['/about', 'Hakkımızda'],
-      ['/about#okul', 'Bayrak Dil Okulları'],
-      ['/blog', 'Blog'],
-      ['/contact', 'İletişim'],
-      ['/contact?konu=corporate', 'Kurumsal eğitim'],
-      ['/contact?konu=partnership', 'İş birliği'],
-    ],
-  },
-  {
-    title: 'Destek',
-    links: [
-      ['/#sss', 'Sık sorulanlar'],
-      ['/contact?konu=support', 'Teknik destek'],
-      ['/contact?konu=course', 'Kurslarımız hakkında'],
-      ['/forgot-password', 'Şifremi unuttum'],
-      ['/refund', 'İptal ve iade'],
-    ],
-  },
-  {
-    title: 'Yasal',
-    links: [
-      ['/terms', 'Kullanım koşulları'],
-      ['/privacy', 'Gizlilik ve KVKK'],
-      ['/cookies', 'Çerez politikası'],
-      ['/distance-sales', 'Mesafeli satış sözleşmesi'],
-    ],
-  },
+  { title: 'Ürün', links: [['/#nasil', 'Nasıl çalışır'], ['/#paketler', 'Paketler'], ['/placement', 'Seviye testi'], ['/#kurumlar', 'Kurumlar için'], ['/register', 'Ücretsiz başla']] },
+  { title: 'Şirket', links: [['/about', 'Hakkımızda'], ['/about#okul', 'Bayrak Dil Okulları'], ['/blog', 'Blog'], ['/contact?konu=partnership', 'İş birliği'], ['/contact', 'İletişim']] },
+  { title: 'Destek', links: [['/#sss', 'Sık sorulanlar'], ['/contact?konu=support', 'Teknik destek'], ['/contact?konu=course', 'Kurs bilgisi'], ['/contact?konu=corporate', 'Kurumsal eğitim'], ['#bulten', 'Bülten aboneliği']] },
+  { title: 'Yasal', links: [['/terms', 'Kullanım koşulları'], ['/privacy', 'Gizlilik ve KVKK'], ['/cookies', 'Çerez politikası'], ['/distance-sales', 'Mesafeli satış sözleşmesi'], ['/refund', 'İptal ve iade']] },
 ]
+
+/** Social accounts, in this order; the addresses come from Yönetim > Site ayarları. */
+const SOCIAL_ORDER = ['instagram', 'youtube', 'tiktok', 'linkedin', 'x'] as const
+const SOCIAL_NAME: Record<string, string> = { instagram: 'Instagram', youtube: 'YouTube', tiktok: 'TikTok', linkedin: 'LinkedIn', x: 'X' }
 
 /** Newsletter: double opt-in on the server, so a typo never subscribes someone else. */
 function Newsletter() {
@@ -287,10 +251,10 @@ function Newsletter() {
   const sub = useMutation({ mutationFn: () => post<{ message: string }>('/newsletter', { email, source: 'footer', website: trap || undefined }) })
   const err = sub.error as ApiError | null
   return (
-    <div className="relative overflow-hidden rounded-[32px] bg-gradient-to-br from-[#1d2334] to-[#141926] p-6 ring-1 ring-white/10 sm:p-10">
+    <div id="bulten" className="relative scroll-mt-24 overflow-hidden rounded-[32px] bg-gradient-to-br from-[#1d2334] to-[#141926] p-6 ring-1 ring-white/10 sm:p-10">
       <div aria-hidden className="absolute -right-24 -top-24 size-72 rounded-full bg-flame/25 blur-3xl" />
       <div className="relative grid items-center gap-8 md:grid-cols-[auto_1fr_1.2fr]">
-        <img src={higoImg('read')} alt="" className="hidden w-28 drop-shadow-[0_18px_20px_rgba(0,0,0,.35)] md:block" />
+        <img src={higoImg('read')} alt="" className="hidden w-20 drop-shadow-[0_14px_16px_rgba(0,0,0,.35)] md:block" />
         <div>
           <p className="text-xs font-black uppercase tracking-[0.2em] text-butter">Bülten</p>
           <h3 className="mt-2 font-display text-2xl font-black leading-tight text-white sm:text-3xl">Haftada bir ipucu, sıfır spam.</h3>
@@ -326,10 +290,11 @@ function Footer() {
   const { data } = useSiteConfig()
   const email = data?.site?.contact?.email ?? data?.support_email ?? 'destek@dilgo.app'
   // Social links are filled in from the admin panel (Yönetim > Site ayarları).
-  const SOCIAL = Object.entries(data?.site?.social ?? {}).filter(([, href]) => !!href).map(([k, href]) => ({ label: k, href: href as string, icon: SOCIAL_ICON[k] }))
+  const social = (data?.site?.social ?? {}) as Record<string, string | null>
+  const SOCIAL = SOCIAL_ORDER.filter((k) => !!social[k]).map((k) => ({ label: SOCIAL_NAME[k], href: social[k] as string, icon: SOCIAL_ICON[k] }))
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end end'] })
-  const wordY = useTransform(scrollYProgress, [0, 1], ['45%', '0%'])
+  const wordY = useTransform(scrollYProgress, [0, 1], ['30%', '0%'])
   const wordO = useTransform(scrollYProgress, [0, 0.6, 1], [0, 0.4, 1])
 
   return (
@@ -350,12 +315,15 @@ function Footer() {
               <li className="flex items-center gap-2.5"><Smartphone className="size-4 text-mint" /> Web, iOS ve Android</li>
             </ul>
             {SOCIAL.length > 0 && (
-              <div className="mt-6 flex gap-2">
-                {SOCIAL.map((s) => (
-                  <a key={s.label} href={s.href} aria-label={s.label} target="_blank" rel="noreferrer" className="grid size-11 place-items-center rounded-xl bg-white/[0.06] ring-1 ring-white/10 transition hover:bg-flame hover:ring-flame">
-                    <s.icon className="size-5" />
-                  </a>
-                ))}
+              <div className="mt-7">
+                <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-white/40">Bizi takip et</p>
+                <div className="flex flex-wrap gap-2">
+                  {SOCIAL.map((s) => (
+                    <a key={s.label} href={s.href} aria-label={s.label} title={s.label} target="_blank" rel="noreferrer" className="grid size-11 place-items-center rounded-xl bg-white/[0.06] ring-1 ring-white/10 transition hover:-translate-y-0.5 hover:bg-flame hover:ring-flame">
+                      <s.icon className="size-5" />
+                    </a>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -367,9 +335,13 @@ function Footer() {
                 <ul className="space-y-2.5">
                   {c.links.map(([to, l]) => (
                     <li key={to + l}>
-                      <Link to={to} className="group inline-flex items-center gap-1 text-[15px] font-semibold text-white/75 transition hover:text-white">
-                        {l}<ArrowUpRight className="size-3.5 -translate-x-1 opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100" />
-                      </Link>
+                      {to.startsWith('#') ? (
+                        <a href={to} onClick={(e) => { e.preventDefault(); document.getElementById(to.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }} className="group inline-flex items-center gap-1 text-[15px] font-semibold text-white/75 transition hover:text-white">{l}</a>
+                      ) : (
+                        <Link to={to} className="group inline-flex items-center gap-1 text-[15px] font-semibold text-white/75 transition hover:text-white">
+                          {l}<ArrowUpRight className="size-3.5 -translate-x-1 opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100" />
+                        </Link>
+                      )}
                     </li>
                   ))}
                 </ul>
@@ -379,12 +351,12 @@ function Footer() {
         </div>
       </div>
 
-      {/* the closing wordmark */}
-      <div ref={ref} className="relative mt-10 select-none overflow-hidden" aria-hidden>
-        <motion.p style={{ y: wordY, opacity: wordO, backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,.22) 10%, rgba(255,255,255,0) 95%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }} className="text-center font-display text-[25vw] font-black leading-[0.8] tracking-[-0.05em] lg:text-[20rem]">
+      {/* the closing wordmark: rises as the page ends, fully visible, with Higo waving beside it */}
+      <div ref={ref} className="relative mx-auto mt-14 flex max-w-6xl select-none items-end justify-center gap-4 px-5 pb-8" aria-hidden>
+        <motion.p style={{ y: wordY, opacity: wordO, backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.04))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }} className="font-display text-[clamp(4.5rem,17vw,13rem)] font-black leading-[1.05] tracking-[-0.04em]">
           dilgo
         </motion.p>
-        <img src={higoImg('wave')} alt="" className="absolute bottom-[8%] left-1/2 w-[14vw] max-w-[150px] translate-x-[140%] drop-shadow-[0_20px_20px_rgba(0,0,0,.4)]" />
+        <motion.img style={{ y: wordY, opacity: wordO }} src={higoImg('wave')} alt="" className="mb-[4%] w-[clamp(44px,7vw,84px)] shrink-0 drop-shadow-[0_12px_14px_rgba(0,0,0,.4)]" />
       </div>
 
       <div className="safe-bottom relative border-t border-white/10">

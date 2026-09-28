@@ -328,3 +328,13 @@ html[data-age='teen'] {
     background-position: 300% 0;
   }
 }
+
+/* The featured price card's outline slowly turns. */
+@property --a {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+@keyframes spin-border {
+  to { --a: 360deg; }
+}
