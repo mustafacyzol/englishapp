@@ -31,6 +31,7 @@ const GROUPS = [
     { to: '/admin/r/blog-posts', label: 'Blog', icon: Newspaper },
     { to: '/admin/r/testimonials', label: 'Öğrenci yorumları', icon: Quote },
     { to: '/admin/r/contact-messages', label: 'İletişim mesajları', icon: Mail },
+    { to: '/admin/r/newsletter-subscribers', label: 'Bülten aboneleri', icon: Mail },
   ] },
   { title: 'Oyun & Büyüme', items: [
     { to: '/admin/r/achievements', label: 'Rozetler', icon: Trophy, admin: true },

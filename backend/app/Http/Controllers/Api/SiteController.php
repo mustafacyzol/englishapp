@@ -7,7 +7,9 @@ use App\Mail\NoticeMail;
 use App\Models\BlogPost;
 use App\Models\ContactMessage;
 use App\Support\Turnstile;
+use App\Models\NewsletterSubscriber;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\ValidationException;
@@ -70,5 +72,51 @@ class SiteController extends Controller
         ));
 
         return response()->json(['ok' => true, 'message' => 'Mesajın bize ulaştı. En geç 1 iş günü içinde dönüş yapacağız.'], 201);
+    }
+
+    /**
+     * Tips and updates by e-mail, double opt-in: the address only starts receiving
+     * mail after the link in the confirmation e-mail is opened. The answer is the same
+     * whether or not the address was already on the list, so it leaks nothing.
+     */
+    public function subscribe(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'email' => ['required', 'email', 'max:190'],
+            'source' => ['nullable', 'in:footer,blog,landing'],
+            'website' => ['prohibited'],
+        ]);
+        $email = strtolower(trim($data['email']));
+        $sub = NewsletterSubscriber::query()->firstOrNew(['email' => $email]);
+        $fresh = ! $sub->exists || $sub->unsubscribed_at !== null || $sub->confirmed_at === null;
+        if ($fresh) {
+            $sub->fill(['source' => $data['source'] ?? 'footer', 'token' => Str::random(48), 'unsubscribed_at' => null, 'ip' => $request->ip()])->save();
+            $base = config('dilgo.brand.frontend_url');
+            Mail::to($email)->queue(new NoticeMail(
+                'DilGO bültenine kaydını onayla',
+                'Bir tık kaldı',
+                ['Haftalık İngilizce ipuçları ve DilGO yeniliklerini almak için adresini onayla.', 'Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin.'],
+                'Kaydımı onayla',
+                $base.'/newsletter/confirm/'.$sub->token,
+            ));
+        }
+
+        return response()->json(['ok' => true, 'message' => 'Onay bağlantısını e-postana gönderdik. Kutunu kontrol et.'], 202);
+    }
+
+    public function confirmSubscription(string $token): JsonResponse
+    {
+        $sub = NewsletterSubscriber::query()->where('token', $token)->firstOrFail();
+        $sub->update(['confirmed_at' => $sub->confirmed_at ?? now(), 'unsubscribed_at' => null]);
+
+        return response()->json(['ok' => true, 'message' => 'Kaydın onaylandı. İlk ipucu yakında kutunda!']);
+    }
+
+    public function unsubscribe(string $token): JsonResponse
+    {
+        $sub = NewsletterSubscriber::query()->where('token', $token)->firstOrFail();
+        $sub->update(['unsubscribed_at' => now()]);
+
+        return response()->json(['ok' => true, 'message' => 'Bültenden çıktın. Bir daha e-posta göndermeyeceğiz.']);
     }
 }

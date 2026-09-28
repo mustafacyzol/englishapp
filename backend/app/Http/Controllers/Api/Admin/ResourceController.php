@@ -264,6 +264,12 @@ class ResourceController extends Controller
                     'is_active' => ['boolean'],
                 ],
             ],
+            'newsletter-subscribers' => [
+                'model' => Models\NewsletterSubscriber::class, 'search' => ['email'], 'order' => '-id', 'filters' => ['source'], 'role' => 'staff',
+                'rules' => [
+                    'unsubscribed_at' => ['nullable', 'date'],
+                ],
+            ],
             'contact-messages' => [
                 'model' => Models\ContactMessage::class, 'search' => ['name', 'email', 'message'], 'order' => '-id', 'filters' => ['status', 'topic'], 'role' => 'staff',
                 'rules' => [

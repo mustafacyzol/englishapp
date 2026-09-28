@@ -299,6 +299,12 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     c.meta = { ...(c.meta ?? {}), used_at: new Date().toISOString() }
     return { item: c }
   }
+  if (path === '/newsletter') {
+    if (!/^\S+@\S+\.\S+$/.test(body.email ?? '')) throw new DemoError(422, 'Geçerli bir e-posta adresi gir.')
+    return ok('Onay bağlantısını e-postana gönderdik. Kutunu kontrol et.')
+  }
+  if (/^\/newsletter\/confirm\//.test(path)) return ok('Kaydın onaylandı. İlk ipucu yakında kutunda!')
+  if (/^\/newsletter\/unsubscribe\//.test(path)) return ok('Bültenden çıktın. Bir daha e-posta göndermeyeceğiz.')
   if (path === '/auth/admin/challenge') return { method: 'email', retry_after: 60 }
   if (path === '/auth/admin/verify') {
     if (!/^\d{6}$/.test(body.code ?? '')) throw new DemoError(422, 'Kod hatalı.', { code: ['Demo için 6 haneli herhangi bir kod gir (ör. 123456).'] })

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ComponentType } from 'react'
+import { useRef, useState, type ComponentType } from 'react'
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
 import clsx from 'clsx'
@@ -8,103 +8,10 @@ import { sfx } from '@/lib/fx'
 import { SKILL, SKILLS } from '@/lib/skills'
 import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
-import { Defne } from '@/components/game/Defne'
 import { SwipeDeck, type DeckWord, type Outcome } from '@/pages/app/games/WordGames'
 import { DefneMock, DuelMock, ExamMock, PathMock, Phone, ScaledPhone, SwipeMock } from './Mocks'
 
 const ease = [0.22, 1, 0.36, 1] as const
-
-/* ------------------------------------------------------------------ hero */
-
-const ROTATING = ['okuyarak', 'dinleyerek', 'konuşarak', 'yazarak']
-
-function RotatingVerb() {
-  const [i, setI] = useState(0)
-  const reduced = useReducedMotion()
-  useEffect(() => {
-    if (reduced) return
-    const t = setInterval(() => setI((x) => (x + 1) % ROTATING.length), 2200)
-    return () => clearInterval(t)
-  }, [reduced])
-  return (
-    <span className="relative inline-grid">
-      <span className="invisible col-start-1 row-start-1" aria-hidden>dinleyerek</span>
-      <AnimatePresence mode="wait">
-        <motion.span key={i} initial={reduced ? false : { y: '0.5em', opacity: 0, filter: 'blur(4px)' }} animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }} exit={reduced ? undefined : { y: '-0.5em', opacity: 0, filter: 'blur(4px)' }} transition={{ duration: 0.4, ease }} className="col-start-1 row-start-1 text-flame">
-          {ROTATING[i]}
-        </motion.span>
-      </AnimatePresence>
-    </span>
-  )
-}
-
-/**
- * Hero: one clear sentence, two actions, and the product itself in a phone.
- * As the page scrolls, the phone rises and tilts back while the floating cards
- * drift at their own speeds, a gentle depth effect driven purely by scroll.
- */
-export function Hero() {
-  const ref = useRef<HTMLElement>(null)
-  const reduced = useReducedMotion()
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
-  const k = reduced ? 0 : 1
-  const phoneY = useTransform(scrollYProgress, [0, 1], [0, -90 * k])
-  const phoneTilt = useTransform(scrollYProgress, [0, 1], [0, 14 * k])
-  const chipA = useTransform(scrollYProgress, [0, 1], [0, -180 * k])
-  const chipB = useTransform(scrollYProgress, [0, 1], [0, -60 * k])
-  const chipC = useTransform(scrollYProgress, [0, 1], [0, -240 * k])
-  const fade = useTransform(scrollYProgress, [0, 0.8], [1, 0.2])
-
-  return (
-    <section ref={ref} className="relative overflow-hidden">
-      <div aria-hidden className="pointer-events-none absolute inset-0 [background:radial-gradient(48rem_28rem_at_85%_10%,color-mix(in_oklab,var(--color-flame)_12%,transparent),transparent_70%),radial-gradient(40rem_26rem_at_0%_90%,color-mix(in_oklab,var(--color-sky)_10%,transparent),transparent_70%)]" />
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-60 [background-image:linear-gradient(var(--line)_1px,transparent_1px),linear-gradient(90deg,var(--line)_1px,transparent_1px)] [background-size:56px_56px] [mask-image:radial-gradient(90%_70%_at_60%_20%,#000_20%,transparent_70%)]" />
-
-      <div className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-16 pt-10 md:grid-cols-[1.2fr_1fr] md:pb-24 md:pt-16">
-        <motion.div style={{ opacity: fade }}>
-          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="mb-6 inline-flex items-center gap-2 rounded-full border-2 border-line bg-card px-3.5 py-1.5 text-sm font-extrabold">
-            <span className="relative flex size-2"><span className="absolute inline-flex size-full animate-ping rounded-full bg-mint opacity-70" /><span className="relative inline-flex size-2 rounded-full bg-mint" /></span>
-            Bayrak Dil Okulları güvencesiyle
-          </motion.p>
-          <motion.h1 initial={reduced ? false : { opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease }} className="font-display text-[clamp(2.5rem,6.4vw,4.5rem)] font-black leading-[1.02] tracking-tight">
-            İngilizceyi <RotatingVerb /> öğren.
-          </motion.h1>
-          <motion.p initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-            Her gün 5 dakikalık dersler, kaydırarak kelime ezberi, arkadaşlarınla 12 saniyelik düellolar ve seninle konuşan yapay zekâ öğretmen Defne. Hepsi tek uygulamada, senin yaşına ve hedefine göre.
-          </motion.p>
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <LinkButton to="/register" size="lg">Ücretsiz başla</LinkButton>
-            <LinkButton to="/placement" size="lg" variant="secondary">Seviyemi 3 dakikada bul</LinkButton>
-          </motion.div>
-          <ul className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm font-bold text-ink-soft">
-            {['Kredi kartı gerekmez', 'Çocuk, genç ve yetişkin modu', 'Web, iOS ve Android'].map((t) => <li key={t} className="flex items-center gap-1.5"><Check className="size-4 text-mint" strokeWidth={3} /> {t}</li>)}
-          </ul>
-        </motion.div>
-
-        <div className="relative mx-auto w-full max-w-[270px] [perspective:1400px] sm:max-w-[320px]">
-          <motion.div style={{ y: phoneY, rotateX: phoneTilt }} initial={reduced ? false : { opacity: 0, y: 40, rotate: 2 }} animate={{ opacity: 1, y: 0, rotate: 0 }} transition={{ duration: 0.8, ease }}>
-            <Phone><PathMock /></Phone>
-          </motion.div>
-
-          <motion.div style={{ y: chipA }} initial={{ opacity: 0, x: -30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6, type: 'spring', stiffness: 160, damping: 16 }} className="absolute -left-6 top-24 flex items-center gap-2.5 rounded-2xl bg-card p-2.5 pr-4 shadow-soft ring-1 ring-line sm:-left-16">
-            <Img src={rewardImg('flame')} alt="" className="size-10 animate-float object-contain" priority />
-            <div><p className="font-display text-xl font-black leading-none">13 gün</p><p className="text-[11px] font-bold text-ink-soft">seri</p></div>
-          </motion.div>
-
-          <motion.div style={{ y: chipB }} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.75, type: 'spring', stiffness: 160, damping: 16 }} className="absolute -right-4 top-1/2 w-[220px] rounded-2xl bg-card p-3 shadow-soft ring-1 ring-line sm:-right-20">
-            <div className="mb-1.5 flex items-center gap-2"><Defne className="size-7" /><p className="text-sm font-black">Defne</p><span className="ml-auto text-[10px] font-extrabold uppercase tracking-wider text-mint-deep">düzeltti</span></div>
-            <p className="text-sm"><s className="text-berry">I am agree</s> → <b className="text-mint-deep">I agree</b></p>
-          </motion.div>
-
-          <motion.div style={{ y: chipC }} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.9 }} className="absolute -left-4 bottom-16 flex items-center gap-2 rounded-2xl bg-[#11141c] px-3 py-2 text-white shadow-soft sm:-left-12">
-            <span className="font-display text-lg font-black text-butter">x1.75</span>
-            <span className="text-[11px] font-bold leading-tight text-white/80">düello<br />serisi</span>
-          </motion.div>
-        </div>
-      </div>
-    </section>
-  )
-}
 
 /* -------------------------------------------------------- audience tabs */
 

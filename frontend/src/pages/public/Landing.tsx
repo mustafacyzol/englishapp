@@ -1,18 +1,18 @@
 import { useCallback, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { ArrowLeft, ArrowRight, BarChart3, Building2, Check, Mail, Quote, Star } from 'lucide-react'
 import { get } from '@/lib/api'
 import { tl } from '@/lib/format'
 import type { Plan } from '@/lib/types'
-import { rewardImg, storyImg } from '@/lib/assets'
+import { rewardImg } from '@/lib/assets'
 import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
 import { Reveal } from '@/components/motion/Page'
 import { SKILL, SKILLS as SKILL_KEYS } from '@/lib/skills'
-import { Audiences, Bento, FeatureStory, Hero, TryIt } from './landing/Sections'
+import { Audiences, Bento, FeatureStory, TryIt } from './landing/Sections'
+import { FinalCta3D, Hero3D, MeetHigo, TrustBar, WhyStack } from './landing/Story'
 
 export interface Review {
   id: number
@@ -33,17 +33,20 @@ export default function Landing() {
   const reviews = data?.testimonials ?? []
   return (
     <>
-      <Hero />
-      <Ticker reviews={reviews} />
+      <Hero3D learners={data?.learners} />
+      <TrustBar />
       <Audiences />
+      <MeetHigo />
       <FeatureStory />
+      <WhyStack />
       <TryIt />
       <Bento />
       <Reviews reviews={reviews} />
       <ForInstitutions />
       <Pricing plans={data?.plans} />
       <Faq />
-      <FinalCta />
+      <Ticker reviews={reviews} />
+      <FinalCta3D />
     </>
   )
 }
@@ -270,26 +273,6 @@ function Faq() {
 
 /* -------------------------------------------------------------- final cta */
 
-function FinalCta() {
-  return (
-    <section className="px-5 pb-24">
-      <Reveal className="relative mx-auto flex max-w-6xl flex-col items-center gap-8 overflow-hidden rounded-[36px] bg-flame px-6 py-16 text-center text-white md:flex-row md:text-left">
-        <div className="relative flex -space-x-6">
-          {['the-cat-who-loved-tea', 'mias-first-day-in-london', 'the-red-umbrella'].map((s, i) => (
-            <motion.div key={s} initial={{ opacity: 0, y: 20, rotate: -6 }} whileInView={{ opacity: 1, y: i % 2 ? 12 : 0, rotate: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.1, type: 'spring', stiffness: 160, damping: 16 }}>
-              <Img src={storyImg(s)} alt="" className="size-28 rounded-3xl border-4 border-flame object-cover" />
-            </motion.div>
-          ))}
-        </div>
-        <div className="relative flex-1">
-          <h2 className="text-4xl">İlk hikâyen seni bekliyor.</h2>
-          <p className="mt-2 text-lg text-white/85">Hesap oluşturmak 1 dakika. Kredi kartı gerekmez.</p>
-        </div>
-        <Link to="/register" className="press relative rounded-2xl bg-white px-8 py-4 text-lg font-black uppercase tracking-wide text-flame shadow-[0_4px_0_0_rgba(0,0,0,0.2)]">Hemen başla</Link>
-      </Reveal>
-    </section>
-  )
-}
 
 /* ------------------------------------------------------------------- Duel */
 

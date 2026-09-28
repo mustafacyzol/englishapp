@@ -102,6 +102,14 @@ const CONFIG: Record<string, Cfg> = {
     fields: [{ key: 'name', label: 'Ad', type: 'text' }, { key: 'role', label: 'Ünvan / meslek', type: 'text' }, { key: 'avatar', label: 'Fotoğraf URL', type: 'text' }, { key: 'highlight', label: 'Vurgu cümlesi (kayan şeritte görünür)', type: 'text', full: true }, { key: 'quote', label: 'Yorum', type: 'textarea', full: true }, { key: 'rating', label: 'Puan (1-5)', type: 'number' }, { key: 'cefr_level', label: 'Seviye', type: 'select', options: ['', ...CEFR] }, { key: 'streak', label: 'Seri (gün)', type: 'number' }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'is_published', label: 'Yayında', type: 'bool' }],
     defaults: { rating: 5, is_published: true, position: 0 },
   },
+  'newsletter-subscribers': {
+    title: 'Bülten aboneleri',
+    noCreate: true,
+    intro: <p className="mb-5 max-w-2xl text-sm text-ink-soft">Çift onaylı liste: yalnızca e-postadaki bağlantıyı açanlar "onaylı" sayılır. Toplu gönderimde yalnızca onaylı ve çıkmamış adresleri kullanın, her e-postaya çıkış bağlantısı ekleyin.</p>,
+    cols: [{ key: 'email', label: 'E-posta' }, { key: 'source', label: 'Kaynak' }, { key: 'confirmed_at', label: 'Onay', render: (r) => (r.confirmed_at ? 'Onaylı' : 'Bekliyor') }, { key: 'unsubscribed_at', label: 'Durum', render: (r) => (r.unsubscribed_at ? 'Çıktı' : 'Aktif') }, { key: 'created_at', label: 'Tarih', render: (r) => String(r.created_at ?? '').slice(0, 10) }],
+    fields: [{ key: 'unsubscribed_at', label: 'Çıkış tarihi (listeden çıkarmak için doldur)', type: 'date' }],
+    defaults: {},
+  },
   'contact-messages': {
     title: 'İletişim mesajları',
     noCreate: true,
