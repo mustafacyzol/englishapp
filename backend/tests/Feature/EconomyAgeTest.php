@@ -107,4 +107,24 @@ class EconomyAgeTest extends TestCase
         $user->forceFill(['premium_until' => now()->subDay()])->save();
         $this->assertNull($user->fresh()->displayAvatar());
     }
+
+    public function test_age_group_changes_are_limited_and_sessions_capped(): void
+    {
+        $user = $this->learner(['age_group' => 'adult']);
+        $this->actingAs($user)->patchJson('/api/v1/account', ['age_group' => 'kid'])->assertUnprocessable();
+        $this->actingAs($user)->patchJson('/api/v1/account', ['age_group' => 'teen'])->assertOk();
+        $this->actingAs($user->fresh())->patchJson('/api/v1/account', ['age_group' => 'adult'])->assertUnprocessable();
+        $this->travel(31)->days();
+        $this->actingAs($user->fresh())->patchJson('/api/v1/account', ['age_group' => 'adult'])->assertOk();
+
+        $kid = $this->learner(['age_group' => 'kid', 'email' => 'kid@example.com', 'password' => bcrypt('secret-pass-1')]);
+        $this->actingAs($kid)->patchJson('/api/v1/account', ['age_group' => 'adult'])->assertUnprocessable();
+
+        // A fourth device signs the oldest out.
+        foreach (range(1, 4) as $n) {
+            $this->postJson('/api/v1/auth/login', ['login' => 'kid@example.com', 'password' => 'secret-pass-1', 'device' => "d{$n}"])->assertOk();
+        }
+        $this->assertSame(3, $kid->tokens()->count());
+        $this->assertSame(['d2', 'd3', 'd4'], $kid->tokens()->orderBy('id')->pluck('name')->all());
+    }
 }

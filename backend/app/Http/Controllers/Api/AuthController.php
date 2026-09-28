@@ -361,6 +361,7 @@ class AuthController extends Controller
     {
         $expires = $remember ? now()->addDays((int) Settings::get('auth.remember_days', 60)) : now()->addDay();
         $token = $user->createToken(substr(strip_tags($device), 0, 40) ?: 'web', ['user'], $expires);
+        $this->capSessions($user);
 
         return response()->json([
             'token' => $token->plainTextToken,
@@ -368,5 +369,19 @@ class AuthController extends Controller
             'expires_at' => $expires->toIso8601String(),
             'user' => UserPresenter::me($user->fresh()),
         ], $status);
+    }
+
+    /**
+     * A learner account is personal (progress, level, age-appropriate content), so it
+     * can't be a shared family login: past the device limit the oldest sessions end.
+     */
+    private function capSessions(User $user): void
+    {
+        $max = max(1, (int) config('dilgo.security.max_sessions', 3));
+        $old = $user->tokens()->where('name', '!=', 'admin-panel')->orderByDesc('id')->skip($max)->take(100)->pluck('id');
+        if ($old->isNotEmpty()) {
+            $user->tokens()->whereIn('id', $old)->delete();
+            Audit::log('auth.sessions_capped', $user, null, ['ended' => $old->count()]);
+        }
     }
 }

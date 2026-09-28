@@ -18,8 +18,9 @@ import { Img } from '@/components/ui/Img'
 import { AuthShell } from './AuthShell'
 import { Turnstile } from './Turnstile'
 import { SocialButtons } from '@/components/auth/SocialButtons'
-import { MobilePass, PassPanel } from './BoardingPass'
+import { MobilePass, PassPanel } from './PlanPanel'
 import { higoImg } from '@/components/game/Higo'
+import { img } from '@/lib/assets'
 
 const LEVELS: { v: Cefr; t: string; d: string }[] = [
   { v: 'A1', t: 'Sıfırdan başlıyorum', d: 'Birkaç kelime biliyorum' },
@@ -42,15 +43,18 @@ interface Draft {
   level: Cefr
   time: string
   daily: number
+  /** also preparing for an exam, whatever the main goal */
+  examOpt: boolean
 }
 const AGES = [
-  { key: 'kid', label: 'Çocuk', range: '7-12 yaş', emoji: '🧒', bg: 'bg-butter/25', text: 'Oyun gibi dersler, yalnızca yaşıtlarla düello, veli onayıyla.' },
-  { key: 'teen', label: 'Genç', range: '13-17 yaş', emoji: '🎧', bg: 'bg-sky/15', text: 'Okul, dizi, müzik ve oyun dünyasından içerik.' },
-  { key: 'adult', label: 'Yetişkin', range: '18 yaş ve üzeri', emoji: '💼', bg: 'bg-flame/10', text: 'İş, seyahat ve sınav odaklı, doğal sohbetler.' },
+  { key: 'kid', label: 'Çocuk', range: '7-12 yaş', art: 'braids', tint: 'bg-mint/15', points: ['Oyun gibi kısa dersler', 'Yalnızca yaşıtlarla düello', 'Veli onayıyla, reklamsız'] },
+  { key: 'teen', label: 'Genç', range: '13-17 yaş', art: 'cap', tint: 'bg-sky/15', points: ['Okul, dizi, müzik, oyun', 'Arkadaşlarla lig', 'İsteğe bağlı YDT hazırlığı'] },
+  { key: 'adult', label: 'Yetişkin', range: '18 yaş ve üzeri', art: 'beard', tint: 'bg-butter/20', points: ['İş, seyahat, günlük hayat', 'Defne ile konuşma provası', 'İsteğe bağlı sınav modu'] },
 ] as const
 
-const flowFor = (motivation: string): StepKey[] => ['name', 'age', 'goal', ...(motivation === 'exam' ? (['exam'] as const) : []), 'interests', 'focus', 'level', 'time', 'account']
-const EMPTY: Draft = { step: 'name', name: '', age: '', motivation: '', exam: '', examDate: '', interests: [], focus: '', level: 'A1', time: '', daily: 20 }
+/** The exam step only appears for teens and adults who want it: exam as the goal, or ticked as an extra. */
+const flowFor = (d: Pick<Draft, 'motivation' | 'examOpt' | 'age'>): StepKey[] => ['name', 'age', 'goal', ...(d.age !== 'kid' && (d.motivation === 'exam' || d.examOpt) ? (['exam'] as const) : []), 'interests', 'focus', 'level', 'time', 'account']
+const EMPTY: Draft = { step: 'name', name: '', age: '', motivation: '', exam: '', examDate: '', interests: [], focus: '', level: 'A1', time: '', daily: 20, examOpt: false }
 
 export default function Register() {
   const { code } = useParams()
@@ -99,7 +103,7 @@ export default function Register() {
     if (inv.data?.email) setForm((f) => ({ ...f, email: f.email || inv.data!.email }))
   }, [inv.data])
 
-  const flow = useMemo(() => flowFor(d.motivation), [d.motivation])
+  const flow = useMemo(() => flowFor(d), [d.motivation, d.examOpt, d.age]) // eslint-disable-line react-hooks/exhaustive-deps
   const step = Math.max(0, flow.indexOf(d.step))
   const key = flow[step]
   const total = flow.length
@@ -118,8 +122,8 @@ export default function Register() {
     parent_consent: d.age === 'kid' ? form.parent_consent : undefined,
     learning_goal: mot?.goal,
     motivation: d.motivation || undefined,
-    exam_target: d.motivation === 'exam' ? d.exam || undefined : undefined,
-    exam_date: d.motivation === 'exam' && d.examDate ? d.examDate : undefined,
+    exam_target: flow.includes('exam') ? d.exam || undefined : undefined,
+    exam_date: flow.includes('exam') && d.examDate ? d.examDate : undefined,
     interests: d.interests,
     focus_skill: d.focus || undefined,
     study_time: d.time || undefined,
@@ -152,14 +156,14 @@ export default function Register() {
   // Single-choice questions move on by themselves after a short beat.
   const pick = (patch: Partial<Draft>) => () => {
     up(patch)
-    const f = flowFor(patch.motivation ?? d.motivation)
+    const f = flowFor({ ...d, ...patch })
     const nextStep = f[Math.min(f.length - 1, f.indexOf(d.step) + 1)]
     setTimeout(() => up({ step: nextStep }), 220)
   }
 
   const who = firstName ? `${firstName}, ` : ''
   const Q: Record<StepKey, { title: ReactNode; sub: string }> = {
-    age: { title: `${who}kaç yaşındasın?`, sub: 'Dersler, Defne’nin konuşma tarzı, rakiplerin ve ödüller yaşına göre ayarlanır.' },
+    age: { title: `${who}hangi yaş grubundasın?`, sub: 'İçerik, rakiplerin ve ödüller yaşına göre seçilir. Hesabı kim kullanacaksa onu seç.' },
     name: { title: 'Merhaba! Sana nasıl hitap edelim?', sub: 'Birkaç soruyla planını kuralım, 1 dakika sürer.' },
     goal: { title: `${who}İngilizce seni nereye götürsün?`, sub: 'Hedefin derslerdeki örnekleri ve senaryoları belirler.' },
     exam: { title: 'Hangi sınava hazırlanıyorsun?', sub: 'Okuma parçaları, soru tipleri ve Defne’nin geri bildirimleri bu sınava göre ayarlanır.' },
@@ -167,7 +171,7 @@ export default function Register() {
     focus: { title: 'En çok nerede zorlanıyorsun?', sub: 'Bu beceriye biraz daha ağırlık vereceğiz, ama dördünü de dengede tutacağız.' },
     level: { title: 'Şu an hangi seviyedesin?', sub: 'Tahmin etmen yeterli; ilk derslerde kendini ayarlar.' },
     time: { title: 'Ne zaman çalışacaksın?', sub: 'Saatini belirleyenlerin alışkanlığı sürdürme ihtimali çok daha yüksek.' },
-    account: { title: firstName ? `Biniş kartın hazır, ${firstName}.` : 'Biniş kartın hazır.', sub: 'Hesabını oluştur ve ilk dersine başla. Ücretsiz, kredi kartı gerekmez.' },
+    account: { title: firstName ? `Planın hazır, ${firstName}.` : 'Planın hazır.', sub: 'Hesabını oluştur ve ilk dersine başla. Ücretsiz, kredi kartı gerekmez.' },
   }
   const canNext: Record<StepKey, boolean> = { name: d.name.trim().length >= 2, age: !!d.age, goal: !!d.motivation, exam: !!d.exam, interests: d.interests.length > 0, focus: !!d.focus, level: true, time: !!d.time, account: true }
 
@@ -217,25 +221,52 @@ export default function Register() {
 
           {key === 'age' && (
             <div className="grid gap-3 sm:grid-cols-3">
-              {AGES.map((a) => (
-                <button key={a.key} onClick={pick({ age: a.key, ...(a.key === 'kid' && d.motivation === 'exam' ? { motivation: '' } : {}) })} aria-pressed={d.age === a.key} className={clsx('press relative flex flex-col items-start gap-3 rounded-3xl border-2 p-4 text-left transition', d.age === a.key ? 'border-ink shadow-[0_4px_0_0_var(--ink)]' : 'border-line shadow-hard hover:border-ink/25')}>
-                  <span className={clsx('grid size-12 place-items-center rounded-2xl text-2xl', a.bg)} aria-hidden>{a.emoji}</span>
-                  <span>
-                    <span className="block font-display text-xl font-black">{a.label}</span>
-                    <span className="block text-sm font-bold text-ink-soft">{a.range}</span>
-                  </span>
-                  <span className="text-sm text-ink-soft">{a.text}</span>
-                  {d.age === a.key && <Tick />}
-                </button>
-              ))}
+              {AGES.map((a, i) => {
+                const on = d.age === a.key
+                return (
+                  <motion.button
+                    key={a.key}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.06 }}
+                    onClick={pick({ age: a.key, ...(a.key === 'kid' ? { examOpt: false, ...(d.motivation === 'exam' ? { motivation: '' } : {}) } : {}) })}
+                    aria-pressed={on}
+                    className={clsx('group relative flex items-center gap-4 overflow-hidden rounded-3xl border-2 p-3 text-left transition sm:flex-col sm:items-stretch sm:p-0', on ? 'border-flame shadow-[0_0_0_4px_rgba(255,90,54,.14)]' : 'border-line hover:border-ink/25')}
+                  >
+                    <span className={clsx('relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-2xl sm:aspect-[5/4] sm:size-auto sm:rounded-none', a.tint)}>
+                      <img src={img(`avatars/${a.art}.webp`)} alt="" className="size-full object-cover transition duration-500 group-hover:scale-105" />
+                    </span>
+                    <span className="min-w-0 flex-1 sm:px-4 sm:pb-4">
+                      <span className="flex items-baseline justify-between gap-2">
+                        <span className="font-display text-xl font-black">{a.label}</span>
+                        <span className="text-xs font-bold text-ink-soft">{a.range}</span>
+                      </span>
+                      <span className="mt-1.5 hidden space-y-1 sm:block">
+                        {a.points.map((p) => <span key={p} className="flex items-center gap-1.5 text-[13px] text-ink-soft"><Check className="size-3.5 shrink-0 text-mint-deep" strokeWidth={3} />{p}</span>)}
+                      </span>
+                      <span className="mt-0.5 block text-[13px] text-ink-soft sm:hidden">{a.points[0]}</span>
+                    </span>
+                    {on && <Tick />}
+                  </motion.button>
+                )
+              })}
+              <p className="text-center text-xs text-ink-soft sm:col-span-3">Yaş grubunu sonradan ayda bir değiştirebilirsin. Çocuk hesabı veli onayıyla açılır.</p>
             </div>
           )}
 
           {key === 'goal' && (
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {MOTIVATIONS.filter((o) => !(d.age === 'kid' && o.key === 'exam')).map((o) => (
-                <PhotoCard key={o.key} photo={o.photo} title={o.label} text={o.text} selected={d.motivation === o.key} onClick={pick({ motivation: o.key })} />
-              ))}
+            <div className="space-y-4">
+              {d.age !== 'kid' && (
+                <label className="flex cursor-pointer items-center gap-3 rounded-2xl border-2 border-line p-3.5 transition hover:border-ink/25">
+                  <input type="checkbox" checked={d.examOpt} onChange={(e) => up({ examOpt: e.target.checked })} className="size-5 accent-[#e8403a]" />
+                  <span className="text-sm"><b>Ayrıca bir sınava hazırlanıyorum</b> <span className="text-ink-soft">(YDS, YÖKDİL, YDT, IELTS, TOEFL). Seçersen sınav modu açılır.</span></span>
+                </label>
+              )}
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                {MOTIVATIONS.filter((o) => !(d.age === 'kid' && o.key === 'exam')).map((o) => (
+                  <PhotoCard key={o.key} photo={o.photo} title={o.label} text={o.text} selected={d.motivation === o.key} onClick={pick({ motivation: o.key })} />
+                ))}
+              </div>
             </div>
           )}
 

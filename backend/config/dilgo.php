@@ -29,6 +29,10 @@ return [
         'lock_minutes' => (int) env('SECURITY_LOCK_MINUTES', 15),
         'admin_email_otp' => (bool) env('ADMIN_REQUIRE_EMAIL_OTP', true),
         'token_ttl_days' => (int) env('AUTH_TOKEN_TTL_DAYS', 60),
+        // One account is one learner: at most this many devices signed in at once (the oldest is
+        // signed out), and the age group can only change once in this many days.
+        'max_sessions' => (int) env('AUTH_MAX_SESSIONS', 3),
+        'age_group_change_days' => (int) env('AGE_GROUP_CHANGE_DAYS', 30),
         'turnstile_secret' => env('TURNSTILE_SECRET_KEY'),
         'allowed_origins' => array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,capacitor://localhost,https://localhost'))),
     ],

@@ -64,6 +64,7 @@ class User extends Authenticatable
             'exam_date' => 'date',
             'streak_last_date' => 'date',
             'premium_until' => 'datetime',
+            'age_group_changed_at' => 'datetime',
             'locked_until' => 'datetime',
             'hearts_updated_at' => 'datetime',
             'last_login_at' => 'datetime',

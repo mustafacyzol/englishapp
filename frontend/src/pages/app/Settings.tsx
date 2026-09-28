@@ -126,14 +126,14 @@ function AccountTab({ save }: { save: Save }) {
       <Section title="Yaş grubu" hint="İçerik, Defne'nin konuşma tonu, iş ortağı hediyeleri ve rakip eşleşmesi buna göre ayarlanır.">
         <div className="grid grid-cols-3 gap-2">
           {AGE.map((a) => (
-            <button key={a.key} onClick={() => a.key !== 'kid' || user.age_group === 'kid' ? save.mutate({ age_group: a.key }) : undefined} disabled={a.key === 'kid' && user.age_group !== 'kid'} aria-pressed={user.age_group === a.key} className={clsx(pill(user.age_group === a.key), 'flex flex-col items-center gap-0.5 py-3 disabled:opacity-40')}>
+            <button key={a.key} onClick={() => a.key !== user.age_group && save.mutate({ age_group: a.key })} disabled={user.age_group === 'kid' ? a.key !== 'kid' : a.key === 'kid'} aria-pressed={user.age_group === a.key} className={clsx(pill(user.age_group === a.key), 'flex flex-col items-center gap-0.5 py-3 disabled:opacity-40')}>
               <span className="text-xl" aria-hidden>{a.emoji}</span>
               <span>{a.label}</span>
               <span className={clsx('text-[11px] font-semibold', user.age_group === a.key ? 'text-paper/70' : 'text-ink-soft')}>{a.text}</span>
             </button>
           ))}
         </div>
-        <p className="mt-3 text-xs text-ink-soft">Çocuk hesabı veli onayıyla kayıt sırasında açılır.</p>
+        <p className="mt-3 text-xs text-ink-soft">{user.age_group === 'kid' ? 'Çocuk hesabının yaş grubunu veli, destek ekibimize yazarak değiştirebilir.' : 'Yaş grubu ayda bir değiştirilebilir. Çocuk hesabı yalnızca kayıt sırasında veli onayıyla açılır. Her öğrencinin kendi hesabı olmalı: ilerleme, seviye ve içerik kişiye özeldir.'}</p>
       </Section>
       <JoinInstitution />
       <Section title="Oturum" danger>
@@ -306,7 +306,7 @@ function Security() {
   const err = change.error as ApiError | null
 
   return (
-    <Section title="Güvenlik" hint="Şifreni değiştirince diğer cihazlardaki oturumlar kapanır.">
+    <Section title="Güvenlik" hint="Şifreni değiştirince diğer cihazlardaki oturumlar kapanır. Hesabın aynı anda en fazla 3 cihazda açık kalır; yeni bir cihazda giriş yapınca en eskisi kapanır.">
       <form className="mb-6 grid gap-3" onSubmit={(e: FormEvent) => { e.preventDefault(); change.mutate() }}>
         {err && <Alert tone="error">{err.first()}</Alert>}
         <Input label="Mevcut şifre" type="password" autoComplete="current-password" value={pw.current_password} onChange={(e) => setPw({ ...pw, current_password: e.target.value })} />

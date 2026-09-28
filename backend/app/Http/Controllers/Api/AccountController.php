@@ -53,6 +53,21 @@ class AccountController extends Controller
         if (! empty($data['avatar']) && in_array($data['avatar'], config('dilgo.avatars.premium'), true) && ! $user->isPremium()) {
             abort(403, 'Bu avatar Premium üyelere özel.');
         }
+        // Age group guards content, rivals and gifts, so it is not a switch to flip back and
+        // forth (that is how one account gets shared between siblings): children's accounts
+        // are only opened at sign-up with parental consent, and any change waits 30 days.
+        if (array_key_exists('age_group', $data) && $data['age_group'] !== $user->age_group) {
+            if ($data['age_group'] === 'kid' || $user->age_group === 'kid') {
+                abort(422, $user->age_group === 'kid'
+                    ? 'Çocuk hesabının yaş grubu veli tarafından destek ekibimize yazılarak değiştirilebilir.'
+                    : 'Çocuk hesabı yalnızca kayıt sırasında veli onayıyla açılır.');
+            }
+            $days = (int) config('dilgo.security.age_group_change_days', 30);
+            if ($user->age_group && $user->age_group_changed_at && $user->age_group_changed_at->gt(now()->subDays($days))) {
+                abort(422, "Yaş grubunu {$days} günde bir değiştirebilirsin. Sonraki değişiklik: ".$user->age_group_changed_at->addDays($days)->format('d.m.Y'));
+            }
+            $user->forceFill(['age_group_changed_at' => now()]);
+        }
         if (isset($data['preferences'])) {
             // merge and whitelist; never let the client overwrite server-owned keys (frame)
             $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'sound', 'tts_voice', 'tts_rate', 'theme', 'tour_done', 'exam_mode']));
