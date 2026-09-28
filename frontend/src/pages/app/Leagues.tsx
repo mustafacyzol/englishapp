@@ -8,6 +8,7 @@ import { timeLeft } from '@/lib/format'
 import { LeagueEmblem } from '@/components/game/LeagueEmblem'
 import { SkeletonPage } from '@/components/ui/Misc'
 import { Img } from '@/components/ui/Img'
+import { UserAvatar } from '@/components/game/UserAvatar'
 
 interface Standings {
   week_key: string
@@ -17,10 +18,9 @@ interface Standings {
   tiers: string[]
   promote_count: number
   demote_count: number
-  rows: { rank: number; user_id: number; name: string; username: string; xp: number; is_me: boolean; is_premium: boolean }[]
+  rows: { rank: number; user_id: number; name: string; username: string; avatar?: string | null; xp: number; is_me: boolean; is_premium: boolean }[]
 }
 
-const AV = ['bg-sky', 'bg-mint', 'bg-berry', 'bg-flame', 'bg-butter-deep']
 
 export default function Leagues() {
   const { data, isLoading } = useQuery({ queryKey: ['league'], queryFn: () => get<Standings>('/league'), refetchInterval: 30_000 })
@@ -52,7 +52,7 @@ export default function Leagues() {
               {demote && r.rank === n - data.demote_count + 1 && <Divider />}
               <Link to={`/u/${r.username}`} className={clsx('flex items-center gap-3 px-4 py-3', r.is_me ? 'bg-sky/10 ring-2 ring-inset ring-sky/40' : 'hover:bg-paper-2')}>
                 <span className={clsx('grid size-8 place-items-center font-display text-lg font-extrabold', r.rank <= 3 && 'rounded-full text-white', r.rank === 1 && 'bg-butter-deep', r.rank === 2 && 'bg-[#9AA5B8]', r.rank === 3 && 'bg-[#D0874E]', promote && r.rank > 3 && 'text-mint-deep', demote && 'text-berry')}>{r.rank}</span>
-                <span className={clsx('grid size-10 place-items-center rounded-full font-display font-extrabold text-white', AV[r.user_id % AV.length])}>{r.name?.[0]}</span>
+                <UserAvatar name={r.name} avatar={r.avatar} className="size-10 text-xl" />
                 <span className="flex-1 font-bold">
                   {r.is_me ? 'Sen' : r.name}
                   {r.is_premium && <Img src={img('rewards/crown.webp')} alt="Premium" className="ml-1 inline size-5 align-[-3px]" />}

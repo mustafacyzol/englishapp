@@ -9,6 +9,7 @@ import { celebrate, sfx } from '@/lib/fx'
 import { useAuth } from '@/lib/auth'
 import type { RewardSummary } from '@/lib/types'
 import { Img } from '@/components/ui/Img'
+import { higoImg } from './Higo'
 
 const Ctx = createContext<(r: RewardSummary, title?: string) => void>(() => {})
 
@@ -37,7 +38,7 @@ export function RewardProvider({ children }: { children: ReactNode }) {
       <Modal open={!!state} onClose={() => setState(null)}>
         {r && (
           <div className="text-center">
-            <motion.img initial={{ scale: 0.4, y: 20 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 220, damping: 14 }} src={rewardImg(r.level_up ? 'crown' : 'bolt')} alt="" className="mx-auto -mt-2 mb-1 size-24 object-contain drop-shadow-xl" />
+            <motion.img initial={{ scale: 0.4, y: 20 }} animate={{ scale: 1, y: 0 }} transition={{ type: 'spring', stiffness: 220, damping: 14 }} src={r.level_up ? rewardImg('crown') : higoImg('cheer')} alt="" className="mx-auto -mt-2 mb-1 size-24 object-contain drop-shadow-xl" />
             <p className="text-sm font-extrabold uppercase tracking-widest text-flame">{r.level_up ? `Seviye ${r.level}!` : state.title}</p>
             <h2 className="mb-5 mt-1 text-4xl">+{r.xp_gained} XP {r.multiplier > 1 && <span className="text-flame">×{r.multiplier}</span>}</h2>
 

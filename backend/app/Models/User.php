@@ -120,6 +120,16 @@ class User extends Authenticatable
         return $this->role === 'super_admin';
     }
 
+    /** The avatar to show: a premium one only while Premium is active, otherwise none (initial). */
+    public function displayAvatar(): ?string
+    {
+        if (! $this->avatar) {
+            return null;
+        }
+
+        return in_array($this->avatar, config('dilgo.avatars.premium', []), true) && ! $this->isPremium() ? null : $this->avatar;
+    }
+
     public function isPremium(): bool
     {
         if ($this->premium_until !== null && $this->premium_until->isFuture()) {

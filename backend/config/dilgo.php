@@ -108,6 +108,15 @@ return [
         'league_winner_item' => 'mystery_chest',
     ],
 
+    /*
+    | Profile avatars. Files live in frontend/public/img/avatars/{key}.webp.
+    | Premium ones can only be chosen (and are only shown) while Premium is active.
+    */
+    'avatars' => [
+        'standard' => ['fox', 'headphones', 'panda', 'beanie', 'cat', 'reader', 'bear', 'grandpa', 'penguin'],
+        'premium' => ['astronaut', 'wizard', 'lion', 'neon', 'samurai', 'mermaid', 'dragon', 'jazz', 'phoenix'],
+    ],
+
     'referral' => [
         'referee_gems' => 100,       // new user gets on email verification
         'referrer_gems' => 150,      // inviter gets when friend verifies email

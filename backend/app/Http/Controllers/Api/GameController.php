@@ -395,7 +395,7 @@ class GameController extends Controller
                 'qualified' => $list->where('status', '!=', 'pending')->count(),
                 'rewarded' => $list->where('status', 'rewarded')->count(),
             ],
-            'data' => $list->map(fn ($r) => ['name' => $r->referee?->name, 'username' => $r->referee?->username, 'avatar' => $r->referee?->avatar, 'status' => $r->status, 'joined_at' => $r->created_at->toIso8601String()]),
+            'data' => $list->map(fn ($r) => ['name' => $r->referee?->name, 'username' => $r->referee?->username, 'avatar' => $r->referee?->displayAvatar(), 'status' => $r->status, 'joined_at' => $r->created_at->toIso8601String()]),
         ]);
     }
 

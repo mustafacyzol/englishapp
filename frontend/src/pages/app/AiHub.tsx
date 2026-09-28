@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, AudioLines, ChevronRight, Lock, MessageSquareText, PenLine, Phone, Sparkles } from 'lucide-react'
+import { ArrowRight, AudioLines, ChevronRight, Lock, MessageSquareText, Phone, Sparkles } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { rewardImg, scenarioImg } from '@/lib/assets'
 import { TUTOR } from '@/lib/tutor'
@@ -107,12 +107,64 @@ export default function AiHub() {
 
       {/* ---------------------------------------------------------- Modes */}
       <section>
-        <h2 className="text-2xl">Nasıl çalışmak istersin?</h2>
-        <p className="mb-5 text-ink-soft">Her mod farklı becerilere puan yazar, dengede kal.</p>
-        <div className="grid gap-4 md:grid-cols-3">
-          <ModeCard icon={AudioLines} title="Sesli arama" text="Defne’yi görerek konuş; telaffuzun ve cümlen anında düzelsin." skills={['speaking', 'listening']} onClick={() => start.mutate({ mode: 'speaking', call: true })} loading={start.isPending} />
-          <ModeCard icon={MessageSquareText} title="Yazılı sohbet" text="Acele etmeden yaz, her mesajda küçük bir düzeltme al." skills={['writing', 'reading']} onClick={() => start.mutate({ mode: 'chat' })} loading={start.isPending} />
-          <ModeCard icon={PenLine} title="Yazma atölyesi" text="Bir görev seç, metnini yaz; Defne hataları üstünde işaretlesin." skills={['writing']} to="/ai/writing" />
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-2">
+          <div>
+            <h2 className="text-2xl">Nasıl çalışmak istersin?</h2>
+            <p className="text-ink-soft">Her mod farklı becerilere puan yazar. Bugün hangisi sana iyi gelir?</p>
+          </div>
+        </div>
+        <div className="grid gap-4 lg:grid-cols-[1.35fr_1fr] lg:grid-rows-2">
+          {/* The featured mode: talking, the hardest skill to practise alone. */}
+          <motion.button
+            whileHover={{ y: -3 }}
+            whileTap={{ scale: 0.99 }}
+            disabled={start.isPending}
+            onClick={() => start.mutate({ mode: 'speaking', call: true })}
+            className="group relative isolate flex min-h-[260px] overflow-hidden rounded-[28px] bg-[#141926] text-left text-white lg:row-span-2 lg:min-h-[340px]"
+          >
+            <Img src={TUTOR.portrait} alt="" className="absolute inset-y-0 right-0 -z-10 h-full w-[62%] object-cover object-top transition duration-700 group-hover:scale-105" />
+            <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-r from-[#141926] via-[#141926]/90 to-transparent" />
+            <div className="flex max-w-[62%] flex-col p-6 sm:p-7">
+              <span className="flex w-fit items-center gap-1.5 rounded-full bg-sage px-2.5 py-1 text-[11px] font-black uppercase tracking-wider"><span className="size-1.5 animate-pulse rounded-full bg-white" /> Önerilen</span>
+              <p className="mt-4 font-display text-3xl font-black leading-[1.05] sm:text-4xl">Sesli arama</p>
+              <p className="mt-2 text-[15px] leading-relaxed text-white/75">{TUTOR.name}’yi görerek konuş. Telaffuzun ve cümlen anında, nazikçe düzelsin.</p>
+              <div className="mt-4 flex flex-wrap gap-1.5">
+                {(['speaking', 'listening'] as SkillKey[]).map((k) => <SkillChip key={k} k={k} dark />)}
+                <span className="rounded-full bg-white/10 px-2 py-0.5 text-[11px] font-extrabold text-white/80">5-10 dk</span>
+              </div>
+              <span className="mt-auto flex w-fit items-center gap-2 rounded-2xl bg-white px-4 py-2.5 pt-2.5 font-extrabold text-[#141926] transition group-hover:gap-3">
+                <Phone className="size-4" /> Aramayı başlat
+                {start.isPending && <span className="size-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-50" />}
+              </span>
+            </div>
+          </motion.button>
+
+          <ModeTile
+            title="Yazılı sohbet"
+            text="Acele etmeden yaz, her mesajda küçük bir düzeltme al."
+            skills={['writing', 'reading']}
+            minutes="Serbest"
+            onClick={() => start.mutate({ mode: 'chat' })}
+            loading={start.isPending}
+            preview={
+              <div className="flex w-full flex-col gap-1.5 text-[11px] font-bold">
+                <span className="w-fit max-w-[85%] rounded-2xl rounded-bl-md bg-sage/15 px-2.5 py-1.5 text-ink">What did you do today?</span>
+                <span className="ml-auto w-fit max-w-[85%] rounded-2xl rounded-br-md bg-ink px-2.5 py-1.5 text-paper">I <s className="opacity-60">go</s> <b className="text-butter">went</b> to the gym.</span>
+              </div>
+            }
+          />
+          <ModeTile
+            title="Yazma atölyesi"
+            text="Bir görev seç, metnini yaz; Defne hataları üstünde işaretlesin."
+            skills={['writing']}
+            minutes="10-15 dk"
+            to="/ai/writing"
+            preview={
+              <p className="w-full rounded-xl bg-paper-2 px-2.5 py-2 text-[11px] font-semibold leading-relaxed text-ink">
+                Last summer I <u className="decoration-berry decoration-wavy decoration-2 underline-offset-2">have visited</u> my grandmother in İzmir and we <u className="decoration-mint decoration-2 underline-offset-2">cooked together</u>.
+              </p>
+            }
+          />
         </div>
       </section>
 
@@ -194,23 +246,29 @@ export default function AiHub() {
   )
 }
 
-function ModeCard({ icon: Icon, title, text, skills, onClick, to, loading }: { icon: typeof PenLine; title: string; text: string; skills: SkillKey[]; onClick?: () => void; to?: string; loading?: boolean }) {
-  const cls = 'press group relative flex h-full flex-col rounded-3xl border-2 border-line bg-card p-5 text-left shadow-hard transition hover:-translate-y-0.5 hover:border-ink/15'
+function SkillChip({ k, dark }: { k: SkillKey; dark?: boolean }) {
+  const S = SKILL[k]
+  return (
+    <span className={clsx('flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold', dark ? 'bg-white/12 text-white' : [S.soft, S.text])}>
+      <S.icon className="size-3" /> {S.label}
+    </span>
+  )
+}
+
+function ModeTile({ title, text, skills, minutes, preview, onClick, to, loading }: { title: string; text: string; skills: SkillKey[]; minutes: string; preview: React.ReactNode; onClick?: () => void; to?: string; loading?: boolean }) {
+  const cls = 'group relative grid h-full grid-cols-[1fr_auto] items-center gap-4 overflow-hidden rounded-[28px] border-2 border-line bg-card p-5 text-left transition hover:-translate-y-0.5 hover:border-ink/15 hover:shadow-soft sm:grid-cols-[1fr_190px]'
   const inner = (
     <>
-      <span className="grid size-12 place-items-center rounded-2xl bg-ink text-paper transition group-hover:scale-105"><Icon className="size-6" /></span>
-      <p className="mt-4 font-display text-xl font-black leading-tight">{title}</p>
-      <p className="mt-1 flex-1 text-sm text-ink-soft">{text}</p>
-      <div className="mt-4 flex flex-wrap gap-1.5">
-        {skills.map((k) => {
-          const S = SKILL[k]
-          return (
-            <span key={k} className={clsx('flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-extrabold', S.soft, S.text)}>
-              <S.icon className="size-3" /> {S.label}
-            </span>
-          )
-        })}
+      <div className="min-w-0">
+        <p className="font-display text-xl font-black leading-tight">{title}</p>
+        <p className="mt-1 text-sm text-ink-soft">{text}</p>
+        <div className="mt-3 flex flex-wrap items-center gap-1.5">
+          {skills.map((k) => <SkillChip key={k} k={k} />)}
+          <span className="rounded-full bg-paper-2 px-2 py-0.5 text-[11px] font-extrabold text-ink-soft">{minutes}</span>
+        </div>
       </div>
+      <div className="hidden transition duration-300 group-hover:-rotate-1 group-hover:scale-[1.03] sm:flex">{preview}</div>
+      <ChevronRight className="size-5 text-ink-soft transition group-hover:translate-x-1 sm:hidden" />
       {loading && <span className="absolute right-4 top-4 size-4 animate-spin rounded-full border-2 border-current border-t-transparent opacity-40" />}
     </>
   )

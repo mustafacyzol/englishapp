@@ -1,8 +1,9 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { SkillMeter } from '@/components/game/SkillMeter'
 import clsx from 'clsx'
-import { BookOpen, Brain, ChevronRight, Clock, Flame, Layers, Mic, Settings, Share2, Target, Zap } from 'lucide-react'
+import { BookOpen, Brain, ChevronRight, Clock, Flame, Layers, Mic, Pencil, Settings, Share2, Target, Zap } from 'lucide-react'
 import { get } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { dateTR, num } from '@/lib/format'
@@ -13,26 +14,18 @@ import { Progress } from '@/components/ui/Misc'
 import { img } from '@/lib/assets'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
+import { UserAvatar } from '@/components/game/UserAvatar'
+import { AvatarPicker } from '@/components/game/AvatarPicker'
 
-/** Profile frames bought in the shop. */
-const FRAMES: Record<string, string> = {
-  gold: 'ring-4 ring-butter ring-offset-2 ring-offset-paper',
-  flame: 'ring-4 ring-flame ring-offset-2 ring-offset-paper',
-  emerald: 'ring-4 ring-mint ring-offset-2 ring-offset-paper',
-  sky: 'ring-4 ring-sky ring-offset-2 ring-offset-paper',
-}
-
-export function Avatar({ name, frame, size = 'size-24' }: { name: string; frame?: string; size?: string }) {
-  return (
-    <span className={clsx('relative grid place-items-center rounded-[28px] border-4 border-card bg-sky font-display text-4xl font-extrabold text-white shadow-lg', size, frame && FRAMES[frame])}>
-      {name[0]}
-    </span>
-  )
+/** Kept for other screens: the profile picture at the large profile size. */
+export function Avatar({ name, avatar, frame, size = 'size-24' }: { name: string; avatar?: string | null; frame?: string; size?: string }) {
+  return <UserAvatar name={name} avatar={avatar} frame={frame} className={clsx('border-4 border-card text-4xl shadow-lg', size)} rounded="rounded-[28px]" />
 }
 
 export default function Profile() {
   const { user } = useAuth()
   const toast = useToast()
+  const [picker, setPicker] = useState(false)
   const stats = useQuery({ queryKey: ['stats'], queryFn: () => get<{ data: Record<string, number> }>('/me/stats') })
   const cal = useQuery({ queryKey: ['calendar'], queryFn: () => get<{ data: { date: string; xp: number; goal_met: boolean; freeze_used: boolean }[] }>('/me/calendar') })
   const ach = useQuery({ queryKey: ['achievements'], queryFn: () => get<{ data: Achievement[] }>('/achievements') })
@@ -58,7 +51,11 @@ export default function Profile() {
       <section className="ink-card relative mb-6 overflow-hidden p-6">
         <Img src={img('photos/classroom.webp')} alt="" className="absolute inset-x-0 top-0 h-20 w-full object-cover opacity-90" />
         <div className="relative flex flex-wrap items-end gap-5 pt-6">
-          <Avatar name={user.name} frame={user.preferences.frame} />
+          <button onClick={() => setPicker(true)} className="group relative rounded-[28px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/30" aria-label="Avatarını değiştir">
+            <Avatar name={user.name} avatar={user.avatar} frame={user.preferences.frame} />
+            <span className="absolute -bottom-1 -right-1 grid size-9 place-items-center rounded-full border-4 border-card bg-ink text-paper transition group-hover:scale-110"><Pencil className="size-3.5" /></span>
+          </button>
+          <AvatarPicker open={picker} onClose={() => setPicker(false)} />
           <div className="min-w-0 flex-1 pt-10 sm:pt-12">
             <h1 className="text-3xl font-extrabold">{user.name}</h1>
             <p className="font-semibold text-ink-soft">@{user.username} · {dateTR(user.created_at)} tarihinden beri</p>

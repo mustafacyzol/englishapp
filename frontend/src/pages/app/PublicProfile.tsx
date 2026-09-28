@@ -8,7 +8,7 @@ import { LeagueEmblem } from '@/components/game/LeagueEmblem'
 import { Spinner } from '@/components/ui/Misc'
 import { Avatar } from './Profile'
 
-interface Pub { user: { name: string; username: string; cefr_level: string; xp_total: number; level: number; streak: number; league_tier: number; is_premium: boolean; joined_at: string }; badges: { id: number; title: string; tier: 'bronze' | 'silver' | 'gold' | 'legend'; icon: string; category?: string }[] }
+interface Pub { user: { name: string; username: string; avatar?: string | null; cefr_level: string; xp_total: number; level: number; streak: number; league_tier: number; is_premium: boolean; joined_at: string }; badges: { id: number; title: string; tier: 'bronze' | 'silver' | 'gold' | 'legend'; icon: string; category?: string }[] }
 
 export default function PublicProfile() {
   const { username } = useParams()
@@ -18,7 +18,7 @@ export default function PublicProfile() {
   return (
     <div className="mx-auto max-w-xl">
       <div className="ink-card p-6 text-center">
-        <Avatar name={u.name} size="size-24 mx-auto" />
+        <Avatar name={u.name} avatar={u.avatar} size="size-24 mx-auto" />
         <h1 className="mt-4 text-3xl font-extrabold">{u.name} {u.is_premium && <Crown className="inline size-6 text-flame" />}</h1>
         <p className="text-ink-soft">@{u.username} · {dateTR(u.joined_at)}</p>
         <div className="mt-5 grid grid-cols-3 gap-3">

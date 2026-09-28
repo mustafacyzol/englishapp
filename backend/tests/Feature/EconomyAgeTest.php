@@ -92,4 +92,19 @@ class EconomyAgeTest extends TestCase
         Http::assertSentCount(1); // second call served from cache
         \Illuminate\Support\Facades\Storage::disk('local')->deleteDirectory('tts');
     }
+
+    public function test_avatars_standard_for_all_premium_only_while_premium(): void
+    {
+        $user = $this->learner();
+        $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'fox'])->assertOk()->assertJsonPath('user.avatar', 'fox');
+        $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'dragon'])->assertForbidden();
+        $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'not-a-real-one'])->assertUnprocessable();
+
+        $user->forceFill(['premium_until' => now()->addDays(3)])->save();
+        $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'dragon'])->assertOk()->assertJsonPath('user.avatar', 'dragon');
+
+        // When Premium ends the premium avatar is no longer shown.
+        $user->forceFill(['premium_until' => now()->subDay()])->save();
+        $this->assertNull($user->fresh()->displayAvatar());
+    }
 }

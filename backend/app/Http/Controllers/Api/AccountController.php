@@ -24,7 +24,7 @@ class AccountController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'min:2', 'max:60'],
             'username' => ['sometimes', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9_.]+$/', Rule::unique('users', 'username')->ignore($user->id)],
-            'avatar' => ['sometimes', 'nullable', 'string', 'max:60', 'regex:/^[a-z0-9_-]+$/'],
+            'avatar' => ['sometimes', 'nullable', Rule::in(array_merge(config('dilgo.avatars.standard'), config('dilgo.avatars.premium')))],
             'cefr_level' => ['sometimes', 'in:A1,A2,B1,B2,C1,C2'],
             'learning_goal' => ['sometimes', 'nullable', 'in:travel,career,exam,school,fun'],
             'daily_goal_xp' => ['sometimes', 'integer', Rule::in(config('dilgo.gamification.daily_goal_options'))],
@@ -50,6 +50,9 @@ class AccountController extends Controller
             'preferences.exam_mode' => ['sometimes', 'boolean'],
         ], ['username.regex' => 'Kullanıcı adı yalnızca küçük harf, rakam, nokta ve alt çizgi içerebilir.']);
 
+        if (! empty($data['avatar']) && in_array($data['avatar'], config('dilgo.avatars.premium'), true) && ! $user->isPremium()) {
+            abort(403, 'Bu avatar Premium üyelere özel.');
+        }
         if (isset($data['preferences'])) {
             // merge and whitelist; never let the client overwrite server-owned keys (frame)
             $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'sound', 'tts_voice', 'tts_rate', 'theme', 'tour_done', 'exam_mode']));

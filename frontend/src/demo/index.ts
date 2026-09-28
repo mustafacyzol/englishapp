@@ -4,6 +4,7 @@
  * Mutations update an in-memory copy, and Defne's replies come from a small rule-based script.
  */
 import fixture from './fixture.json'
+import { isPremiumAvatar } from '@/lib/avatars'
 
 type Json = any // eslint-disable-line @typescript-eslint/no-explicit-any
 const F = fixture as { get: Record<string, Json>; post: Record<string, Json>; err: Record<string, { status: number; message: string }>; fresh?: Record<string, Json> }
@@ -557,6 +558,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
 
   // --- account
   if (path === '/account' && method === 'PATCH') {
+    if (body.avatar && isPremiumAvatar(body.avatar) && !me().premium?.active) throw new DemoError(403, 'Bu avatar Premium üyelere özel.')
     Object.assign(me(), body, body.preferences ? { preferences: { ...me().preferences, ...body.preferences } } : {})
     if (db['/exam'] && 'exam_target' in body) db['/exam'].target = body.exam_target
     if (db['/exam'] && 'exam_date' in body) {

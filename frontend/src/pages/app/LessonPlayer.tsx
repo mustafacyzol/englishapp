@@ -5,7 +5,8 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { Check, Gem, Infinity as InfinityIcon, Keyboard, Mic, MicOff, Snail, Volume2, X } from 'lucide-react'
 import { img, rewardImg } from '@/lib/assets'
-import { Defne, DefnePose } from '@/components/game/Defne'
+import { Defne } from '@/components/game/Defne'
+import { higoImg } from '@/components/game/Higo'
 import { SKILL } from '@/lib/skills'
 import type { SkillKey } from '@/lib/types'
 import { ApiError, get, post } from '@/lib/api'
@@ -243,11 +244,9 @@ export default function LessonPlayer() {
         <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center">
           {checked !== null && (
             <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative flex flex-1 items-center gap-3">
-              {/* Defne reacts from a round portrait, badged with the verdict, instead of floating above the button. */}
-              <motion.span initial={{ scale: 0.6, rotate: -8 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 380, damping: 16 }} className="relative shrink-0">
-                <span className={clsx('block size-14 overflow-hidden rounded-full border-[3px] sm:size-16', checked ? 'border-mint bg-mint/20' : 'border-berry bg-berry/15')}>
-                  <DefnePose pose={checked ? 'cheer' : 'think'} className="size-full scale-[1.35] object-cover object-top pt-1" />
-                </span>
+              {/* Higo reacts between questions: jumps for joy on a right answer, cheers you on after a miss. */}
+              <motion.span initial={{ scale: 0.4, y: 20, rotate: -10 }} animate={{ scale: 1, y: 0, rotate: 0 }} transition={{ type: 'spring', stiffness: 420, damping: 14 }} className="relative shrink-0">
+                <img src={higoImg(checked ? (combo >= 3 ? 'music' : 'cheer') : 'thumbs')} alt="Higo" className="block size-16 object-contain drop-shadow-[0_8px_10px_rgba(160,40,10,.2)] sm:size-[72px]" />
                 <span className={clsx('absolute -bottom-1 -right-1 grid size-6 place-items-center rounded-full border-2 border-card text-white', checked ? 'bg-mint' : 'bg-berry')}>
                   {checked ? <Check className="size-3.5" strokeWidth={4} /> : <X className="size-3.5" strokeWidth={4} />}
                 </span>
@@ -274,7 +273,7 @@ export default function LessonPlayer() {
 
       <Modal open={outOfHearts} onClose={() => nav('/learn')} dismissable={false}>
         <div className="text-center">
-          <Img src={rewardImg('heart')} alt="" className="mx-auto mb-3 size-24 object-contain grayscale" />
+          <img src={higoImg('think')} alt="Higo" className="mx-auto mb-3 size-24 object-contain" />
           <h2 className="text-2xl font-extrabold">Canın bitti!</h2>
           <p className="mb-6 mt-2 text-ink-soft">Canlar her 30 dakikada bir yenilenir. Hemen devam etmek istersen elmasla doldurabilir ya da Premium ile sınırsız can alabilirsin.</p>
           <div className="grid gap-3">

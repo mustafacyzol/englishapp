@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, BookmarkPlus, Brain, Check, Headphones, Layers, Puzzle, Search, Shuffle, TextCursorInput, Timer, Trash2, Volume2, X, Zap } from 'lucide-react'
+import { ArrowRight, BookmarkPlus, Brain, Check, CloudRain, Headphones, Layers, PartyPopper, Puzzle, Search, Shuffle, TextCursorInput, Timer, Trash2, Volume2, X, Zap } from 'lucide-react'
 import { del, get, post } from '@/lib/api'
 import { speak } from '@/lib/speech'
 import { celebrate, sfx } from '@/lib/fx'
@@ -11,20 +11,23 @@ import type { RewardSummary } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Empty, PageHeader, SkeletonPage, Spinner, Tabs } from '@/components/ui/Misc'
 import { useReward } from '@/components/game/RewardProvider'
-import { Cloze, ListenType, Memory, QuickChoice, Restart, Scramble, SpeedMatch, SwipeDeck, TrueFalse, type DeckWord, type Outcome } from './games/WordGames'
+import { BalloonRescue, Cloze, ListenType, Memory, QuickChoice, WordRain, Restart, Scramble, SpeedMatch, SwipeDeck, TrueFalse, type DeckWord, type Outcome } from './games/WordGames'
 
 interface Word { id: number; word: string; translation: string | null; example: string | null; interval_days: number; due_at: string | null; source: string | null }
-type GameKey = 'swipe' | 'match' | 'truefalse' | 'listen' | 'scramble' | 'memory' | 'cloze' | 'choice'
+type GameKey = 'swipe' | 'match' | 'truefalse' | 'listen' | 'scramble' | 'memory' | 'cloze' | 'choice' | 'rain' | 'balloon'
 
-const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; tone: string; badge?: string }[] = [
-  { key: 'swipe', title: 'Kaydır kartları', text: 'Sağa biliyorum, sola tekrar. Mobilde parmağınla kaydır.', icon: Layers, tone: 'from-flame to-berry', badge: 'Favori' },
-  { key: 'match', title: 'Hızlı eşleştir', text: '45 saniyede İngilizce ve Türkçeyi eşle, seri yap.', icon: Timer, tone: 'from-sky to-lilac' },
-  { key: 'truefalse', title: 'Doğru mu?', text: '30 saniyelik blitz: çeviri doğru mu, yanlış mı?', icon: Check, tone: 'from-mint to-sage' },
-  { key: 'listen', title: 'Dinle ve yaz', text: 'Duyduğun kelimeyi yaz, kulağını ve yazımını çalıştır.', icon: Headphones, tone: 'from-lilac to-sky' },
-  { key: 'scramble', title: 'Harf karıştır', text: 'Karışık harflerden kelimeyi yeniden kur.', icon: Puzzle, tone: 'from-butter to-flame' },
-  { key: 'memory', title: 'Hafıza kartları', text: 'Kartları çevir, İngilizceyi Türkçesiyle eşle.', icon: Brain, tone: 'from-berry to-lilac' },
-  { key: 'cloze', title: 'Cümlede boşluk', text: 'Kelimeyi kendi örnek cümlesinde yerine koy.', icon: TextCursorInput, tone: 'from-sage to-mint' },
-  { key: 'choice', title: 'Hızlı anlam', text: 'On kelime, dört seçenek. Klavyede 1-4.', icon: Zap, tone: 'from-flame to-butter' },
+type Group = 'quick' | 'memory' | 'spell'
+const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; tone: string; badge?: string; group: Group }[] = [
+  { group: 'memory', key: 'swipe', title: 'Kaydır kartları', text: 'Sağa biliyorum, sola tekrar. Mobilde parmağınla kaydır.', icon: Layers, tone: 'from-flame to-berry', badge: 'Favori' },
+  { group: 'quick', key: 'match', title: 'Hızlı eşleştir', text: '45 saniyede İngilizce ve Türkçeyi eşle, seri yap.', icon: Timer, tone: 'from-sky to-lilac' },
+  { group: 'quick', key: 'truefalse', title: 'Doğru mu?', text: '30 saniyelik blitz: çeviri doğru mu, yanlış mı?', icon: Check, tone: 'from-mint to-sage' },
+  { group: 'spell', key: 'listen', title: 'Dinle ve yaz', text: 'Duyduğun kelimeyi yaz, kulağını ve yazımını çalıştır.', icon: Headphones, tone: 'from-lilac to-sky' },
+  { group: 'spell', key: 'scramble', title: 'Harf karıştır', text: 'Karışık harflerden kelimeyi yeniden kur.', icon: Puzzle, tone: 'from-butter to-flame' },
+  { group: 'memory', key: 'memory', title: 'Hafıza kartları', text: 'Kartları çevir, İngilizceyi Türkçesiyle eşle.', icon: Brain, tone: 'from-berry to-lilac' },
+  { group: 'spell', key: 'cloze', title: 'Cümlede boşluk', text: 'Kelimeyi kendi örnek cümlesinde yerine koy.', icon: TextCursorInput, tone: 'from-sage to-mint' },
+  { group: 'quick', key: 'rain', title: 'Kelime yağmuru', text: 'Kelimeler yağıyor! Doğrusuna yere düşmeden dokun.', icon: CloudRain, tone: 'from-sky to-mint', badge: 'Yeni' },
+  { group: 'spell', key: 'balloon', title: 'Balon kurtar', text: 'Harf harf tahmin et, Higo’nun balonlarını uçurma.', icon: PartyPopper, tone: 'from-berry to-butter', badge: 'Yeni' },
+  { group: 'quick', key: 'choice', title: 'Hızlı anlam', text: 'On kelime, dört seçenek. Klavyede 1-4.', icon: Zap, tone: 'from-flame to-butter' },
 ]
 
 export default function Practice() {
@@ -55,32 +58,64 @@ function GamePicker({ onPick }: { onPick: (g: GameKey) => void }) {
           <p className="basis-full text-sm text-ink-soft sm:ml-auto sm:basis-auto">{st.total < 8 ? 'Defterin dolana kadar seviyene uygun başlangıç kelimeleriyle oynarsın.' : 'Oyunlar önce tekrar zamanı gelen kelimeleri getirir.'}</p>
         </div>
       )}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {GAMES.map((g, i) => (
-          <motion.button
-            key={g.key}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            onClick={() => onPick(g.key)}
-            className={clsx('press group relative flex flex-col overflow-hidden rounded-[28px] border-2 border-line bg-card text-left shadow-hard transition hover:border-ink/25', i === 0 && 'sm:col-span-2 lg:col-span-1 lg:row-span-2')}
-          >
-            <span className={clsx('relative grid place-items-center overflow-hidden bg-gradient-to-br text-white', g.tone, i === 0 ? 'h-40 lg:h-64' : 'h-28')}>
-              <span aria-hidden className="absolute -right-6 -top-8 size-32 rounded-full bg-white/15" />
-              <span aria-hidden className="absolute -bottom-10 left-6 size-24 rounded-full bg-black/10" />
-              {i === 0 ? <SwipeArt /> : <g.icon className="size-12 drop-shadow transition duration-300 group-hover:scale-110" strokeWidth={2.2} />}
-              {g.badge && <span className="absolute left-4 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#1f2433]">{g.badge}</span>}
-            </span>
-            <span className="flex flex-1 flex-col p-4">
-              <span className="flex items-center justify-between font-display text-xl font-black">{g.title}<ArrowRight className="size-5 text-ink-soft transition group-hover:translate-x-0.5 group-hover:text-ink" /></span>
-              <span className="mt-1 text-sm text-ink-soft">{g.text}</span>
-            </span>
-          </motion.button>
-        ))}
-      </div>
+      {/* The day's pick: the swipe deck, big. Then the rest in three short rows that scroll
+          sideways on phones, so more games never means a longer page. */}
+      <motion.button
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        onClick={() => onPick('swipe')}
+        className="press group relative mb-7 flex w-full items-center gap-4 overflow-hidden rounded-[28px] bg-gradient-to-br from-flame to-berry p-5 text-left text-white shadow-hard sm:p-6"
+      >
+        <span aria-hidden className="absolute -right-8 -top-10 size-40 rounded-full bg-white/15" />
+        <span className="min-w-0 flex-1">
+          <span className="rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#1f2433]">Günün oyunu</span>
+          <span className="mt-2 block font-display text-2xl font-black sm:text-3xl">Kaydır kartları</span>
+          <span className="mt-1 block text-sm text-white/85">Sağa biliyorum, sola tekrar. {st?.due ? `${st.due} kelimenin tekrar zamanı geldi.` : 'Günlük tekrarın için en hızlı yol.'}</span>
+          <span className="mt-3 inline-flex items-center gap-1.5 rounded-xl bg-white px-3.5 py-2 text-sm font-extrabold text-[#1f2433]">Başla <ArrowRight className="size-4 transition group-hover:translate-x-0.5" /></span>
+        </span>
+        <span className="hidden shrink-0 sm:block"><SwipeArt /></span>
+      </motion.button>
+
+      {GROUPS.map((grp) => (
+        <section key={grp.key} className="mb-6">
+          <div className="mb-2.5 flex items-baseline justify-between">
+            <h3 className="font-display text-lg font-black">{grp.title}</h3>
+            <span className="text-xs font-bold text-ink-soft">{grp.text}</span>
+          </div>
+          <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
+            {GAMES.filter((g) => g.group === grp.key && g.key !== 'swipe').map((g, i) => (
+              <motion.button
+                key={g.key}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.04 }}
+                onClick={() => onPick(g.key)}
+                className="press group relative flex w-[46%] shrink-0 snap-start flex-col overflow-hidden rounded-3xl border-2 border-line bg-card text-left shadow-hard-sm transition hover:border-ink/25 sm:w-auto"
+              >
+                <span className={clsx('relative grid h-20 place-items-center overflow-hidden bg-gradient-to-br text-white sm:h-24', g.tone)}>
+                  <span aria-hidden className="absolute -right-5 -top-6 size-20 rounded-full bg-white/15" />
+                  <g.icon className="size-9 drop-shadow transition duration-300 group-hover:scale-110" strokeWidth={2.2} />
+                  {g.badge && <span className="absolute left-2.5 top-2 rounded-full bg-white/90 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#1f2433]">{g.badge}</span>}
+                </span>
+                <span className="flex flex-1 flex-col p-3">
+                  <span className="font-display text-[15px] font-black leading-tight sm:text-base">{g.title}</span>
+                  <span className="mt-0.5 line-clamp-2 text-xs text-ink-soft">{g.text}</span>
+                </span>
+              </motion.button>
+            ))}
+          </div>
+        </section>
+      ))}
     </>
   )
 }
+
+const GROUPS: { key: Group; title: string; text: string }[] = [
+  { key: 'quick', title: 'Hız ve refleks', text: 'Süreli, seri yap' },
+  { key: 'spell', title: 'Yazım ve dinleme', text: 'Harf harf, kulakla' },
+  { key: 'memory', title: 'Hafıza', text: 'Sakin ve kalıcı' },
+]
 
 /** Three fanned cards hinting at the swipe gesture. */
 function SwipeArt() {
@@ -168,6 +203,8 @@ function GameRun({ game, onExit, onSwitch }: { game: GameKey; onExit: () => void
             {game === 'memory' && <Memory deck={data.data} onFinish={finish} />}
             {game === 'cloze' && <Cloze deck={data.data} onFinish={finish} />}
             {game === 'choice' && <QuickChoice deck={data.data} onFinish={finish} />}
+            {game === 'rain' && <WordRain deck={data.data} onFinish={finish} />}
+            {game === 'balloon' && <BalloonRescue deck={data.data} onFinish={finish} />}
           </motion.div>
         </AnimatePresence>
       )}

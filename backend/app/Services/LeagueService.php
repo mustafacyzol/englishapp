@@ -58,7 +58,7 @@ class LeagueService
                 'user_id' => $m->user_id,
                 'name' => $m->user?->name,
                 'username' => $m->user?->username,
-                'avatar' => $m->user?->avatar,
+                'avatar' => $m->user?->displayAvatar(),
                 'xp' => $m->xp,
                 'is_me' => $m->user_id === $user->id,
                 'is_premium' => $m->user?->isPremium() ?? false,
