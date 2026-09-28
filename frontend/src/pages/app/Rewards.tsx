@@ -14,6 +14,7 @@ import { RewardCard } from '@/components/game/RewardCard'
 import { ChestOpening, type ChestResult } from '@/components/game/ChestOpening'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
+import { XpGuide } from '@/components/game/XpGuide'
 import { Empty, PageHeader, Progress, SkeletonPage, Tabs } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
@@ -203,6 +204,7 @@ function Roadmap() {
   ]
   return (
     <div className="space-y-10">
+      <XpGuide />
       <section>
         <div className="mb-4 flex items-end justify-between">
           <div>

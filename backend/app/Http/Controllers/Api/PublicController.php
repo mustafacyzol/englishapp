@@ -17,6 +17,30 @@ use Illuminate\Support\Facades\Cache;
 class PublicController extends Controller
 {
     /** Boot config for web + mobile clients. */
+    /**
+     * The economy as the app explains it to learners: XP per activity, daily caps,
+     * what keeps a streak alive and what pays gems. Straight from config, so the
+     * rules page can never drift from what the server actually grants.
+     */
+    public function economy(): JsonResponse
+    {
+        $e = config('dilgo.economy');
+        $r = config('dilgo.rewards');
+        $g = config('dilgo.gamification');
+
+        return response()->json([
+            'xp' => $e['xp'],
+            'daily_caps' => $e['daily_caps'],
+            'streak_min_xp' => $e['streak_min_xp'],
+            'daily_goal_gems' => $r['daily_goal_gems'],
+            'level_up_gems' => $r['level_up_gems'],
+            'heart_regen_minutes' => $g['heart_regen_minutes'],
+            'heart_refill_gems' => $g['heart_refill_gems'],
+            'league_top3_gems' => $g['league']['top3_gems'],
+            'league_promote' => $g['league']['promote'],
+        ]);
+    }
+
     public function config(): JsonResponse
     {
         return response()->json([

@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('v1')->group(function () {
     // ---- Public -------------------------------------------------------------
     Route::get('config', [PublicController::class, 'config']);
+    Route::get('economy', [PublicController::class, 'economy']);
     Route::get('landing', [PublicController::class, 'landing']);
     Route::get('plans', [BillingController::class, 'plans']);
     Route::get('stories', [StoryController::class, 'index']);

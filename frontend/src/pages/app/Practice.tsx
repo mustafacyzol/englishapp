@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, BookmarkPlus, Brain, Check, CloudRain, Headphones, Layers, PartyPopper, Puzzle, Search, Shuffle, TextCursorInput, Timer, Trash2, Volume2, X, Zap } from 'lucide-react'
+import { ArrowRight, BookmarkPlus, Brain, Check, Heart, Grid3x3, Headphones, Layers, Puzzle, Search, Shuffle, TextCursorInput, Timer, Trash2, Volume2, X, Zap } from 'lucide-react'
 import { del, get, post } from '@/lib/api'
 import { speak } from '@/lib/speech'
 import { celebrate, sfx } from '@/lib/fx'
@@ -11,29 +11,30 @@ import type { RewardSummary } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Empty, PageHeader, SkeletonPage, Spinner, Tabs } from '@/components/ui/Misc'
 import { useReward } from '@/components/game/RewardProvider'
-import { BalloonRescue, Cloze, ListenType, Memory, QuickChoice, WordRain, Restart, Scramble, SpeedMatch, SwipeDeck, TrueFalse, type DeckWord, type Outcome } from './games/WordGames'
+import { useEconomy, XpGuide } from '@/components/game/XpGuide'
+import { Cloze, Kelimle, ListenType, Memory, QuickChoice, WordSearch, Restart, Scramble, SpeedMatch, SwipeDeck, TrueFalse, type DeckWord, type Outcome } from './games/WordGames'
 
 interface Word { id: number; word: string; translation: string | null; example: string | null; interval_days: number; due_at: string | null; source: string | null }
-type GameKey = 'swipe' | 'match' | 'truefalse' | 'listen' | 'scramble' | 'memory' | 'cloze' | 'choice' | 'rain' | 'balloon'
+type GameKey = 'swipe' | 'match' | 'truefalse' | 'listen' | 'scramble' | 'memory' | 'cloze' | 'choice' | 'kelimle' | 'search'
 
 type Group = 'quick' | 'memory' | 'spell'
-const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; tone: string; badge?: string; group: Group }[] = [
-  { group: 'memory', key: 'swipe', title: 'Kaydır kartları', text: 'Sağa biliyorum, sola tekrar. Mobilde parmağınla kaydır.', icon: Layers, tone: 'from-flame to-berry', badge: 'Favori' },
-  { group: 'quick', key: 'match', title: 'Hızlı eşleştir', text: '45 saniyede İngilizce ve Türkçeyi eşle, seri yap.', icon: Timer, tone: 'from-sky to-lilac' },
-  { group: 'quick', key: 'truefalse', title: 'Doğru mu?', text: '30 saniyelik blitz: çeviri doğru mu, yanlış mı?', icon: Check, tone: 'from-mint to-sage' },
-  { group: 'spell', key: 'listen', title: 'Dinle ve yaz', text: 'Duyduğun kelimeyi yaz, kulağını ve yazımını çalıştır.', icon: Headphones, tone: 'from-lilac to-sky' },
-  { group: 'spell', key: 'scramble', title: 'Harf karıştır', text: 'Karışık harflerden kelimeyi yeniden kur.', icon: Puzzle, tone: 'from-butter to-flame' },
-  { group: 'memory', key: 'memory', title: 'Hafıza kartları', text: 'Kartları çevir, İngilizceyi Türkçesiyle eşle.', icon: Brain, tone: 'from-berry to-lilac' },
-  { group: 'spell', key: 'cloze', title: 'Cümlede boşluk', text: 'Kelimeyi kendi örnek cümlesinde yerine koy.', icon: TextCursorInput, tone: 'from-sage to-mint' },
-  { group: 'quick', key: 'rain', title: 'Kelime yağmuru', text: 'Kelimeler yağıyor! Doğrusuna yere düşmeden dokun.', icon: CloudRain, tone: 'from-sky to-mint', badge: 'Yeni' },
-  { group: 'spell', key: 'balloon', title: 'Balon kurtar', text: 'Harf harf tahmin et, Higo’nun balonlarını uçurma.', icon: PartyPopper, tone: 'from-berry to-butter', badge: 'Yeni' },
-  { group: 'quick', key: 'choice', title: 'Hızlı anlam', text: 'On kelime, dört seçenek. Klavyede 1-4.', icon: Zap, tone: 'from-flame to-butter' },
+const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; tone: string; badge?: string; group: Group; rules: string[] }[] = [
+  { group: 'memory', key: 'swipe', title: 'Kaydır kartları', text: 'Sağa biliyorum, sola tekrar. Mobilde parmağınla kaydır.', icon: Layers, tone: 'from-flame to-berry', badge: 'Favori', rules: ['Kartta İngilizce kelimeyi gör, anlamını aklından söyle.', 'Biliyorsan sağa, emin değilsen sola kaydır (ya da oklara bas).', 'Sola attıkların tekrar listene girer, yakında yeniden gelir.'] },
+  { group: 'quick', key: 'match', title: 'Hızlı eşleştir', text: '45 saniyede İngilizce ve Türkçeyi eşle, seri yap.', icon: Timer, tone: 'from-sky to-lilac', rules: ['45 saniyen var. Soldan İngilizceyi, sağdan Türkçesini seç.', 'Art arda doğrular seri yapar, seri puanı katlar.', 'Yanlış eşleşme seriyi sıfırlar ama süre durmaz.'] },
+  { group: 'quick', key: 'truefalse', title: 'Doğru mu?', text: '30 saniyelik blitz: çeviri doğru mu, yanlış mı?', icon: Check, tone: 'from-mint to-sage', rules: ['30 saniyede olabildiğince çok kart.', 'Çeviri doğruysa Doğru, değilse Yanlış de.', 'Art arda doğrular seri yapar ve puanı artırır; yanlışlar tekrar listene girer.'] },
+  { group: 'spell', key: 'listen', title: 'Dinle ve yaz', text: 'Duyduğun kelimeyi yaz, kulağını ve yazımını çalıştır.', icon: Headphones, tone: 'from-lilac to-sky', rules: ['Kelimeyi dinle, istediğin kadar tekrar çal.', 'Duyduğunu yaz ve Kontrol et.', 'Takılırsan Harf ipucu al. Yanlışta doğru yazımı gösteririz.'] },
+  { group: 'spell', key: 'scramble', title: 'Harf karıştır', text: 'Karışık harflerden kelimeyi yeniden kur.', icon: Puzzle, tone: 'from-butter to-flame', rules: ['Karışık harflere sırayla dokun ve kelimeyi kur.', 'Türkçe anlamı ipucu olarak üstte durur.', 'Yanlış harfi Sil ile geri alırsın.'] },
+  { group: 'memory', key: 'memory', title: 'Hafıza kartları', text: 'Kartları çevir, İngilizceyi Türkçesiyle eşle.', icon: Brain, tone: 'from-berry to-lilac', rules: ['Kartları ikişer ikişer çevir.', 'İngilizce kelimeyi Türkçesiyle eşle, eşleşen çift açık kalır.', '100 puanla başlarsın; her fazla hamle 8 puan düşürür.'] },
+  { group: 'spell', key: 'cloze', title: 'Cümlede boşluk', text: 'Kelimeyi kendi örnek cümlesinde yerine koy.', icon: TextCursorInput, tone: 'from-sage to-mint', rules: ['Örnek cümledeki boşluğa gelen kelimeyi seç.', 'Dört seçenekten doğrusunu seç.', 'Yanlış seçimde doğru cümleyi görürsün.'] },
+  { group: 'spell', key: 'kelimle', title: 'Kelimle', text: 'Türkçe ipucundan İngilizce kelimeyi 6 denemede bul.', icon: Grid3x3, tone: 'from-mint to-sky', badge: 'Yeni', rules: ['Türkçe ipucuna bakıp İngilizce kelimeyi tahmin et, her kelime için 6 hakkın var.', 'Yeşil: harf doğru yerde. Sarı: harf kelimede var ama başka yerde. Gri: kelimede yok.', 'Üç kelime çözersin; 5 denemede bulduğun kelime "biliyorum" sayılır.'] },
+  { group: 'memory', key: 'search', title: 'Kelime avı', text: 'Harf tablosunda saklı 5 kelimeyi 2 dakikada bul.', icon: Search, tone: 'from-lilac to-berry', badge: 'Yeni', rules: ['Harf tablosunda 5 kelime saklı: yatay, dikey ya da çapraz.', 'Kelimenin ilk harfine, sonra son harfine dokun.', '2 dakikan var. Bulamadıkların tekrar listene girer.'] },
+  { group: 'quick', key: 'choice', title: 'Hızlı anlam', text: 'On kelime, dört seçenek. Klavyede 1-4.', icon: Zap, tone: 'from-flame to-butter', rules: ['On kelime, her birinde dört seçenek.', 'Doğru anlamı seç; klavyede 1-4 tuşları da çalışır.', 'Art arda doğrular seri yapar; yanlışlar tekrar listene girer.'] },
 ]
 
 export default function Practice() {
   const [tab, setTab] = useState<'games' | 'words'>('games')
   const [game, setGame] = useState<GameKey | null>(null)
-  if (game) return <GameRun game={game} onExit={() => setGame(null)} onSwitch={setGame} />
+  if (game) return <GameRun key={game} game={game} onExit={() => setGame(null)} onSwitch={setGame} />
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader kicker="Aralıklı tekrar + oyunlar" title="Kelime pratiği" />
@@ -87,8 +88,7 @@ function GamePicker({ onPick }: { onPick: (g: GameKey) => void }) {
               <motion.button
                 key={g.key}
                 initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
                 onClick={() => onPick(g.key)}
                 className="press group relative flex w-[46%] shrink-0 snap-start flex-col overflow-hidden rounded-3xl border-2 border-line bg-card text-left shadow-hard-sm transition hover:border-ink/25 sm:w-auto"
@@ -107,6 +107,7 @@ function GamePicker({ onPick }: { onPick: (g: GameKey) => void }) {
           </div>
         </section>
       ))}
+      <XpGuide only="words" className="mt-2" />
     </>
   )
 }
@@ -143,6 +144,7 @@ function GameRun({ game, onExit, onSwitch }: { game: GameKey; onExit: () => void
   const qc = useQueryClient()
   const showReward = useReward()
   const [round, setRound] = useState(0)
+  const [started, setStarted] = useState(false)
   const [result, setResult] = useState<{ outcomes: Outcome[]; score?: number; saved: number } | null>(null)
   const { data, isLoading } = useQuery({ queryKey: ['deck', game, round], queryFn: () => get<{ data: DeckWord[] }>(`/words/deck?n=${game === 'match' ? 24 : 16}`), gcTime: 0, staleTime: Infinity })
   const meta = GAMES.find((g) => g.key === game)!
@@ -188,6 +190,8 @@ function GameRun({ game, onExit, onSwitch }: { game: GameKey; onExit: () => void
         <Spinner className="min-h-[40vh]" />
       ) : data.data.length < 4 ? (
         <Empty icon={<Layers className="size-8" />} title="Kelime yetersiz" text="Hikâyelerde kelimelere dokunup deftere ekle, sonra geri gel." action={<Link to="/stories" className="font-bold text-flame">Hikâyelere git</Link>} />
+      ) : !started ? (
+        <GameIntro meta={meta} onStart={() => setStarted(true)} />
       ) : result ? (
         <Result r={result} onAgain={again} onExit={onExit} onSwitch={onSwitch} current={game} />
       ) : submit.isPending ? (
@@ -203,12 +207,46 @@ function GameRun({ game, onExit, onSwitch }: { game: GameKey; onExit: () => void
             {game === 'memory' && <Memory deck={data.data} onFinish={finish} />}
             {game === 'cloze' && <Cloze deck={data.data} onFinish={finish} />}
             {game === 'choice' && <QuickChoice deck={data.data} onFinish={finish} />}
-            {game === 'rain' && <WordRain deck={data.data} onFinish={finish} />}
-            {game === 'balloon' && <BalloonRescue deck={data.data} onFinish={finish} />}
+            {game === 'kelimle' && <Kelimle deck={data.data} onFinish={finish} />}
+            {game === 'search' && <WordSearch deck={data.data} onFinish={finish} />}
           </motion.div>
         </AnimatePresence>
       )}
     </div>
+  )
+}
+
+/** Rules first, so nobody has to guess how a game works or what it pays. */
+function GameIntro({ meta, onStart }: { meta: (typeof GAMES)[number]; onStart: () => void }) {
+  const { data: e } = useEconomy()
+  return (
+    <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="overflow-hidden rounded-[28px] border-2 border-line bg-card">
+      <div className={clsx('relative flex items-center gap-4 bg-gradient-to-br p-5 text-white sm:p-6', meta.tone)}>
+        <span aria-hidden className="absolute -right-10 -top-12 size-44 rounded-full bg-white/15" />
+        <span className="grid size-14 shrink-0 place-items-center rounded-2xl bg-white/20"><meta.icon className="size-7" strokeWidth={2.2} /></span>
+        <span className="relative min-w-0">
+          <span className="block font-display text-2xl font-black leading-tight">{meta.title}</span>
+          <span className="block text-sm text-white/85">{meta.text}</span>
+        </span>
+      </div>
+      <div className="p-5 sm:p-6">
+        <p className="text-xs font-black uppercase tracking-widest text-ink-soft">Nasıl oynanır?</p>
+        <ol className="mt-3 space-y-2.5">
+          {meta.rules.map((r, i) => (
+            <li key={i} className="flex gap-3">
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-ink font-display text-xs font-black text-paper">{i + 1}</span>
+              <span className="text-[15px] leading-snug">{r}</span>
+            </li>
+          ))}
+        </ol>
+        <div className="mt-5 flex flex-wrap gap-2 text-xs font-bold">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-butter/40 px-3 py-1.5"><Zap className="size-3.5" /> Her doğru cevap {e?.xp.practice_per_correct ?? 1} XP</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-paper-2 px-3 py-1.5">Kelime XP'si günde en fazla {e?.daily_caps.words ?? 60}</span>
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-berry/10 px-3 py-1.5 text-berry"><Heart className="size-3.5" /> 5+ doğru = 1 can</span>
+        </div>
+        <Button className="mt-6" block size="lg" onClick={onStart} icon={<ArrowRight className="size-5" />}>Başla</Button>
+      </div>
+    </motion.div>
   )
 }
 

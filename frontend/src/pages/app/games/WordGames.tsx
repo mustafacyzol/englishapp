@@ -5,7 +5,6 @@ import { ArrowLeft, ArrowRight, Check, Delete, Headphones, Lightbulb, RotateCcw,
 import { speak } from '@/lib/speech'
 import { sfx } from '@/lib/fx'
 import { Button } from '@/components/ui/Button'
-import { Higo, type HigoPose } from '@/components/game/Higo'
 
 export interface DeckWord { id: number | null; word: string; translation: string; example: string | null; interval_days: number }
 /** One answer: which word, and whether the learner knew it. */
@@ -410,14 +409,14 @@ export function Scramble({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finis
       <p className="font-display text-3xl font-black">{w.translation}</p>
       <div className="my-7 flex min-h-16 flex-wrap justify-center gap-2">
         {w.word.split('').map((_, k) => (
-          <span key={k} className={clsx('grid size-12 place-items-center rounded-xl border-2 font-display text-2xl font-black uppercase sm:size-14', picked[k] !== undefined ? (state === 'ok' ? 'border-mint bg-mint/10' : state === 'no' ? 'border-berry bg-berry/10' : 'border-ink bg-card') : 'border-dashed border-line')}>
+          <span key={k} lang="en" className={clsx('grid size-12 place-items-center rounded-xl border-2 font-display text-2xl font-black uppercase sm:size-14', picked[k] !== undefined ? (state === 'ok' ? 'border-mint bg-mint/10' : state === 'no' ? 'border-berry bg-berry/10' : 'border-ink bg-card') : 'border-dashed border-line')}>
             {picked[k] !== undefined ? letters[picked[k]].c : ''}
           </span>
         ))}
       </div>
       <div className="flex flex-wrap justify-center gap-2">
         {letters.map((l, k) => (
-          <motion.button key={k} whileTap={{ scale: 0.9 }} disabled={picked.includes(k) || state !== 'ask'} onClick={() => { sfx.tap(); setPicked((p) => [...p, k]) }} className={clsx('grid size-12 place-items-center rounded-xl border-2 border-line bg-card font-display text-2xl font-black uppercase shadow-hard-sm transition sm:size-14', picked.includes(k) && 'opacity-20')}>
+          <motion.button key={k} lang="en" whileTap={{ scale: 0.9 }} disabled={picked.includes(k) || state !== 'ask'} onClick={() => { sfx.tap(); setPicked((p) => [...p, k]) }} className={clsx('grid size-12 place-items-center rounded-xl border-2 border-line bg-card font-display text-2xl font-black uppercase shadow-hard-sm transition sm:size-14', picked.includes(k) && 'opacity-20')}>
             {l.c}
           </motion.button>
         ))}
@@ -575,211 +574,223 @@ export function QuickChoice({ deck, onFinish }: { deck: DeckWord[]; onFinish: Fi
 }
 
 // ---------------------------------------------------------------------------
-// Word rain: the Turkish meaning is at the top, English words fall. Tap the right
-// one before it lands. Three lives; it speeds up as you go.
+// Kelimle: guess the English word in six tries (Wordle rules), with its Turkish
+// meaning as the clue. Green = right letter, right place; yellow = in the word,
+// wrong place; grey = not in the word. Three words per game.
 // ---------------------------------------------------------------------------
-const RAIN_H = 400
-export function WordRain({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finish }) {
-  const targets = useMemo(() => shuffle(deck).slice(0, 12), [deck])
-  const [i, setI] = useState(0)
-  const [lives, setLives] = useState(3)
-  const [score, setScore] = useState(0)
-  const [combo, setCombo] = useState(0)
-  const [flash, setFlash] = useState<'ok' | 'bad' | null>(null)
-  const log = useRef<Outcome[]>([])
-  const done = useRef(false)
-  const scoreRef = useRef(0)
-  scoreRef.current = score
-  const w = targets[i]
-  const drops = useMemo(() => {
-    if (!w) return []
-    const others = shuffle(deck.filter((x) => x.word !== w.word)).slice(0, 3)
-    const lanes = shuffle([0, 1, 2, 3])
-    return shuffle([w, ...others]).map((x, k) => ({ w: x, lane: lanes[k], delay: k * 0.35 + Math.random() * 0.3 }))
-  }, [w, deck])
-  const speed = Math.max(3.2, 6.2 - i * 0.28)
-
-  const end = useCallback(() => {
-    if (done.current) return
-    done.current = true
-    onFinish(log.current, scoreRef.current)
-  }, [onFinish])
-
-  const next = useCallback((known: boolean, lifeLost: boolean) => {
-    if (!w || done.current) return
-    log.current.push({ w, known })
-    setFlash(known ? 'ok' : 'bad')
-    setTimeout(() => setFlash(null), 350)
-    const left = lifeLost ? lives - 1 : lives
-    if (lifeLost) setLives(left)
-    if (left <= 0 || i + 1 >= targets.length) return void setTimeout(end, 500)
-    setI(i + 1)
-  }, [w, lives, i, targets.length, end])
-
-  const hit = (x: DeckWord) => {
-    if (x.word === w?.word) {
-      sfx.correct(combo + 1)
-      setCombo((c) => c + 1)
-      setScore((s) => s + 10 + Math.min(4, combo) * 5)
-      next(true, false)
-    } else {
-      sfx.wrong()
-      setCombo(0)
-      next(false, true)
+const QWERTY = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
+type Mark = 'hit' | 'near' | 'miss'
+function grade(guess: string, answer: string): Mark[] {
+  const res: Mark[] = Array(guess.length).fill('miss')
+  const left: Record<string, number> = {}
+  for (let i = 0; i < answer.length; i++) {
+    if (guess[i] === answer[i]) res[i] = 'hit'
+    else left[answer[i]] = (left[answer[i]] ?? 0) + 1
+  }
+  for (let i = 0; i < guess.length; i++) {
+    if (res[i] !== 'hit' && left[guess[i]]) {
+      res[i] = 'near'
+      left[guess[i]]--
     }
   }
-  if (!w) return null
+  return res
+}
+const MARK: Record<Mark, string> = { hit: 'bg-mint border-mint text-white', near: 'bg-butter border-butter text-[#1f2433]', miss: 'bg-ink-soft/70 border-transparent text-white' }
+
+export function Kelimle({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finish }) {
+  const words = useMemo(() => shuffle(deck.filter((d) => /^[a-z]{4,6}$/i.test(d.word))).slice(0, 3), [deck])
+  const [i, setI] = useState(0)
+  const [rows, setRows] = useState<string[]>([])
+  const [typed, setTyped] = useState('')
+  const [shake, setShake] = useState(0)
+  const log = useRef<Outcome[]>([])
+  const w = words[i]
+  const answer = w?.word.toLowerCase() ?? ''
+  const solved = rows.includes(answer)
+  const over = solved || rows.length >= 6
+  const keys = useMemo(() => {
+    const k: Record<string, Mark> = {}
+    for (const r of rows) grade(r, answer).forEach((m, j) => { const c = r[j]; if (k[c] !== 'hit' && !(k[c] === 'near' && m === 'miss')) k[c] = m })
+    return k
+  }, [rows, answer])
+
+  const submit = useCallback(() => {
+    if (over || !w) return
+    if (typed.length !== answer.length) { setShake((x) => x + 1); return }
+    const next = [...rows, typed]
+    setRows(next)
+    setTyped('')
+    const win = typed === answer
+    if (win) sfx.correct(0)
+    else if (next.length >= 6) sfx.wrong()
+    if (win || next.length >= 6) { log.current.push({ w, known: win && next.length <= 5 }); speak(w.word) }
+  }, [over, w, typed, answer, rows])
+  const press = useCallback((c: string) => {
+    if (over) return
+    if (c === 'enter') return submit()
+    if (c === 'back') return setTyped((t) => t.slice(0, -1))
+    setTyped((t) => (t.length < answer.length ? t + c : t))
+  }, [over, submit, answer.length])
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => {
+      if (e.key === 'Enter') { e.preventDefault(); over ? next() : press('enter') }
+      else if (e.key === 'Backspace') press('back')
+      else if (/^[a-z]$/i.test(e.key)) press(e.key.toLowerCase())
+    }
+    window.addEventListener('keydown', k)
+    return () => window.removeEventListener('keydown', k)
+  })
+  const next = () => {
+    if (i + 1 >= words.length) return onFinish(log.current)
+    setI(i + 1); setRows([]); setTyped('')
+  }
+  if (!w) return <p className="text-center text-ink-soft">Bu oyun için 4-6 harfli kelime yok. Başka bir oyun dene.</p>
+  const grid = Array.from({ length: 6 }, (_, r) => rows[r] ?? (r === rows.length ? typed : ''))
   return (
-    <div className="mx-auto max-w-md select-none">
-      <div className="mb-3 flex items-center justify-between">
-        <span className="flex gap-1" aria-label={`${lives} can`}>{[0, 1, 2].map((k) => <motion.span key={k} animate={{ scale: k < lives ? 1 : 0.7, opacity: k < lives ? 1 : 0.25 }} className="text-xl">❤️</motion.span>)}</span>
-        <span className="font-mono text-xs font-bold text-ink-soft">{i + 1}/{targets.length}</span>
-        <span className="font-display text-2xl font-black tabular-nums">{score}</span>
+    <div lang="en" className="mx-auto max-w-md select-none text-center">
+      <div className="mb-4 flex items-center justify-between text-sm font-bold text-ink-soft">
+        <span className="font-mono">{i + 1}/{words.length}</span>
+        <span className="rounded-full bg-paper-2 px-3 py-1">İpucu: <b className="text-ink">{w.translation}</b></span>
+        <span className="font-mono">{rows.length}/6</span>
       </div>
-      <div className={clsx('relative overflow-hidden rounded-[28px] border-2 bg-gradient-to-b from-sky/10 to-card transition-colors', flash === 'ok' ? 'border-mint' : flash === 'bad' ? 'border-berry' : 'border-line')} style={{ height: RAIN_H }}>
-        <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-center gap-2 bg-card/85 py-3 backdrop-blur">
-          <span className="text-xs font-black uppercase tracking-widest text-ink-soft">Bul:</span>
-          <AnimatePresence mode="wait"><motion.span key={w.word} initial={{ y: -10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="font-display text-2xl font-black">{w.translation}</motion.span></AnimatePresence>
-          {combo >= 2 && <span className="flex items-center gap-0.5 rounded-full bg-butter px-2 py-0.5 text-xs font-black text-[#1f2433]"><Zap className="size-3.5" />x{Math.min(4, combo)}</span>}
+      <div className="mx-auto grid w-fit gap-1.5">
+        {grid.map((r, ri) => {
+          const done = ri < rows.length
+          const marks = done ? grade(r, answer) : []
+          return (
+            <motion.div key={ri + (ri === rows.length ? `-${shake}` : '')} className="flex gap-1.5" animate={ri === rows.length && shake ? { x: [0, -8, 8, -6, 6, 0] } : {}} transition={{ duration: 0.35 }}>
+              {Array.from({ length: answer.length }, (_, ci) => (
+                <motion.span key={ci} initial={false} animate={done ? { rotateX: [0, 90, 0] } : {}} transition={{ delay: ci * 0.08, duration: 0.4 }} className={clsx('grid size-12 place-items-center rounded-xl border-2 font-display text-2xl font-black uppercase sm:size-14', done ? MARK[marks[ci]] : r[ci] ? 'border-ink/40 bg-card' : 'border-line bg-card')}>
+                  {r[ci] ?? ''}
+                </motion.span>
+              ))}
+            </motion.div>
+          )
+        })}
+      </div>
+      {over ? (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
+          <p className={clsx('font-display text-2xl font-black', solved ? 'text-mint-deep' : 'text-berry')}>{solved ? ['Dâhice!', 'Harika!', 'Çok iyi!', 'Güzel!', 'Tamam!', 'Son anda!'][rows.length - 1] : `Kelime: ${w.word}`}</p>
+          {w.example && <p className="mt-1 text-sm italic text-ink-soft">“{w.example}”</p>}
+          <Button className="mt-4" onClick={next}>{i + 1 >= words.length ? 'Sonuçlar' : 'Sıradaki kelime'}</Button>
+        </motion.div>
+      ) : (
+        <div className="mt-6 space-y-1.5">
+          {QWERTY.map((row, ri) => (
+            <div key={row} className="flex justify-center gap-1">
+              {ri === 2 && <button lang="tr" onClick={() => press('enter')} className="h-12 rounded-lg border-2 border-line bg-card px-2 text-[11px] font-black uppercase shadow-hard-sm">Gir</button>}
+              {row.split('').map((c) => (
+                <button key={c} onClick={() => press(c)} className={clsx('h-12 w-[8.4%] max-w-10 rounded-lg border-2 font-display text-base font-black uppercase transition active:scale-95', keys[c] ? MARK[keys[c]] : 'border-line bg-card shadow-hard-sm')}>{c}</button>
+              ))}
+              {ri === 2 && <button onClick={() => press('back')} aria-label="Sil" className="grid h-12 place-items-center rounded-lg border-2 border-line bg-card px-2 shadow-hard-sm"><Delete className="size-4" /></button>}
+            </div>
+          ))}
         </div>
-        {drops.map((d) => (
-          <motion.button
-            key={`${i}-${d.w.word}`}
-            onClick={() => hit(d.w)}
-            className="absolute z-0 -translate-x-1/2 rounded-2xl border-2 border-line bg-card px-3 py-2 font-display text-lg font-black shadow-hard-sm active:scale-95"
-            style={{ left: `${14 + d.lane * 24}%` }}
-            initial={{ y: -60 }}
-            animate={{ y: RAIN_H }}
-            transition={{ duration: speed, delay: d.delay, ease: 'linear' }}
-            onAnimationComplete={() => {
-              if (d.w.word === w.word) {
-                sfx.wrong()
-                setCombo(0)
-                next(false, true)
-              }
-            }}
-          >
-            {d.w.word}
-          </motion.button>
-        ))}
-        <span aria-hidden className="absolute inset-x-0 bottom-0 h-2 bg-gradient-to-t from-berry/30 to-transparent" />
-      </div>
-      <p className="mt-3 text-center text-sm text-ink-soft">Doğru kelimeye yere düşmeden dokun. Yanlış dokunuş bir can götürür.</p>
+      )}
     </div>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Balloon rescue: guess the word letter by letter from its Turkish meaning.
-// Higo holds six balloons; every wrong letter pops one.
+// Kelime avı: five words are hidden in a letter grid (across, down or diagonal).
+// Read the Turkish clues, tap a word's first letter, then its last letter.
 // ---------------------------------------------------------------------------
-const KEYS = ['qwertyuiop', 'asdfghjkl', 'zxcvbnm']
-const BALLOONS = ['#ff5a36', '#ffc233', '#2f7cf6', '#22b573', '#ef4e7b', '#8f7cf8']
-export function BalloonRescue({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finish }) {
-  const words = useMemo(() => shuffle(deck.filter((d) => /^[a-z]{3,10}$/i.test(d.word))).slice(0, 5), [deck])
-  const [i, setI] = useState(0)
-  const [guessed, setGuessed] = useState<string[]>([])
-  const [state, setState] = useState<'play' | 'won' | 'lost'>('play')
-  const log = useRef<Outcome[]>([])
-  const w = words[i]
-  const letters = w ? w.word.toLowerCase().split('') : []
-  const misses = guessed.filter((g) => !letters.includes(g)).length
-  const left = BALLOONS.length - misses
-
-  const guess = useCallback((ch: string) => {
-    if (!w || state !== 'play' || guessed.includes(ch)) return
-    const g = [...guessed, ch]
-    setGuessed(g)
-    const hit = letters.includes(ch)
-    hit ? sfx.correct(0) : sfx.wrong()
-    const solved = letters.every((l) => g.includes(l))
-    const missCount = g.filter((x) => !letters.includes(x)).length
-    if (solved || missCount >= BALLOONS.length) {
-      setState(solved ? 'won' : 'lost')
-      if (solved) sfx.complete()
-      log.current.push({ w, known: solved })
-      speak(w.word)
+const SIZE = 9
+const DIRS = [[0, 1], [1, 0], [1, 1]]
+function buildGrid(words: string[]) {
+  for (let attempt = 0; attempt < 60; attempt++) {
+    const g: string[][] = Array.from({ length: SIZE }, () => Array(SIZE).fill(''))
+    const placed: { word: string; cells: [number, number][] }[] = []
+    let ok = true
+    for (const word of words) {
+      let done = false
+      for (let t = 0; t < 120 && !done; t++) {
+        const [dr, dc] = DIRS[Math.floor(Math.random() * DIRS.length)]
+        const r0 = Math.floor(Math.random() * (SIZE - (dr ? word.length - 1 : 0)))
+        const c0 = Math.floor(Math.random() * (SIZE - (dc ? word.length - 1 : 0)))
+        const cells: [number, number][] = [...word].map((_, k) => [r0 + dr * k, c0 + dc * k])
+        if (cells.every(([r, c], k) => !g[r][c] || g[r][c] === word[k])) {
+          cells.forEach(([r, c], k) => (g[r][c] = word[k]))
+          placed.push({ word, cells })
+          done = true
+        }
+      }
+      if (!done) { ok = false; break }
     }
-  }, [w, state, guessed, letters])
-
-  const next = () => {
-    if (i + 1 >= words.length) return onFinish(log.current)
-    setI(i + 1)
-    setGuessed([])
-    setState('play')
+    if (!ok) continue
+    const abc = 'abcdefghijklmnoprstuvyz'
+    for (const row of g) for (let c = 0; c < SIZE; c++) if (!row[c]) row[c] = abc[Math.floor(Math.random() * abc.length)]
+    return { g, placed }
   }
+  return null
+}
+
+export function WordSearch({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finish }) {
+  const items = useMemo(() => shuffle(deck.filter((d) => /^[a-z]{3,8}$/i.test(d.word))).slice(0, 5), [deck])
+  const board = useMemo(() => buildGrid(items.map((x) => x.word.toLowerCase())), [items])
+  const [found, setFound] = useState<string[]>([])
+  const [start, setStart] = useState<[number, number] | null>(null)
+  const [flash, setFlash] = useState<[number, number][] | null>(null)
+  const [time, setTime] = useState(120)
+  const finished = useRef(false)
+  const finish = useCallback((f: string[]) => {
+    if (finished.current) return
+    finished.current = true
+    onFinish(items.map((w) => ({ w, known: f.includes(w.word.toLowerCase()) })))
+  }, [items, onFinish])
   useEffect(() => {
-    const k = (e: KeyboardEvent) => {
-      if (/^[a-z]$/i.test(e.key)) guess(e.key.toLowerCase())
-      if (e.key === 'Enter' && state !== 'play') next()
+    if (time <= 0) return finish(found)
+    const t = setTimeout(() => setTime((x) => x - 1), 1000)
+    return () => clearTimeout(t)
+  }, [time, found, finish])
+  if (!board || items.length < 3) return <p className="text-center text-ink-soft">Bu oyun için yeterli kelime yok.</p>
+  const foundCells = new Set(board.placed.filter((p) => found.includes(p.word)).flatMap((p) => p.cells.map(([r, c]) => `${r}-${c}`)))
+  const tap = (r: number, c: number) => {
+    if (!start) { setStart([r, c]); return }
+    const [r0, c0] = start
+    setStart(null)
+    const hit = board.placed.find((p) => !found.includes(p.word) && ((p.cells[0][0] === r0 && p.cells[0][1] === c0 && p.cells.at(-1)![0] === r && p.cells.at(-1)![1] === c) || (p.cells[0][0] === r && p.cells[0][1] === c && p.cells.at(-1)![0] === r0 && p.cells.at(-1)![1] === c0)))
+    if (hit) {
+      const f = [...found, hit.word]
+      setFound(f)
+      sfx.correct(f.length)
+      speak(hit.word)
+      if (f.length === board.placed.length) setTimeout(() => finish(f), 700)
+    } else {
+      sfx.wrong()
+      setFlash([[r0, c0], [r, c]])
+      setTimeout(() => setFlash(null), 400)
     }
-    window.addEventListener('keydown', k)
-    return () => window.removeEventListener('keydown', k)
-  })
-  if (!w) return <p className="text-center text-ink-soft">Bu oyun için yeterli kelime yok.</p>
-  const pose: HigoPose = state === 'won' ? 'cheer' : state === 'lost' ? 'thumbs' : misses >= 4 ? 'think' : 'point'
+  }
   return (
-    <div className="mx-auto max-w-md select-none text-center">
-      <p className="mb-2 font-mono text-xs font-bold text-ink-soft">{i + 1}/{words.length}</p>
-      <div className="relative mx-auto flex h-44 w-64 items-end justify-center">
-        {/* balloons on strings above Higo */}
-        <div className="absolute inset-x-0 top-0 flex justify-center gap-1">
-          {BALLOONS.map((c, k) => (
-            <AnimatePresence key={k}>
-              {k < left && (
-                <motion.span
-                  className="relative flex flex-col items-center"
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: [0, -4, 0], opacity: 1, rotate: (k - 2.5) * 6 }}
-                  exit={{ scale: [1, 1.5, 0], opacity: [1, 1, 0], transition: { duration: 0.3 } }}
-                  transition={{ y: { repeat: Infinity, duration: 2 + k * 0.2, ease: 'easeInOut' } }}
-                  style={{ transformOrigin: '50% 100%' }}
-                >
-                  <span className="h-10 w-8 rounded-[50%] shadow-inner" style={{ background: `radial-gradient(circle at 35% 30%, #fff8 0 12%, ${c} 13%)` }} />
-                  <span className="h-12 w-px bg-ink/25" />
-                </motion.span>
-              )}
-            </AnimatePresence>
-          ))}
+    <div lang="en" className="mx-auto max-w-lg select-none">
+      <GameBar time={time} total={120} score={found.length * 10} combo={0} />
+      <div className="grid gap-5 sm:grid-cols-[1fr_170px]">
+        <div className="mx-auto grid w-full max-w-[400px] gap-1" style={{ gridTemplateColumns: `repeat(${SIZE}, minmax(0, 1fr))` }}>
+          {board.g.map((row, r) => row.map((ch, c) => {
+            const k = `${r}-${c}`
+            const isStart = start && start[0] === r && start[1] === c
+            const bad = flash?.some(([a, b]) => a === r && b === c)
+            return (
+              <motion.button key={k} whileTap={{ scale: 0.9 }} onClick={() => tap(r, c)} className={clsx('grid aspect-square place-items-center rounded-lg font-display text-base font-black uppercase transition sm:text-lg', foundCells.has(k) ? 'bg-mint text-white' : isStart ? 'bg-flame text-white' : bad ? 'bg-berry/20 text-berry' : 'bg-paper-2 hover:bg-line')}>
+                {ch}
+              </motion.button>
+            )
+          }))}
         </div>
-        <Higo pose={pose} className="relative size-24" />
+        <ul className="grid grid-cols-2 gap-1.5 sm:grid-cols-1 sm:content-start">
+          {items.map((w) => {
+            const ok = found.includes(w.word.toLowerCase())
+            return (
+              <li key={w.word} className={clsx('rounded-xl border-2 px-3 py-2 text-sm font-bold transition', ok ? 'border-mint bg-mint/10' : 'border-line bg-card')}>
+                <span className="block text-ink-soft">{w.translation}</span>
+                <span className={clsx('block font-display font-black', ok ? 'text-mint-deep' : 'text-ink/30')}>{ok ? w.word : '·'.repeat(w.word.length)}</span>
+              </li>
+            )
+          })}
+        </ul>
       </div>
-
-      <p className="mt-2 text-sm font-bold text-ink-soft">Anlamı: <span className="text-ink">{w.translation}</span></p>
-      <div className="mt-3 flex flex-wrap justify-center gap-1.5">
-        {letters.map((l, k) => {
-          const show = guessed.includes(l) || state !== 'play'
-          return (
-            <span key={k} className={clsx('grid h-12 w-9 place-items-center border-b-4 font-display text-3xl font-black uppercase', show ? (guessed.includes(l) ? 'border-mint text-ink' : 'border-berry text-berry') : 'border-line text-transparent')}>
-              <AnimatePresence>{show && <motion.span initial={{ y: -12, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>{l}</motion.span>}</AnimatePresence>
-            </span>
-          )
-        })}
-      </div>
-
-      {state === 'play' ? (
-        <div className="mt-6 space-y-1.5">
-          {KEYS.map((row) => (
-            <div key={row} className="flex justify-center gap-1">
-              {row.split('').map((ch) => {
-                const used = guessed.includes(ch)
-                const ok = used && letters.includes(ch)
-                return (
-                  <button key={ch} onClick={() => guess(ch)} disabled={used} className={clsx('h-11 w-[8.6%] max-w-9 rounded-lg border-2 font-display text-base font-black uppercase transition', ok ? 'border-mint bg-mint/15 text-mint-deep' : used ? 'border-transparent bg-paper-2 text-ink-soft/40' : 'border-line bg-card shadow-hard-sm active:scale-95')}>
-                    {ch}
-                  </button>
-                )
-              })}
-            </div>
-          ))}
-        </div>
-      ) : (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="mt-6">
-          <p className={clsx('font-display text-2xl font-black', state === 'won' ? 'text-mint-deep' : 'text-berry')}>{state === 'won' ? `Kurtardın! ${left} balon kaldı` : 'Balonlar uçtu, sorun değil'}</p>
-          {w.example && <p className="mt-1 text-sm italic text-ink-soft">“{w.example}”</p>}
-          <Button className="mt-4" onClick={next}>{i + 1 >= words.length ? 'Sonuçlar' : 'Sıradaki kelime'}</Button>
-        </motion.div>
-      )}
+      <p className="mt-4 text-center text-sm text-ink-soft">{start ? 'Şimdi kelimenin son harfine dokun.' : 'Bir kelimenin ilk harfine dokun.'}</p>
     </div>
   )
 }
