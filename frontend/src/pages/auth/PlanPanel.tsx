@@ -80,7 +80,8 @@ export function PassPanel({ name, age, mot, exam, interests, focus, level, slot,
     level: ORDER.indexOf(step) > ORDER.indexOf('level') ? level : '',
     time: slot ? `${slot.label} · ${pace.minutes} dk` : '',
   }
-  const at = cur < 0 ? { x: 50, y: -2 } : cur >= n ? { x: pts[n - 1].x, y: 100 } : pts[cur]
+  // Before the first answer Higo waits just ahead of the first stop, clear of the heading.
+  const at = cur < 0 ? { x: pts[0].x + 16, y: pts[0].y + 3 } : cur >= n ? { x: pts[n - 1].x, y: 100 } : pts[cur]
   const doneFrac = cur <= 0 ? 0 : Math.min(1, cur / (n - 1))
 
   return (
@@ -103,7 +104,7 @@ export function PassPanel({ name, age, mot, exam, interests, focus, level, slot,
       </div>
 
       {/* the road */}
-      <div className="relative z-10 mx-10 my-6 flex-1 xl:mx-14">
+      <div className="relative z-10 mx-10 mb-6 mt-16 flex-1 xl:mx-14">
         <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible" aria-hidden>
           <path d={d} fill="none" stroke="#e7e1d8" strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeDasharray="2 7" style={{ strokeWidth: 5 }} />
           <motion.path d={d} fill="none" stroke="url(#road)" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 5 }} initial={false} animate={{ pathLength: doneFrac }} transition={{ type: 'spring', stiffness: 60, damping: 18 }} />
