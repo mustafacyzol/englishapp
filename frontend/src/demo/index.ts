@@ -299,6 +299,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     c.meta = { ...(c.meta ?? {}), used_at: new Date().toISOString() }
     return { item: c }
   }
+  if (path === '/admin/newsletter/send') return { sent: body.test_email ? 1 : 3, test: !!body.test_email }
   if (path === '/newsletter') {
     if (!/^\S+@\S+\.\S+$/.test(body.email ?? '')) throw new DemoError(422, 'Geçerli bir e-posta adresi gir.')
     return ok('Onay bağlantısını e-postana gönderdik. Kutunu kontrol et.')

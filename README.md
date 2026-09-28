@@ -103,7 +103,8 @@ Demo hesaplar (yalnızca yerelde oluşturulur):
 - XP, seri, elmas, sandık ve yaş grubu kuralları: `docs/ECONOMY.md`.
 - Maskot **Higo** (`frontend/public/img/higo/`, bileşen `components/game/Higo.tsx`): kayıt adımları, ders geri bildirimi, ödül ekranı, boş ekranlar, 404 ve tanıtım sayfasında.
 - Profil avatarları: 9 standart + 9 Premium (`config/dilgo.php > avatars`). Premium avatar yalnızca Premium açıkken seçilebilir ve gösterilir; sunucu denetler.
-- Bülten: çift onaylı (`POST /newsletter`, e-postadaki bağlantı `/newsletter/confirm/{token}`), çıkış `/newsletter/unsubscribe/{token}`; aboneler Yönetim > Bülten aboneleri. Toplu gönderimde yalnızca onaylı ve çıkmamış adresleri kullanın.
+- Hesap paylaşımına karşı: bir hesap aynı anda en fazla 3 cihazda açık kalır (`AUTH_MAX_SESSIONS`), yaş grubu 30 günde bir değişebilir (`AGE_GROUP_CHANGE_DAYS`), çocuk hesabı yalnızca kayıtta veli onayıyla açılır ve sınav modu çocuk hesaplarında kapalıdır.
+- Bülten: çift onaylı (`POST /newsletter`, e-postadaki bağlantı `/newsletter/confirm/{token}`), çıkış `/newsletter/unsubscribe/{token}`; aboneler Yönetim > Bülten aboneleri. Gönderim Yönetim > Bülten aboneleri > "Bülten gönder" ile yapılır (önce kendinize deneme gönderin); yalnızca onaylı ve çıkmamış adreslere gider, her e-postaya kişiye özel çıkış bağlantısı eklenir.
 
 Testler: `cd backend && php artisan test` (kayıt/OTP, kilitleme, admin 2FA, ders→XP→seri→rozet, lig kapanışı, mağaza, sandık, canlı ders kuponu, kupon+ödeme, hediye kodu, seviye testi, seri dondurucu).
 

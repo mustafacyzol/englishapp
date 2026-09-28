@@ -77,7 +77,7 @@ class AuthController extends Controller
             'interests' => array_values(array_unique($data['interests'] ?? [])) ?: null,
             'study_time' => $data['study_time'] ?? null,
             'motivation' => $data['motivation'] ?? null,
-            'exam_target' => $data['exam_target'] ?? null,
+            'exam_target' => ($data['age_group'] ?? null) === 'kid' ? null : ($data['exam_target'] ?? null),
             'age_group' => $data['age_group'] ?? null,
             'exam_date' => $data['exam_date'] ?? null,
             'marketing_opt_in' => $data['marketing_opt_in'] ?? false,
@@ -209,7 +209,7 @@ class AuthController extends Controller
                 'interests' => array_values(array_unique($data['interests'] ?? [])) ?: null,
                 'study_time' => $data['study_time'] ?? null,
                 'motivation' => $data['motivation'] ?? null,
-                'exam_target' => $data['exam_target'] ?? null,
+                'exam_target' => ($data['age_group'] ?? null) === 'kid' ? null : ($data['exam_target'] ?? null),
                 'age_group' => $data['age_group'] ?? null,
                 'onboarded' => isset($data['learning_goal']),
             ]);

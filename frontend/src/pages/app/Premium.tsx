@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
-import { Crown, ShieldCheck, Ticket } from 'lucide-react'
+import { Ticket } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { dateTR, tl } from '@/lib/format'
@@ -9,7 +9,7 @@ import type { Plan } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert, Modal, PageHeader, SkeletonPage } from '@/components/ui/Misc'
-import { PlanCards } from '../public/Landing'
+import { PricingPro } from '../public/landing/Showcase'
 
 interface Quote { amount: number; discount: number; total: number; currency: string; coupon: { code: string; description: string | null } | null }
 interface StartResp { order: { uuid: string; status: string }; checkout: { payment_page_url?: string; checkout_form_content?: string } | null }
@@ -57,15 +57,11 @@ export default function Premium() {
   if (isLoading || !data) return <SkeletonPage variant="cards" />
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader kicker="DilGO Premium" title={user?.premium.active ? 'Premium üyesisin 👑' : 'Sınırları kaldır'} />
+      {user?.premium.active && <PageHeader kicker="DilGO Premium" title="Premium üyesisin" />}
       {user?.premium.active && <div className="mb-6"><Alert tone="success">Premium üyeliğin {dateTR(user.premium.until)} tarihine kadar aktif. Yeni paket alırsan süren üzerine eklenir.</Alert></div>}
 
-      <PlanCards plans={data.data} cta={(p) => <Button block variant={p.is_featured ? 'dark' : 'primary'} onClick={() => choose(p)}>Seç</Button>} />
+      <PricingPro embedded plans={data.data} title="Sınırsız pratik, tek dokunuşla." sub="Sınırsız can, tüm hikâyeler, daha fazla Defne pratiği ve canlı ders kuponları." cta={(p) => <Button block variant={p.is_featured ? 'primary' : 'dark'} onClick={() => choose(p)}>{p.is_featured ? 'Premium’a geç' : 'Seç'}</Button>} />
 
-      <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm font-bold text-ink-soft">
-        <span className="flex items-center gap-2"><ShieldCheck className="size-5 text-mint-deep" /> iyzico güvencesiyle 3D Secure ödeme</span>
-        <span className="flex items-center gap-2"><Crown className="size-5 text-flame" /> Otomatik yenileme yok</span>
-      </div>
 
       <Modal open={!!plan && !form} onClose={() => setPlan(null)}>
         {plan && (

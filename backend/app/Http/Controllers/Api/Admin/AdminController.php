@@ -275,4 +275,41 @@ class AdminController extends Controller
 
         return response()->json(['ok' => true]);
     }
+
+    /**
+     * Send the newsletter to confirmed, still-subscribed addresses (or to one test
+     * address first). Every e-mail carries its own one-click unsubscribe link.
+     */
+    public function sendNewsletter(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'subject' => ['required', 'string', 'min:3', 'max:150'],
+            'body' => ['required', 'string', 'min:10', 'max:10000'],
+            'cta_label' => ['nullable', 'string', 'max:40', 'required_with:cta_url'],
+            'cta_url' => ['nullable', 'url', 'max:500'],
+            'test_email' => ['nullable', 'email'],
+        ]);
+        $lines = array_values(array_filter(array_map('trim', preg_split('/\n{2,}/', strip_tags($data['body'])))));
+        $base = config('dilgo.brand.frontend_url');
+        $send = function (string $email, ?string $token) use ($data, $lines, $base) {
+            $footer = $token ? 'Bu e-postayı DilGO bültenine abone olduğun için aldın. Çıkmak için: '.$base.'/newsletter/unsubscribe/'.$token : '(Deneme gönderimi)';
+            \Illuminate\Support\Facades\Mail::to($email)->queue(new \App\Mail\NoticeMail($data['subject'], $data['subject'], [...$lines, $footer], $data['cta_label'] ?? null, $data['cta_url'] ?? null));
+        };
+        if (! empty($data['test_email'])) {
+            $send($data['test_email'], null);
+
+            return response()->json(['sent' => 1, 'test' => true]);
+        }
+        $count = 0;
+        \App\Models\NewsletterSubscriber::query()->whereNotNull('confirmed_at')->whereNull('unsubscribed_at')
+            ->chunkById(200, function ($subs) use ($send, &$count) {
+                foreach ($subs as $s) {
+                    $send($s->email, $s->token);
+                    $count++;
+                }
+            });
+        \App\Support\Audit::log('newsletter.sent', $request->user(), null, ['subject' => $data['subject'], 'recipients' => $count]);
+
+        return response()->json(['sent' => $count, 'test' => false]);
+    }
 }

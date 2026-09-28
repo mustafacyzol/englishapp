@@ -68,6 +68,15 @@ class AccountController extends Controller
             }
             $user->forceFill(['age_group_changed_at' => now()]);
         }
+        // Exam practice is for teens and adults only.
+        if (($data['age_group'] ?? $user->age_group) === 'kid') {
+            if (! empty($data['exam_target'])) {
+                abort(422, 'Sınav modu çocuk hesaplarında kullanılamaz.');
+            }
+            if (isset($data['preferences']['exam_mode'])) {
+                $data['preferences']['exam_mode'] = false;
+            }
+        }
         if (isset($data['preferences'])) {
             // merge and whitelist; never let the client overwrite server-owned keys (frame)
             $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'sound', 'tts_voice', 'tts_rate', 'theme', 'tour_done', 'exam_mode']));

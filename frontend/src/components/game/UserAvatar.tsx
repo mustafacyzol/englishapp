@@ -9,7 +9,7 @@ export const FRAMES: Record<string, string> = {
   sky: 'ring-4 ring-sky ring-offset-2 ring-offset-paper',
 }
 
-const TINTS = ['bg-sky', 'bg-flame', 'bg-mint', 'bg-lilac', 'bg-butter', 'bg-berry']
+const TINTS = ['bg-sky', 'bg-flame', 'bg-mint-deep', 'bg-lilac', 'bg-berry', 'bg-ink']
 
 /**
  * A learner's picture: the avatar they picked, or their initial on a colour

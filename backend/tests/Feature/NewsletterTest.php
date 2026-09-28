@@ -37,4 +37,17 @@ class NewsletterTest extends TestCase
         $this->assertNotNull($sub->fresh()->unsubscribed_at);
         $this->postJson('/api/v1/newsletter/confirm/nope')->assertNotFound();
     }
+
+    public function test_admin_sends_only_to_confirmed_subscribers(): void
+    {
+        Mail::fake();
+        $admin = \App\Models\User::factory()->create(['role' => 'admin', 'email_verified_at' => now()]);
+        NewsletterSubscriber::query()->create(['email' => 'a@example.com', 'token' => 'ta', 'confirmed_at' => now()]);
+        NewsletterSubscriber::query()->create(['email' => 'b@example.com', 'token' => 'tb']);
+        NewsletterSubscriber::query()->create(['email' => 'c@example.com', 'token' => 'tc', 'confirmed_at' => now(), 'unsubscribed_at' => now()]);
+        $token = $admin->createToken('admin-panel', ['user', 'admin'])->plainTextToken;
+        $this->withToken($token)->postJson('/api/v1/admin/newsletter/send', ['subject' => 'Haftanın ipucu', 'body' => "Merhaba!\n\nBugün phrasal verbs."])->assertOk()->assertJsonPath('sent', 1);
+        Mail::assertQueued(NoticeMail::class, fn ($m) => $m->hasTo('a@example.com') && str_contains(implode(' ', $m->lines), '/newsletter/unsubscribe/ta'));
+        Mail::assertNotQueued(NoticeMail::class, fn ($m) => $m->hasTo('b@example.com') || $m->hasTo('c@example.com'));
+    }
 }

@@ -167,6 +167,7 @@ Route::prefix('v1')->group(function () {
                 Route::get('orders', [AdminController::class, 'orders']);
                 Route::post('orders/{order}/refund', [AdminController::class, 'refundOrder']);
                 Route::get('audit', [AdminController::class, 'audit']);
+                Route::post('newsletter/send', [AdminController::class, 'sendNewsletter'])->middleware('throttle:10,60');
                 Route::post('redeem-codes/generate', [ResourceController::class, 'generateCodes']);
                 Route::get('institutions/{institution}/report', [AdminController::class, 'institutionReport']);
                 Route::post('institutions/{institution}/invite', [AdminController::class, 'institutionInvite']);

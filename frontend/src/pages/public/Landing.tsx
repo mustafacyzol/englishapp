@@ -2,9 +2,8 @@ import { useCallback, useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, ArrowRight, BarChart3, Building2, Check, Mail, Quote, Star } from 'lucide-react'
+import { ArrowLeft, ArrowRight, BarChart3, Building2, Mail, Quote, Star } from 'lucide-react'
 import { get } from '@/lib/api'
-import { tl } from '@/lib/format'
 import type { Plan } from '@/lib/types'
 import { rewardImg } from '@/lib/assets'
 import { LinkButton } from '@/components/ui/Button'
@@ -186,35 +185,6 @@ const FALLBACK_PLANS: Plan[] = [
   { id: 3, slug: 'yearly', name: 'Yıllık', tagline: 'Akıcılığa kadar', interval: 'year', duration_days: 365, price: '999', compare_at_price: '1788', currency: 'TRY', features: ['Tüm Premium özellikler', '4 canlı ders kuponu', 'CEFR seviye sertifikası'], badge: '%44 tasarruf', bonus_gems: 2000, live_lesson_credits: 4, is_featured: false },
 ]
 
-export function PlanCards({ plans, cta }: { plans: Plan[]; cta: (p: Plan) => React.ReactNode }) {
-  return (
-    <div className="grid gap-5 md:grid-cols-3">
-      {plans.map((p) => (
-        <div
-          key={p.id}
-          className={clsx(
-            'relative flex flex-col rounded-3xl border-2 bg-card p-7 transition duration-300',
-            p.is_featured ? 'border-flame shadow-soft md:-my-3 md:py-10' : 'border-line hover:-translate-y-1 hover:shadow-soft',
-          )}
-        >
-          {p.badge && <span className={clsx('absolute -top-3.5 left-7 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider text-white', p.is_featured ? 'bg-flame' : 'bg-mint')}>{p.badge}</span>}
-          <p className="font-display text-2xl font-black">{p.name}</p>
-          <p className="text-ink-soft">{p.tagline}</p>
-          <div className="my-6 flex items-end gap-2">
-            <span className="font-display text-5xl font-black leading-none">{tl(p.price)}</span>
-            {p.compare_at_price && <s className="mb-1 font-bold text-ink-soft">{tl(p.compare_at_price)}</s>}
-          </div>
-          <ul className="mb-7 flex-1 space-y-3">
-            {(p.features ?? []).map((f) => (
-              <li key={f} className="flex gap-2.5 font-semibold"><Check className="mt-0.5 size-5 shrink-0 text-mint" strokeWidth={3} /> {f}</li>
-            ))}
-          </ul>
-          {cta(p)}
-        </div>
-      ))}
-    </div>
-  )
-}
 
 /* ------------------------------------------------------------------- faq */
 

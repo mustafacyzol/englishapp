@@ -114,7 +114,7 @@ export function HeroPro() {
         {/* product composition */}
         <div className="relative mx-auto h-[520px] w-full max-w-[520px] sm:h-[560px]">
           <motion.div aria-hidden className="absolute left-1/2 top-1/2 size-[420px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-br from-flame/15 via-butter/10 to-sky/15 blur-2xl" />
-          <motion.div style={ph} initial={{ opacity: 0, y: 40, rotate: -2 }} animate={{ opacity: 1, y: 0, rotate: -4 }} transition={{ duration: 0.9, ease }} className="absolute left-1/2 top-1/2 w-[250px] -translate-x-1/2 -translate-y-1/2 sm:w-[270px]">
+          <motion.div style={ph} initial={{ opacity: 0, y: 40, rotate: -2 }} animate={{ opacity: 1, y: 0, rotate: -4 }} transition={{ duration: 0.9, ease }} className="absolute left-1/2 top-1/2 w-[220px] -translate-x-1/2 -translate-y-1/2 sm:w-[270px]">
             <Phone><PathMock /></Phone>
             <motion.img src={higoImg('wave')} alt="Higo" initial={{ opacity: 0, y: 30, rotate: 12 }} animate={{ opacity: 1, y: 0, rotate: 8 }} transition={{ delay: 0.9, type: 'spring', stiffness: 160, damping: 12 }} className="absolute -right-16 -top-14 w-28 drop-shadow-[0_16px_18px_rgba(200,60,20,.25)] sm:-right-20 sm:w-32" />
           </motion.div>
@@ -396,23 +396,23 @@ const FREE = ['Tüm ders yolu', 'Seçili hikâyeler', 'Kelime oyunları', 'Günd
  * lifted with a glowing border and Higo on top. Each paid plan shows its monthly
  * equivalent and the saving, so the comparison is instant.
  */
-export function PricingPro({ plans }: { plans: Plan[] }) {
+export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, hazır olunca yüksel.', sub = 'Temel her şey ücretsiz. Premium sınırları kaldırır, canlı ders ve daha fazla konuşma pratiği ekler.' }: { plans: Plan[]; cta?: (p: Plan) => ReactNode; embedded?: boolean; title?: string; sub?: string }) {
   const monthly = plans.find((p) => p.duration_days <= 31) ?? plans[0]
   const perMonth = (p: Plan) => Number(p.price) / Math.max(1, Math.round(p.duration_days / 30))
   const saving = (p: Plan) => (monthly && p !== monthly ? Math.round((1 - perMonth(p) / Number(monthly.price)) * 100) : 0)
   return (
-    <section id="paketler" className="relative overflow-hidden bg-[#0f131c] py-24 text-white">
+    <section id={embedded ? undefined : 'paketler'} className={clsx('relative overflow-hidden bg-[#0f131c] text-white', embedded ? 'rounded-[32px] py-12' : 'py-24')}>
       <div aria-hidden className="absolute inset-0 [background:radial-gradient(50rem_26rem_at_50%_0%,rgba(255,90,54,.22),transparent_70%)]" />
       <div aria-hidden className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] [background-size:56px_56px]" />
       <div className="relative mx-auto max-w-6xl px-5">
         <div className="mx-auto mb-14 max-w-2xl text-center">
           <p className="text-sm font-black uppercase tracking-[0.2em] text-butter">Paketler</p>
-          <h2 className="mt-3 font-display text-[clamp(2.1rem,4.6vw,3.4rem)] font-black leading-[1.06] tracking-tight">Ücretsiz başla, hazır olunca yüksel.</h2>
-          <p className="mt-4 text-lg text-white/65">Temel her şey ücretsiz. Premium sınırları kaldırır, canlı ders ve daha fazla konuşma pratiği ekler.</p>
+          <h2 className="mt-3 font-display text-[clamp(2.1rem,4.6vw,3.4rem)] font-black leading-[1.06] tracking-tight">{title}</h2>
+          <p className="mt-4 text-lg text-white/65">{sub}</p>
         </div>
 
-        <div className="grid items-stretch gap-5 md:grid-cols-2 lg:grid-cols-4">
-          <PriceCard name="Ücretsiz" tagline="Her zaman" price="₺0" note="Kredi kartı gerekmez" features={FREE} cta={<LinkButton to="/register" block variant="secondary">Ücretsiz başla</LinkButton>} />
+ <div className={clsx('grid items-stretch gap-5 md:grid-cols-2', embedded ? 'lg:grid-cols-3' : 'lg:grid-cols-4')}>
+          {!embedded && <PriceCard name="Ücretsiz" tagline="Her zaman" price="₺0" note="Kredi kartı gerekmez" features={FREE} cta={<LinkButton to="/register" block variant="secondary">Ücretsiz başla</LinkButton>} />}
           {plans.map((p) => (
             <PriceCard
               key={p.id}
@@ -424,13 +424,13 @@ export function PricingPro({ plans }: { plans: Plan[] }) {
               note={p !== monthly ? `ayda ${tl(String(Math.round(perMonth(p))))}` : 'aylık yenilenmez'}
               badge={p.is_featured ? 'En popüler' : saving(p) > 0 ? `%${saving(p)} tasarruf` : undefined}
               features={p.features ?? []}
-              cta={<LinkButton to="/register" block variant={p.is_featured ? 'primary' : 'dark'}>{p.is_featured ? 'Premium’a başla' : 'Seç'}</LinkButton>}
+              cta={cta ? cta(p) : <LinkButton to="/register" block variant={p.is_featured ? 'primary' : 'dark'}>{p.is_featured ? 'Premium’a başla' : 'Seç'}</LinkButton>}
             />
           ))}
         </div>
 
         <ul className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm font-semibold text-white/55">
-          {['Otomatik yenileme yok', 'İstediğin an iptal', 'Kurumlara özel fiyat'].map((t) => <li key={t} className="flex items-center gap-1.5"><Check className="size-4 text-mint" strokeWidth={3} />{t}</li>)}
+          {(embedded ? ['Otomatik yenileme yok', 'Güvenli ödeme', 'Tek seferlik ödeme'] : ['Otomatik yenileme yok', 'İstediğin an iptal', 'Kurumlara özel fiyat']).map((t) => <li key={t} className="flex items-center gap-1.5"><Check className="size-4 text-mint" strokeWidth={3} />{t}</li>)}
         </ul>
       </div>
     </section>

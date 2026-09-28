@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { Bell, GraduationCap, LogOut, Monitor, Moon, Palette, Shield, Smartphone, Sun, Target, Trash2, User } from 'lucide-react'
 import { setTheme, useTheme } from '@/lib/theme'
+import { img } from '@/lib/assets'
 import { ApiError, del, get, patch, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { dateTR, GOALS, tl } from '@/lib/format'
@@ -38,9 +39,9 @@ const pill = (on: boolean) => clsx('rounded-xl border-2 py-2 text-sm font-bold t
 type Tab = 'hesap' | 'ogrenme' | 'sinav' | 'gorunum' | 'bildirim' | 'guvenlik'
 
 const AGE = [
-  { key: 'kid', label: 'Çocuk', text: '7-12 yaş', emoji: '🧒' },
-  { key: 'teen', label: 'Genç', text: '13-17 yaş', emoji: '🎧' },
-  { key: 'adult', label: 'Yetişkin', text: '18+', emoji: '💼' },
+  { key: 'kid', label: 'Çocuk', text: '7-12 yaş', art: 'braids' },
+  { key: 'teen', label: 'Genç', text: '13-17 yaş', art: 'cap' },
+  { key: 'adult', label: 'Yetişkin', text: '18+', art: 'beard' },
 ] as const
 
 /**
@@ -127,7 +128,7 @@ function AccountTab({ save }: { save: Save }) {
         <div className="grid grid-cols-3 gap-2">
           {AGE.map((a) => (
             <button key={a.key} onClick={() => a.key !== user.age_group && save.mutate({ age_group: a.key })} disabled={user.age_group === 'kid' ? a.key !== 'kid' : a.key === 'kid'} aria-pressed={user.age_group === a.key} className={clsx(pill(user.age_group === a.key), 'flex flex-col items-center gap-0.5 py-3 disabled:opacity-40')}>
-              <span className="text-xl" aria-hidden>{a.emoji}</span>
+              <img src={img(`avatars/${a.art}.webp`)} alt="" className="mb-1 size-12 rounded-2xl object-cover" />
               <span>{a.label}</span>
               <span className={clsx('text-[11px] font-semibold', user.age_group === a.key ? 'text-paper/70' : 'text-ink-soft')}>{a.text}</span>
             </button>

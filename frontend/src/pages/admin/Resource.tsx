@@ -105,7 +105,12 @@ const CONFIG: Record<string, Cfg> = {
   'newsletter-subscribers': {
     title: 'Bülten aboneleri',
     noCreate: true,
-    intro: <p className="mb-5 max-w-2xl text-sm text-ink-soft">Çift onaylı liste: yalnızca e-postadaki bağlantıyı açanlar "onaylı" sayılır. Toplu gönderimde yalnızca onaylı ve çıkmamış adresleri kullanın, her e-postaya çıkış bağlantısı ekleyin.</p>,
+    intro: (
+      <>
+        <p className="mb-5 max-w-2xl text-sm text-ink-soft">Çift onaylı liste: yalnızca e-postadaki bağlantıyı açanlar "onaylı" sayılır. Gönderim yalnızca onaylı ve çıkmamış adreslere gider; her e-postaya kişiye özel çıkış bağlantısı otomatik eklenir.</p>
+        <NewsletterComposer />
+      </>
+    ),
     cols: [{ key: 'email', label: 'E-posta' }, { key: 'source', label: 'Kaynak' }, { key: 'confirmed_at', label: 'Onay', render: (r) => (r.confirmed_at ? 'Onaylı' : 'Bekliyor') }, { key: 'unsubscribed_at', label: 'Durum', render: (r) => (r.unsubscribed_at ? 'Çıktı' : 'Aktif') }, { key: 'created_at', label: 'Tarih', render: (r) => String(r.created_at ?? '').slice(0, 10) }],
     fields: [{ key: 'unsubscribed_at', label: 'Çıkış tarihi (listeden çıkarmak için doldur)', type: 'date' }],
     defaults: {},
@@ -174,6 +179,34 @@ const CONFIG: Record<string, Cfg> = {
     fields: [{ key: 'code', label: 'Kod', type: 'text' }, { key: 'type', label: 'Tür', type: 'select', options: ['premium_days', 'gems', 'item'] }, { key: 'amount', label: 'Miktar (gün/elmas)', type: 'number' }, { key: 'reward_item_id', label: 'Kart ID (item türü)', type: 'number' }, { key: 'max_uses', label: 'Kullanım limiti', type: 'number' }, { key: 'batch', label: 'Parti', type: 'text' }, { key: 'expires_at', label: 'Bitiş', type: 'date' }, { key: 'is_active', label: 'Aktif', type: 'bool' }, { key: 'description', label: 'Açıklama', type: 'text', full: true }],
     defaults: { type: 'premium_days', amount: 7, max_uses: 1, is_active: true },
   },
+}
+
+/** Compose and send the newsletter: a test to yourself first, then to every confirmed subscriber. */
+function NewsletterComposer() {
+  const toast = useToast()
+  const [open, setOpen] = useState(false)
+  const [f, setF] = useState({ subject: '', body: '', cta_label: '', cta_url: '', test_email: '' })
+  const send = useMutation({
+    mutationFn: (test: boolean) => post<{ sent: number; test: boolean }>('/admin/newsletter/send', { subject: f.subject, body: f.body, cta_label: f.cta_label || undefined, cta_url: f.cta_url || undefined, test_email: test ? f.test_email : undefined }),
+    onSuccess: (r) => toast(r.test ? 'Deneme e-postası gönderildi' : `${r.sent} aboneye gönderim kuyruğa alındı`, 'success'),
+    onError: (e: ApiError) => toast(e.first(), 'error'),
+  })
+  if (!open) return <Button className="mb-6" onClick={() => setOpen(true)}>Bülten gönder</Button>
+  return (
+    <div className="mb-6 max-w-2xl space-y-3 rounded-2xl border-2 border-line bg-card p-5">
+      <Input label="Konu" value={f.subject} onChange={(e) => setF({ ...f, subject: e.target.value })} />
+      <Textarea label="İçerik (paragrafları boş satırla ayırın)" rows={8} value={f.body} onChange={(e) => setF({ ...f, body: e.target.value })} />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Input label="Düğme metni (isteğe bağlı)" value={f.cta_label} onChange={(e) => setF({ ...f, cta_label: e.target.value })} />
+        <Input label="Düğme bağlantısı" value={f.cta_url} onChange={(e) => setF({ ...f, cta_url: e.target.value })} placeholder="https://" />
+      </div>
+      <div className="flex flex-wrap items-end gap-3">
+        <Input label="Deneme için e-posta" value={f.test_email} onChange={(e) => setF({ ...f, test_email: e.target.value })} className="min-w-56 flex-1" />
+        <Button variant="secondary" loading={send.isPending && send.variables === true} disabled={!f.test_email} onClick={() => send.mutate(true)}>Deneme gönder</Button>
+        <Button loading={send.isPending && send.variables === false} onClick={() => confirm('Bülten tüm onaylı abonelere gönderilsin mi?') && send.mutate(false)}>Tüm abonelere gönder</Button>
+      </div>
+    </div>
+  )
 }
 
 export default function Resource() {

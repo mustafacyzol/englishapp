@@ -76,3 +76,11 @@ kaydına yazılır. Yaş grubu şunları belirler:
 - İş ortağı hediyelerinin kitlesi.
 - Gölge Düellosu'nda rakip gölgesi aynı yaş grubundan seçilir.
 - Çocuk hesaplarına kampanya e-postası seçeneği gösterilmez.
+
+## 7. Tek hesap, tek öğrenci
+
+İlerleme, seviye, yaşa uygun içerik ve lig bir kişiye aittir; bu yüzden hesap paylaşımı zorlaştırılır:
+
+- Aynı anda en fazla 3 cihazda oturum açık kalır; 4. cihazda giriş yapılınca en eski oturum kapanır.
+- Yaş grubu 30 günde bir değiştirilebilir. Çocuk hesabı yalnızca kayıtta veli onayıyla açılır; çocuk hesabından büyük yaş grubuna geçiş destek ekibi üzerinden yapılır.
+- Sınav modu çocuk hesaplarında sunucu tarafında da kapalıdır.
