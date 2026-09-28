@@ -11,8 +11,9 @@ import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
 import { Reveal } from '@/components/motion/Page'
 import { SKILL, SKILLS as SKILL_KEYS } from '@/lib/skills'
-import { Audiences, Bento, FeatureStory, TryIt } from './landing/Sections'
-import { FinalCta3D, Hero3D, MeetHigo, TrustBar, WhyStack } from './landing/Story'
+import { Bento, TryIt } from './landing/Sections'
+import { FinalCta3D, TrustBar } from './landing/Story'
+import { AudiencesPro, HeroPro, MeetHigoPro, PricingPro, Strengths } from './landing/Showcase'
 
 export interface Review {
   id: number
@@ -33,17 +34,16 @@ export default function Landing() {
   const reviews = data?.testimonials ?? []
   return (
     <>
-      <Hero3D learners={data?.learners} />
+      <HeroPro />
       <TrustBar />
-      <Audiences />
-      <MeetHigo />
-      <FeatureStory />
-      <WhyStack />
+      <AudiencesPro />
+      <Strengths />
+      <MeetHigoPro />
       <TryIt />
       <Bento />
       <Reviews reviews={reviews} />
       <ForInstitutions />
-      <Pricing plans={data?.plans} />
+      <PricingPro plans={data?.plans?.length ? data.plans : FALLBACK_PLANS} />
       <Faq />
       <Ticker reviews={reviews} />
       <FinalCta3D />
@@ -213,20 +213,6 @@ export function PlanCards({ plans, cta }: { plans: Plan[]; cta: (p: Plan) => Rea
         </div>
       ))}
     </div>
-  )
-}
-
-function Pricing({ plans }: { plans?: Plan[] }) {
-  return (
-    <section id="paketler" className="mx-auto max-w-6xl px-5 py-24">
-      <Reveal className="mb-14 text-center">
-        <p className="mb-2 font-extrabold uppercase tracking-widest text-flame">Paketler</p>
-        <h2 className="text-4xl sm:text-5xl">Ücretsiz başla.</h2>
-        <p className="mx-auto mt-4 max-w-xl text-lg text-ink-soft">Ders yolu, seçili hikâyeler ve günde 10 AI mesajı her zaman ücretsiz. Premium sınırları kaldırır.</p>
-      </Reveal>
-      <Reveal><PlanCards plans={plans?.length ? plans : FALLBACK_PLANS} cta={(p) => <LinkButton to="/register" variant={p.is_featured ? 'primary' : 'secondary'} block>Başla</LinkButton>} /></Reveal>
-      <p className="mt-8 text-center text-sm font-semibold text-ink-soft">iyzico güvencesiyle 3D Secure ödeme · Otomatik yenileme yok</p>
-    </section>
   )
 }
 
