@@ -63,6 +63,11 @@ const AdminVouchers = lazy(() => import('./pages/admin/Vouchers'))
 const AdminCodes = lazy(() => import('./pages/admin/CodeGenerator'))
 const AdminSettings = lazy(() => import('./pages/admin/Settings'))
 const AdminAudit = lazy(() => import('./pages/admin/Audit'))
+const AdminRevenue = lazy(() => import('./pages/admin/Revenue'))
+const AdminSubscribers = lazy(() => import('./pages/admin/Subscribers'))
+const AdminStaff = lazy(() => import('./pages/admin/Staff'))
+const AdminBlogList = lazy(() => import('./pages/admin/BlogEditor').then((m) => ({ default: m.BlogList })))
+const AdminBlogEdit = lazy(() => import('./pages/admin/BlogEditor').then((m) => ({ default: m.BlogEdit })))
 
 function Guard({ children, verified = true, guest }: { children: ReactNode; verified?: boolean; guest?: boolean }) {
   const { user, ready } = useAuth()
@@ -145,6 +150,11 @@ export default function App() {
           <Route path="codes" element={<AdminCodes />} />
           <Route path="settings" element={<AdminSettings />} />
           <Route path="audit" element={<AdminAudit />} />
+          <Route path="revenue" element={<AdminRevenue />} />
+          <Route path="subscribers" element={<AdminSubscribers />} />
+          <Route path="staff" element={<AdminStaff />} />
+          <Route path="blog" element={<AdminBlogList />} />
+          <Route path="blog/:id" element={<AdminBlogEdit />} />
           <Route path="r/:resource" element={<AdminResource />} />
           <Route path="institutions/:id" element={<InstitutionDetail />} />
         </Route>

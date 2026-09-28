@@ -24,7 +24,7 @@ class ResourceController extends Controller
 
         return [
             'courses' => [
-                'model' => Models\Course::class, 'search' => ['title', 'slug'], 'order' => 'position', 'role' => 'staff',
+                'model' => Models\Course::class, 'search' => ['title', 'slug'], 'order' => 'position', 'perm' => 'content',
                 'rules' => [
                     'slug' => ['required', 'alpha_dash', 'max:120', Rule::unique('courses')->ignore($id)],
                     'title' => ['required', 'string', 'max:190'],
@@ -36,7 +36,7 @@ class ResourceController extends Controller
                 ],
             ],
             'units' => [
-                'model' => Models\Unit::class, 'search' => ['title'], 'order' => 'position', 'with' => ['course:id,title'], 'filters' => ['course_id'], 'role' => 'staff',
+                'model' => Models\Unit::class, 'search' => ['title'], 'order' => 'position', 'with' => ['course:id,title'], 'filters' => ['course_id'], 'perm' => 'content',
                 'rules' => [
                     'course_id' => ['required', 'exists:courses,id'],
                     'title' => ['required', 'string', 'max:190'],
@@ -47,7 +47,7 @@ class ResourceController extends Controller
                 ],
             ],
             'lessons' => [
-                'model' => Models\Lesson::class, 'search' => ['title'], 'order' => 'position', 'with' => ['unit:id,title'], 'filters' => ['unit_id', 'skill', 'kind'], 'role' => 'staff',
+                'model' => Models\Lesson::class, 'search' => ['title'], 'order' => 'position', 'with' => ['unit:id,title'], 'filters' => ['unit_id', 'skill', 'kind'], 'perm' => 'content',
                 'rules' => [
                     'unit_id' => ['required', 'exists:units,id'],
                     'title' => ['required', 'string', 'max:190'],
@@ -63,7 +63,7 @@ class ResourceController extends Controller
                 ],
             ],
             'stories' => [
-                'model' => Models\Story::class, 'search' => ['title', 'title_tr', 'slug'], 'order' => '-id', 'filters' => ['cefr_level', 'category', 'is_premium', 'is_published'], 'role' => 'staff',
+                'model' => Models\Story::class, 'search' => ['title', 'title_tr', 'slug'], 'order' => '-id', 'filters' => ['cefr_level', 'category', 'is_premium', 'is_published'], 'perm' => 'content',
                 'rules' => [
                     'slug' => ['required', 'alpha_dash', 'max:190', Rule::unique('stories')->ignore($id)],
                     'title' => ['required', 'string', 'max:190'],
@@ -92,7 +92,7 @@ class ResourceController extends Controller
                 },
             ],
             'scenarios' => [
-                'model' => Models\AiScenario::class, 'search' => ['title', 'key'], 'order' => 'position', 'role' => 'staff',
+                'model' => Models\AiScenario::class, 'search' => ['title', 'key'], 'order' => 'position', 'perm' => 'content',
                 'rules' => [
                     'key' => ['required', 'alpha_dash', 'max:80', Rule::unique('ai_scenarios')->ignore($id)],
                     'title' => ['required', 'string', 'max:190'],
@@ -109,7 +109,7 @@ class ResourceController extends Controller
                 ],
             ],
             'achievements' => [
-                'model' => Models\Achievement::class, 'search' => ['title', 'key'], 'order' => 'position', 'role' => 'admin',
+                'model' => Models\Achievement::class, 'search' => ['title', 'key'], 'order' => 'position', 'perm' => 'gamification',
                 'rules' => [
                     'key' => ['required', 'alpha_dash', 'max:80', Rule::unique('achievements')->ignore($id)],
                     'title' => ['required', 'string', 'max:120'],
@@ -126,7 +126,7 @@ class ResourceController extends Controller
                 ],
             ],
             'quests' => [
-                'model' => Models\Quest::class, 'search' => ['title', 'key'], 'order' => 'id', 'role' => 'admin',
+                'model' => Models\Quest::class, 'search' => ['title', 'key'], 'order' => 'id', 'perm' => 'gamification',
                 'rules' => [
                     'key' => ['required', 'alpha_dash', 'max:80', Rule::unique('quests')->ignore($id)],
                     'title' => ['required', 'string', 'max:120'],
@@ -140,7 +140,7 @@ class ResourceController extends Controller
                 ],
             ],
             'plans' => [
-                'model' => Models\Plan::class, 'search' => ['name', 'slug'], 'order' => 'position', 'role' => 'admin',
+                'model' => Models\Plan::class, 'search' => ['name', 'slug'], 'order' => 'position', 'perm' => 'sales',
                 'rules' => [
                     'slug' => ['required', 'alpha_dash', 'max:80', Rule::unique('plans')->ignore($id)],
                     'name' => ['required', 'string', 'max:120'],
@@ -160,7 +160,7 @@ class ResourceController extends Controller
                 ],
             ],
             'blog-posts' => [
-                'model' => Models\BlogPost::class, 'search' => ['title', 'slug'], 'order' => '-published_at', 'filters' => ['category', 'is_published'], 'role' => 'staff',
+                'model' => Models\BlogPost::class, 'search' => ['title', 'slug'], 'order' => '-published_at', 'filters' => ['category', 'is_published'], 'perm' => 'blog',
                 'rules' => [
                     'slug' => ['required', 'alpha_dash', 'max:190', Rule::unique('blog_posts')->ignore($id)],
                     'title' => ['required', 'string', 'max:190'],
@@ -169,13 +169,28 @@ class ResourceController extends Controller
                     'cover_image' => ['nullable', 'string', 'max:500'],
                     'category' => ['nullable', 'string', 'max:40'],
                     'author_name' => ['nullable', 'string', 'max:80'],
+                    'seo_title' => ['nullable', 'string', 'max:70'],
+                    'seo_description' => ['nullable', 'string', 'max:170'],
+                    'tags' => ['nullable', 'array', 'max:8'],
+                    'tags.*' => ['string', 'max:30'],
                     'reading_minutes' => ['integer', 'min:1', 'max:60'],
                     'is_published' => ['boolean'],
                     'published_at' => ['nullable', 'date'],
                 ],
+                'before' => function (array $data) {
+                    // Publishing without a date means "now"; reading time follows the text.
+                    if (! empty($data['is_published']) && empty($data['published_at'])) {
+                        $data['published_at'] = now();
+                    }
+                    if (isset($data['body']) && empty($data['reading_minutes'])) {
+                        $data['reading_minutes'] = max(1, (int) ceil(str_word_count(strip_tags($data['body'])) / 200));
+                    }
+
+                    return $data;
+                },
             ],
             'testimonials' => [
-                'model' => Models\Testimonial::class, 'search' => ['name', 'quote'], 'order' => 'position', 'filters' => ['is_published'], 'role' => 'staff',
+                'model' => Models\Testimonial::class, 'search' => ['name', 'quote'], 'order' => 'position', 'filters' => ['is_published'], 'perm' => 'blog',
                 'rules' => [
                     'name' => ['required', 'string', 'max:80'],
                     'role' => ['nullable', 'string', 'max:120'],
@@ -190,7 +205,7 @@ class ResourceController extends Controller
                 ],
             ],
             'institutions' => [
-                'model' => Models\Institution::class, 'search' => ['name', 'city', 'contact_email', 'join_code'], 'order' => '-id', 'filters' => ['type', 'is_active'], 'role' => 'admin',
+                'model' => Models\Institution::class, 'search' => ['name', 'city', 'contact_email', 'join_code'], 'order' => '-id', 'filters' => ['type', 'is_active'], 'perm' => 'institutions',
                 'rules' => [
                     'name' => ['required', 'string', 'max:160'],
                     'type' => ['required', 'in:school,course,company'],
@@ -208,7 +223,7 @@ class ResourceController extends Controller
                 ],
             ],
             'partners' => [
-                'model' => Models\Partner::class, 'search' => ['name', 'slug'], 'order' => 'position', 'filters' => ['is_active'], 'role' => 'admin',
+                'model' => Models\Partner::class, 'search' => ['name', 'slug'], 'order' => 'position', 'filters' => ['is_active'], 'perm' => 'gamification',
                 'rules' => [
                     'name' => ['required', 'string', 'max:80'],
                     'slug' => ['required', 'alpha_dash', 'max:80', Rule::unique('partners')->ignore($id)],
@@ -221,7 +236,7 @@ class ResourceController extends Controller
                 ],
             ],
             'partner-offers' => [
-                'model' => Models\PartnerOffer::class, 'search' => ['title', 'code_prefix'], 'order' => '-id', 'filters' => ['partner_id', 'is_active', 'rarity'], 'with' => ['partner:id,name'], 'role' => 'admin',
+                'model' => Models\PartnerOffer::class, 'search' => ['title', 'code_prefix'], 'order' => '-id', 'filters' => ['partner_id', 'is_active', 'rarity'], 'with' => ['partner:id,name'], 'perm' => 'gamification',
                 'rules' => [
                     'partner_id' => ['required', 'integer', 'exists:partners,id'],
                     'title' => ['required', 'string', 'max:120'],
@@ -237,7 +252,7 @@ class ResourceController extends Controller
                 ],
             ],
             'exam-questions' => [
-                'model' => Models\ExamQuestion::class, 'search' => ['prompt', 'section'], 'order' => 'position', 'filters' => ['section', 'cefr', 'is_active'], 'role' => 'admin', 'visible' => ['answer', 'explanation'],
+                'model' => Models\ExamQuestion::class, 'search' => ['prompt', 'section'], 'order' => 'position', 'filters' => ['section', 'cefr', 'is_active'], 'perm' => 'content', 'visible' => ['answer', 'explanation'],
                 'before' => function (array $d) {
                     foreach (['exams', 'options'] as $k) {
                         if (isset($d[$k])) {
@@ -265,20 +280,20 @@ class ResourceController extends Controller
                 ],
             ],
             'newsletter-subscribers' => [
-                'model' => Models\NewsletterSubscriber::class, 'search' => ['email'], 'order' => '-id', 'filters' => ['source'], 'role' => 'staff',
+                'model' => Models\NewsletterSubscriber::class, 'search' => ['email'], 'order' => '-id', 'filters' => ['source'], 'perm' => 'marketing',
                 'rules' => [
                     'unsubscribed_at' => ['nullable', 'date'],
                 ],
             ],
             'contact-messages' => [
-                'model' => Models\ContactMessage::class, 'search' => ['name', 'email', 'message'], 'order' => '-id', 'filters' => ['status', 'topic'], 'role' => 'staff',
+                'model' => Models\ContactMessage::class, 'search' => ['name', 'email', 'message'], 'order' => '-id', 'filters' => ['status', 'topic'], 'perm' => 'marketing',
                 'rules' => [
                     'status' => ['required', 'in:new,replied,closed'],
                     'admin_note' => ['nullable', 'string', 'max:2000'],
                 ],
             ],
             'coupons' => [
-                'model' => Models\Coupon::class, 'search' => ['code', 'description'], 'order' => '-id', 'filters' => ['is_active'], 'role' => 'admin',
+                'model' => Models\Coupon::class, 'search' => ['code', 'description'], 'order' => '-id', 'filters' => ['is_active'], 'perm' => 'sales',
                 'rules' => [
                     'code' => ['required', 'string', 'max:40', 'regex:/^[A-Za-z0-9_-]+$/', Rule::unique('coupons')->ignore($id)],
                     'description' => ['nullable', 'string', 'max:255'],
@@ -296,7 +311,7 @@ class ResourceController extends Controller
                 'before' => fn (array $d) => isset($d['code']) ? ['code' => strtoupper($d['code'])] + $d : $d,
             ],
             'reward-items' => [
-                'model' => Models\RewardItem::class, 'search' => ['name', 'key'], 'order' => 'position', 'filters' => ['type'], 'role' => 'admin',
+                'model' => Models\RewardItem::class, 'search' => ['name', 'key'], 'order' => 'position', 'filters' => ['type'], 'perm' => 'gamification',
                 'rules' => [
                     'key' => ['required', 'alpha_dash', 'max:80', Rule::unique('reward_items')->ignore($id)],
                     'name' => ['required', 'string', 'max:120'],
@@ -311,7 +326,7 @@ class ResourceController extends Controller
                 ],
             ],
             'redeem-codes' => [
-                'model' => Models\RedeemCode::class, 'search' => ['code', 'batch', 'description'], 'order' => '-id', 'filters' => ['batch', 'type', 'is_active'], 'with' => ['item:id,name'], 'role' => 'admin',
+                'model' => Models\RedeemCode::class, 'search' => ['code', 'batch', 'description'], 'order' => '-id', 'filters' => ['batch', 'type', 'is_active'], 'with' => ['item:id,name'], 'perm' => 'gamification',
                 'rules' => [
                     'code' => ['required', 'string', 'max:40', 'regex:/^[A-Za-z0-9_-]+$/', Rule::unique('redeem_codes')->ignore($id)],
                     'description' => ['nullable', 'string', 'max:255'],
@@ -332,7 +347,7 @@ class ResourceController extends Controller
     {
         $cfg = $this->resources($id)[$resource] ?? abort(404, 'Unknown resource');
         $user = request()->user();
-        abort_unless($cfg['role'] === 'staff' ? $user->isStaff() : $user->isAdmin(), 403);
+        abort_unless($user->hasPermission($cfg['perm']), 403, 'Bu bölüm için yetkin yok.');
 
         return $cfg;
     }
@@ -411,7 +426,6 @@ class ResourceController extends Controller
     /** Bulk-generate redeem codes (e.g. 500 codes for a school campaign). */
     public function generateCodes(Request $request): JsonResponse
     {
-        abort_unless($request->user()->isAdmin(), 403);
         $data = $request->validate([
             'count' => ['required', 'integer', 'min:1', 'max:2000'],
             'prefix' => ['nullable', 'string', 'max:10', 'regex:/^[A-Za-z0-9]+$/'],

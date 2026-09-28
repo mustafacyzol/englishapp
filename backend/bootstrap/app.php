@@ -26,6 +26,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->api(prepend: [ForceJson::class], append: [MaintenanceGate::class]);
         $middleware->alias([
             'role' => EnsureRole::class,
+            'perm' => \App\Http\Middleware\EnsurePermission::class,
             'active' => EnsureActiveAccount::class,
             'verified.api' => EnsureVerified::class,
             'feature' => EnsureFeature::class,

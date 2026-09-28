@@ -38,7 +38,7 @@ export function Pager({ page, last, onPage }: { page: number; last: number; onPa
 
 export function Pill({ children, tone = 'default' }: { children: ReactNode; tone?: 'default' | 'good' | 'warn' | 'bad' | 'info' }) {
   const c = { default: 'bg-paper-2', good: 'bg-mint/30', warn: 'bg-butter/60', bad: 'bg-berry/20', info: 'bg-sky/20' }[tone]
-  return <span className={clsx('inline-flex items-center rounded-lg border-2 border-line/20 px-2 py-0.5 text-xs font-bold', c)}>{children}</span>
+  return <span className={clsx('inline-flex items-center whitespace-nowrap rounded-lg border-2 border-line/20 px-2 py-0.5 text-xs font-bold', c)}>{children}</span>
 }
 
 /**
@@ -75,7 +75,7 @@ export function BarChart({ title, data, color, format = (v) => String(v) }: { ti
           <table className="w-full"><tbody>{data.map((x) => <tr key={x.d} className="border-b border-line/10"><td className="py-1">{x.d}</td><td className="py-1 text-right font-mono font-bold">{format(x.v)}</td></tr>)}</tbody></table>
         </div>
       ) : !data.some((x) => x.v > 0) ? (
-        <p className="py-12 text-center text-sm text-ink-soft">Son 30 günde veri yok.</p>
+        <p className="py-12 text-center text-sm text-ink-soft">Bu aralıkta veri yok.</p>
       ) : (
         <div className="relative">
           <svg viewBox={`0 0 ${W} ${H}`} className="w-full" role="img" aria-label={title}>

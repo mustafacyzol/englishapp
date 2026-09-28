@@ -23,6 +23,7 @@ class UserPresenter
             'email_verified' => $user->email_verified_at !== null,
             'role' => $user->role,
             'is_staff' => $user->isStaff(),
+            'permissions' => $user->permissionList(),
             'avatar' => $user->displayAvatar(),
             'locale' => $user->locale,
             'cefr_level' => $user->cefr_level,

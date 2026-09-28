@@ -17,7 +17,17 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable, SoftDeletes;
 
-    public const ROLES = ['user', 'editor', 'admin', 'super_admin'];
+    public const ROLES = ['user', 'support', 'editor', 'admin', 'super_admin'];
+
+    /** Admin panel areas. Super admins always hold all of them. */
+    public const PERMISSIONS = ['users', 'sales', 'content', 'blog', 'gamification', 'institutions', 'marketing', 'desk', 'settings', 'audit'];
+
+    /** What each staff role gets when no custom list is set. */
+    public const ROLE_PERMISSIONS = [
+        'support' => ['users', 'marketing', 'desk'],
+        'editor' => ['content', 'blog'],
+        'admin' => ['users', 'sales', 'content', 'blog', 'gamification', 'institutions', 'marketing', 'desk', 'settings', 'audit'],
+    ];
 
     public const MAX_HEARTS = 5;
 
@@ -60,6 +70,7 @@ class User extends Authenticatable
             'marketing_opt_in' => 'boolean',
             'is_banned' => 'boolean',
             'preferences' => 'array',
+            'permissions' => 'array',
             'interests' => 'array',
             'exam_date' => 'date',
             'streak_last_date' => 'date',
@@ -113,7 +124,26 @@ class User extends Authenticatable
 
     public function isStaff(): bool
     {
-        return in_array($this->role, ['editor', 'admin', 'super_admin'], true);
+        return in_array($this->role, ['support', 'editor', 'admin', 'super_admin'], true);
+    }
+
+    /** @return list<string> the admin panel areas this user may open */
+    public function permissionList(): array
+    {
+        if ($this->role === 'super_admin') {
+            return self::PERMISSIONS;
+        }
+        if (! $this->isStaff()) {
+            return [];
+        }
+        $list = is_array($this->permissions) ? $this->permissions : (self::ROLE_PERMISSIONS[$this->role] ?? []);
+
+        return array_values(array_intersect(self::PERMISSIONS, $list));
+    }
+
+    public function hasPermission(string $area): bool
+    {
+        return in_array($area, $this->permissionList(), true);
     }
 
     public function isSuperAdmin(): bool

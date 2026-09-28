@@ -157,19 +157,27 @@ Route::prefix('v1')->group(function () {
         // ---- Admin (step-up token with "admin" ability) ----------------------
         Route::prefix('admin')->middleware('role:staff')->group(function () {
             Route::get('dashboard', [AdminController::class, 'dashboard']);
-            Route::get('settings', [AdminController::class, 'settings']);
-            Route::put('settings', [AdminController::class, 'updateSettings']);
-            Route::post('vouchers', [AdminController::class, 'voucher']);
+            Route::get('settings', [AdminController::class, 'settings'])->middleware('perm:settings');
+            Route::put('settings', [AdminController::class, 'updateSettings'])->middleware('perm:settings');
+            Route::post('vouchers', [AdminController::class, 'voucher'])->middleware('perm:desk');
 
-            Route::middleware('role:admin')->group(function () {
+            Route::middleware('perm:users')->group(function () {
                 Route::get('users', [AdminController::class, 'users']);
+                Route::post('users', [AdminController::class, 'createUser'])->middleware('throttle:30,1');
                 Route::get('users/{user}', [AdminController::class, 'user']);
                 Route::patch('users/{user}', [AdminController::class, 'updateUser']);
+            });
+            Route::get('staff', [AdminController::class, 'staff'])->middleware('role:super_admin');
+            Route::middleware('perm:sales')->group(function () {
+                Route::get('revenue', [AdminController::class, 'revenue']);
+                Route::get('subscribers', [AdminController::class, 'subscribers']);
                 Route::get('orders', [AdminController::class, 'orders']);
                 Route::post('orders/{order}/refund', [AdminController::class, 'refundOrder']);
-                Route::get('audit', [AdminController::class, 'audit']);
-                Route::post('newsletter/send', [AdminController::class, 'sendNewsletter'])->middleware('throttle:10,60');
-                Route::post('redeem-codes/generate', [ResourceController::class, 'generateCodes']);
+            });
+            Route::get('audit', [AdminController::class, 'audit'])->middleware('perm:audit');
+            Route::post('newsletter/send', [AdminController::class, 'sendNewsletter'])->middleware(['perm:marketing', 'throttle:10,60']);
+            Route::post('redeem-codes/generate', [ResourceController::class, 'generateCodes'])->middleware('perm:gamification');
+            Route::middleware('perm:institutions')->group(function () {
                 Route::get('institutions/{institution}/report', [AdminController::class, 'institutionReport']);
                 Route::post('institutions/{institution}/invite', [AdminController::class, 'institutionInvite']);
                 Route::delete('institution-members/{member}', [AdminController::class, 'institutionRemove']);

@@ -231,6 +231,9 @@ function rollChest(e: Json) {
 const ok = (message: string, extra: Json = {}) => ({ message, ...extra })
 const usage = () => ({ used: 3, limit: 20, remaining: 17 })
 
+const AREAS_ALL = ['users', 'sales', 'content', 'blog', 'gamification', 'institutions', 'marketing', 'desk', 'settings', 'audit']
+const ROLE_DEFAULT: Record<string, string[]> = { support: ['users', 'marketing', 'desk'], editor: ['content', 'blog'] }
+
 function getRoute(path: string, admin: boolean): Json {
   // Coupons are the partner gifts in the inventory, so a chest win shows up here at once.
   if (path === '/coupons') return { data: (db['/inventory']?.data ?? []).filter((x: Json) => x.item?.type === 'partner_coupon') }
@@ -262,7 +265,17 @@ function getRoute(path: string, admin: boolean): Json {
   }
   if (base === '/exam/practice') return db['/exam/practice?section=mix&n=10']
   if (base === '/words/deck') return db['/words/deck?n=16']
-  if ((m = base.match(/^\/admin\/users\/(\d+)$/))) return db['/admin/users/1']
+  if ((m = base.match(/^\/admin\/users\/(\d+)$/))) return db[base] ?? db['/admin/users/1']
+  if (base === '/admin/subscribers') {
+    const all = db[`/admin/subscribers?status=${params.get('status') ?? 'active'}&page=1`]
+    const q = params.get('q')?.toLowerCase()
+    const src = params.get('source')
+    if (all) return { ...all, data: all.data.filter((x: Json) => (!q || JSON.stringify(x.user).toLowerCase().includes(q)) && (!src || x.source === src)) }
+  }
+  if ((m = base.match(/^\/admin\/([a-z-]+)\/(\d+)$/))) {
+    const row = (db[`/admin/${m[1]}?page=1`]?.data ?? []).find((r: Json) => r.id === +m![2])
+    if (row) return { data: row }
+  }
   if ((m = base.match(/^\/orders\/(.+)$/))) {
     const plan = db['/plans'].data.find((p: Json) => p.is_featured) ?? db['/plans'].data[0]
     return { order: { uuid: m[1], status: 'paid', total: plan.price, plan } }
@@ -579,12 +592,42 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   if (path === '/account/2fa/confirm') return { recovery_codes: ['7F3K-9QPA', 'M2XD-4TLW', 'C8VN-1RZE', 'H6JB-0YUS'] }
 
   // --- admin
+  if (path === '/admin/users' && method === 'POST') {
+    const id = 9000 + nextMsg++
+    const role = body.role ?? 'user'
+    const perms = role === 'super_admin' || role === 'admin' ? AREAS_ALL : role === 'user' ? [] : body.permissions ?? ROLE_DEFAULT[role] ?? []
+    const base = db['/admin/users/1']
+    const detail = { ...base, user: { ...base.user, id, name: body.name, email: body.email, username: String(body.email).split('@')[0], role, permissions: perms, custom_permissions: !!body.permissions, is_staff: role !== 'user', email_verified: !!body.verify_email, stats: { ...base.user.stats, xp_total: 0, gems: 0, streak: 0, streak_longest: 0, level: 1 }, premium: { active: !!body.premium_days, until: body.premium_days ? new Date(Date.now() + body.premium_days * 864e5).toISOString() : null } }, orders: [], items: [], audit: [] }
+    db[`/admin/users/${id}`] = detail
+    db['/admin/users?page=1']?.data.unshift({ id, name: body.name, email: body.email, username: detail.user.username, role, cefr_level: body.cefr_level ?? 'A1', xp_total: 0, gems: 0, streak_current: 0, premium_until: detail.user.premium.until, is_banned: false, email_verified_at: body.verify_email ? new Date().toISOString() : null, created_at: new Date().toISOString() })
+    if (role !== 'user') db['/admin/staff']?.data.push({ id, name: body.name, email: body.email, role, permissions: perms, custom: !!body.permissions, two_factor: false, last_login_at: null })
+    return detail
+  }
+  if ((m = path.match(/^\/admin\/users\/(\d+)$/)) && method === 'PATCH') {
+    const key = `/admin/users/${m[1]}`
+    const d = structuredClone(db[key] ?? db['/admin/users/1'])
+    const role = body.role ?? d.user.role
+    if ('role' in body || 'permissions' in body) {
+      d.user.role = role
+      d.user.custom_permissions = Array.isArray(body.permissions)
+      d.user.permissions = role === 'super_admin' || (role === 'admin' && !Array.isArray(body.permissions)) ? AREAS_ALL : role === 'user' ? [] : Array.isArray(body.permissions) ? body.permissions : ROLE_DEFAULT[role] ?? []
+      const st = db['/admin/staff']?.data.find((x: Json) => x.id === +m![1])
+      if (st) Object.assign(st, { role, permissions: d.user.permissions, custom: d.user.custom_permissions })
+    }
+    if ('is_banned' in body) d.user.is_banned = body.is_banned
+    if (body.gems_delta) d.user.stats.gems = Math.max(0, d.user.stats.gems + body.gems_delta)
+    if (body.verify_email) d.user.email_verified = true
+    db[key] = d
+    return d
+  }
   if ((m = path.match(/^\/admin\/([a-z-]+)(?:\/(\d+))?$/))) {
     const list = db[`/admin/${m[1]}?page=1`]
     if (list) {
-      if (method === 'POST') list.data.unshift({ ...body, id: nextMsg++ })
-      if (method === 'PUT') Object.assign(list.data.find((r: Json) => r.id === +m![2]) ?? {}, body)
+      let row: Json | undefined
+      if (method === 'POST') list.data.unshift((row = { ...body, id: 5000 + nextMsg++, published_at: body.published_at ?? (body.is_published ? new Date().toISOString() : null) }))
+      if (method === 'PUT') row = Object.assign(list.data.find((r: Json) => r.id === +m![2]) ?? {}, body)
       if (method === 'DELETE') list.data = list.data.filter((r: Json) => r.id !== +m![2])
+      if (row) return { ...ok('Kaydedildi'), data: row }
     }
     return ok('Kaydedildi')
   }

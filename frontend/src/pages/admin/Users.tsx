@@ -1,7 +1,10 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { Crown } from 'lucide-react'
+import { Crown, UserPlus } from 'lucide-react'
+import { ROLES, roleLabel } from '@/lib/adminAccess'
+import { Button } from '@/components/ui/Button'
+import { CreateUserModal } from './CreateUser'
 import { get } from '@/lib/api'
 import { dateTR, num } from '@/lib/format'
 import type { Paginated } from '@/lib/types'
@@ -16,6 +19,7 @@ export default function Users() {
   const [status, setStatus] = useState('')
   const [role, setRole] = useState('')
   const [page, setPage] = useState(1)
+  const [adding, setAdding] = useState(false)
   const params = new URLSearchParams({ page: String(page), ...(q && { q }), ...(status && { status }), ...(role && { role }) })
   const { data, isLoading } = useQuery({ queryKey: ['admin-users', params.toString()], queryFn: () => get<Paginated<U>>(`/admin/users?${params}`, true) })
 
@@ -27,8 +31,9 @@ export default function Users() {
           <option value="">Tüm durumlar</option><option value="premium">Premium</option><option value="unverified">Doğrulanmamış</option><option value="banned">Askıda</option>
         </Select>
         <Select value={role} onChange={(e) => setRole(e.target.value)} className="w-36">
-          <option value="">Tüm roller</option><option value="user">user</option><option value="editor">editor</option><option value="admin">admin</option><option value="super_admin">super_admin</option>
+          <option value="">Tüm roller</option>{ROLES.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
         </Select>
+        <Button icon={<UserPlus className="size-4" />} onClick={() => setAdding(true)}>Yeni kullanıcı</Button>
       </AdminTitle>
       {isLoading || !data ? <Spinner /> : (
         <>
@@ -36,7 +41,7 @@ export default function Users() {
             {data.data.map((u) => (
               <tr key={u.id} className="hover:bg-paper-2">
                 <td className="px-4 py-2.5"><Link to={`/admin/users/${u.id}`} className="font-bold hover:text-flame">{u.name}</Link><p className="text-xs text-ink-soft">{u.email}</p></td>
-                <td className="px-4"><Pill tone={u.role === 'user' ? 'default' : 'info'}>{u.role}</Pill></td>
+                <td className="px-4"><Pill tone={u.role === 'user' ? 'default' : 'info'}>{roleLabel(u.role)}</Pill></td>
                 <td className="px-4 font-mono">{u.cefr_level}</td>
                 <td className="px-4 font-mono">{num(u.xp_total)}</td>
                 <td className="px-4 font-mono">{u.streak_current}</td>
@@ -52,6 +57,7 @@ export default function Users() {
           <Pager page={data.current_page} last={data.last_page} onPage={setPage} />
         </>
       )}
+      {adding && <CreateUserModal open onClose={() => setAdding(false)} />}
     </div>
   )
 }

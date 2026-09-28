@@ -24,8 +24,11 @@ use Illuminate\Validation\Rule;
 
 class AdminController extends Controller
 {
-    public function dashboard(): JsonResponse
+    public function dashboard(Request $request): JsonResponse
     {
+        // Money and people only for those who may see them.
+        $sales = $request->user()->hasPermission('sales');
+        $people = $request->user()->hasPermission('users');
         $since = now()->subDays(29)->startOfDay();
         $revenue = Order::query()->where('status', 'paid')->where('paid_at', '>=', $since)
             ->selectRaw('DATE(paid_at) as d, SUM(total) as total, COUNT(*) as count')->groupBy('d')->orderBy('d')->get();
@@ -40,14 +43,14 @@ class AdminController extends Controller
                 'verified' => User::query()->whereNotNull('email_verified_at')->count(),
                 'premium' => User::query()->where('premium_until', '>', now())->count(),
                 'active_today' => DailyActivity::query()->where('date', now('Europe/Istanbul')->toDateString())->where('xp', '>', 0)->count(),
-                'revenue_30d' => (float) Order::query()->where('status', 'paid')->where('paid_at', '>=', $since)->sum('total'),
-                'orders_30d' => Order::query()->where('status', 'paid')->where('paid_at', '>=', $since)->count(),
+                'revenue_30d' => $sales ? (float) Order::query()->where('status', 'paid')->where('paid_at', '>=', $since)->sum('total') : null,
+                'orders_30d' => $sales ? Order::query()->where('status', 'paid')->where('paid_at', '>=', $since)->count() : null,
                 'stories' => Story::query()->count(),
                 'open_vouchers' => UserItem::query()->where('status', 'active')->whereHas('item', fn ($q) => $q->where('type', 'live_lesson'))->count(),
             ],
-            'series' => ['revenue' => $revenue, 'signups' => $signups, 'dau' => $dau],
-            'recent_orders' => Order::query()->with('user:id,name,email', 'plan:id,name')->latest()->limit(8)->get(),
-            'recent_users' => User::query()->latest()->limit(8)->get(['id', 'name', 'email', 'created_at', 'email_verified_at', 'premium_until']),
+            'series' => ['revenue' => $sales ? $revenue : [], 'signups' => $signups, 'dau' => $dau],
+            'recent_orders' => $sales ? Order::query()->with('user:id,name,email', 'plan:id,name')->latest()->limit(8)->get() : [],
+            'recent_users' => $people ? User::query()->latest()->limit(8)->get(['id', 'name', 'email', 'created_at', 'email_verified_at', 'premium_until']) : [],
         ]);
     }
 
@@ -67,7 +70,7 @@ class AdminController extends Controller
     public function user(User $user): JsonResponse
     {
         return response()->json([
-            'user' => UserPresenter::me($user) + ['is_banned' => $user->is_banned, 'banned_reason' => $user->banned_reason, 'last_login_at' => $user->last_login_at, 'last_login_ip' => $user->last_login_ip, 'locked_until' => $user->locked_until],
+            'user' => UserPresenter::me($user) + ['custom_permissions' => $user->permissions !== null, 'is_banned' => $user->is_banned, 'banned_reason' => $user->banned_reason, 'last_login_at' => $user->last_login_at, 'last_login_ip' => $user->last_login_ip, 'locked_until' => $user->locked_until],
             'orders' => $user->orders()->with('plan:id,name')->latest()->limit(20)->get(),
             'items' => $user->items()->with('item:id,name,type')->latest()->limit(30)->get(),
             'audit' => AuditLog::query()->where('user_id', $user->id)->latest('id')->limit(30)->get(),
@@ -80,6 +83,8 @@ class AdminController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'max:60'],
             'role' => ['sometimes', Rule::in(User::ROLES)],
+            'permissions' => ['sometimes', 'nullable', 'array'],
+            'permissions.*' => [Rule::in(User::PERMISSIONS)],
             'cefr_level' => ['sometimes', 'in:A1,A2,B1,B2,C1,C2'],
             'is_banned' => ['sometimes', 'boolean'],
             'banned_reason' => ['nullable', 'string', 'max:255'],
@@ -91,17 +96,24 @@ class AdminController extends Controller
             'verify_email' => ['sometimes', 'boolean'],
         ]);
 
-        // Only super admins can change roles or touch other admins.
-        if (isset($data['role']) || $user->isAdmin()) {
-            abort_unless($admin->isSuperAdmin() || $user->id === $admin->id && ! isset($data['role']), 403, 'Bu değişiklik için süper yönetici yetkisi gerekli.');
+        // Only super admins change roles or permissions, or touch other admins.
+        $access = array_key_exists('role', $data) || array_key_exists('permissions', $data);
+        if ($access || $user->isAdmin()) {
+            abort_unless($admin->isSuperAdmin() || $user->id === $admin->id && ! $access, 403, 'Bu değişiklik için süper yönetici yetkisi gerekli.');
         }
-        abort_if(isset($data['role']) && $user->id === $admin->id, 422, 'Kendi rolünü değiştiremezsin.');
+        // Support staff manage learners, not other staff.
+        abort_if($user->isStaff() && $user->id !== $admin->id && ! $admin->isAdmin(), 403, 'Ekip üyelerini yalnızca yöneticiler düzenleyebilir.');
+        abort_if($access && $user->id === $admin->id, 422, 'Kendi rolünü ve yetkilerini değiştiremezsin.');
 
         DB::transaction(function () use ($data, $user, $rewards) {
             $user->fill(array_intersect_key($data, array_flip(['name', 'cefr_level'])));
             if (isset($data['role'])) {
                 $user->role = $data['role'];
                 $user->tokens()->delete();
+            }
+            if (array_key_exists('permissions', $data)) {
+                $user->permissions = $data['permissions'] === null ? null : array_values(array_unique($data['permissions']));
+                $user->tokens()->where('abilities', 'like', '%admin%')->delete();
             }
             if (isset($data['is_banned'])) {
                 $user->is_banned = $data['is_banned'];
@@ -140,6 +152,149 @@ class AdminController extends Controller
         return $this->user($user->fresh());
     }
 
+    /**
+     * Create an account from the panel. Staff roles and custom permissions are
+     * for super admins only. Without a password the person gets a welcome
+     * e-mail and sets their own via "Şifremi unuttum".
+     */
+    public function createUser(Request $request, RewardService $rewards): JsonResponse
+    {
+        $admin = $request->user();
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:60'],
+            'email' => ['required', 'email', 'max:190', Rule::unique('users', 'email')],
+            'password' => ['nullable', 'string', 'min:10', 'max:100'],
+            'role' => ['sometimes', Rule::in(User::ROLES)],
+            'permissions' => ['sometimes', 'nullable', 'array'],
+            'permissions.*' => [Rule::in(User::PERMISSIONS)],
+            'cefr_level' => ['sometimes', 'in:A1,A2,B1,B2,C1,C2'],
+            'age_group' => ['sometimes', 'nullable', 'in:kid,teen,adult'],
+            'premium_days' => ['sometimes', 'nullable', 'integer', 'between:1,3650'],
+            'verify_email' => ['sometimes', 'boolean'],
+            'send_welcome' => ['sometimes', 'boolean'],
+        ]);
+        $role = $data['role'] ?? 'user';
+        abort_if(($role !== 'user' || ! empty($data['permissions'])) && ! $admin->isSuperAdmin(), 403, 'Ekip hesabı açmak için süper yönetici yetkisi gerekli.');
+
+        $user = DB::transaction(function () use ($data, $role, $rewards) {
+            $user = User::query()->create([
+                'name' => strip_tags($data['name']),
+                'email' => strtolower($data['email']),
+                'password' => $data['password'] ?? \Illuminate\Support\Str::password(32),
+                'cefr_level' => $data['cefr_level'] ?? 'A1',
+                'age_group' => $data['age_group'] ?? null,
+            ]);
+            $user->role = $role;
+            $user->permissions = $role === 'user' ? null : ($data['permissions'] ?? null);
+            if (! empty($data['verify_email'])) {
+                $user->email_verified_at = now();
+            }
+            $user->save();
+            if (! empty($data['premium_days'])) {
+                $rewards->grantPremiumDays($user, $data['premium_days'], 'admin');
+            }
+
+            return $user;
+        });
+
+        if ($data['send_welcome'] ?? true) {
+            $base = config('dilgo.brand.frontend_url');
+            \Illuminate\Support\Facades\Mail::to($user->email)->queue(new \App\Mail\NoticeMail(
+                'DilGO hesabın hazır',
+                'Hoş geldin, '.$user->name.'!',
+                ['Senin için bir DilGO hesabı açıldı. Giriş e-postan: '.$user->email, empty($data['password']) ? 'İlk girişten önce "Şifremi unuttum" ile kendi şifreni belirle.' : 'Şifreni hesabı açan kişiden alabilir, ilk girişte değiştirebilirsin.'],
+                empty($data['password']) ? 'Şifremi belirle' : 'Giriş yap',
+                $base.(empty($data['password']) ? '/forgot-password' : '/login'),
+            ));
+        }
+        Audit::log('admin.user.created', $admin, $user, ['role' => $role]);
+
+        return response()->json($this->user($user->fresh())->getData(true), 201);
+    }
+
+    /** Everyone with panel access, with what they can open. Super admins only. */
+    public function staff(): JsonResponse
+    {
+        $rows = User::query()->whereIn('role', ['support', 'editor', 'admin', 'super_admin'])->orderByRaw("CASE role WHEN 'super_admin' THEN 0 WHEN 'admin' THEN 1 WHEN 'editor' THEN 2 ELSE 3 END")->get();
+
+        return response()->json([
+            'data' => $rows->map(fn (User $u) => ['id' => $u->id, 'name' => $u->name, 'email' => $u->email, 'role' => $u->role, 'permissions' => $u->permissionList(), 'custom' => $u->permissions !== null, 'two_factor' => $u->two_factor_confirmed_at !== null, 'last_login_at' => $u->last_login_at]),
+            'areas' => User::PERMISSIONS,
+            'role_defaults' => User::ROLE_PERMISSIONS,
+        ]);
+    }
+
+    /**
+     * Money in plain numbers: gross paid, refunded, net, per period and per plan,
+     * plus a daily series. All amounts are order totals after discounts.
+     */
+    public function revenue(Request $request): JsonResponse
+    {
+        $days = (int) $request->integer('days', 30);
+        $days = in_array($days, [7, 30, 90, 365], true) ? $days : 30;
+        $tz = 'Europe/Istanbul';
+        $period = function ($from) {
+            $paid = Order::query()->whereIn('status', ['paid', 'refunded'])->when($from, fn ($q) => $q->where('paid_at', '>=', $from));
+            $gross = (float) (clone $paid)->sum('total');
+            $refunded = (float) (clone $paid)->where('status', 'refunded')->sum('total');
+
+            return [
+                'gross' => round($gross, 2),
+                'refunded' => round($refunded, 2),
+                'net' => round($gross - $refunded, 2),
+                'orders' => (clone $paid)->count(),
+                'discounts' => round((float) (clone $paid)->sum('discount'), 2),
+            ];
+        };
+        $since = now($tz)->subDays($days - 1)->startOfDay()->utc();
+        $series = Order::query()->whereIn('status', ['paid', 'refunded'])->where('paid_at', '>=', $since)
+            ->selectRaw("DATE(paid_at) as d, SUM(total) as gross, SUM(CASE WHEN status = 'refunded' THEN total ELSE 0 END) as refunded, COUNT(*) as count")
+            ->groupBy('d')->orderBy('d')->get()
+            ->map(fn ($r) => ['d' => $r->d, 'gross' => round((float) $r->gross, 2), 'net' => round((float) $r->gross - (float) $r->refunded, 2), 'count' => (int) $r->count]);
+        $byPlan = Order::query()->whereIn('orders.status', ['paid', 'refunded'])->where('paid_at', '>=', $since)
+            ->leftJoin('plans', 'plans.id', '=', 'orders.plan_id')
+            ->selectRaw("COALESCE(plans.name, 'Silinmiş paket') as name, COUNT(*) as count, SUM(CASE WHEN orders.status = 'paid' THEN orders.total ELSE 0 END) as net")
+            ->groupBy('name')->orderByDesc('net')->get()
+            ->map(fn ($r) => ['name' => $r->name, 'count' => (int) $r->count, 'net' => round((float) $r->net, 2)]);
+        $active = User::query()->where('premium_until', '>', now())->count();
+        $paying = \App\Models\Subscription::query()->where('status', 'active')->where('ends_at', '>', now())->where('source', 'purchase')->distinct('user_id')->count('user_id');
+
+        return response()->json([
+            'currency' => 'TRY',
+            'days' => $days,
+            'periods' => [
+                'today' => $period(now($tz)->startOfDay()->utc()),
+                'week' => $period(now($tz)->subDays(6)->startOfDay()->utc()),
+                'month' => $period(now($tz)->subDays(29)->startOfDay()->utc()),
+                'all' => $period(null),
+            ],
+            'range' => $period($since),
+            'series' => $series,
+            'by_plan' => $byPlan,
+            'subscribers' => ['premium_active' => $active, 'paying_active' => $paying],
+            'avg_order' => round((float) Order::query()->where('status', 'paid')->avg('total'), 2),
+            'pending' => Order::query()->where('status', 'pending')->where('created_at', '>=', now()->subDay())->count(),
+        ]);
+    }
+
+    /** Premium members now: who, which plan, from where, until when. */
+    public function subscribers(Request $request): JsonResponse
+    {
+        $status = $request->query('status', 'active');
+        $q = \App\Models\Subscription::query()->with('plan:id,name', 'user:id,name,email,premium_until')
+            ->when($status === 'active', fn ($q) => $q->where('status', 'active')->where('ends_at', '>', now()))
+            ->when($status === 'expiring', fn ($q) => $q->where('status', 'active')->whereBetween('ends_at', [now(), now()->addDays(7)]))
+            ->when($status === 'ended', fn ($q) => $q->where(fn ($w) => $w->where('status', '!=', 'active')->orWhere('ends_at', '<=', now())))
+            ->when($request->query('source'), fn ($q, $s) => $q->where('source', $s))
+            ->when($request->query('q'), fn ($q, $s) => $q->whereHas('user', fn ($u) => $u->where('email', 'like', "%{$s}%")->orWhere('name', 'like', "%{$s}%")))
+            ->latest('starts_at');
+
+        return response()->json($q->paginate(25)->toArray() + ['counts' => [
+            'active' => \App\Models\Subscription::query()->where('status', 'active')->where('ends_at', '>', now())->count(),
+            'expiring' => \App\Models\Subscription::query()->where('status', 'active')->whereBetween('ends_at', [now(), now()->addDays(7)])->count(),
+        ]]);
+    }
+
     public function orders(Request $request): JsonResponse
     {
         $q = Order::query()->with('user:id,name,email', 'plan:id,name', 'coupon:id,code')
@@ -152,7 +307,7 @@ class AdminController extends Controller
 
     public function refundOrder(Request $request, Order $order): JsonResponse
     {
-        abort_unless($request->user()->isSuperAdmin(), 403);
+        abort_unless($request->user()->isAdmin(), 403, 'İadeyi yalnızca yöneticiler yapabilir.');
         abort_unless($order->status === 'paid', 422, 'Yalnızca ödenmiş siparişler iade edilebilir.');
         $data = $request->validate(['revoke_premium' => ['boolean']]);
 
@@ -189,7 +344,6 @@ class AdminController extends Controller
 
     public function updateSettings(Request $request): JsonResponse
     {
-        abort_unless($request->user()->isAdmin(), 403);
         $data = $request->validate([
             'maintenance_mode' => ['sometimes', 'boolean'],
             'registration_open' => ['sometimes', 'boolean'],

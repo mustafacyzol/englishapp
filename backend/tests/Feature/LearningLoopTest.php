@@ -108,7 +108,7 @@ class LearningLoopTest extends TestCase
         $code = $this->postJson("/api/v1/inventory/{$card->id}/activate")->assertOk()->json('extra.code');
         $this->assertStringStartsWith('BDO-', $code);
 
-        $staff = User::factory()->create(['role' => 'editor', 'email_verified_at' => now()]);
+        $staff = User::factory()->create(['role' => 'support', 'email_verified_at' => now()]);
         $this->app['auth']->forgetGuards();
         $token = $staff->createToken('admin', ['user', 'admin'])->plainTextToken;
         $this->withToken($token)->postJson('/api/v1/admin/vouchers', ['code' => $code, 'redeem' => true])

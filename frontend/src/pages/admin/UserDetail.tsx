@@ -10,9 +10,11 @@ import { Input, Select } from '@/components/ui/Field'
 import { Spinner } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { AdminTitle, Pill, Table } from './kit'
+import { ROLES, roleLabel } from '@/lib/adminAccess'
+import { PermissionPicker, ROLE_DEFAULTS } from './CreateUser'
 
 interface Detail {
-  user: Me & { is_banned: boolean; banned_reason: string | null; last_login_at: string | null; last_login_ip: string | null; locked_until: string | null }
+  user: Me & { custom_permissions?: boolean; is_banned: boolean; banned_reason: string | null; last_login_at: string | null; last_login_ip: string | null; locked_until: string | null }
   orders: { uuid: string; total: string; status: string; created_at: string; plan: { name: string } | null }[]
   items: { id: number; status: string; source: string; code: string | null; created_at: string; item: { name: string } }[]
   audit: { id: number; action: string; ip: string; created_at: string }[]
@@ -41,7 +43,7 @@ export default function UserDetail() {
   return (
     <div>
       <AdminTitle title={u.name}>
-        <Pill tone="info">{u.role}</Pill>
+        <Pill tone="info">{roleLabel(u.role)}</Pill>
         {u.is_banned && <Pill tone="bad">askıda</Pill>}
         {u.premium.active && <Pill tone="good">premium · {dateTR(u.premium.until)}</Pill>}
       </AdminTitle>
@@ -87,13 +89,10 @@ export default function UserDetail() {
           ) : (
             <div className="flex gap-2"><Input placeholder="Askı sebebi" value={reason} onChange={(e) => setReason(e.target.value)} className="flex-1" /><Button size="sm" variant="danger" onClick={() => update.mutate({ is_banned: true, banned_reason: reason })}>Askıya al</Button></div>
           )}
-          {me?.role === 'super_admin' && me.id !== u.id && (
-            <Select label="Rol" value={u.role} onChange={(e) => update.mutate({ role: e.target.value })}>
-              {['user', 'editor', 'admin', 'super_admin'].map((r) => <option key={r}>{r}</option>)}
-            </Select>
-          )}
         </section>
       </div>
+
+      {me?.role === 'super_admin' && me.id !== u.id && <AccessCard u={u} onSave={(b) => update.mutate(b)} saving={update.isPending} />}
 
       <div className="grid gap-6 xl:grid-cols-2">
         <section>
@@ -114,5 +113,33 @@ export default function UserDetail() {
         </section>
       </div>
     </div>
+  )
+}
+
+/** Role and panel areas, for super admins. Custom areas override the role defaults. */
+function AccessCard({ u, onSave, saving }: { u: Detail['user']; onSave: (b: Record<string, unknown>) => void; saving: boolean }) {
+  const [role, setRole] = useState(u.role)
+  const [perms, setPerms] = useState<string[]>(u.permissions ?? [])
+  const staffRole = role !== 'user' && role !== 'super_admin'
+  const same = (a: string[], b: string[]) => JSON.stringify([...a].sort()) === JSON.stringify([...b].sort())
+  const changed = role !== u.role || !same(perms, u.permissions ?? [])
+  return (
+    <section className="ink-card mb-6 p-5">
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h2 className="text-lg font-extrabold">Rol ve yetkiler</h2>
+          <p className="text-sm text-ink-soft">{u.custom_permissions ? 'Bu kişiye özel bölüm listesi tanımlı.' : 'Rolün varsayılan bölümleri kullanılıyor.'} Kaydedince kişinin yönetici oturumu kapanır.</p>
+        </div>
+        <Select value={role} onChange={(e) => { const r = e.target.value as typeof role; setRole(r); setPerms(ROLE_DEFAULTS[r] ?? []) }} className="w-52">
+          {ROLES.map((r) => <option key={r.key} value={r.key}>{r.label}</option>)}
+        </Select>
+      </div>
+      {staffRole && <div className="mt-4"><PermissionPicker value={perms} onChange={setPerms} /></div>}
+      {role === 'super_admin' && <p className="mt-4 text-sm font-semibold text-ink-soft">Süper yönetici her bölüme erişir; rol ve yetki atayabilir.</p>}
+      <div className="mt-4 flex flex-wrap justify-end gap-2">
+        {staffRole && u.custom_permissions && <Button variant="secondary" size="sm" onClick={() => onSave({ permissions: null })} loading={saving}>Rol varsayılanına dön</Button>}
+        <Button size="sm" disabled={!changed} loading={saving} onClick={() => onSave({ ...(role !== u.role && { role }), ...(staffRole && { permissions: same(perms, ROLE_DEFAULTS[role] ?? []) ? null : perms }) })}>Kaydet</Button>
+      </div>
+    </section>
   )
 }

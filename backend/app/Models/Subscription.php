@@ -14,6 +14,11 @@ class Subscription extends Model
         return ['starts_at' => 'datetime', 'ends_at' => 'datetime'];
     }
 
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function plan(): BelongsTo
     {
         return $this->belongsTo(Plan::class);

@@ -7,7 +7,8 @@ export interface Me {
   username: string
   email: string
   email_verified: boolean
-  role: 'user' | 'editor' | 'admin' | 'super_admin'
+  role: 'user' | 'support' | 'editor' | 'admin' | 'super_admin'
+  permissions?: string[]
   is_staff: boolean
   avatar: string | null
   cefr_level: Cefr

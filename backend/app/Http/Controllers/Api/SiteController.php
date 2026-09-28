@@ -29,9 +29,10 @@ class SiteController extends Controller
 
     public function post(string $slug): JsonResponse
     {
-        $post = BlogPost::query()->where('slug', $slug)->where('is_published', true)->firstOrFail();
+        $post = BlogPost::query()->where('slug', $slug)->where('is_published', true)
+            ->where(fn ($q) => $q->whereNull('published_at')->orWhere('published_at', '<=', now()))->firstOrFail();
         $post->increment('views');
-        $related = BlogPost::query()->where('is_published', true)->whereKeyNot($post->id)->latest('published_at')->limit(3)
+        $related = BlogPost::query()->where('is_published', true)->where('published_at', '<=', now())->whereKeyNot($post->id)->latest('published_at')->limit(3)
             ->get(['slug', 'title', 'cover_image', 'category', 'reading_minutes', 'published_at']);
 
         return response()->json(['post' => $post, 'related' => $related]);
