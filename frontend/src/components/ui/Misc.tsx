@@ -1,6 +1,7 @@
 import { type ReactNode, useEffect } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
+import { img } from '@/lib/assets'
 import { X } from 'lucide-react'
 import { LogoMark } from '@/components/game/Logo'
 
@@ -113,7 +114,11 @@ export function SkeletonPage({ variant = 'cards' }: { variant?: 'cards' | 'list'
 export function Empty({ icon, title, text, action }: { icon: ReactNode; title: string; text?: string; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center gap-3 px-6 py-14 text-center">
-      <div className="grid size-16 place-items-center rounded-2xl bg-paper-2 text-ink-soft">{icon}</div>
+      {/* Higo keeps empty screens friendly; the page's own icon rides on his badge. */}
+      <div className="relative">
+        <img src={img('higo/think.webp')} alt="" className="size-28 object-contain" draggable={false} />
+        <span className="absolute -bottom-1 -right-2 grid size-11 place-items-center rounded-2xl border-2 border-card bg-paper-2 text-ink-soft [&_img]:size-7 [&_svg]:size-5">{icon}</span>
+      </div>
       <h3 className="text-xl font-extrabold">{title}</h3>
       {text && <p className="max-w-sm text-ink-soft">{text}</p>}
       {action}

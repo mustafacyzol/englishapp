@@ -15,6 +15,7 @@ const Legal = lazy(() => import('./pages/public/Legal'))
 const About = lazy(() => import('./pages/public/About'))
 const Contact = lazy(() => import('./pages/public/Contact'))
 const Newsletter = lazy(() => import('./pages/public/Newsletter'))
+const NotFound = lazy(() => import('./pages/public/NotFound'))
 const BlogList = lazy(() => import('./pages/public/Blog').then((m) => ({ default: m.BlogList })))
 const BlogPost = lazy(() => import('./pages/public/Blog').then((m) => ({ default: m.BlogPost })))
 const Placement = lazy(() => import('./pages/public/Placement'))
@@ -87,6 +88,7 @@ export default function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/newsletter/confirm/:token" element={<Newsletter action="confirm" />} />
           <Route path="/newsletter/unsubscribe/:token" element={<Newsletter action="unsubscribe" />} />
+          <Route path="*" element={<NotFound />} />
           <Route path="/blog" element={<BlogList />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/terms" element={<Legal kind="terms" />} />
@@ -147,7 +149,6 @@ export default function App() {
           <Route path="institutions/:id" element={<InstitutionDetail />} />
         </Route>
 
-        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Suspense>
   )

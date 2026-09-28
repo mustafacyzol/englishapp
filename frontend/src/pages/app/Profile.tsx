@@ -56,7 +56,7 @@ export default function Profile() {
             <span className="absolute -bottom-1 -right-1 grid size-9 place-items-center rounded-full border-4 border-card bg-ink text-paper transition group-hover:scale-110"><Pencil className="size-3.5" /></span>
           </button>
           <AvatarPicker open={picker} onClose={() => setPicker(false)} />
-          <div className="min-w-0 flex-1 pt-10 sm:pt-12">
+          <div className="order-3 min-w-0 basis-full sm:order-none sm:basis-0 sm:flex-1 sm:pt-12">
             <h1 className="text-3xl font-extrabold">{user.name}</h1>
             <p className="font-semibold text-ink-soft">@{user.username} · {dateTR(user.created_at)} tarihinden beri</p>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -65,7 +65,7 @@ export default function Profile() {
               {user.premium.active && <span className="ink-chip bg-butter/30 py-0.5 text-ink"><Img src={img('rewards/crown.webp')} alt="" className="size-4" /> Premium</span>}
             </div>
           </div>
-          <div className="flex gap-2">
+          <div className="ml-auto flex gap-2 self-end sm:ml-0">
             <button onClick={share} className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm" aria-label="Paylaş"><Share2 className="size-5" /></button>
             <Link to="/settings" className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm" aria-label="Ayarlar"><Settings className="size-5" /></Link>
           </div>

@@ -101,6 +101,9 @@ Demo hesaplar (yalnızca yerelde oluşturulur):
 - Defne için `.env` dosyasına `ANTHROPIC_API_KEY` ekleyin; anahtar yoksa AI ekranları "bakımda" mesajı gösterir, uygulamanın geri kalanı çalışır.
 - Defne'nin gerçek sesi ve sese bağlı ağız hareketi için `ELEVENLABS_API_KEY` ekleyin (ayrıntı: `docs/DEPLOY_HOSTINGER.md`, "Defne: konuşan yapay zekâ").
 - XP, seri, elmas, sandık ve yaş grubu kuralları: `docs/ECONOMY.md`.
+- Maskot **Higo** (`frontend/public/img/higo/`, bileşen `components/game/Higo.tsx`): kayıt adımları, ders geri bildirimi, ödül ekranı, boş ekranlar, 404 ve tanıtım sayfasında.
+- Profil avatarları: 9 standart + 9 Premium (`config/dilgo.php > avatars`). Premium avatar yalnızca Premium açıkken seçilebilir ve gösterilir; sunucu denetler.
+- Bülten: çift onaylı (`POST /newsletter`, e-postadaki bağlantı `/newsletter/confirm/{token}`), çıkış `/newsletter/unsubscribe/{token}`; aboneler Yönetim > Bülten aboneleri. Toplu gönderimde yalnızca onaylı ve çıkmamış adresleri kullanın.
 
 Testler: `cd backend && php artisan test` (kayıt/OTP, kilitleme, admin 2FA, ders→XP→seri→rozet, lig kapanışı, mağaza, sandık, canlı ders kuponu, kupon+ödeme, hediye kodu, seviye testi, seri dondurucu).
 
