@@ -7,7 +7,6 @@ import { patch } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { TUTOR } from '@/lib/tutor'
 import { examName, examOn } from '@/lib/onboarding'
-import { sfx } from '@/lib/fx'
 import { Img } from '@/components/ui/Img'
 
 interface Mark {
@@ -101,7 +100,6 @@ export function CoachMarks() {
   }, [user, setUser])
 
   const next = useCallback(() => {
-    sfx.tap()
     if (i >= marks.length - 1) finish()
     else setI(i + 1)
   }, [i, marks.length, finish])

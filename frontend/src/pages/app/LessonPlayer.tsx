@@ -362,7 +362,7 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
               <motion.button
                 key={i}
                 disabled={locked}
-                onClick={() => { sfx.tap(); setValue(i) }}
+                onClick={() => setValue(i)}
                 animate={locked && value === i && i !== ex.answer ? { x: [0, -6, 6, -3, 0] } : {}}
                 className={clsx(
                   'press flex items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left text-lg font-bold transition-colors',
@@ -416,7 +416,6 @@ function SpotError({ ex, value, setValue, locked }: { ex: Extract<Exercise, { ty
 
   const tapWord = (i: number) => {
     if (locked) return
-    sfx.tap()
     setPicked(i)
     setValue(null)
   }
@@ -451,7 +450,7 @@ function SpotError({ ex, value, setValue, locked }: { ex: Extract<Exercise, { ty
               {ex.options.map((o, i) => (
                 <button
                   key={i}
-                  onClick={() => { sfx.tap(); setValue(`${picked}:${i}`) }}
+                  onClick={() => setValue(`${picked}:${i}`)}
                   className={clsx('press rounded-2xl border-2 px-4 py-4 text-lg font-bold', chosen === i ? 'border-berry bg-berry/10 text-berry shadow-[0_3px_0_0_var(--color-berry)]' : 'border-line bg-card shadow-hard hover:bg-paper-2')}
                 >
                   {o}
@@ -518,7 +517,7 @@ function DialogueScene({ ex, value, setValue, locked, ttsRate }: { ex: Extract<E
           <button
             key={i}
             disabled={locked}
-            onClick={() => { sfx.tap(); setValue(i) }}
+            onClick={() => setValue(i)}
             className={clsx('press rounded-2xl border-2 px-4 py-4 text-left text-lg font-bold', value === i ? 'border-flame bg-flame/10 text-flame shadow-[0_3px_0_0_var(--color-flame)]' : 'border-line bg-card shadow-hard hover:bg-paper-2')}
           >
             {o}
@@ -544,7 +543,6 @@ function SequenceTrack({ ex, value, setValue, locked }: { ex: Extract<Exercise, 
   const order = Array.isArray(value) ? value : []
   const toggle = (i: number) => {
     if (locked) return
-    sfx.tap()
     const next = order.includes(i) ? order.filter((x) => x !== i) : [...order, i]
     setValue(next.length === ex.items.length ? next : next.length ? next : null)
   }
@@ -615,7 +613,7 @@ function TileBuilder({ ex, value, setValue, locked }: { ex: Extract<Exercise, { 
               picked.includes(i) ? (
                 <span key={i} className="rounded-xl bg-line px-3 py-2 text-lg font-bold text-transparent">{t}</span>
               ) : (
-                <motion.button layoutId={`tile-${i}`} key={i} disabled={locked} onClick={() => { sfx.tap(); setPicked((p) => [...p, i]) }} className="press rounded-xl border-2 border-line bg-card px-3 py-2 text-lg font-bold shadow-hard">
+                <motion.button layoutId={`tile-${i}`} key={i} disabled={locked} onClick={() => setPicked((p) => [...p, i])} className="press rounded-xl border-2 border-line bg-card px-3 py-2 text-lg font-bold shadow-hard">
                   {t}
                 </motion.button>
               ),

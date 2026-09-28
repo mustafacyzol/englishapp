@@ -17,12 +17,15 @@ export interface ChestResult {
   extra?: { code?: string; prize?: { type: 'gems' | 'item' | 'partner'; amount?: number; item?: UserItem } }
 }
 
-type Stage = 'ready' | 'key' | 'shake' | 'burst' | 'reveal'
+type Stage = 'ready' | 'key' | 'open' | 'reveal'
 
 /** Where the keyhole sits in chest.webp (measured), and the lid seam (fraction from the top). */
 const KEYHOLE = { x: 0.443, y: 0.53 }
-const LID = 0.44
 const KEY_MS = 1900
+/** The opening film: same chest, rendered in 3D. Its chest fills 56.8% of the frame, ours 96% of the box. */
+const FILM_SCALE = 0.96 / 0.568
+const FILM_FROM = 0.9 // seconds: skip the idle start
+const REVEAL_MS = 2900 // film time after FILM_FROM when the prize rises
 
 const RARITY_COLOR: Record<RewardItem['rarity'], string> = { common: '#22b573', rare: '#2f7cf6', epic: '#ef4e7b', legendary: '#ffc233' }
 
@@ -40,6 +43,7 @@ export function ChestOpening({ chest, odds, onOpen, onClose }: { chest: RewardIt
   const reduced = useReducedMotion()
   const toast = useToast()
   const pending = useRef<Promise<ChestResult> | null>(null)
+  const film = useRef<HTMLVideoElement>(null)
 
   const legendary = chest.rarity === 'legendary'
 
@@ -51,39 +55,53 @@ export function ChestOpening({ chest, odds, onOpen, onClose }: { chest: RewardIt
     sfx.tap()
   }
 
-  // Drive the sequence: key goes in and turns (1.9s) → chest trembles (1.3s) → lid bursts open → reveal.
+  // Drive the sequence: key goes in and turns (1.9s) → the chest trembles, the lock clicks and
+  // the lid swings open in a burst of light (filmed, ~2.9s) → the prize rises out of it.
   useEffect(() => {
     if (failed) return onClose()
-    let t: ReturnType<typeof setTimeout>
     if (stage === 'key') {
       const clicks = [1150, 1450, 1650].map((d) => setTimeout(() => sfx.tick(), reduced ? 0 : d))
-      t = setTimeout(() => setStage('shake'), reduced ? 200 : KEY_MS)
+      const t = setTimeout(() => setStage(reduced ? 'reveal' : 'open'), reduced ? 200 : KEY_MS)
       return () => {
         clearTimeout(t)
         clicks.forEach(clearTimeout)
       }
     }
-    if (stage === 'shake') {
-      const beats = [0, 420, 780, 1080].map((d) => setTimeout(() => sfx.beat(), d))
-      t = setTimeout(() => setStage('burst'), reduced ? 200 : 1300)
-      return () => {
-        clearTimeout(t)
-        beats.forEach(clearTimeout)
+    if (stage === 'open') {
+      const v = film.current
+      if (v) {
+        v.currentTime = FILM_FROM
+        v.play().catch(() => {})
       }
+      const cues = [
+        setTimeout(() => sfx.beat(), 0),
+        setTimeout(() => sfx.beat(), 260),
+        setTimeout(() => sfx.beat(), 500),
+        setTimeout(() => sfx.tick(), 720),
+        setTimeout(() => sfx.reward(), 1050),
+      ]
+      return () => cues.forEach(clearTimeout)
     }
-    if (stage === 'burst' && result) {
-      sfx.reward()
-      t = setTimeout(() => {
-        setStage('reveal')
-        const r = prizeRarity(result)
-        celebrate(r === 'legendary' || r === 'epic')
-      }, reduced ? 100 : 900)
-      return () => clearTimeout(t)
+  }, [stage, failed, reduced, onClose])
+
+  // The prize rises once the film has burst open and the server has answered.
+  const [filmDone, setFilmDone] = useState(false)
+  useEffect(() => {
+    if (stage !== 'open') return
+    const t = setTimeout(() => setFilmDone(true), REVEAL_MS)
+    return () => clearTimeout(t)
+  }, [stage])
+  useEffect(() => {
+    if ((stage === 'open' && filmDone && result) || (stage === 'reveal' && result && reduced)) {
+      if (stage !== 'reveal') setStage('reveal')
+      const r = prizeRarity(result)
+      celebrate(r === 'legendary' || r === 'epic')
     }
-  }, [stage, result, failed, reduced, onClose])
+  }, [stage, filmDone, result, reduced])
 
   const prize = result ? describe(result) : null
-  const glow = prize ? RARITY_COLOR[prize.rarity] : legendary ? '#ffc233' : '#ffb347'
+  // Golden until the reveal, so the colour never gives the prize away early.
+  const glow = prize && stage === 'reveal' ? RARITY_COLOR[prize.rarity] : legendary ? '#ffc233' : '#ffb347'
 
   return createPortal(
     <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden p-4" role="dialog" aria-modal="true" aria-label={chest.name}>
@@ -94,7 +112,7 @@ export function ChestOpening({ chest, odds, onOpen, onClose }: { chest: RewardIt
         aria-hidden
         className="pointer-events-none absolute left-1/2 top-1/2 size-[140vmax] -translate-x-1/2 -translate-y-1/2"
         style={{ background: `repeating-conic-gradient(from 0deg, ${glow}22 0deg 8deg, transparent 8deg 22deg)`, maskImage: 'radial-gradient(circle, #000 0%, transparent 42%)', WebkitMaskImage: 'radial-gradient(circle, #000 0%, transparent 42%)' }}
-        animate={{ rotate: 360, opacity: stage === 'burst' || stage === 'reveal' ? 1 : stage === 'shake' ? 0.55 : 0.25 }}
+        animate={{ rotate: 360, opacity: stage === 'reveal' ? 1 : stage === 'open' ? 0.6 : 0.25 }}
         transition={{ rotate: { duration: 40, ease: 'linear', repeat: Infinity }, opacity: { duration: 0.6 } }}
       />
 
@@ -111,88 +129,85 @@ export function ChestOpening({ chest, odds, onOpen, onClose }: { chest: RewardIt
             aria-hidden
             className="absolute size-56 rounded-full blur-3xl"
             style={{ background: glow }}
-            animate={{ opacity: stage === 'ready' ? 0.25 : stage === 'key' ? 0.35 : stage === 'shake' ? [0.35, 0.7, 0.4, 0.8] : 0.9, scale: stage === 'burst' ? 1.6 : stage === 'reveal' ? 1.2 : 1 }}
-            transition={{ duration: stage === 'shake' ? 1.3 : 0.5 }}
+            animate={{ opacity: stage === 'ready' ? 0.25 : stage === 'key' ? 0.35 : stage === 'open' ? [0.3, 0.3, 0.3, 0.55] : 0.7, scale: stage === 'open' ? [1, 1, 1, 1.5] : stage === 'reveal' ? 1.2 : 1 }}
+            transition={{ duration: stage === 'open' ? 1.6 : 0.5, times: stage === 'open' ? [0, 0.3, 0.6, 1] : undefined }}
           />
 
+          {/* The filmed opening sits exactly over the chest image (same chest, same size), mounted from
+              the start so it is buffered, and shown the moment the key has turned. It stays behind the
+              prize as a glowing open chest. */}
+          {!reduced && (
+            <motion.div
+              aria-hidden
+              className="pointer-events-none absolute left-1/2 top-1/2 size-56 -translate-x-1/2 -translate-y-1/2 sm:size-64"
+              initial={false}
+              animate={
+                stage === 'open'
+                  ? { opacity: 1, x: [0, -3, 3, -5, 5, -6, 6, -2, 0, 0], rotate: [0, -1, 1, -1.5, 1.5, -2, 2, -0.5, 0, 0], y: 0, scale: 1 }
+                  : stage === 'reveal'
+                    ? { opacity: 0, y: 50, scale: 0.85, x: 0, rotate: 0 }
+                    : { opacity: 0 }
+              }
+              transition={stage === 'open' ? { opacity: { duration: 0 }, x: { duration: 0.8, ease: 'easeIn' }, rotate: { duration: 0.8, ease: 'easeIn' } } : { duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <video
+                ref={film}
+                muted
+                playsInline
+                preload="auto"
+                className="absolute left-1/2 top-1/2 max-w-none -translate-x-1/2 -translate-y-1/2"
+                style={{ width: `${FILM_SCALE * 100}%`, height: `${FILM_SCALE * 100}%`, maskImage: 'radial-gradient(closest-side, #000 72%, transparent 100%)', WebkitMaskImage: 'radial-gradient(closest-side, #000 72%, transparent 100%)' }}
+              >
+                <source src={img('rewards/chest-open.webm')} type="video/webm" />
+                <source src={img('rewards/chest-open.mp4')} type="video/mp4" />
+              </video>
+            </motion.div>
+          )}
+
           <AnimatePresence mode="popLayout">
-            {stage !== 'reveal' ? (
+            {stage === 'ready' || stage === 'key' ? (
               <motion.div
                 key="chest"
                 className="relative size-56 sm:size-64 [transform-style:preserve-3d]"
                 initial={{ y: 40, opacity: 0, rotateX: 18 }}
-                animate={
-                  stage === 'shake' && !reduced
-                    ? { x: [0, -6, 6, -9, 9, -12, 12, -6, 0], rotateZ: [0, -2, 2, -3, 3, -4, 4, -1, 0], scale: [1, 1.02, 1.03, 1.05, 1.06, 1.08], y: 0, opacity: 1, rotateX: 0 }
-                    : stage === 'burst'
-                      ? { scale: 1.12, y: -6, opacity: 1, rotateX: 0 }
-                      : stage === 'key'
-                        ? { y: 0, opacity: 1, rotateX: 0, scale: [1, 1, 1, 1.03, 1] }
-                        : { y: [0, -8, 0], opacity: 1, rotateX: 0 }
-                }
-                exit={{ scale: 0.6, opacity: 0, y: 40 }}
-                transition={stage === 'shake' ? { duration: 1.3, ease: 'easeIn' } : stage === 'ready' ? { y: { repeat: Infinity, duration: 2.4, ease: 'easeInOut' }, opacity: { duration: 0.4 } } : stage === 'key' ? { scale: { duration: KEY_MS / 1000, times: [0, 0.6, 0.86, 0.9, 1] } } : { type: 'spring', stiffness: 220, damping: 14 }}
+                animate={stage === 'key' ? { y: 0, opacity: 1, rotateX: 0, scale: [1, 1, 1, 1.03, 1] } : { y: [0, -8, 0], opacity: 1, rotateX: 0 }}
+                exit={{ opacity: 0, transition: { duration: 0.12 } }}
+                transition={stage === 'ready' ? { y: { repeat: Infinity, duration: 2.4, ease: 'easeInOut' }, opacity: { duration: 0.4 } } : { scale: { duration: KEY_MS / 1000, times: [0, 0.6, 0.86, 0.9, 1] } }}
               >
-                {stage !== 'burst' ? (
-                  <Img src={img('rewards/chest.webp')} alt="" className="size-full object-contain drop-shadow-[0_24px_30px_rgba(0,0,0,.55)]" />
-                ) : (
-                  // The lid swings up and back on its hinge while the open chest fades in underneath.
-                  <div className="relative size-full [perspective:600px]">
-                    <motion.div className="absolute inset-0" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.22, duration: 0.3 }}>
-                      <Img src={img('rewards/chest-open.webp')} alt="" className="size-full object-contain drop-shadow-[0_24px_30px_rgba(0,0,0,.55)]" />
-                    </motion.div>
-                    <motion.div className="absolute inset-0" style={{ clipPath: `inset(${LID * 100}% 0 0 0)` }} animate={{ opacity: 0 }} transition={{ delay: 0.3, duration: 0.25 }}>
-                      <Img src={img('rewards/chest.webp')} alt="" className="size-full object-contain" />
-                    </motion.div>
-                    <motion.div className="absolute inset-0" style={{ clipPath: `inset(0 0 ${(1 - LID) * 100}% 0)`, transformOrigin: `50% ${LID * 100}%` }} initial={{ rotateX: 0 }} animate={{ rotateX: 78, y: -18, opacity: 0 }} transition={{ duration: 0.5, ease: [0.3, 1.4, 0.6, 1], opacity: { delay: 0.25, duration: 0.25 } }}>
-                      <Img src={img('rewards/chest.webp')} alt="" className="size-full object-contain" />
-                    </motion.div>
-                    <motion.span aria-hidden className="absolute left-1/2 top-[38%] size-24 -translate-x-1/2 rounded-full bg-white blur-md" initial={{ opacity: 0.95, scale: 0.3 }} animate={{ opacity: 0, scale: 3 }} transition={{ duration: 0.7 }} />
-                  </div>
-                )}
+                <Img src={img('rewards/chest.webp')} alt="" className="size-full object-contain drop-shadow-[0_24px_30px_rgba(0,0,0,.55)]" />
 
                 {/* The key: flies in, lines up over the keyhole, its blade sinks in (hidden past the keyhole line), then turns. */}
-                {stage !== 'burst' && (
-                  <motion.div
-                    className="absolute"
-                    style={{ left: `${KEYHOLE.x * 100}%`, top: `${KEYHOLE.y * 100}%`, width: '34%', aspectRatio: '218 / 300', translate: '-50% -100%', transformOrigin: '50% 100%' }}
-                    initial={{ x: '150%', y: '-40%', rotate: 28, opacity: 0 }}
-                    animate={
-                      stage === 'ready'
-                        ? { x: '150%', y: ['-40%', '-52%', '-40%'], rotate: 28, opacity: 1 }
-                        : stage === 'key'
-                          ? { x: ['150%', '0%', '0%', '0%', '0%'], y: ['-40%', '-14%', '0%', '0%', '0%'], rotate: [28, 0, 0, 90, 90], opacity: 1 }
-                          : { x: '0%', y: '0%', rotate: 90, opacity: 1 }
-                    }
-                    transition={stage === 'ready' ? { y: { repeat: Infinity, duration: 2.2, ease: 'easeInOut' }, default: { duration: 0.4 } } : stage === 'key' ? { duration: KEY_MS / 1000, times: [0, 0.3, 0.42, 0.72, 1], ease: 'easeInOut' } : { duration: 0 }}
-                  >
-                    <div className="size-full overflow-hidden">
-                      <motion.div
-                        className="size-full"
-                        animate={stage === 'ready' ? { y: '0%' } : stage === 'key' ? { y: ['0%', '0%', '0%', '36%', '36%'] } : { y: '36%' }}
-                        transition={stage === 'key' ? { duration: KEY_MS / 1000, times: [0, 0.42, 0.46, 0.6, 1], ease: 'easeIn' } : { duration: 0 }}
-                      >
-                        <Img src={img('rewards/key-v.webp')} alt="" className="size-full object-contain drop-shadow-[0_8px_10px_rgba(0,0,0,.45)]" />
-                      </motion.div>
-                    </div>
-                  </motion.div>
-                )}
+                <motion.div
+                  className="absolute"
+                  style={{ left: `${KEYHOLE.x * 100}%`, top: `${KEYHOLE.y * 100}%`, width: '34%', aspectRatio: '218 / 300', translate: '-50% -100%', transformOrigin: '50% 100%' }}
+                  initial={{ x: '150%', y: '-40%', rotate: 28, opacity: 0 }}
+                  animate={stage === 'ready' ? { x: '150%', y: ['-40%', '-52%', '-40%'], rotate: 28, opacity: 1 } : { x: ['150%', '0%', '0%', '0%', '0%'], y: ['-40%', '-14%', '0%', '0%', '0%'], rotate: [28, 0, 0, 90, 90], opacity: 1 }}
+                  transition={stage === 'ready' ? { y: { repeat: Infinity, duration: 2.2, ease: 'easeInOut' }, default: { duration: 0.4 } } : { duration: KEY_MS / 1000, times: [0, 0.3, 0.42, 0.72, 1], ease: 'easeInOut' }}
+                >
+                  <div className="size-full overflow-hidden">
+                    <motion.div
+                      className="size-full"
+                      animate={stage === 'ready' ? { y: '0%' } : { y: ['0%', '0%', '0%', '36%', '36%'] }}
+                      transition={stage === 'key' ? { duration: KEY_MS / 1000, times: [0, 0.42, 0.46, 0.6, 1], ease: 'easeIn' } : { duration: 0 }}
+                    >
+                      <Img src={img('rewards/key-v.webp')} alt="" className="size-full object-contain drop-shadow-[0_8px_10px_rgba(0,0,0,.45)]" />
+                    </motion.div>
+                  </div>
+                </motion.div>
                 {/* the lock gives: a flash at the keyhole when the key finishes turning */}
                 {stage === 'key' && !reduced && (
                   <motion.span aria-hidden className="absolute size-8 rounded-full border-4 border-butter" style={{ left: `${KEYHOLE.x * 100}%`, top: `${KEYHOLE.y * 100}%`, translate: '-50% -50%' }} initial={{ scale: 0, opacity: 0 }} animate={{ scale: [0, 0, 2.6], opacity: [0, 1, 0] }} transition={{ duration: KEY_MS / 1000, times: [0, 0.72, 0.95] }} />
                 )}
               </motion.div>
-            ) : (
-              prize && (
-                <motion.div key="prize" className="relative" initial={{ y: 70, scale: 0.3, opacity: 0, rotate: -12 }} animate={{ y: 0, scale: 1, opacity: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 180, damping: 12 }}>
-                  {prize.kind === 'partner' ? <PartnerTicket p={prize} /> : <Img src={prize.image} alt="" className="size-44 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,.5)] sm:size-52" />}
-                </motion.div>
-              )
-            )}
+            ) : stage === 'reveal' && prize ? (
+              <motion.div key="prize" className="relative" initial={{ y: 90, scale: 0.2, opacity: 0, rotate: -12 }} animate={{ y: -10, scale: 1, opacity: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 170, damping: 13 }}>
+                {prize.kind === 'partner' ? <PartnerTicket p={prize} /> : <Img src={prize.image} alt="" className="size-44 object-contain drop-shadow-[0_20px_30px_rgba(0,0,0,.5)] sm:size-52" />}
+              </motion.div>
+            ) : null}
           </AnimatePresence>
 
           {/* sparks on burst */}
-          {(stage === 'burst' || stage === 'reveal') && <Sparks color={glow} />}
+          {stage === 'reveal' && <Sparks color={glow} />}
         </div>
 
         {stage === 'ready' && (
@@ -201,7 +216,7 @@ export function ChestOpening({ chest, odds, onOpen, onClose }: { chest: RewardIt
             {!!odds?.length && <Odds odds={odds} />}
           </motion.div>
         )}
-        {(stage === 'key' || stage === 'shake' || stage === 'burst') && <p className="mt-6 h-14 font-display text-2xl font-black">{stage === 'key' ? 'Kilit açılıyor...' : stage === 'shake' ? 'Bir şeyler kıpırdıyor!' : ''}</p>}
+        {(stage === 'key' || stage === 'open') && <p className="mt-6 h-14 font-display text-2xl font-black">{stage === 'key' ? 'Kilit açılıyor...' : filmDone ? 'Az kaldı...' : 'Açılıyor!'}</p>}
 
         {stage === 'reveal' && prize && (
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 }} className="mt-4 w-full">

@@ -2,7 +2,6 @@ import { createContext, useCallback, useContext, useRef, useState, type ReactNod
 import { AnimatePresence, motion } from 'motion/react'
 import { CheckCircle2, Info, X, XCircle } from 'lucide-react'
 import clsx from 'clsx'
-import { sfx } from '@/lib/fx'
 
 type Tone = 'info' | 'success' | 'error'
 interface Toast {
@@ -35,7 +34,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const push = useCallback((text: ReactNode, tone: Tone = 'info') => {
     const key = `${tone}:${typeof text === 'string' ? text : Math.random()}`
     const repeat = lastKey.current === key
-    if (!repeat) sfx.notify(tone)
+    // Toasts are silent: saving a setting or copying a code is not an event worth a sound.
     lastKey.current = key
     setToast((cur) => (repeat && cur ? { ...cur, count: cur.count + 1 } : { id: Date.now() + Math.random(), key, text, tone, count: 1 }))
     window.clearTimeout(timer.current)
