@@ -280,6 +280,11 @@ function getRoute(path: string, admin: boolean): Json {
     const plan = db['/plans'].data.find((p: Json) => p.is_featured) ?? db['/plans'].data[0]
     return { order: { uuid: m[1], status: 'paid', total: plan.price, plan } }
   }
+  if ((m = base.match(/^\/u\/([^/]+)$/))) {
+    // Any learner in the league or arena gets a public profile in the demo.
+    const row = [...(db['/league']?.rows ?? []), ...(db['/duel']?.leaderboard ?? [])].find((r: Json) => r.username === m![1])
+    if (row) return { user: { name: row.name, username: row.username, avatar: row.avatar, avatar_url: row.avatar_url, frame: row.frame, banner: row.banner, bio: null, cefr_level: row.cefr_level ?? 'A2', xp_total: row.xp * 7, level: 4, streak: row.streak ?? 3, league_tier: db['/league']?.tier ?? 2, league_name: db['/league']?.tier_name, badges_count: 5, is_premium: !!row.is_premium, joined_at: '2026-08-12T10:00:00Z' }, badges: db['/u/elifkaya']?.badges ?? [] }
+  }
   if (F.err[base]) throw new DemoError(F.err[base].status, F.err[base].message)
   if (/^\/(lessons|stories|u|blog|units)\//.test(base)) throw new DemoError(404, 'Bulunamadı.')
   void admin

@@ -1,14 +1,14 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'motion/react'
-import { ArrowLeft, Crown } from 'lucide-react'
+import { ArrowLeft, Crown, UserX } from 'lucide-react'
 import { get } from '@/lib/api'
 import { dateTR, num } from '@/lib/format'
 import { AchievementBadge } from '@/components/game/AchievementBadge'
 import { LeagueEmblem } from '@/components/game/LeagueEmblem'
 import { ProfileBanner } from '@/components/game/ProfileBanner'
 import { UserAvatar } from '@/components/game/UserAvatar'
-import { Spinner } from '@/components/ui/Misc'
+import { Empty, Spinner } from '@/components/ui/Misc'
 
 interface Pub {
   user: { name: string; username: string; avatar?: string | null; avatar_url?: string | null; frame?: string | null; banner?: string | null; bio?: string | null; cefr_level: string; xp_total: number; level: number; streak: number; streak_longest?: number; league_tier: number; league_name?: string; badges_count?: number; is_premium: boolean; joined_at: string }
@@ -19,7 +19,8 @@ interface Pub {
 export default function PublicProfile() {
   const { username } = useParams()
   const nav = useNavigate()
-  const { data, isLoading } = useQuery({ queryKey: ['pub', username], queryFn: () => get<Pub>(`/u/${username}`) })
+  const { data, isLoading, isError } = useQuery({ queryKey: ['pub', username], queryFn: () => get<Pub>(`/u/${username}`), retry: false })
+  if (isError) return <Empty icon={<UserX className="size-8" />} title="Profil bulunamadı" text="Bu kullanıcı hesabını kapatmış olabilir." />
   if (isLoading || !data) return <Spinner />
   const u = data.user
   const stats = [

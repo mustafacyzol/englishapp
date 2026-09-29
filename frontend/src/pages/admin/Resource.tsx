@@ -10,9 +10,10 @@ import { Alert, Modal, Spinner } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { AdminTitle, Pager, Pill, Table } from './kit'
 import { avatarUrl } from '@/lib/avatars'
+import { ParagraphsField, QuestionsField, VocabField, type Para, type Question, type Vocab } from './StoryFields'
 
 type Row = Record<string, unknown> & { id: number }
-type FieldType = 'text' | 'textarea' | 'number' | 'bool' | 'select' | 'json' | 'date' | 'list'
+type FieldType = 'text' | 'textarea' | 'number' | 'bool' | 'select' | 'json' | 'date' | 'list' | 'vocab' | 'paragraphs' | 'questions'
 interface Field { key: string; label: string; type: FieldType; options?: string[]; hint?: string; full?: boolean }
 interface Col { key: string; label: string; render?: (r: Row) => ReactNode }
 interface Cfg { title: string; cols: Col[]; fields: Field[]; defaults: Record<string, unknown>; noCreate?: boolean; preview?: (r: Row) => ReactNode; action?: (r: Row) => ReactNode; intro?: ReactNode }
@@ -49,9 +50,9 @@ const CONFIG: Record<string, Cfg> = {
       { key: 'category', label: 'Kategori', type: 'text' }, { key: 'reading_minutes', label: 'Okuma süresi (dk)', type: 'number' }, { key: 'cover_image', label: 'Kapak görseli URL (boşsa otomatik kapak)', type: 'text' }, { key: 'audio_url', label: 'Ses dosyası URL (isteğe bağlı)', type: 'text' },
       { key: 'is_premium', label: 'Premium', type: 'bool' }, { key: 'is_published', label: 'Yayında', type: 'bool' },
       { key: 'summary', label: 'Özet', type: 'textarea', full: true },
-      { key: 'paragraphs', label: 'Paragraflar (JSON: [{"en":"…","tr":"…"}])', type: 'json', full: true },
-      { key: 'vocabulary', label: 'Kelimeler (JSON: [{"word","meaning","example"}])', type: 'json', full: true },
-      { key: 'questions', label: 'Sorular (JSON: [{"q","options":[…],"answer":0}])', type: 'json', full: true },
+      { key: 'paragraphs', label: 'Sahneler (İngilizce + Türkçe)', type: 'paragraphs', full: true },
+      { key: 'vocabulary', label: 'Kelimeler ve Türkçe karşılıkları (okuyucuda dokununca görünür)', type: 'vocab', full: true },
+      { key: 'questions', label: 'Anlama soruları (her doğru cevap XP kazandırır)', type: 'questions', full: true },
     ],
     defaults: { cefr_level: 'A1', reading_minutes: 3, is_premium: false, is_published: true, paragraphs: [{ en: '', tr: '' }], vocabulary: [], questions: [] },
   },
@@ -341,6 +342,9 @@ function Editor({ resource, cfg, row, onClose }: { resource: string; cfg: Cfg; r
             case 'textarea': return <Textarea key={f.key} label={f.label} className={cls} value={String(v ?? '')} onChange={(e) => set(e.target.value)} error={fieldErr} rows={8} />
             case 'list': return <Textarea key={f.key} label={f.label} className={cls} value={((v as string[]) ?? []).join('\n')} onChange={(e) => set(e.target.value.split('\n').filter((x, i, a) => x.trim() || i === a.length - 1))} error={fieldErr} />
             case 'json': return <Textarea key={f.key} label={f.label} hint={f.hint} className={`${cls} [&_textarea]:min-h-48 [&_textarea]:font-mono [&_textarea]:text-xs`} value={json[f.key]} onChange={(e) => setJson((s) => ({ ...s, [f.key]: e.target.value }))} error={fieldErr} />
+            case 'vocab': return <div key={f.key} className={cls}><p className="mb-1.5 text-sm font-bold">{f.label}</p><VocabField value={(v as Vocab[]) ?? []} onChange={set} paragraphs={(form.paragraphs as Para[]) ?? []} /></div>
+            case 'paragraphs': return <div key={f.key} className={cls}><p className="mb-1.5 text-sm font-bold">{f.label}</p><ParagraphsField value={(v as Para[]) ?? []} onChange={set} /></div>
+            case 'questions': return <div key={f.key} className={cls}><p className="mb-1.5 text-sm font-bold">{f.label}</p><QuestionsField value={(v as Question[]) ?? []} onChange={set} /></div>
             case 'date': return <Input key={f.key} type="date" label={f.label} className={cls} value={v ? String(v).slice(0, 10) : ''} onChange={(e) => set(e.target.value)} error={fieldErr} />
             case 'number': return <Input key={f.key} type="number" step="any" label={f.label} className={cls} value={v === null || v === undefined ? '' : String(v)} onChange={(e) => set(e.target.value)} error={fieldErr} />
             default: return <Input key={f.key} label={f.label} className={cls} value={String(v ?? '')} onChange={(e) => set(e.target.value)} error={fieldErr} />

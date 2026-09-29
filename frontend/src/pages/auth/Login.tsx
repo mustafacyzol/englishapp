@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert } from '@/components/ui/Misc'
 import { Logo } from '@/components/game/Logo'
-import { LangSelect } from '@/components/ui/LangSelect'
 import { SocialButtons } from '@/components/auth/SocialButtons'
 import { Turnstile } from './Turnstile'
 import { higoImg } from '@/components/game/Higo'
@@ -53,14 +52,29 @@ export default function Login() {
     <div className="auth-backdrop relative flex min-h-dvh flex-col overflow-hidden">
       <header className="relative z-10 flex items-center justify-between px-5 py-3 sm:px-8">
         <Link to="/" aria-label="DilGO ana sayfa"><Logo small /></Link>
-        <LangSelect />
+        <Link to="/register" className="press flex h-10 items-center gap-1.5 rounded-xl border-2 border-line bg-card px-3.5 text-sm font-extrabold shadow-hard-sm hover:border-ink/30">
+          <span className="hidden text-ink-soft sm:inline">{t('Hesabın yok mu?')}</span> <span className="text-flame">{t('Kayıt ol')}</span>
+        </Link>
       </header>
 
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-6 pt-2">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[420px]">
-          <div className="rounded-[28px] border-2 border-line bg-card p-5 shadow-soft sm:p-7">
+          <div className="relative mt-10 rounded-[28px] border-2 border-line bg-card p-5 pt-9 shadow-soft sm:p-7 sm:pt-10">
+            {/* Higo peeks over the card edge and waves, taking no room from the form */}
+            <div aria-hidden className="absolute -top-12 left-1/2 flex -translate-x-1/2 items-end">
+              <motion.img
+                src={higoImg('wave')}
+                alt=""
+                className="size-[76px] object-contain drop-shadow-[0_8px_10px_rgba(160,40,10,.18)]"
+                initial={{ y: 30, opacity: 0, rotate: -8 }}
+                animate={{ y: [0, -4, 0], opacity: 1, rotate: [0, -4, 0] }}
+                transition={{ y: { repeat: Infinity, duration: 2.6, ease: 'easeInOut', delay: 0.6 }, rotate: { repeat: Infinity, duration: 2.6, ease: 'easeInOut', delay: 0.6 }, opacity: { duration: 0.3 } }}
+              />
+              <motion.span initial={{ opacity: 0, scale: 0.6, x: -6 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ delay: 0.5, type: 'spring', stiffness: 380, damping: 18 }} className="mb-9 -ml-1 whitespace-nowrap rounded-2xl rounded-bl-md bg-ink px-2.5 py-1 text-xs font-extrabold text-paper">
+                {t('Seni özledim!')}
+              </motion.span>
+            </div>
             <div className="mb-5 flex flex-col items-center text-center">
-              <motion.img src={higoImg('wave')} alt="Higo" className="mb-2 size-16 object-contain" initial={{ scale: 0.6, rotate: -10 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 14, delay: 0.15 }} />
               <h1 className="text-[26px] leading-tight">{t('Tekrar hoş geldin')}</h1>
               <p className="mt-1 text-[15px] text-ink-soft">{t('Hesabına giriş yap ve kaldığın yerden devam et.')}</p>
             </div>
@@ -95,9 +109,6 @@ export default function Login() {
             </p>
           </div>
 
-          <p className="mt-4 text-center font-semibold text-ink-soft">
-            {t('Hesabın yok mu?')} <Link to="/register" className="font-extrabold text-flame hover:underline">{t('Ücretsiz kayıt ol')}</Link>
-          </p>
         </motion.div>
       </main>
     </div>

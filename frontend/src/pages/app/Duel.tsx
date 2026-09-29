@@ -144,7 +144,7 @@ export default function Duel() {
               <div key={d.id} className={clsx('flex min-w-[260px] items-center gap-3 rounded-2xl border-2 p-4', d.held ? 'border-mint/40 bg-mint/8' : 'border-berry/30 bg-berry/6')}>
                 <span className={clsx('grid size-11 shrink-0 place-items-center rounded-xl text-white', d.held ? 'bg-mint' : 'bg-berry')}>{d.held ? <Shield className="size-6" /> : <ShieldAlert className="size-6" />}</span>
                 <div className="min-w-0">
-                  <p className="font-black leading-tight">{d.held ? 'Gölgen seni savundu' : 'Gölgen yenildi'} <span className={d.held ? 'text-mint-deep' : 'text-berry'}>{d.delta > 0 ? `+${d.delta}` : d.delta}</span></p>
+                  <p className="font-black leading-tight">{d.held ? 'Gölgen seni savundu' : 'Gölgen yenildi'}</p>
                   <p className="truncate text-sm text-ink-soft">{d.challenger} meydan okudu</p>
                 </div>
               </div>

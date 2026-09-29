@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
+import { BarChart3, Clock, FileText, Headphones, Sparkles, Target, UserRound } from 'lucide-react'
 import type { Cefr, SkillKey } from '@/lib/types'
 import { SKILL } from '@/lib/skills'
 import { EXAMS, INTERESTS, MOTIVATIONS, PACES, STUDY_TIMES } from '@/lib/onboarding'
@@ -57,20 +58,19 @@ const STOPS: { key: string; label: string }[] = [
   { key: 'time', label: 'Günlük plan' },
 ]
 
+const STOP_ICON: Record<string, typeof UserRound> = { age: UserRound, goal: Target, exam: FileText, interests: Sparkles, focus: Headphones, level: BarChart3, time: Clock }
+
 /**
- * Sign-up's left side as a small journey: a winding road with a stop for each
- * question. Higo hops to the stop being asked; answered stops keep their answer
- * beside them, and the road fills in behind him. A soft, slowly drifting colour
- * field sits behind it all.
+ * Sign-up's left side as a plan being written: a straight, calm timeline with a
+ * row per question. The row being asked opens up with Higo beside it, answered
+ * rows tick off with their answer, and the line fills in as you go. Before the
+ * first answer Higo greets in the header, never on the road.
  */
 export function PassPanel({ name, age, mot, exam, interests, focus, level, slot, pace, weeks, step }: PassProps) {
   const higo = HIGO[step] ?? HIGO.name
   const stops = STOPS.filter((st) => st.key !== 'exam' || exam || step === 'exam')
   const cur = step === 'name' ? -1 : step === 'account' ? stops.length : stops.findIndex((st) => st.key === step)
   const n = stops.length
-  const pos = (i: number) => ({ x: 50 + Math.sin(i * 1.15 + 0.4) * 26, y: 10 + (i * 78) / Math.max(1, n - 1) })
-  const pts = stops.map((_, i) => pos(i))
-  const d = pts.map((p, i) => (i === 0 ? `M ${p.x} ${p.y}` : `C ${pts[i - 1].x} ${(pts[i - 1].y + p.y) / 2}, ${p.x} ${(pts[i - 1].y + p.y) / 2}, ${p.x} ${p.y}`)).join(' ')
   const value: Record<string, string> = {
     age: age ? AGE_SHORT[age] : '',
     goal: mot?.label ?? '',
@@ -80,69 +80,72 @@ export function PassPanel({ name, age, mot, exam, interests, focus, level, slot,
     level: ORDER.indexOf(step) > ORDER.indexOf('level') ? level : '',
     time: slot ? `${slot.label} · ${pace.minutes} dk` : '',
   }
-  // Before the first answer Higo waits just ahead of the first stop, clear of the heading.
-  const at = cur < 0 ? { x: pts[0].x + 16, y: pts[0].y + 3 } : cur >= n ? { x: pts[n - 1].x, y: 100 } : pts[cur]
-  const doneFrac = cur <= 0 ? 0 : Math.min(1, cur / (n - 1))
+  const fill = cur < 0 ? 0 : Math.min(1, cur / Math.max(1, n - 1))
 
   return (
     <aside className="relative hidden overflow-hidden bg-[#fbf7f2] lg:flex lg:flex-col">
-      {/* drifting colour field */}
       <motion.span aria-hidden className="absolute -left-24 -top-24 size-[26rem] rounded-full bg-[#ffd9c7] blur-3xl" animate={{ x: [0, 40, 0], y: [0, 30, 0] }} transition={{ repeat: Infinity, duration: 18, ease: 'easeInOut' }} />
       <motion.span aria-hidden className="absolute -bottom-32 -right-20 size-[28rem] rounded-full bg-[#d9e6ff] blur-3xl" animate={{ x: [0, -40, 0], y: [0, -20, 0] }} transition={{ repeat: Infinity, duration: 22, ease: 'easeInOut' }} />
-      <motion.span aria-hidden className="absolute left-1/3 top-1/2 size-72 rounded-full bg-[#fff0c2] blur-3xl" animate={{ x: [0, 30, -20, 0] }} transition={{ repeat: Infinity, duration: 26, ease: 'easeInOut' }} />
 
       <div className="relative z-10 flex items-center justify-between px-10 pt-9 xl:px-14">
         <Link to="/" className="font-display text-3xl font-black tracking-tight text-[#1f2433]">dil<span className="text-flame">go</span></Link>
         <span className="rounded-full bg-white/80 px-3 py-1 font-mono text-xs font-bold text-[#1f2433] ring-1 ring-black/5 backdrop-blur">{level} → {exam ? exam.name : NEXT[level]}</span>
       </div>
 
-      <div className="relative z-10 px-10 pt-6 xl:px-14">
-        <p className="text-sm font-bold text-[#676d7c]">{name ? `${name}'in İngilizce yolculuğu` : 'İngilizce yolculuğun'}</p>
-        <AnimatePresence mode="wait">
-          <motion.p key={step} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }} className="mt-1 max-w-sm font-display text-xl font-black leading-snug text-[#1f2433]">{higo.line}</motion.p>
+      {/* Higo speaks in the header; the line changes with each question */}
+      <div className="relative z-10 flex items-center gap-4 px-10 pt-7 xl:px-14">
+        <AnimatePresence mode="popLayout">
+          <motion.img key={higo.pose} src={`${import.meta.env.BASE_URL}img/higo/${higo.pose}.webp`} alt="Higo" initial={{ scale: 0.6, rotate: -12, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} exit={{ scale: 0.6, opacity: 0 }} transition={{ type: 'spring', stiffness: 320, damping: 18 }} className="size-20 shrink-0 object-contain drop-shadow-[0_10px_12px_rgba(160,40,10,.2)]" />
         </AnimatePresence>
+        <div className="min-w-0">
+          <p className="text-sm font-bold text-[#676d7c]">{name ? `${name}'in planı` : 'Kişisel planın'}</p>
+          <AnimatePresence mode="wait">
+            <motion.p key={step} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} transition={{ duration: 0.22 }} className="mt-0.5 max-w-sm font-display text-xl font-black leading-snug text-[#1f2433]">{higo.line}</motion.p>
+          </AnimatePresence>
+        </div>
       </div>
 
-      {/* the road */}
-      <div className="relative z-10 mx-10 mb-6 mt-16 flex-1 xl:mx-14">
-        <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="absolute inset-0 size-full overflow-visible" aria-hidden>
-          <path d={d} fill="none" stroke="#e7e1d8" strokeWidth="1.6" vectorEffect="non-scaling-stroke" strokeLinecap="round" strokeDasharray="2 7" style={{ strokeWidth: 5 }} />
-          <motion.path d={d} fill="none" stroke="url(#road)" strokeLinecap="round" vectorEffect="non-scaling-stroke" style={{ strokeWidth: 5 }} initial={false} animate={{ pathLength: doneFrac }} transition={{ type: 'spring', stiffness: 60, damping: 18 }} />
-          <defs><linearGradient id="road" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stopColor="#ff5a36" /><stop offset="1" stopColor="#ffb020" /></linearGradient></defs>
-        </svg>
-        {stops.map((st, i) => {
-          const p = pts[i]
-          const done = i < cur || cur >= n
-          const on = i === cur
-          const right = p.x < 55
-          return (
-            <div key={st.key} className="absolute" style={{ left: `${p.x}%`, top: `${p.y}%` }}>
-              <motion.span className={clsx('absolute -translate-x-1/2 -translate-y-1/2 rounded-full ring-4 transition-colors duration-300', done ? 'size-4 bg-flame ring-flame/20' : on ? 'size-5 bg-white ring-flame/40' : 'size-3.5 bg-white ring-[#e7e1d8]')} animate={on ? { scale: [1, 1.25, 1] } : { scale: 1 }} transition={on ? { repeat: Infinity, duration: 1.6 } : {}} />
-              <div className={clsx('absolute top-0 w-40 -translate-y-1/2', right ? 'left-5 text-left' : 'right-5 text-right')}>
-                <p className={clsx('text-[11px] font-black uppercase tracking-[0.14em]', on ? 'text-flame' : 'text-[#9aa1b2]')}>{st.label}</p>
-                <AnimatePresence>
-                  {value[st.key] && done && (
-                    <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="truncate text-sm font-extrabold text-[#1f2433]">{value[st.key]}</motion.p>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-          )
-        })}
-        {/* Higo walks the road */}
-        <motion.img
-          src={`${import.meta.env.BASE_URL}img/higo/${higo.pose}.webp`}
-          alt="Higo"
-          className="absolute z-20 w-16 -translate-x-1/2 -translate-y-[92%] drop-shadow-[0_10px_12px_rgba(160,40,10,.25)]"
-          initial={false}
-          animate={{ left: `${at.x}%`, top: `${at.y}%` }}
-          transition={{ type: 'spring', stiffness: 70, damping: 16 }}
-        />
+      {/* the timeline */}
+      <div className="relative z-10 mx-10 my-7 flex-1 xl:mx-14">
+        <div className="relative rounded-3xl bg-white/70 p-5 ring-1 ring-black/5 backdrop-blur">
+          <span aria-hidden className="absolute bottom-9 left-[42px] top-9 w-[3px] rounded-full bg-[#ece6dd]" />
+          <motion.span aria-hidden className="absolute left-[42px] top-9 w-[3px] origin-top rounded-full bg-gradient-to-b from-flame to-[#ffb020]" style={{ height: 'calc(100% - 4.5rem)' }} initial={false} animate={{ scaleY: fill }} transition={{ type: 'spring', stiffness: 70, damping: 18 }} />
+          <ol className="relative space-y-1">
+            {stops.map((st, i) => {
+              const done = i < cur || cur >= n
+              const on = i === cur
+              return (
+                <motion.li key={st.key} layout transition={{ type: 'spring', stiffness: 300, damping: 30 }} className={clsx('flex items-center gap-3 rounded-2xl px-2 py-2 transition-colors duration-300', on && 'bg-flame/8 ring-1 ring-flame/25')}>
+                  <span className={clsx('relative grid size-9 shrink-0 place-items-center rounded-full border-[3px] text-sm transition-colors duration-300', done ? 'border-flame bg-flame text-white' : on ? 'border-flame bg-white' : 'border-[#ece6dd] bg-white')}>
+                    {done ? (
+                      <motion.svg viewBox="0 0 24 24" className="size-4" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}>
+                        <motion.path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" initial={{ pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 0.35 }} />
+                      </motion.svg>
+                    ) : (
+                      (() => { const I = STOP_ICON[st.key]; return <I className={clsx('size-4', on ? 'text-flame' : 'text-[#aab0bd]')} strokeWidth={2.5} /> })()
+                    )}
+                    {on && <motion.span aria-hidden className="absolute -inset-1.5 rounded-full border-2 border-flame/40" animate={{ scale: [1, 1.18, 1], opacity: [0.8, 0, 0.8] }} transition={{ repeat: Infinity, duration: 1.8 }} />}
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className={clsx('block text-[11px] font-black uppercase tracking-[0.14em]', on ? 'text-flame' : done ? 'text-[#676d7c]' : 'text-[#aab0bd]')}>{st.label}</span>
+                    <AnimatePresence mode="wait">
+                      {done && value[st.key] ? (
+                        <motion.span key="v" initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} className="block truncate text-[15px] font-extrabold text-[#1f2433]">{value[st.key]}</motion.span>
+                      ) : on ? (
+                        <motion.span key="q" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="block text-sm font-bold text-[#1f2433]">Şimdi bunu seçiyorsun</motion.span>
+                      ) : null}
+                    </AnimatePresence>
+                  </span>
+                </motion.li>
+              )
+            })}
+          </ol>
+        </div>
       </div>
 
-      <div className="relative z-10 mx-10 mb-8 flex items-center justify-between rounded-2xl bg-white/75 px-4 py-3 ring-1 ring-black/5 backdrop-blur xl:mx-14">
-        <span className="text-sm font-bold text-[#676d7c]">{slot ? `İlk ünite ~${weeks} günde` : 'Ücretsiz · kredi kartı gerekmez'}</span>
-        <span className="flex gap-1">{ORDER.slice(1, -1).map((k) => <span key={k} className={clsx('h-1.5 w-4 rounded-full', ORDER.indexOf(step) > ORDER.indexOf(k) ? 'bg-flame' : 'bg-[#e7e1d8]')} />)}</span>
+      <div className="relative z-10 mx-10 mb-8 flex items-center justify-between rounded-2xl bg-[#1f2433] px-4 py-3 text-white xl:mx-14">
+        <span className="text-sm font-bold">{slot ? `İlk ünite ~${weeks} günde · günde ${pace.minutes} dk` : 'Ücretsiz · kredi kartı gerekmez'}</span>
+        <span className="font-mono text-xs font-bold text-white/70">{Math.max(0, Math.min(n, cur))}/{n}</span>
       </div>
     </aside>
   )

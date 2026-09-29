@@ -3,13 +3,16 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, Bookmark, BookmarkCheck, Languages, Pause, Play, Plus, Type, Volume2 } from 'lucide-react'
+import { Bookmark, BookmarkCheck, Check, ChevronLeft, Headphones, Languages, Pause, Plus, Sparkles, Type, Volume2, X } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { speak, stopSpeaking } from '@/lib/speech'
 import type { RewardSummary, Story } from '@/lib/types'
 import { Button, LinkButton } from '@/components/ui/Button'
-import { Progress, SkeletonPage, Sticker } from '@/components/ui/Misc'
+import { SkeletonPage } from '@/components/ui/Misc'
+import { useEconomy } from '@/components/game/XpGuide'
+import { higoImg } from '@/components/game/Higo'
+import { sfx } from '@/lib/fx'
 import { useReward } from '@/components/game/RewardProvider'
 import { useToast } from '@/components/ui/Toast'
 import { StoryCover } from './StoryCover'
@@ -18,6 +21,30 @@ import { Img } from '@/components/ui/Img'
 
 interface Resp { story: Story; locked: boolean; read: { bookmarked: boolean; progress: number; completed_at: string | null } }
 
+type Card = { kind: 'cover' } | { kind: 'scene'; i: number } | { kind: 'check'; qi: number } | { kind: 'paywall' } | { kind: 'end' }
+
+/** Spread the questions between scenes so understanding is checked as you go. */
+function buildCards(scenes: number, questions: number, locked: boolean): Card[] {
+  const out: Card[] = [{ kind: 'cover' }]
+  const after = new Map<number, number[]>()
+  for (let q = 0; q < questions; q++) {
+    const at = Math.max(0, Math.min(scenes - 1, Math.round(((q + 1) * scenes) / (questions + 1)) - 1))
+    after.set(at, [...(after.get(at) ?? []), q])
+  }
+  for (let i = 0; i < scenes; i++) {
+    out.push({ kind: 'scene', i })
+    if (!locked) for (const qi of after.get(i) ?? []) out.push({ kind: 'check', qi })
+  }
+  out.push(locked ? { kind: 'paywall' } : { kind: 'end' })
+  return out
+}
+
+/**
+ * A story told in short scenes, one screen at a time: tap a word for its meaning,
+ * listen, and answer a quick check every few scenes. Right answers pay XP on the
+ * spot, so there is always a next small win. Built for short attention spans:
+ * a scene is a few sentences, a check is one tap.
+ */
 export default function StoryReader() {
   const { slug } = useParams()
   const [params] = useSearchParams()
@@ -27,41 +54,31 @@ export default function StoryReader() {
   const toast = useToast()
   const showReward = useReward()
   const { user } = useAuth()
+  const { data: eco } = useEconomy()
   const { data, isLoading, error } = useQuery({ queryKey: ['story', slug], queryFn: () => get<Resp>(`/stories/${slug}`) })
 
-  const [showTr, setShowTr] = useState<Record<number, boolean>>({})
-  const [playing, setPlaying] = useState<number | null>(null)
-  const [charIdx, setCharIdx] = useState(-1)
+  const [step, setStep] = useState(0)
+  const [dir, setDir] = useState(1)
+  const [tr, setTr] = useState(false)
+  const [voice, setVoice] = useState(false)
   const [big, setBig] = useState(false)
+  const [playing, setPlaying] = useState(false)
+  const [charIdx, setCharIdx] = useState(-1)
   const [word, setWord] = useState<{ w: string; p: number; x: number; y: number } | null>(null)
   const [quiz, setQuiz] = useState<Record<number, number>>({})
   const [bookmarked, setBookmarked] = useState(false)
-  const autoplay = useRef(false)
-  const maxProgress = useRef(0)
   const started = useRef(Date.now())
 
   const vocab = useMemo(() => new Map((data?.story.vocabulary ?? []).map((v) => [v.word.toLowerCase(), v])), [data])
+  const cards = useMemo(() => (data ? buildCards(data.story.paragraphs.length, data.story.questions?.length ?? 0, data.locked) : []), [data])
+  const card = cards[step]
   useEffect(() => setBookmarked(!!data?.read.bookmarked), [data])
   useEffect(() => () => stopSpeaking(), [])
-
-  // scroll progress → server (throttled by 10% steps)
-  useEffect(() => {
-    const onScroll = () => {
-      const h = document.documentElement
-      const pct = Math.min(100, Math.round(((h.scrollTop + h.clientHeight) / h.scrollHeight) * 100))
-      if (pct >= maxProgress.current + 10) {
-        maxProgress.current = pct
-        post(`/stories/${slug}/progress`, { progress: pct }).catch(() => {})
-      }
-    }
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [slug])
 
   const saveWord = useMutation({
     mutationFn: (w: { word: string; translation?: string; example?: string }) => post('/words', { ...w, source: 'story', source_id: data?.story.id }),
     onSuccess: () => {
-      toast('Kelime defterine eklendi ✓', 'success')
+      toast('Kelime defterine eklendi', 'success')
       qc.invalidateQueries({ queryKey: ['words'] })
       setWord(null)
     },
@@ -69,7 +86,8 @@ export default function StoryReader() {
   const bookmark = useMutation({ mutationFn: () => post<{ bookmarked: boolean }>(`/stories/${slug}/bookmark`), onSuccess: (r) => setBookmarked(r.bookmarked) })
   const complete = useMutation({
     mutationFn: async () => {
-      const r = await post<{ score: number; reward: RewardSummary }>(`/stories/${slug}/complete`, { answers: Object.keys(quiz).length ? data!.story.questions!.map((_, i) => quiz[i] ?? null) : null, minutes: Math.max(1, Math.round((Date.now() - started.current) / 60000)) })
+      const qs = data!.story.questions ?? []
+      const r = await post<{ score: number; correct: number; total: number; reward: RewardSummary }>(`/stories/${slug}/complete`, { answers: qs.length ? qs.map((_, i) => quiz[i] ?? null) : null, minutes: Math.max(1, Math.round((Date.now() - started.current) / 60000)), listened: voice })
       if (lessonId) await post(`/lessons/${lessonId}/complete`, { answers: [] })
       return r
     },
@@ -77,146 +95,216 @@ export default function StoryReader() {
       qc.invalidateQueries({ queryKey: ['path'] })
       qc.invalidateQueries({ queryKey: ['stories'] })
       qc.invalidateQueries({ queryKey: ['dashboard'] })
-      showReward(r.reward, `Hikaye bitti · Quiz %${r.score}`)
+      showReward(r.reward, r.total ? `Hikâye bitti · ${r.correct}/${r.total} doğru` : 'Hikâye bitti')
       nav(lessonId ? '/learn' : '/stories')
     },
     onError: (e: ApiError) => toast(e.message, 'error'),
   })
 
-  const playParagraph = (i: number) => {
+  const say = (i: number) => {
     if (!data) return
-    if (playing === i) {
-      autoplay.current = false
-      stopSpeaking()
-      setPlaying(null)
-      return
-    }
-    setPlaying(i)
+    stopSpeaking()
+    setPlaying(true)
     setCharIdx(-1)
-    speak(data.story.paragraphs[i].en, {
-      rate: user?.preferences?.tts_rate ?? 0.92,
-      onBoundary: setCharIdx,
-      onEnd: () => {
-        setCharIdx(-1)
-        if (autoplay.current && i + 1 < data.story.paragraphs.length) playParagraph(i + 1)
-        else setPlaying(null)
-      },
-    })
+    speak(data.story.paragraphs[i].en, { rate: user?.preferences?.tts_rate ?? 0.92, onBoundary: setCharIdx, onEnd: () => { setCharIdx(-1); setPlaying(false) } })
   }
+  const go = (d: number) => {
+    const next = Math.max(0, Math.min(cards.length - 1, step + d))
+    if (next === step) return
+    stopSpeaking()
+    setPlaying(false)
+    setWord(null)
+    setDir(d)
+    setStep(next)
+    const pct = Math.round((next / Math.max(1, cards.length - 1)) * 100)
+    post(`/stories/${slug}/progress`, { progress: pct }).catch(() => {})
+    const c = cards[next]
+    if (voice && c?.kind === 'scene') setTimeout(() => say(c.i), 350)
+  }
+  // a check has to be answered before moving on
+  const blocked = card?.kind === 'check' && quiz[card.qi] === undefined
+  useEffect(() => {
+    const k = (e: KeyboardEvent) => {
+      if ((e.target as HTMLElement)?.tagName === 'INPUT') return
+      if (e.key === 'ArrowRight' && !blocked) go(1)
+      if (e.key === 'ArrowLeft') go(-1)
+    }
+    window.addEventListener('keydown', k)
+    return () => window.removeEventListener('keydown', k)
+  })
 
   if (isLoading) return <SkeletonPage variant="reader" />
-  if (error || !data) return <p className="p-8 text-center font-bold">{(error as ApiError)?.message ?? 'Hikaye bulunamadı.'}</p>
-  const { story, locked } = data
+  if (error || !data || !card) return <p className="p-8 text-center font-bold">{(error as ApiError)?.message ?? 'Hikâye bulunamadı.'}</p>
+  const { story } = data
   const questions = story.questions ?? []
-  const allAnswered = questions.every((_, i) => quiz[i] !== undefined)
+  const first = !data.read.completed_at
+  const perRight = first ? eco?.xp.story_per_correct ?? 3 : eco?.xp.story_repeat_per_correct ?? 1
+  const base = first ? eco?.xp.story_first ?? 8 : eco?.xp.story_repeat ?? 3
+  const right = questions.filter((q, i) => quiz[i] === q.answer).length
+  const answered = Object.keys(quiz).length
 
   return (
-    <article className="mx-auto max-w-3xl pb-16">
-      <div className="mb-6 flex items-center justify-between">
-        <Link to="/stories" className="flex items-center gap-1 font-bold text-ink-soft hover:text-ink"><ArrowLeft className="size-5" /> Kütüphane</Link>
-        <div className="flex gap-2">
-          <button onClick={() => setBig((b) => !b)} className="grid size-10 place-items-center rounded-xl border-2 border-line bg-card" aria-label="Yazı boyutu"><Type className="size-5" /></button>
-          <button onClick={() => bookmark.mutate()} className="grid size-10 place-items-center rounded-xl border-2 border-line bg-card" aria-label="Kaydet">{bookmarked ? <BookmarkCheck className="size-5 text-flame" /> : <Bookmark className="size-5" />}</button>
+    <div className="mx-auto flex min-h-[calc(100dvh-9rem)] max-w-2xl flex-col">
+      {/* top bar: close, story segments, tools */}
+      <div className="mb-4 flex items-center gap-2">
+        <Link to="/stories" className="grid size-10 shrink-0 place-items-center rounded-xl text-ink-soft hover:bg-paper-2" aria-label="Kütüphaneye dön"><X className="size-6" /></Link>
+        <div className="flex flex-1 gap-1" aria-label={`Sahne ${step + 1}/${cards.length}`}>
+          {cards.map((c, k) => (
+            <span key={k} className={clsx('h-1.5 flex-1 rounded-full transition-colors duration-300', k < step ? (c.kind === 'check' ? (quiz[c.qi] === questions[c.qi]?.answer ? 'bg-mint' : 'bg-berry/60') : 'bg-flame') : k === step ? 'bg-flame/60' : 'bg-line')} />
+          ))}
         </div>
+        <button onClick={() => bookmark.mutate()} className="grid size-10 shrink-0 place-items-center rounded-xl hover:bg-paper-2" aria-label="Kaydet">{bookmarked ? <BookmarkCheck className="size-5 text-flame" /> : <Bookmark className="size-5 text-ink-soft" />}</button>
       </div>
 
-      <header className="mb-8 overflow-hidden rounded-3xl border-2 border-line bg-card">
-        <div className="aspect-[16/8]"><StoryCover story={story} /></div>
-        <div className="p-6">
-          <div className="mb-3 flex flex-wrap gap-2">
-            <Sticker color="bg-butter">{story.cefr_level}</Sticker>
-            {story.category && <Sticker color="bg-paper-2 text-ink">{story.category}</Sticker>}
-            <Sticker color="bg-paper-2 text-ink">{story.reading_minutes} dk · {story.word_count} kelime</Sticker>
-          </div>
-          <h1 className="text-4xl leading-tight">{story.title}</h1>
-          {story.title_tr && <p className="text-lg text-ink-soft">{story.title_tr}</p>}
-          <p className="mt-3">{story.summary}</p>
-          <div className="mt-5 flex flex-wrap gap-3">
-            <Button onClick={() => { autoplay.current = true; playParagraph(0) }} icon={<Volume2 className="size-5" />} variant="dark">Tümünü dinle</Button>
-            <Button variant="secondary" onClick={() => setShowTr(Object.fromEntries(story.paragraphs.map((_, i) => [i, !Object.values(showTr).some(Boolean)])))} icon={<Languages className="size-5" />}>Çeviriler</Button>
-          </div>
-        </div>
-      </header>
-
-      <p className="mb-4 text-sm font-semibold text-ink-soft">💡 Bilmediğin bir kelimeye dokun: anlamını gör, sesini dinle, kelime defterine ekle.</p>
-
-      <div className={clsx('mx-auto max-w-[42rem] space-y-6 font-read', big ? 'text-[22px] leading-[1.85]' : 'text-[19px] leading-[1.8]')}>
-        {story.paragraphs.map((p, i) => (
-          <div key={i} className={clsx('group relative rounded-2xl p-4 transition', playing === i ? 'bg-butter/15' : 'hover:bg-paper-2/60')}>
-            <div className="absolute -left-2 top-4 flex flex-col gap-1 sm:-left-14">
-              <button onClick={() => { autoplay.current = false; playParagraph(i) }} className="grid size-9 place-items-center rounded-full bg-sky text-white" aria-label="Paragrafı dinle">
-                {playing === i ? <Pause className="size-4" /> : <Play className="size-4" />}
-              </button>
-              {p.tr && (
-                <button onClick={() => setShowTr((s) => ({ ...s, [i]: !s[i] }))} className="grid size-9 place-items-center rounded-full border-2 border-line bg-card text-ink-soft" aria-label="Çeviri">
-                  <Languages className="size-4" />
-                </button>
-              )}
-            </div>
-            <p className="pl-8 sm:pl-0">
-              <Tokens text={p.en} activeChar={playing === i ? charIdx : -1} vocab={vocab} onWord={(w, e) => { const r = (e.target as HTMLElement).getBoundingClientRect(); setWord({ w, p: i, x: r.left + r.width / 2, y: r.bottom + window.scrollY }) }} />
-            </p>
-            <AnimatePresence>
-              {showTr[i] && p.tr && (
-                <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mt-3 overflow-hidden border-l-4 border-flame pl-8 font-sans text-base italic text-ink-soft sm:pl-3">
-                  {p.tr}
-                </motion.p>
-              )}
-            </AnimatePresence>
-          </div>
-        ))}
-      </div>
-
-      {locked ? (
-        <div className="relative mt-8 overflow-hidden rounded-3xl bg-[#1f2433] p-8 text-center text-white">
-          <Img src={rewardImg('crown')} alt="" className="mx-auto mb-3 size-20 object-contain" />
-          <h2 className="text-2xl">Hikayenin devamı Premium'da</h2>
-          <p className="mx-auto mb-6 mt-2 max-w-sm text-white/70">Tüm hikayeler, sesli okumalar ve sınırsız pratik için Premium'a geç.</p>
-          <LinkButton to="/premium" variant="butter">Premium'u keşfet</LinkButton>
-        </div>
-      ) : (
-        <>
-          {!!story.vocabulary?.length && (
-            <section className="ink-card mt-10 p-6">
-              <h2 className="mb-4 text-2xl font-extrabold">Hikayedeki kelimeler</h2>
-              <div className="grid gap-2 sm:grid-cols-2">
-                {story.vocabulary.map((v) => (
-                  <div key={v.word} className="flex items-center gap-3 rounded-2xl border-2 border-line p-3">
-                    <button onClick={() => speak(v.word)} className="text-sky" aria-label="Dinle"><Volume2 className="size-5" /></button>
-                    <div className="min-w-0 flex-1">
-                      <p className="font-bold">{v.word}</p>
-                      <p className="truncate text-sm text-ink-soft">{v.meaning}</p>
+      <div className="relative flex-1">
+        <AnimatePresence mode="wait" custom={dir}>
+          <motion.section
+            key={step}
+            custom={dir}
+            initial={{ opacity: 0, x: dir * 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: dir * -40 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
+            drag={blocked ? false : 'x'}
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragEnd={(_, i) => { if (i.offset.x < -70) go(1); else if (i.offset.x > 70) go(-1) }}
+            className="touch-pan-y"
+          >
+            {card.kind === 'cover' && (
+              <div className="overflow-hidden rounded-[28px] border-2 border-line bg-card">
+                <div className="relative aspect-[16/10]">
+                  <StoryCover story={story} />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+                  <div className="absolute inset-x-0 bottom-0 p-6 text-white">
+                    <div className="mb-2 flex flex-wrap gap-2 text-xs font-black">
+                      <span className="rounded-full bg-butter px-2.5 py-1 text-[#1f2433]">{story.cefr_level}</span>
+                      <span className="rounded-full bg-white/20 px-2.5 py-1 backdrop-blur">{story.paragraphs.length} sahne · ~{story.reading_minutes} dk</span>
                     </div>
-                    <button onClick={() => saveWord.mutate({ word: v.word, translation: v.meaning, example: v.example })} className="grid size-9 place-items-center rounded-xl bg-mint/15 text-mint-deep hover:bg-mint/25" aria-label="Kelime defterine ekle"><Plus className="size-5" /></button>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-
-          <section className="ink-card mt-8 p-6">
-            <h2 className="mb-1 text-2xl font-extrabold">Anladın mı?</h2>
-            <p className="mb-5 text-ink-soft">Soruları cevapla, hikayeyi bitir ve XP kazan.</p>
-            <div className="space-y-6">
-              {questions.map((q, qi) => (
-                <div key={qi}>
-                  <p className="mb-2 font-bold">{qi + 1}. {q.q}</p>
-                  <div className="grid gap-2">
-                    {q.options.map((o, oi) => (
-                      <button key={oi} onClick={() => setQuiz((s) => ({ ...s, [qi]: oi }))} className={clsx('rounded-xl border-2 px-4 py-3 text-left font-bold', quiz[qi] === oi ? 'border-sky bg-sky/10 text-sky' : 'border-line bg-card hover:bg-paper-2')}>
-                        {o}
-                      </button>
-                    ))}
+                    <h1 className="text-3xl leading-tight sm:text-4xl">{story.title}</h1>
+                    {story.title_tr && <p className="text-white/80">{story.title_tr}</p>}
                   </div>
                 </div>
-              ))}
-            </div>
-            <div className="mt-6">
-              <Progress value={Object.keys(quiz).length} max={Math.max(1, questions.length)} className="mb-4" />
-              <Button block size="lg" disabled={!allAnswered} loading={complete.isPending} onClick={() => complete.mutate()}>Hikayeyi bitir</Button>
-            </div>
-          </section>
-        </>
+                <div className="p-6">
+                  {story.summary && <p className="text-[15px]">{story.summary}</p>}
+                  <div className="mt-4 grid grid-cols-3 gap-2 text-center">
+                    <Chip v={`${story.paragraphs.length}`} l="kısa sahne" />
+                    <Chip v={`${questions.length}`} l="hızlı kontrol" />
+                    <Chip v={`${base}+${perRight}×`} l="XP / doğru" />
+                  </div>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Toggle on={voice} onClick={() => setVoice((v) => !v)} icon={<Headphones className="size-4" />}>Sahneleri seslendir</Toggle>
+                    <Toggle on={tr} onClick={() => setTr((v) => !v)} icon={<Languages className="size-4" />}>Türkçesini göster</Toggle>
+                    <Toggle on={big} onClick={() => setBig((v) => !v)} icon={<Type className="size-4" />}>Büyük yazı</Toggle>
+                  </div>
+                  <p className="mt-4 text-sm text-ink-soft">Altı çizili kelimelere dokun: anlamı çıkar, tek dokunuşla defterine eklersin.</p>
+                </div>
+              </div>
+            )}
+
+            {card.kind === 'scene' && (() => {
+              const p = story.paragraphs[card.i]
+              return (
+                <div className="rounded-[28px] border-2 border-line bg-card p-6 sm:p-8">
+                  <div className="mb-4 flex items-center justify-between">
+                    <span className="text-xs font-black uppercase tracking-widest text-ink-soft">Sahne {card.i + 1}/{story.paragraphs.length}</span>
+                    <div className="flex gap-1.5">
+                      {p.tr && <button onClick={() => setTr((v) => !v)} className={clsx('grid size-10 place-items-center rounded-full border-2', tr ? 'border-flame bg-flame/10 text-flame' : 'border-line text-ink-soft')} aria-label="Türkçesi"><Languages className="size-4" /></button>}
+                      <button onClick={() => (playing ? (stopSpeaking(), setPlaying(false)) : say(card.i))} className="grid size-10 place-items-center rounded-full bg-sky text-white" aria-label="Dinle">{playing ? <Pause className="size-4" /> : <Volume2 className="size-4" />}</button>
+                    </div>
+                  </div>
+                  <p className={clsx('font-read', big ? 'text-[24px] leading-[1.75]' : 'text-[20px] leading-[1.75]')}>
+                    <Tokens text={p.en} activeChar={playing ? charIdx : -1} vocab={vocab} onWord={(w, e) => { const r = (e.target as HTMLElement).getBoundingClientRect(); setWord({ w, p: card.i, x: r.left + r.width / 2, y: r.bottom + window.scrollY }) }} />
+                  </p>
+                  <AnimatePresence>
+                    {tr && p.tr && (
+                      <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mt-4 overflow-hidden border-l-4 border-flame pl-3 text-base italic text-ink-soft">{p.tr}</motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )
+            })()}
+
+            {card.kind === 'check' && (() => {
+              const q = questions[card.qi]
+              const pick = quiz[card.qi]
+              const done = pick !== undefined
+              return (
+                <div className="rounded-[28px] border-2 border-line bg-card p-6 sm:p-8">
+                  <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-lilac"><Sparkles className="size-4" /> Hızlı kontrol · +{perRight} XP</p>
+                  <h2 className="mt-2 text-2xl leading-snug">{q.q}</h2>
+                  <div className="mt-5 grid gap-2.5">
+                    {q.options.map((o, oi) => {
+                      const right = oi === q.answer
+                      return (
+                        <motion.button
+                          key={oi}
+                          whileTap={done ? undefined : { scale: 0.98 }}
+                          disabled={done}
+                          onClick={() => { setQuiz((s) => ({ ...s, [card.qi]: oi })); oi === q.answer ? sfx.correct(1) : sfx.wrong() }}
+                          animate={done && pick === oi && !right ? { x: [0, -6, 6, -4, 4, 0] } : {}}
+                          className={clsx('relative flex items-center gap-3 rounded-2xl border-2 px-4 py-3.5 text-left font-bold transition', !done && 'border-line hover:border-ink/30', done && right && 'border-mint bg-mint/10', done && pick === oi && !right && 'border-berry bg-berry/8', done && pick !== oi && !right && 'border-line opacity-50')}
+                        >
+                          <span className="flex-1">{o}</span>
+                          {done && right && <Check className="size-5 text-mint-deep" strokeWidth={3} />}
+                        </motion.button>
+                      )
+                    })}
+                  </div>
+                  <AnimatePresence>
+                    {done && (
+                      <motion.p initial={{ opacity: 0, y: 8, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} className={clsx('mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-display font-black', pick === q.answer ? 'bg-mint/15 text-mint-deep' : 'bg-berry/10 text-berry')}>
+                        {pick === q.answer ? `Doğru! +${perRight} XP` : 'Olsun, doğrusu yeşil olan.'}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
+              )
+            })()}
+
+            {card.kind === 'paywall' && (
+              <div className="relative overflow-hidden rounded-[28px] bg-[#1f2433] p-8 text-center text-white">
+                <Img src={rewardImg('crown')} alt="" className="mx-auto mb-3 size-20 object-contain" />
+                <h2 className="text-2xl">Hikâyenin devamı Premium'da</h2>
+                <p className="mx-auto mb-6 mt-2 max-w-sm text-white/70">Tüm hikâyeler, sesli okumalar ve sınırsız pratik için Premium'a geç.</p>
+                <LinkButton to="/premium" variant="butter">Premium'u keşfet</LinkButton>
+              </div>
+            )}
+
+            {card.kind === 'end' && (
+              <div className="rounded-[28px] border-2 border-line bg-card p-6 text-center sm:p-8">
+                <Img src={higoImg(right === questions.length ? 'cheer' : 'thumbs')} alt="" className="mx-auto size-24 object-contain" />
+                <h2 className="mt-2 text-3xl">Son sahne!</h2>
+                {questions.length > 0 && <p className="mt-1 text-ink-soft">{answered < questions.length ? `${questions.length - answered} kontrol cevapsız kaldı.` : `${right}/${questions.length} doğru cevap`}</p>}
+                <p className="mx-auto mt-4 inline-flex items-center gap-2 rounded-2xl bg-butter/25 px-4 py-2 font-display text-2xl font-black tabular-nums">+{base + right * perRight} XP</p>
+                <p className="mt-1 text-xs font-bold text-ink-soft">{base} bitirme + {right} × {perRight} doğru cevap{!first && ' (tekrar okuma)'}</p>
+                {!!story.vocabulary?.length && (
+                  <div className="mt-6 text-left">
+                    <p className="mb-2 text-xs font-black uppercase tracking-widest text-ink-soft">Bu hikâyenin kelimeleri</p>
+                    <div className="grid gap-2 sm:grid-cols-2">
+                      {story.vocabulary.map((v) => (
+                        <div key={v.word} className="flex items-center gap-2 rounded-2xl border-2 border-line px-3 py-2">
+                          <button onClick={() => speak(v.word)} className="text-sky" aria-label="Dinle"><Volume2 className="size-4" /></button>
+                          <span className="min-w-0 flex-1"><b>{v.word}</b> <span className="text-sm text-ink-soft">{v.meaning}</span></span>
+                          <button onClick={() => saveWord.mutate({ word: v.word, translation: v.meaning, example: v.example })} className="grid size-8 place-items-center rounded-lg bg-mint/15 text-mint-deep" aria-label="Deftere ekle"><Plus className="size-4" /></button>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                <Button block size="lg" className="mt-6" loading={complete.isPending} onClick={() => complete.mutate()}>Hikâyeyi bitir ve XP’yi al</Button>
+              </div>
+            )}
+          </motion.section>
+        </AnimatePresence>
+      </div>
+
+      {/* bottom controls stay in thumb reach */}
+      {card.kind !== 'end' && card.kind !== 'paywall' && (
+        <div className="sticky bottom-24 mt-5 flex items-center gap-3 lg:bottom-4">
+          <button onClick={() => go(-1)} disabled={step === 0} className="press grid size-14 place-items-center rounded-2xl border-2 border-line bg-card disabled:opacity-30" aria-label="Önceki"><ChevronLeft className="size-6" /></button>
+          <Button block size="lg" disabled={blocked} onClick={() => go(1)}>{card.kind === 'cover' ? 'Okumaya başla' : blocked ? 'Bir seçenek seç' : 'Devam'}</Button>
+        </div>
       )}
 
       <AnimatePresence>
@@ -229,7 +317,22 @@ export default function StoryReader() {
           </>
         )}
       </AnimatePresence>
-    </article>
+    </div>
+  )
+}
+
+function Chip({ v, l }: { v: string; l: string }) {
+  return (
+    <div className="rounded-2xl bg-paper-2 px-2 py-2.5">
+      <p className="font-display text-xl font-black tabular-nums">{v}</p>
+      <p className="text-[11px] font-bold text-ink-soft">{l}</p>
+    </div>
+  )
+}
+
+function Toggle({ on, onClick, icon, children }: { on: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <button onClick={onClick} aria-pressed={on} className={clsx('inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-sm font-extrabold transition', on ? 'border-flame bg-flame/10 text-flame' : 'border-line text-ink-soft hover:text-ink')}>{icon}{children}</button>
   )
 }
 
