@@ -48,8 +48,10 @@ return [
         'xp' => [
             'lesson_min' => 10,          // per lesson, from the lesson's own xp_reward (10-20)
             'perfect_bonus' => 5,
-            'story_first' => 15,
-            'story_repeat' => 5,
+            'story_first' => 8,          // finishing a story the first time
+            'story_per_correct' => 3,    // + per right quiz answer on the first read
+            'story_repeat' => 3,         // re-reading is practice
+            'story_repeat_per_correct' => 1,
             'review_per_word' => 1,
             'practice_per_correct' => 1,
             'exam_correct' => 3,
@@ -117,8 +119,21 @@ return [
     | Premium ones can only be chosen (and are only shown) while Premium is active.
     */
     'avatars' => [
-        'standard' => ['headphones', 'beard', 'braids', 'cap', 'granny', 'hoodie', 'hijab', 'grandpa', 'ponytail'],
-        'premium' => ['astronaut', 'wizard', 'king', 'pilot', 'scientist', 'chef', 'jazz', 'detective', 'explorer'],
+        // Bundled set, seeded into the `avatars` table; admins add more from the panel.
+        'labels' => [
+            'standard' => [['headphones', 'Müziksever'], ['afro', 'Ritim'], ['braids', 'Örgülü'], ['cap', 'Sokak'], ['buns', 'Topuzlu'], ['hoodie', 'Kapüşonlu'], ['glasses', 'Kod'], ['pinkbob', 'Pembe'], ['ponytail', 'Kampüs']],
+            'premium' => [['astronaut', 'Astronot'], ['wizard', 'Büyücü'], ['king', 'Kral'], ['pilot', 'Pilot'], ['scientist', 'Bilim insanı'], ['chef', 'Şef'], ['jazz', 'Cazcı'], ['detective', 'Dedektif'], ['explorer', 'Kaşif']],
+        ],
+        'upload_max_kb' => 1024,
+    ],
+
+    /*
+    | Profile cosmetics sold in the shop. Frames ring the avatar everywhere it is
+    | shown (profile, leagues, arena); banners sit behind the public profile header.
+    */
+    'cosmetics' => [
+        'frames' => ['gold', 'flame', 'emerald', 'sky', 'neon', 'sakura', 'royal', 'rainbow'],
+        'banners' => ['sunset', 'ocean', 'forest', 'candy', 'galaxy', 'istanbul'],
     ],
 
     'referral' => [

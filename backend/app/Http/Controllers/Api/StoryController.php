@@ -88,13 +88,20 @@ class StoryController extends Controller
         $first = ! $read->completed_at;
         $read->update(['progress' => 100, 'completed_at' => $read->completed_at ?? now(), 'quiz_score' => max($read->quiz_score ?? 0, $score)]);
 
-        // first read: the base plus up to 5 for comprehension; re-reads are practice
-        $xp = $first ? (int) config('dilgo.economy.xp.story_first') + (int) floor($score / 20) : (int) config('dilgo.economy.xp.story_repeat');
+        // XP follows understanding: a small base for finishing plus XP for every right
+        // answer. The first read pays more; re-reads are practice.
+        $x = config('dilgo.economy.xp');
+        $xp = $first
+            ? (int) $x['story_first'] + $correct * (int) $x['story_per_correct']
+            : (int) $x['story_repeat'] + $correct * (int) $x['story_repeat_per_correct'];
         // Stories are read and, when the narration was played, listened to as well.
         $skills = ($data['listened'] ?? false) ? ['reading' => 0.6, 'listening' => 0.4] : ['reading' => 1];
         $summary = $game->record($user, $xp, 'story', $story->id, ['stories' => $first ? 1 : 0, 'minutes' => $data['minutes'] ?? $story->reading_minutes], $skills);
 
-        return response()->json(['score' => $score, 'correct' => $correct, 'total' => count($questions), 'reward' => $summary]);
+        return response()->json([
+            'score' => $score, 'correct' => $correct, 'total' => count($questions), 'reward' => $summary,
+            'xp_breakdown' => ['base' => $first ? (int) $x['story_first'] : (int) $x['story_repeat'], 'per_correct' => $first ? (int) $x['story_per_correct'] : (int) $x['story_repeat_per_correct'], 'first' => $first],
+        ]);
     }
 
     public function bookmark(Request $request, Story $story): JsonResponse

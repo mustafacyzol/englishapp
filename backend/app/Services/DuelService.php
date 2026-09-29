@@ -56,6 +56,7 @@ class DuelService
     public function __construct(
         private readonly GamificationService $game,
         private readonly RewardService $rewards,
+        private readonly LeagueService $leagues,
     ) {}
 
     public static function rankFor(int $trophies): array
@@ -123,6 +124,7 @@ class DuelService
             'ghost_id' => $ghost?->id,
             'ghost_name' => $ghost?->name ?? self::TRAINING_GHOSTS[array_rand(self::TRAINING_GHOSTS)],
             'ghost_trophies' => $ghost?->duel_trophies ?? max(0, $user->duel_trophies + random_int(-40, 40)),
+            'ghost_tier' => $ghost?->league_tier ?? $user->league_tier,
             'ghost_skills' => $ghostSkills,
             'rounds' => $rounds,
             'status' => 'active',
@@ -272,8 +274,15 @@ class DuelService
             ->with('user:id,name,username')->latest('id')->limit(10)->get();
         Duel::query()->whereIn('id', $defenses->pluck('id'))->update(['ghost_notified' => true]);
 
-        $top = User::query()->where('duel_trophies', '>', 0)->orderByDesc('duel_trophies')->orderBy('id')->limit(20)->get(['id', 'name', 'username', 'duel_trophies']);
-        $myRank = User::query()->where('duel_trophies', '>', $user->duel_trophies)->count() + 1;
+        // The arena table is your league group: duel wins this week, side by side.
+        $membership = $this->leagues->membershipFor($user);
+        $weekStart = \App\Support\Period::weekEndsAt()->copy()->subWeek();
+        $groupIds = \App\Models\LeagueMembership::query()->where('league_group_id', $membership->league_group_id)->pluck('user_id');
+        $wins = Duel::query()->whereIn('user_id', $groupIds)->where('result', 'win')->where('finished_at', '>=', $weekStart)
+            ->selectRaw('user_id, COUNT(*) c')->groupBy('user_id')->pluck('c', 'user_id');
+        $top = User::query()->whereIn('id', $groupIds)->get(['id', 'name', 'username', 'avatar', 'preferences', 'premium_until', 'duel_trophies'])
+            ->sortByDesc(fn (User $u) => [(int) ($wins[$u->id] ?? 0), $u->duel_trophies])->values();
+        $myRank = $top->search(fn (User $u) => $u->id === $user->id) + 1;
 
         return [
             'me' => [
@@ -298,8 +307,10 @@ class DuelService
                 'id' => $d->id, 'challenger' => $d->user?->name ?? 'Bir öğrenci', 'held' => $d->result === 'loss',
                 'delta' => $d->ghost_delta, 'at' => $d->finished_at?->toIso8601String(),
             ]),
-            'leaderboard' => $top->values()->map(fn (User $u, $i) => [
+            'league' => ['tier' => $user->league_tier, 'name' => $this->leagues->tierName($user->league_tier), 'tiers' => config('dilgo.gamification.league.tiers')],
+            'leaderboard' => $top->map(fn (User $u, $i) => [
                 'position' => $i + 1, 'name' => $u->name, 'username' => $u->username, 'trophies' => $u->duel_trophies,
+                'wins' => (int) ($wins[$u->id] ?? 0), ...$u->look(),
                 'rank' => self::rankFor($u->duel_trophies)['name'], 'is_me' => $u->id === $user->id,
             ]),
             'ranks' => self::RANKS,
@@ -318,6 +329,10 @@ class DuelService
                 'name' => $duel->ghost_name,
                 'trophies' => $duel->ghost_trophies,
                 'rank' => self::rankFor($duel->ghost_trophies),
+                'league' => ['tier' => (int) $duel->ghost_tier, 'name' => $this->leagues->tierName((int) $duel->ghost_tier)],
+                'look' => $duel->ghost_id ? User::query()->find($duel->ghost_id)?->look() : null,
+                'same_group' => $duel->ghost_id && \App\Models\LeagueMembership::query()->where('user_id', $duel->ghost_id)->where('week_key', \App\Support\Period::weekKey())
+                    ->where('league_group_id', \App\Models\LeagueMembership::query()->where('user_id', $duel->user_id)->where('week_key', \App\Support\Period::weekKey())->value('league_group_id'))->exists(),
                 'skills' => $duel->ghost_skills,
                 'training' => $duel->ghost_id === null,
             ],
@@ -385,14 +400,23 @@ class DuelService
         return $streak;
     }
 
+    /**
+     * Rivals come from your league: first the people in your weekly league group,
+     * then others in the same league, then the leagues either side. Children and
+     * teenagers are only ever matched with their own age group, adults with adults.
+     */
     private function pickGhost(User $user): ?User
     {
-        $base = User::query()->whereKeyNot($user->id)->where('is_banned', false)->whereNotNull('email_verified_at')->where('xp_total', '>', 0);
-        // Children and teenagers are only ever matched with their own age group, adults with adults.
-        $base->where(fn ($q) => $user->age_group ? $q->where('age_group', $user->age_group) : $q->whereNull('age_group')->orWhere('age_group', 'adult'));
+        $base = fn () => User::query()->whereKeyNot($user->id)->where('is_banned', false)->whereNotNull('email_verified_at')->where('xp_total', '>', 0)
+            ->where(fn ($q) => $user->age_group ? $q->where('age_group', $user->age_group) : $q->whereNull('age_group')->orWhere('age_group', 'adult'));
 
-        return (clone $base)->whereBetween('duel_trophies', [max(0, $user->duel_trophies - 200), $user->duel_trophies + 200])->inRandomOrder()->first()
-            ?? (clone $base)->inRandomOrder()->first();
+        $group = $this->leagues->membershipFor($user)->league_group_id;
+        $groupIds = \App\Models\LeagueMembership::query()->where('league_group_id', $group)->pluck('user_id');
+
+        return $base()->whereIn('id', $groupIds)->inRandomOrder()->first()
+            ?? $base()->where('league_tier', $user->league_tier)->inRandomOrder()->first()
+            ?? $base()->whereBetween('league_tier', [$user->league_tier - 1, $user->league_tier + 1])->inRandomOrder()->first()
+            ?? $base()->inRandomOrder()->first();
     }
 
     private function trainingSkills(User $user): array

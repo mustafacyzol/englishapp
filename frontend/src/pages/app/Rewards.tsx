@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'motion/react'
 import { useLocation } from 'react-router-dom'
 import clsx from 'clsx'
-import { Check, Copy, Lock, Share2 } from 'lucide-react'
+import { Check, Copy, Share2 } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { celebrate, sfx } from '@/lib/fx'
@@ -19,8 +19,8 @@ import { Empty, PageHeader, Progress, SkeletonPage, Tabs } from '@/components/ui
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 
-type Tab = 'vault' | 'kupon' | 'yol' | 'redeem' | 'invite'
-const HASH: Record<string, Tab> = { '#yol': 'yol', '#kuponlar': 'kupon' }
+type Tab = 'vault' | 'kupon' | 'yol' | 'xp' | 'redeem' | 'invite'
+const HASH: Record<string, Tab> = { '#yol': 'yol', '#seri': 'yol', '#xp': 'xp', '#kuponlar': 'kupon' }
 
 export default function Rewards() {
   const { hash } = useLocation()
@@ -35,11 +35,12 @@ export default function Rewards() {
     <div className="mx-auto max-w-5xl">
       <PageHeader kicker="Kazandıkların" title="Ödüller" />
       <div className="mb-8">
-        <Tabs value={tab} onChange={setTab} items={[{ value: 'vault', label: 'Kasam' }, ...(coupons.data?.data.length ? [{ value: 'kupon' as Tab, label: live ? `Kuponlarım (${live})` : 'Kuponlarım' }] : []), { value: 'yol', label: 'Nasıl kazanırım?' }, { value: 'redeem', label: 'Kod kullan' }, { value: 'invite', label: 'Arkadaş davet et' }]} />
+        <Tabs value={tab} onChange={setTab} items={[{ value: 'vault', label: 'Kasam' }, ...(coupons.data?.data.length ? [{ value: 'kupon' as Tab, label: live ? `Kuponlarım (${live})` : 'Kuponlarım' }] : []), { value: 'yol', label: 'Seri ödülleri' }, { value: 'xp', label: 'XP ve elmas' }, { value: 'redeem', label: 'Kod kullan' }, { value: 'invite', label: 'Arkadaş davet et' }]} />
       </div>
       {tab === 'vault' && <Vault />}
       {tab === 'kupon' && <Coupons list={coupons.data?.data} />}
-      {tab === 'yol' && <Roadmap />}
+      {tab === 'yol' && <Roadmap onVault={() => setTab('vault')} />}
+      {tab === 'xp' && <Earn />}
       {tab === 'redeem' && <Redeem />}
       {tab === 'invite' && <Invite />}
     </div>
@@ -193,67 +194,99 @@ interface RoadmapData {
   milestones: { days: number; title: string; icon: string; gems: number; claimed: boolean; current: number; target: number }[]
 }
 
-function Roadmap() {
+/**
+ * Streak rewards on one track: where you are, what drops next and when. Rewards
+ * are paid automatically the day the streak reaches them, straight into the vault.
+ */
+function Roadmap({ onVault }: { onVault: () => void }) {
   const { data, isLoading } = useQuery({ queryKey: ['roadmap'], queryFn: () => get<RoadmapData>('/rewards/roadmap') })
   if (isLoading || !data) return <SkeletonPage variant="cards" />
-  const WAYS = [
+  const next = data.milestones.find((m) => !m.claimed)
+  const got = data.milestones.filter((m) => m.claimed)
+  return (
+    <div className="space-y-6">
+      <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-flame to-[#d9391f] p-6 text-white sm:p-8">
+        <span aria-hidden className="absolute -right-10 -top-10 size-48 rounded-full bg-white/10" />
+        <div className="relative flex flex-wrap items-center gap-5">
+          <Img src={rewardImg('flame')} alt="" className="size-20 drop-shadow-lg" />
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-bold text-white/80">Şu anki serin</p>
+            <p className="font-display text-5xl font-black leading-none">{data.streak} gün</p>
+          </div>
+          {next && (
+            <div className="rounded-2xl bg-white/15 p-4 backdrop-blur">
+              <p className="text-xs font-black uppercase tracking-widest text-white/75">Sıradaki ödül</p>
+              <div className="mt-1 flex items-center gap-3">
+                <Img src={rewardImg(next.icon)} alt="" className="size-12 object-contain" />
+                <div>
+                  <p className="font-display text-lg font-black leading-tight">{next.title}</p>
+                  <p className="text-sm font-bold">{next.days - data.streak} gün sonra · {next.days}. gün</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+        {next && <div className="relative mt-5"><Progress value={data.streak} max={next.days} color="bg-white" tall /></div>}
+      </section>
+
+      <p className="flex items-start gap-2 rounded-2xl bg-mint/10 p-4 text-sm font-semibold">
+        <Check className="mt-0.5 size-4 shrink-0 text-mint-deep" strokeWidth={3} />
+        <span>Toplamana gerek yok: serin o güne ulaştığı an ödül <b>kendiliğinden Kasana</b> düşer ve bildirim gelir. Kasadan açıp kullanırsın.{got.length > 0 && <> <button onClick={onVault} className="font-extrabold text-flame underline underline-offset-2">Kasama git</button></>}</span>
+      </p>
+
+      <div className="no-scrollbar -mx-4 overflow-x-auto px-4 pb-2">
+        <ol className="flex min-w-max items-stretch gap-3">
+          {data.milestones.map((m, i) => {
+            const reached = data.streak >= m.days
+            const isNext = m === next
+            return (
+              <motion.li key={m.days} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
+                className={clsx('relative flex w-40 flex-col items-center rounded-3xl border-2 p-4 text-center', m.claimed ? 'border-mint/50 bg-mint/8' : isNext ? 'border-flame bg-flame/5 shadow-[0_0_0_4px_rgba(255,90,54,.12)]' : 'border-line bg-card')}>
+                <p className="font-display text-3xl font-black leading-none">{m.days}</p>
+                <p className="text-xs font-bold text-ink-soft">gün</p>
+                <Img src={rewardImg(m.icon)} alt="" className={clsx('my-3 size-16 object-contain', !reached && !isNext && 'opacity-40 grayscale')} />
+                <p className="text-sm font-black leading-tight">{m.title}</p>
+                {m.gems > 0 && m.icon !== 'gem' && <p className="text-xs font-bold text-ink-soft">+ {m.gems} elmas</p>}
+                <span className={clsx('mt-3 rounded-full px-2.5 py-1 text-[11px] font-black', m.claimed ? 'bg-mint text-white' : isNext ? 'bg-flame text-white' : 'bg-paper-2 text-ink-soft')}>
+                  {m.claimed ? 'Kasana eklendi' : isNext ? `${m.days - data.streak} gün kaldı` : 'Kilitli'}
+                </span>
+              </motion.li>
+            )
+          })}
+        </ol>
+      </div>
+    </div>
+  )
+}
+
+/** Everything about earning: XP per activity with daily caps, and every way to earn gems. */
+function Earn() {
+  const { data } = useQuery({ queryKey: ['roadmap'], queryFn: () => get<RoadmapData>('/rewards/roadmap') })
+  const WAYS = data ? [
     { icon: 'gem', title: 'Günlük hedef', text: `Her gün hedefini tamamla: +${data.daily_goal_gems} elmas.` },
     { icon: 'crown', title: 'Seviye atla', text: `Her seviyede +${data.level_up_gems} elmas, her ${data.level_chest_every}. seviyede Gizemli Sandık.` },
     { icon: 'chest', title: 'Görevler', text: 'Günlük ve haftalık görevleri bitir, elmas ve kart topla.' },
     { icon: 'voucher', title: 'Lig', text: 'Haftayı ilk 3 bitir: elmas. Birinci ol: Gizemli Sandık.' },
-  ]
+  ] : []
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       <XpGuide />
-      <section>
-        <div className="mb-4 flex items-end justify-between">
-          <div>
-            <h2 className="text-2xl">Seri ödülleri</h2>
-            <p className="text-ink-soft">Serin büyüdükçe kasana özel kartlar düşer.</p>
-          </div>
-          <div className="flex items-center gap-2 rounded-2xl bg-flame/10 px-4 py-2">
-            <Img src={rewardImg('flame')} alt="" className="size-7" />
-            <span className="text-xl font-black text-flame">{data.streak} gün</span>
-          </div>
-        </div>
-        <ol className="relative space-y-3">
-          {data.milestones.map((m) => {
-            const reached = data.streak >= m.days
-            return (
-              <li key={m.days} className={clsx('flex items-center gap-4 rounded-2xl border-2 p-4', m.claimed ? 'border-mint/40 bg-mint/8' : reached ? 'border-butter bg-butter/10' : 'border-line bg-card')}>
-                <div className="w-16 shrink-0 text-center">
-                  <p className="text-2xl font-black leading-none">{m.days}</p>
-                  <p className="text-xs font-bold text-ink-soft">gün</p>
+      {!!WAYS.length && (
+        <section>
+          <h2 className="mb-4 text-2xl">Elmas nasıl kazanılır?</h2>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {WAYS.map((w) => (
+              <div key={w.title} className="flex items-center gap-4 rounded-2xl border-2 border-line bg-card p-4">
+                <Img src={rewardImg(w.icon)} alt="" className="size-14 object-contain" />
+                <div>
+                  <p className="font-black">{w.title}</p>
+                  <p className="text-sm text-ink-soft">{w.text}</p>
                 </div>
-                <Img src={rewardImg(m.icon)} alt="" className={clsx('size-14 object-contain', !reached && 'opacity-50 grayscale')} />
-                <div className="min-w-0 flex-1">
-                  <p className="font-black">{m.title}{m.gems > 0 && m.icon !== 'gem' && ` + ${m.gems} elmas`}</p>
-                  {!m.claimed && <Progress value={m.current} max={m.target} color="bg-flame" className="mt-2 max-w-xs" />}
-                </div>
-                {m.claimed ? (
-                  <span className="flex items-center gap-1 text-sm font-black text-mint-deep"><Check className="size-4" strokeWidth={3} /> Kazanıldı</span>
-                ) : (
-                  <Lock className="size-5 text-ink-soft" />
-                )}
-              </li>
-            )
-          })}
-        </ol>
-      </section>
-      <section>
-        <h2 className="mb-4 text-2xl">Başka nasıl kazanırım?</h2>
-        <div className="grid gap-4 sm:grid-cols-2">
-          {WAYS.map((w) => (
-            <div key={w.title} className="flex items-center gap-4 rounded-2xl border-2 border-line bg-card p-4">
-              <Img src={rewardImg(w.icon)} alt="" className="size-14 object-contain" />
-              <div>
-                <p className="font-black">{w.title}</p>
-                <p className="text-sm text-ink-soft">{w.text}</p>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

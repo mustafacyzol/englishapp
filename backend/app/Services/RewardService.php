@@ -64,6 +64,10 @@ class RewardService
                     throw ValidationException::withMessages(['item' => 'En fazla '.config('dilgo.gamification.streak_freeze_max').' seri dondurucu taşıyabilirsin.']);
                 }
             }
+            if (in_array($item->type, ['avatar_frame', 'profile_banner'], true)
+                && UserItem::query()->where('user_id', $user->id)->where('reward_item_id', $item->id)->where('status', '!=', 'expired')->exists()) {
+                throw ValidationException::withMessages(['item' => 'Bu görünüm zaten sende. Profilinden takabilirsin.']);
+            }
             if ($fresh->gems < $item->price_gems) {
                 throw ValidationException::withMessages(['item' => 'Yeterli elmasın yok.']);
             }
@@ -143,6 +147,32 @@ class RewardService
                     $user->forceFill(['preferences' => $prefs])->save();
                     $userItem->update(['status' => 'active', 'activated_at' => now()]);
                     $message = 'Yeni çerçeven profilinde!';
+                    break;
+
+                case 'profile_banner':
+                    $prefs = $user->preferences ?? [];
+                    $prefs['banner'] = $value['banner'] ?? $item->key;
+                    $user->forceFill(['preferences' => $prefs])->save();
+                    $userItem->update(['status' => 'active', 'activated_at' => now()]);
+                    $message = 'Profil kapağın değişti!';
+                    break;
+
+                case 'bundle':
+                    // A pack opens into its cards, which then sit in the vault like any other.
+                    $names = [];
+                    foreach ($value['items'] ?? [] as $part) {
+                        $card = RewardItem::query()->where('key', $part['item'] ?? '')->first();
+                        for ($n = 0; $card && $n < (int) ($part['qty'] ?? 1); $n++) {
+                            // A freeze over the carry limit is paid back in gems instead.
+                            $full = $card->type === 'streak_freeze' && UserItem::query()->where('user_id', $user->id)->where('status', 'available')->where('reward_item_id', $card->id)->count() >= config('dilgo.gamification.streak_freeze_max');
+                            $full ? $user->increment('gems', (int) $card->price_gems) : $this->grant($user, $card, 'bundle');
+                        }
+                        if ($card) {
+                            $names[] = ((int) ($part['qty'] ?? 1)).' × '.$card->name;
+                        }
+                    }
+                    $userItem->update(['status' => 'used', 'activated_at' => now()]);
+                    $message = 'Paket açıldı: '.implode(', ', $names);
                     break;
 
                 case 'partner_coupon':

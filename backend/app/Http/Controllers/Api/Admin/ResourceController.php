@@ -279,6 +279,16 @@ class ResourceController extends Controller
                     'is_active' => ['boolean'],
                 ],
             ],
+            'avatars' => [
+                'model' => Models\Avatar::class, 'search' => ['key', 'label'], 'order' => 'position', 'filters' => ['tier', 'is_active'], 'perm' => 'gamification',
+                'rules' => [
+                    'key' => ['required', 'alpha_dash', 'max:40', Rule::unique('avatars')->ignore($id)],
+                    'label' => ['required', 'string', 'max:60'],
+                    'tier' => ['required', 'in:standard,premium'],
+                    'is_active' => ['boolean'],
+                    'position' => ['integer', 'min:0', 'max:9999'],
+                ],
+            ],
             'newsletter-subscribers' => [
                 'model' => Models\NewsletterSubscriber::class, 'search' => ['email'], 'order' => '-id', 'filters' => ['source'], 'perm' => 'marketing',
                 'rules' => [
@@ -316,7 +326,7 @@ class ResourceController extends Controller
                     'key' => ['required', 'alpha_dash', 'max:80', Rule::unique('reward_items')->ignore($id)],
                     'name' => ['required', 'string', 'max:120'],
                     'description' => ['nullable', 'string', 'max:255'],
-                    'type' => ['required', 'in:streak_freeze,xp_boost,heart_refill,premium_days,gems,live_lesson,discount_coupon,avatar_frame,chest,partner_coupon'],
+                    'type' => ['required', 'in:streak_freeze,xp_boost,heart_refill,premium_days,gems,live_lesson,discount_coupon,avatar_frame,profile_banner,bundle,chest,partner_coupon'],
                     'value' => ['nullable', 'array'],
                     'price_gems' => ['nullable', 'integer', 'min:0'],
                     'icon' => ['required', 'string', 'max:40'],

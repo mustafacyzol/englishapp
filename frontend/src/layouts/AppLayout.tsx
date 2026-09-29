@@ -3,8 +3,8 @@ import { NavLink, useLocation, useOutlet, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { Bell, Settings, X } from 'lucide-react'
-import { IconBag, IconBook, IconCards, IconCup, IconExam, IconGhost, IconGift, IconMore, IconPath, IconProfile, IconQuest, IconSchool, IconShield, IconSliders, IconTalk, type NavIcon } from '@/components/ui/NavIcons'
+import { Bell, Settings } from 'lucide-react'
+import { IconBag, IconBook, IconCards, IconCup, IconExam, IconGhost, IconGift, IconPath, IconProfile, IconQuest, IconSchool, IconShield, IconSliders, IconTalk, type NavIcon } from '@/components/ui/NavIcons'
 import { useAuth } from '@/lib/auth'
 import { get } from '@/lib/api'
 import { rewardImg } from '@/lib/assets'
@@ -18,6 +18,8 @@ import { SideRail, type Dashboard } from './SideRail'
 import { Img } from '@/components/ui/Img'
 import { CoachMarks } from '@/components/game/CoachMarks'
 import { examOn } from '@/lib/onboarding'
+import { UserAvatar } from '@/components/game/UserAvatar'
+import { TUTOR } from '@/lib/tutor'
 
 interface Item { to: string; label: string; icon: NavIcon; tone: string; badge?: string; match?: string[]; tour?: string; feature?: 'exam' | 'duel' | 'ai' | 'stories' }
 
@@ -42,11 +44,11 @@ const GROUPS: { title: string; items: Item[] }[] = [
   {
     title: 'Öğren',
     items: [
+      { to: '/ai', label: 'Defne AI', icon: IconTalk, tone: 'sage', feature: 'ai', tour: 'ai', badge: 'Canlı' },
       { to: '/learn', label: 'Yol haritası', icon: IconPath, tone: 'flame', tour: 'path' },
       { to: '/stories', label: 'Hikâyeler', icon: IconBook, tone: 'butter', feature: 'stories' },
       { to: '/practice', label: 'Kelime pratiği', icon: IconCards, tone: 'sky', tour: 'practice' },
       { to: '/exam', label: 'Sınav modu', icon: IconExam, tone: 'lilac', feature: 'exam', tour: 'exam' },
-      { to: '/ai', label: 'Defne ile konuş', icon: IconTalk, tone: 'sage', feature: 'ai', tour: 'ai' },
     ],
   },
   {
@@ -68,12 +70,14 @@ export const HUBS: { key: string; tabs: { to: string; label: string; icon: NavIc
   { key: 'rewards', tabs: [{ to: '/rewards', label: 'Kasa', icon: IconGift }, { to: '/quests', label: 'Görevler', icon: IconQuest }, { to: '/shop', label: 'Mağaza', icon: IconBag }] },
 ]
 
-/** Phone tab bar: the four daily jobs plus a "more" sheet for everything else. */
+/**
+ * Phone tab bar: two tabs either side of Defne, who sits raised in the middle as
+ * the app's signature. Everything else lives in a short "Menü" sheet.
+ */
 const TABS: Item[] = [
-  { to: '/learn', label: 'Öğren', icon: IconPath, tone: 'flame' },
+  { to: '/learn', label: 'Öğren', icon: IconPath, tone: 'flame', match: ['/learn', '/lesson'] },
   { to: '/practice', label: 'Pratik', icon: IconCards, tone: 'sky', tour: 'tab-practice' },
   { to: '/duel', label: 'Arena', icon: IconGhost, tone: 'ink', match: ['/duel', '/leagues'], tour: 'tab-arena' },
-  { to: '/rewards', label: 'Ödüller', icon: IconGift, tone: 'berry', match: ['/rewards', '/quests', '/shop'], tour: 'tab-rewards' },
 ]
 
 const isOn = (n: Item, path: string) => (n.match ?? [n.to]).some((m) => path === m || path.startsWith(`${m}/`))
@@ -175,20 +179,15 @@ export default function AppLayout() {
 
       {/* Floating tab bar (phones and tablets). */}
       <nav aria-label="Alt menü" className="safe-bottom fixed inset-x-0 bottom-0 z-40 px-3 pb-2 lg:hidden">
-        <div className="mx-auto flex max-w-lg items-stretch rounded-[22px] border-2 border-line bg-card/95 p-1.5 shadow-soft backdrop-blur-md">
-          {TABS.map((n) => {
-            const isActive = isOn(n, loc.pathname)
-            return (
-              <Link key={n.to} to={n.to} data-tour={n.tour} aria-current={isActive ? 'page' : undefined} className="relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[11px] font-extrabold">
-                {isActive && <motion.span layoutId="tab-bg" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className={clsx('absolute inset-0 rounded-2xl', TONE[n.tone].split(' ').slice(1).join(' '))} />}
-                <n.icon className={clsx('relative size-6', isActive ? TONE[n.tone].split(' ')[0] : 'text-ink-soft')} />
-                <span className={clsx('relative', isActive ? 'text-ink' : 'text-ink-soft')}>{t(n.label)}</span>
-              </Link>
-            )
-          })}
-          <button onClick={() => setMore(true)} data-tour="more" className="relative flex flex-1 flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[11px] font-extrabold text-ink-soft" aria-label="Diğer sayfalar">
-            <IconMore className="size-6" />
-            {t('Daha')}
+        <div className="relative mx-auto grid max-w-lg grid-cols-5 items-stretch rounded-[24px] border-2 border-line bg-card/95 p-1.5 shadow-soft backdrop-blur-md">
+          {TABS.slice(0, 2).map((n) => <Tab key={n.to} n={n} active={isOn(n, loc.pathname)} />)}
+          <DefneTab active={loc.pathname.startsWith('/ai')} />
+          <Tab n={TABS[2]} active={isOn(TABS[2], loc.pathname)} />
+          <button onClick={() => setMore(true)} data-tour="more" aria-label="Menü" className="relative flex flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[11px] font-extrabold text-ink-soft">
+            <span className={clsx('absolute inset-0 rounded-2xl transition', MENU_PATHS.some((p) => loc.pathname.startsWith(p)) ? 'bg-ink/[0.07]' : 'bg-transparent')} />
+            <UserAvatar name={user.name} avatar={user.avatar} frame={user.frame} className="relative size-7" />
+            <span className="relative">{t('Menü')}</span>
+            {!!data?.available_items && <span className="absolute right-3 top-1 size-2.5 rounded-full bg-flame ring-2 ring-card" />}
           </button>
         </div>
       </nav>
@@ -196,6 +195,37 @@ export default function AppLayout() {
       <MoreSheet open={more} onClose={() => setMore(false)} staff={!!user.is_staff} manager={user.institution_role === 'manager'} exam={on('exam')} />
       <CoachMarks />
     </div>
+  )
+}
+
+const MENU_PATHS = ['/stories', '/exam', '/rewards', '/quests', '/shop', '/profile', '/settings', '/notifications', '/kurum']
+
+/** A plain tab: the soft pill fades in place (no shared-layout jump between pages). */
+function Tab({ n, active }: { n: Item; active: boolean }) {
+  const { t } = useLang()
+  const [text, bg] = TONE[n.tone].split(' ')
+  return (
+    <Link to={n.to} data-tour={n.tour} aria-current={active ? 'page' : undefined} className="relative flex flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[11px] font-extrabold">
+      <span className={clsx('absolute inset-0 rounded-2xl transition duration-200', active ? bg : 'scale-90 opacity-0')} />
+      <n.icon className={clsx('relative size-6 transition-colors', active ? text : 'text-ink-soft')} />
+      <span className={clsx('relative', active ? 'text-ink' : 'text-ink-soft')}>{t(n.label)}</span>
+    </Link>
+  )
+}
+
+/** Defne, raised in the middle of the bar: her face, an online dot and a soft pulse. */
+function DefneTab({ active }: { active: boolean }) {
+  return (
+    <Link to="/ai" data-tour="tab-defne" aria-label="Defne AI ile konuş" aria-current={active ? 'page' : undefined} className="relative flex flex-col items-center justify-end pb-1">
+      <span className="absolute -top-7 grid place-items-center">
+        {!active && <span aria-hidden className="absolute size-16 animate-ping rounded-full bg-sage/25 [animation-duration:2.4s]" />}
+        <span className={clsx('relative grid size-16 place-items-center rounded-full border-4 border-card shadow-[0_8px_20px_rgba(31,36,51,.18)] transition', active ? 'bg-sage' : 'bg-gradient-to-br from-sage to-mint-deep')}>
+          <Img src={TUTOR.avatar} alt="" className="size-[52px] rounded-full object-cover" />
+          <span className="absolute bottom-0.5 right-0.5 size-3.5 rounded-full border-2 border-card bg-mint" />
+        </span>
+      </span>
+      <span className={clsx('text-[11px] font-black', active ? 'text-sage-deep dark:text-sage' : 'text-ink')}>Defne</span>
+    </Link>
   )
 }
 
@@ -237,25 +267,25 @@ function HubTabs({ tabs, path }: { tabs: (typeof HUBS)[number]['tabs']; path: st
 
 function MoreSheet({ open, onClose, staff, manager, exam }: { open: boolean; onClose: () => void; staff: boolean; manager: boolean; exam: boolean }) {
   const { t } = useLang()
+  const { user } = useAuth()
   const items: Item[] = [
     { to: '/stories', label: 'Hikâyeler', icon: IconBook, tone: 'butter' },
-    ...(exam ? [{ to: '/exam', label: 'Sınav modu', icon: IconExam, tone: 'lilac' }] : []),
-    { to: '/ai', label: 'Defne', icon: IconTalk, tone: 'sage' },
-    { to: '/leagues', label: 'Ligler', icon: IconCup, tone: 'butter' },
-    { to: '/quests', label: 'Görevler', icon: IconQuest, tone: 'mint' },
-    { to: '/shop', label: 'Mağaza', icon: IconBag, tone: 'lilac' },
-    { to: '/profile', label: 'Profil', icon: IconProfile, tone: 'sky' },
-    { to: '/settings', label: 'Ayarlar', icon: IconSliders, tone: 'ink' },
-    ...(manager ? [{ to: '/kurum', label: 'Kurum', icon: IconSchool, tone: 'sage' }] : []),
-    ...(staff ? [{ to: '/admin', label: 'Yönetim', icon: IconShield, tone: 'ink' }] : []),
+    { to: '/rewards', label: 'Ödüller', icon: IconGift, tone: 'berry' },
+    ...(exam ? [{ to: '/exam', label: 'Sınav modu', icon: IconExam, tone: 'lilac' }] : [{ to: '/shop', label: 'Mağaza', icon: IconBag, tone: 'lilac' }]),
   ]
+  const rows: Item[] = [
+    { to: '/settings', label: 'Ayarlar', icon: IconSliders, tone: 'ink' },
+    ...(manager ? [{ to: '/kurum', label: 'Kurum paneli', icon: IconSchool, tone: 'sage' }] : []),
+    ...(staff ? [{ to: '/admin', label: 'Yönetim paneli', icon: IconShield, tone: 'ink' }] : []),
+  ]
+  if (!user) return null
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Diğer sayfalar">
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menü">
           <motion.button aria-label="Kapat" onClick={onClose} className="absolute inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
           <motion.div
-            className="safe-bottom absolute inset-x-0 bottom-0 rounded-t-[28px] border-t-2 border-line bg-card px-5 pb-6 pt-3"
+            className="safe-bottom absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-[28px] border-t-2 border-line bg-card px-5 pb-6 pt-3"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -266,21 +296,30 @@ function MoreSheet({ open, onClose, staff, manager, exam }: { open: boolean; onC
             onDragEnd={(_, i) => i.offset.y > 90 && onClose()}
           >
             <span className="mx-auto mb-4 block h-1.5 w-12 rounded-full bg-line" />
-            <div className="mb-4 flex items-center justify-between">
-              <p className="font-display text-xl font-black">{t('Menü')}</p>
-              <button onClick={onClose} className="grid size-9 place-items-center rounded-xl hover:bg-paper-2" aria-label="Kapat"><X className="size-5" /></button>
-            </div>
-            <div className="grid grid-cols-4 gap-2 sm:grid-cols-4">
+            <Link to="/profile" className="flex items-center gap-3 rounded-2xl bg-paper-2 p-3">
+              <UserAvatar name={user.name} avatar={user.avatar} frame={user.frame} className="size-12" />
+              <span className="min-w-0 flex-1">
+                <span className="block truncate font-display text-lg font-black">{user.name}</span>
+                <span className="block text-xs font-bold text-ink-soft">Profilini gör ve düzenle · Seviye {user.stats.level}</span>
+              </span>
+              <span className="ml-auto grid size-9 place-items-center rounded-xl text-ink-soft" aria-hidden>›</span>
+            </Link>
+            <div className="mt-3 grid grid-cols-3 gap-2">
               {items.map((n) => (
-                <NavLink key={n.to} to={n.to} className={({ isActive }) => clsx('flex flex-col items-center gap-1.5 rounded-2xl border-2 p-2.5 text-center text-xs font-extrabold transition', isActive ? 'border-flame/40 bg-flame/5' : 'border-transparent hover:bg-paper-2')}>
+                <NavLink key={n.to} to={n.to} className={({ isActive }) => clsx('flex flex-col items-center gap-1.5 rounded-2xl border-2 p-3 text-center text-xs font-extrabold transition', isActive ? 'border-flame/40 bg-flame/5' : 'border-line hover:bg-paper-2')}>
                   <span className={clsx('grid size-12 place-items-center rounded-2xl', TONE[n.tone])}><n.icon className="size-6" /></span>
                   <span className="leading-tight">{t(n.label)}</span>
                 </NavLink>
               ))}
             </div>
-            <div className="mt-5 flex items-center justify-between rounded-2xl bg-paper-2 px-4 py-3">
-              <span className="text-sm font-extrabold">{t('Dil')}</span>
-              <LangSelect />
+            <div className="mt-3 divide-y-2 divide-line/50 rounded-2xl border-2 border-line">
+              {rows.map((n) => (
+                <Link key={n.to} to={n.to} className="flex items-center gap-3 px-4 py-3 text-sm font-extrabold"><n.icon className="size-5 text-ink-soft" /> {t(n.label)}</Link>
+              ))}
+              <div className="flex items-center justify-between px-4 py-2.5">
+                <span className="text-sm font-extrabold">{t('Dil')}</span>
+                <LangSelect />
+              </div>
             </div>
           </motion.div>
         </div>

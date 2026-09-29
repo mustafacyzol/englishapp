@@ -17,9 +17,14 @@ export default function Achievements() {
 
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader kicker={`${got}/${total} rozet`} title="Başarımlar">
-        <Progress value={got} max={total} color="bg-butter" className="w-48" tall />
-      </PageHeader>
+      <PageHeader kicker="Rozet koleksiyonun" title="Başarımlar" />
+      <div className="ink-card mb-8 flex flex-wrap items-center gap-x-6 gap-y-3 p-5">
+        <p className="font-display text-4xl font-black tabular-nums">{got}<span className="text-xl text-ink-soft">/{total}</span></p>
+        <div className="min-w-48 flex-1">
+          <div className="mb-1.5 flex justify-between text-xs font-bold text-ink-soft"><span>Açılan rozetler</span><span>%{Math.round((got / Math.max(1, total)) * 100)}</span></div>
+          <Progress value={got} max={total} color="bg-butter" tall />
+        </div>
+      </div>
       {groups.map(([cat, list]) => (
         <section key={cat} className="mb-8">
           <h2 className="mb-3 text-sm font-extrabold uppercase tracking-[0.18em] text-ink-soft">{CAT[cat] ?? cat}</h2>

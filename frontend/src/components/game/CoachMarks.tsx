@@ -42,9 +42,9 @@ export function CoachMarks() {
       { targets: ['stats'], title: 'Serin, elmasın, canların', text: 'Her gün biraz çalış, alev büyüsün. Elmaslarla mağazadan dondurucu ve sandık alırsın.' },
       { targets: ['practice', 'tab-practice'], title: 'Kelime pratiği', text: 'Kaydırmalı kartlar ve hızlı oyunlarla kelimeleri unutmadan tekrar et. Sağa bildim, sola bilmedim.' },
       ...(exam ? [{ targets: ['exam', 'more'], title: `${exam} hazırlığın burada`, text: `${exam} formatında sorular, Türkçe çözümler ve zayıf bölümüne göre öneri. Defne de sınavına göre konuşur.` }] : []),
-      { targets: ['ai', 'more'], title: `${TUTOR.name} ile konuş`, text: 'Sesli arama, rol oyunları ve yazı düzeltme. Hata yapmaktan korkma, ben buradayım.' },
+      { targets: ['ai', 'tab-defne'], title: `${TUTOR.name} ile konuş`, text: 'Sesli arama, rol oyunları ve yazı düzeltme. Hata yapmaktan korkma, ben buradayım.' },
       { targets: ['arena', 'tab-arena'], title: 'Arena: Gölge Düellosu', text: '12 saniyelik blitz sorular, seri çarpanı ve rakibinin gölgesi. Kupaları topla, ligde yüksel.' },
-      { targets: ['rewards', 'tab-rewards'], title: 'Ödüllerin tek yerde', text: 'Kasandaki kartlar, günlük görevler ve mağaza. Gizemli sandıktan iş ortaklarımızın hediyeleri bile çıkabilir.' },
+      { targets: ['rewards', 'more'], title: 'Ödüllerin tek yerde', text: 'Kasandaki kartlar, günlük görevler ve mağaza. Gizemli sandıktan iş ortaklarımızın hediyeleri bile çıkabilir.' },
     ]
   }, [user])
 

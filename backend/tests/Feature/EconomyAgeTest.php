@@ -103,9 +103,9 @@ class EconomyAgeTest extends TestCase
         $user->forceFill(['premium_until' => now()->addDays(3)])->save();
         $this->actingAs($user)->patchJson('/api/v1/account', ['avatar' => 'pilot'])->assertOk()->assertJsonPath('user.avatar', 'pilot');
 
-        // When Premium ends the premium avatar is no longer shown.
+        // When Premium ends the premium avatar gives way to a standard one (never a blank).
         $user->forceFill(['premium_until' => now()->subDay()])->save();
-        $this->assertNull($user->fresh()->displayAvatar());
+        $this->assertContains($user->fresh()->displayAvatar(), \App\Models\Avatar::standardKeys());
     }
 
     public function test_age_group_changes_are_limited_and_sessions_capped(): void

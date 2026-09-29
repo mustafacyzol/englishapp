@@ -9,6 +9,7 @@ import { Input, Select, Textarea, Toggle } from '@/components/ui/Field'
 import { Alert, Modal, Spinner } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { AdminTitle, Pager, Pill, Table } from './kit'
+import { avatarUrl } from '@/lib/avatars'
 
 type Row = Record<string, unknown> & { id: number }
 type FieldType = 'text' | 'textarea' | 'number' | 'bool' | 'select' | 'json' | 'date' | 'list'
@@ -101,6 +102,20 @@ const CONFIG: Record<string, Cfg> = {
     cols: [{ key: 'name', label: 'Ad' }, { key: 'role', label: 'Ünvan' }, { key: 'highlight', label: 'Vurgu' }, { key: 'position', label: 'Sıra' }, { key: 'is_published', label: 'Yayında', render: bool('is_published') }],
     fields: [{ key: 'name', label: 'Ad', type: 'text' }, { key: 'role', label: 'Ünvan / meslek', type: 'text' }, { key: 'avatar', label: 'Fotoğraf URL', type: 'text' }, { key: 'highlight', label: 'Vurgu cümlesi (kayan şeritte görünür)', type: 'text', full: true }, { key: 'quote', label: 'Yorum', type: 'textarea', full: true }, { key: 'rating', label: 'Puan (1-5)', type: 'number' }, { key: 'cefr_level', label: 'Seviye', type: 'select', options: ['', ...CEFR] }, { key: 'streak', label: 'Seri (gün)', type: 'number' }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'is_published', label: 'Yayında', type: 'bool' }],
     defaults: { rating: 5, is_published: true, position: 0 },
+  },
+  avatars: {
+    title: 'Avatarlar',
+    cols: [
+      { key: 'key', label: 'Görsel', render: (r) => <img src={avatarUrl(String(r.key), r.url as string | null)!} alt="" className="size-12 rounded-xl object-cover" /> },
+      { key: 'label', label: 'Ad' },
+      { key: 'tier', label: 'Tür', render: (r) => (r.tier === 'premium' ? <Pill tone="warn">Premium</Pill> : <Pill>Standart</Pill>) },
+      { key: 'position', label: 'Sıra' },
+      { key: 'is_active', label: 'Aktif', render: bool('is_active') },
+    ],
+    fields: [{ key: 'label', label: 'Ad', type: 'text' }, { key: 'key', label: 'Anahtar', type: 'text' }, { key: 'tier', label: 'Tür', type: 'select', options: ['standard', 'premium'] }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'is_active', label: 'Aktif', type: 'bool' }],
+    defaults: { tier: 'standard', is_active: true, position: 0 },
+    noCreate: true,
+    intro: <AvatarUpload />,
   },
   'newsletter-subscribers': {
     title: 'Bülten aboneleri',
@@ -337,5 +352,40 @@ function Editor({ resource, cfg, row, onClose }: { resource: string; cfg: Cfg; r
         <Button loading={save.isPending} onClick={submit}>Kaydet</Button>
       </div>
     </Modal>
+  )
+}
+
+/** Upload a new avatar: square PNG, JPG or WebP, 128 to 2048 px, up to 1 MB. */
+function AvatarUpload() {
+  const qc = useQueryClient()
+  const toast = useToast()
+  const [file, setFile] = useState<File | null>(null)
+  const [label, setLabel] = useState('')
+  const [tier, setTier] = useState('standard')
+  const preview = file ? URL.createObjectURL(file) : null
+  const up = useMutation({
+    mutationFn: () => {
+      const f = new FormData()
+      f.append('image', file!)
+      f.append('label', label)
+      f.append('tier', tier)
+      return post('/admin/avatars/upload', f, true)
+    },
+    onSuccess: () => { toast('Avatar eklendi', 'success'); setFile(null); setLabel(''); qc.invalidateQueries({ queryKey: ['res', 'avatars'] }); qc.invalidateQueries({ queryKey: ['avatars'] }) },
+    onError: (e: ApiError) => toast(e.first(), 'error'),
+  })
+  return (
+    <div className="ink-card mb-5 flex flex-wrap items-end gap-4 p-5">
+      <label className="grid size-24 shrink-0 cursor-pointer place-items-center overflow-hidden rounded-3xl border-2 border-dashed border-line bg-paper-2 text-center text-xs font-bold text-ink-soft hover:border-ink/30">
+        {preview ? <img src={preview} alt="" className="size-full object-cover" /> : <>Görsel<br />seç</>}
+        <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+      </label>
+      <div className="grid min-w-56 flex-1 gap-3 sm:grid-cols-2">
+        <Input label="Avatar adı" value={label} onChange={(e) => setLabel(e.target.value)} placeholder="ör. Kaykaycı" />
+        <Select label="Tür" value={tier} onChange={(e) => setTier(e.target.value)}><option value="standard">Standart (herkese açık)</option><option value="premium">Premium</option></Select>
+      </div>
+      <Button disabled={!file || !label.trim()} loading={up.isPending} onClick={() => up.mutate()}>Yükle</Button>
+      <p className="basis-full text-xs text-ink-soft">Kare bir görsel yükle (PNG, JPG veya WebP; 128 ile 2048 piksel arası, en fazla 1 MB). Öğrenciler yeni avatarı profil stüdyosunda hemen görür.</p>
+    </div>
   )
 }

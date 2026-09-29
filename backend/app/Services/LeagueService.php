@@ -49,7 +49,7 @@ class LeagueService
         $cfg = config('dilgo.gamification.league');
 
         $rows = $group->memberships()
-            ->with('user:id,name,username,avatar,streak_current,premium_until')
+            ->with('user:id,name,username,avatar,preferences,streak_current,premium_until,cefr_level,xp_total')
             ->orderByDesc('xp')->orderBy('updated_at')
             ->get()
             ->values()
@@ -58,7 +58,9 @@ class LeagueService
                 'user_id' => $m->user_id,
                 'name' => $m->user?->name,
                 'username' => $m->user?->username,
-                'avatar' => $m->user?->displayAvatar(),
+                ...($m->user?->look() ?? ['avatar' => null, 'frame' => null, 'banner' => null, 'avatar_url' => null]),
+                'streak' => $m->user?->streak_current ?? 0,
+                'cefr_level' => $m->user?->cefr_level,
                 'xp' => $m->xp,
                 'is_me' => $m->user_id === $user->id,
                 'is_premium' => $m->user?->isPremium() ?? false,

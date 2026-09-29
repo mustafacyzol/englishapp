@@ -18,7 +18,7 @@ export function Progress({ value, max = 100, color = 'bg-mint', className, tall 
   return (
     <div className={clsx('relative overflow-hidden rounded-full bg-paper-2', tall ? 'h-4' : 'h-3', className)} role="progressbar" aria-valuenow={Math.round(pct)} aria-valuemin={0} aria-valuemax={100}>
       <motion.div className={clsx('h-full rounded-full', color)} initial={{ width: 0 }} animate={{ width: `${pct}%` }} transition={{ type: 'spring', stiffness: 120, damping: 20 }}>
-        <div className="mx-2 mt-[3px] h-[3px] rounded-full bg-white/35" />
+        {tall && pct > 12 && <div className="mx-2 mt-[4px] h-[3px] rounded-full bg-white/35" />}
       </motion.div>
     </div>
   )

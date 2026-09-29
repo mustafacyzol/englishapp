@@ -72,9 +72,9 @@ export function HeroPro() {
   const who = [
     { k: 'Çocuk', a: 'braids' },
     { k: 'Genç', a: 'cap' },
-    { k: 'Yetişkin', a: 'beard' },
+    { k: 'Yetişkin', a: 'glasses' },
     { k: 'Sınav', a: 'ponytail' },
-    { k: 'Kurum', a: 'granny' },
+    { k: 'Kurum', a: 'afro' },
   ]
   return (
     <section onPointerMove={move} className="relative isolate overflow-hidden">

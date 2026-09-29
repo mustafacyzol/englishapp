@@ -71,6 +71,9 @@ class SkillsDuelInstitutionTest extends TestCase
         $this->seed([GameSeeder::class, CourseSeeder::class]);
         $me = $this->learner();
         $ghost = $this->learner(['xp_total' => 500, 'duel_trophies' => 100]);
+        // Rivals come from your own league group first.
+        app(\App\Services\LeagueService::class)->membershipFor($ghost);
+        app(\App\Services\LeagueService::class)->membershipFor($me);
 
         $duel = $this->actingAs($me)->postJson('/api/v1/duel')->assertCreated()->json('duel');
         $this->assertCount(4, $duel['rounds']);

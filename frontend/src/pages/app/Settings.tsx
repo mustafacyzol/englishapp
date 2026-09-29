@@ -41,7 +41,7 @@ type Tab = 'hesap' | 'ogrenme' | 'sinav' | 'gorunum' | 'bildirim' | 'guvenlik'
 const AGE = [
   { key: 'kid', label: 'Çocuk', text: '7-12 yaş', art: 'braids' },
   { key: 'teen', label: 'Genç', text: '13-17 yaş', art: 'cap' },
-  { key: 'adult', label: 'Yetişkin', text: '18+', art: 'beard' },
+  { key: 'adult', label: 'Yetişkin', text: '18+', art: 'glasses' },
 ] as const
 
 /**

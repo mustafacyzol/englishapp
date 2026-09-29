@@ -101,14 +101,15 @@ export async function api<T = unknown>(path: string, opts: Opts = {}): Promise<T
   const headers: Record<string, string> = { Accept: 'application/json', 'X-Client': 'dilgo-app' }
   const bearer = opts.admin ? adminToken : token
   if (bearer) headers.Authorization = `Bearer ${bearer}`
-  if (opts.body !== undefined) headers['Content-Type'] = 'application/json'
+  const form = typeof FormData !== 'undefined' && opts.body instanceof FormData
+  if (opts.body !== undefined && !form) headers['Content-Type'] = 'application/json'
 
   let res: Response
   try {
     res = await fetch(BASE + path, {
       method: opts.method ?? (opts.body !== undefined ? 'POST' : 'GET'),
       headers,
-      body: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
+      body: opts.body === undefined ? undefined : form ? (opts.body as FormData) : JSON.stringify(opts.body),
       signal: opts.signal,
     })
   } catch {

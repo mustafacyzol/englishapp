@@ -431,6 +431,28 @@ class AdminController extends Controller
     }
 
     /**
+     * Upload a new avatar image (square PNG, JPG or WebP). Stored on the public
+     * disk under a random name; the file type is checked from its content.
+     */
+    public function uploadAvatar(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'image' => ['required', 'file', 'mimes:png,jpg,jpeg,webp', 'max:'.config('dilgo.avatars.upload_max_kb'), 'dimensions:min_width=128,min_height=128,max_width=2048,max_height=2048'],
+            'label' => ['required', 'string', 'max:60'],
+            'tier' => ['required', 'in:standard,premium'],
+        ]);
+        $path = $request->file('image')->store('avatars', 'public');
+        $key = 'u'.\Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(10));
+        $avatar = \App\Models\Avatar::query()->create([
+            'key' => $key, 'label' => strip_tags($data['label']), 'tier' => $data['tier'], 'image_path' => $path,
+            'position' => (int) \App\Models\Avatar::query()->max('position') + 1,
+        ]);
+        Audit::log('admin.avatar.uploaded', $request->user(), $avatar);
+
+        return response()->json(['data' => $avatar->toArray() + ['url' => $avatar->url()]], 201);
+    }
+
+    /**
      * Send the newsletter to confirmed, still-subscribed addresses (or to one test
      * address first). Every e-mail carries its own one-click unsubscribe link.
      */

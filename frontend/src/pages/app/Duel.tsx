@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import clsx from 'clsx'
-import { Check, Crown, Flame, Ghost, Shield, ShieldAlert, Swords, Ticket, Trophy, X } from 'lucide-react'
+import { Check, Crown, Flame, Ghost, Shield, ShieldAlert, Swords, Ticket, X } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { leagueImg, rewardImg } from '@/lib/assets'
 import { SKILL, SKILLS } from '@/lib/skills'
@@ -16,6 +16,7 @@ import { SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 import { ExerciseView, correctText, isCorrect, type Answer } from './LessonPlayer'
+import { UserAvatar } from '@/components/game/UserAvatar'
 
 interface Rank { key: string; name: string; min: number; tier: number }
 interface Overview {
@@ -23,14 +24,15 @@ interface Overview {
   skills: { key: SkillKey; label: string; correct: number; total: number }[]
   recent: { id: number; ghost_name: string; result: 'win' | 'loss' | 'draw'; score: number; ghost_score: number; delta: number; at: string }[]
   defenses: { id: number; challenger: string; held: boolean; delta: number; at: string }[]
-  leaderboard: { position: number; name: string; username: string; trophies: number; rank: string; is_me: boolean }[]
+  leaderboard: { position: number; name: string; username: string; trophies: number; wins: number; avatar?: string; avatar_url?: string | null; frame?: string | null; rank: string; is_me: boolean }[]
   ranks: Rank[]
+  league?: { tier: number; name: string }
 }
 interface Rules { item_ms: number; combo_step: number; combo_max: number; base: number; speed_max: number; speed_ms_per_point: number }
 interface DuelData {
   id: number
   rules?: Rules
-  ghost: { name: string; trophies: number; rank: Rank; skills: Record<SkillKey, number>; training: boolean }
+  ghost: { name: string; trophies: number; rank: Rank; league?: { tier: number; name: string }; look?: { avatar: string; avatar_url?: string | null; frame?: string | null } | null; same_group?: boolean; skills: Record<SkillKey, number>; training: boolean }
   rounds: { skill: SkillKey; label: string; items: { ex: Exercise; ghost: { correct: boolean; ms: number } }[] }[]
 }
 interface DuelResult {
@@ -75,9 +77,7 @@ export default function Duel() {
 
   if (isLoading || !data) return <SkeletonPage variant="cards" />
   const me = data.me
-  const next = me.next_rank
-  const toNext = next ? next.min - me.trophies : 0
-  const span = next ? next.min - me.rank.min : 1
+  const league = data.league ?? { tier: me.rank.tier, name: me.rank.name }
   const noTickets = me.tickets_left === 0
 
   return (
@@ -90,7 +90,7 @@ export default function Duel() {
             <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-white/55"><Ghost className="size-4" /> DilGO’ya özel</p>
             <h1 className="mt-2 text-4xl leading-[1.05] sm:text-5xl">Gölge Düellosu <span className="align-middle text-xl text-butter sm:text-2xl">BLITZ</span></h1>
             <p className="mt-3 max-w-xl text-[17px] leading-relaxed text-white/70">
-              Dört tur, on iki blitz soru, her biri <b className="text-white">12 saniye</b>. Hızlı cevap bonus getirir, üst üste doğrular puanını <b className="text-butter">x2</b>’ye kadar katlar. Rakibinin <b className="text-white">gölgesi</b> aynı soruları canlı olarak senle birlikte cevaplar; sen yokken de senin gölgen kupalarını savunur.
+              Dört tur, on iki blitz soru, her biri <b className="text-white">12 saniye</b>. Hızlı cevap bonus getirir, üst üste doğrular puanını <b className="text-butter">x2</b>’ye kadar katlar. Rakibin <b className="text-white">kendi liginden</b> gelir ve gölgesi aynı soruları canlı olarak seninle cevaplar. Kazandığın düellonun XP’si lig tablona yazılır; sen yokken de gölgen seni savunur.
             </p>
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <button
@@ -110,31 +110,22 @@ export default function Duel() {
             )}
           </div>
 
-          <div className="flex items-center gap-5 rounded-3xl bg-white/6 p-5 ring-1 ring-white/10 lg:w-[340px]">
-            <Img src={leagueImg(me.rank.tier)} alt="" className="size-24 shrink-0 object-contain drop-shadow-xl" />
+          <Link to="/leagues" className="group flex items-center gap-5 rounded-3xl bg-white/6 p-5 ring-1 ring-white/10 transition hover:bg-white/10 lg:w-[340px]">
+            <Img src={leagueImg(league.tier)} alt="" className="size-24 shrink-0 object-contain drop-shadow-xl transition group-hover:scale-105" />
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-white/55">Rütben</p>
-              <p className="font-display text-2xl font-black">{me.rank.name}</p>
-              <p className="mt-0.5 flex items-center gap-1.5 font-display text-xl font-black tabular-nums text-butter"><Trophy className="size-5" /> {me.trophies}</p>
-              {next ? (
-                <>
-                  <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
-                    <motion.div className="h-full rounded-full bg-butter" initial={{ width: 0 }} animate={{ width: `${Math.min(100, ((me.trophies - me.rank.min) / span) * 100)}%` }} transition={{ duration: 1 }} />
-                  </div>
-                  <p className="mt-1.5 text-xs font-bold text-white/60">{next.name} rütbesine <b className="text-white">{toNext}</b> kupa</p>
-                </>
-              ) : (
-                <p className="mt-2 text-xs font-bold text-butter">Zirvedesin. Efsaneni koru!</p>
-              )}
+              <p className="text-xs font-black uppercase tracking-[0.14em] text-white/55">Arena ligin</p>
+              <p className="font-display text-2xl font-black">{league.name} Ligi</p>
+              <p className="mt-1 text-sm text-white/65">Rakiplerin önce lig grubundan, sonra aynı ligden gelir. Ligde yükseldikçe rakiplerin de güçlenir.</p>
+              <p className="mt-2 text-xs font-bold text-butter">Lig tablosunu gör →</p>
             </div>
-          </div>
+          </Link>
         </div>
         <div className="relative grid grid-cols-4 border-t border-white/10 text-center">
           {[
             ['Galibiyet', me.wins],
             ['Mağlubiyet', me.losses],
             ['Seri', me.win_streak],
-            ['Sıralama', `#${me.position}`],
+            ['Grupta sıran', `#${me.position}`],
           ].map(([l, v]) => (
             <div key={l as string} className="border-r border-white/10 px-2 py-3 last:border-r-0">
               <p className="font-display text-xl font-black tabular-nums">{v}</p>
@@ -153,7 +144,7 @@ export default function Duel() {
               <div key={d.id} className={clsx('flex min-w-[260px] items-center gap-3 rounded-2xl border-2 p-4', d.held ? 'border-mint/40 bg-mint/8' : 'border-berry/30 bg-berry/6')}>
                 <span className={clsx('grid size-11 shrink-0 place-items-center rounded-xl text-white', d.held ? 'bg-mint' : 'bg-berry')}>{d.held ? <Shield className="size-6" /> : <ShieldAlert className="size-6" />}</span>
                 <div className="min-w-0">
-                  <p className="font-black leading-tight">{d.held ? 'Kupanı korudu' : 'Kupa kaptırdı'} <span className={d.held ? 'text-mint-deep' : 'text-berry'}>{d.delta > 0 ? `+${d.delta}` : d.delta}</span></p>
+                  <p className="font-black leading-tight">{d.held ? 'Gölgen seni savundu' : 'Gölgen yenildi'} <span className={d.held ? 'text-mint-deep' : 'text-berry'}>{d.delta > 0 ? `+${d.delta}` : d.delta}</span></p>
                   <p className="truncate text-sm text-ink-soft">{d.challenger} meydan okudu</p>
                 </div>
               </div>
@@ -164,24 +155,19 @@ export default function Duel() {
 
       <div className="grid gap-8 xl:grid-cols-[1.2fr_1fr] [&>*]:min-w-0">
         <div className="space-y-8">
-          {/* ------------------------------------------------------- Rank ladder */}
-          <section>
-            <h2 className="mb-1 text-xl">Rütbe yolu</h2>
-            <p className="mb-4 text-sm text-ink-soft">Galibiyet +24-32 kupa, mağlubiyet −12. Her 3 galibiyet serisinde gizemli sandık.</p>
-            <div className="no-scrollbar -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 pt-3">
-              {data.ranks.map((r) => {
-                const reached = me.trophies >= r.min
-                const current = r.key === me.rank.key
-                return (
-                  <div key={r.key} className={clsx('relative flex min-w-[112px] flex-1 flex-col items-center rounded-2xl border-2 px-3 pb-3 pt-4 text-center', current ? 'border-butter bg-butter/10' : 'border-line bg-card', !reached && 'opacity-60')}>
-                    {current && <span className="absolute -top-2.5 rounded-full bg-butter px-2 py-0.5 text-[10px] font-black uppercase text-[#1f2433]">Sen</span>}
-                    <Img src={leagueImg(r.tier)} alt="" className={clsx('size-14 object-contain', !reached && 'grayscale')} />
-                    <p className="mt-1 font-display font-black">{r.name}</p>
-                    <p className="flex items-center gap-1 text-xs font-bold text-ink-soft"><Trophy className="size-3" /> {r.min}</p>
-                  </div>
-                )
-              })}
-            </div>
+          {/* ------------------------------------- How the arena feeds the league */}
+          <section className="grid gap-3 sm:grid-cols-3">
+            {[
+              ['Rakip ligden', 'Her düelloda ligindeki biriyle eşleşirsin; kimse seviyene göre çok güçlü değil.'],
+              ['XP lige yazılır', 'Düello XP’si haftalık lig tablona eklenir; kazanmak terfi demek.'],
+              ['Seri sandık getirir', 'Üst üste 3 galibiyette Gizemli Sandık kasana düşer.'],
+            ].map(([t, x], i) => (
+              <div key={t} className="rounded-2xl border-2 border-line bg-card p-4">
+                <p className="font-display text-2xl font-black text-flame">{i + 1}</p>
+                <p className="font-extrabold">{t}</p>
+                <p className="text-sm text-ink-soft">{x}</p>
+              </div>
+            ))}
           </section>
 
           {/* ------------------------------------------------ Four-skill record */}
@@ -217,7 +203,7 @@ export default function Duel() {
                       <span className="block truncate font-bold">{r.ghost_name}’in gölgesi</span>
                       <span className="block text-xs tabular-nums text-ink-soft">{r.score}, {r.ghost_score}</span>
                     </span>
-                    <span className={clsx('flex items-center gap-1 font-display font-black tabular-nums', r.delta >= 0 ? 'text-mint-deep' : 'text-berry')}><Trophy className="size-4" /> {r.delta >= 0 ? `+${r.delta}` : r.delta}</span>
+                    <span className={clsx('rounded-full px-2.5 py-1 text-xs font-black', r.result === 'win' ? 'bg-mint/15 text-mint-deep' : r.result === 'loss' ? 'bg-berry/10 text-berry' : 'bg-paper-2 text-ink-soft')}>{r.result === 'win' ? 'Kazandın' : r.result === 'loss' ? 'Kaybettin' : 'Berabere'}</span>
                   </div>
                 ))}
               </div>
@@ -227,19 +213,19 @@ export default function Duel() {
 
         {/* ---------------------------------------------------------- Board */}
         <section>
-          <h2 className="mb-3 text-xl">Kupa sıralaması</h2>
+          <h2 className="mb-1 text-xl">Lig grubunda bu hafta</h2>
+          <p className="mb-3 text-sm text-ink-soft">{league.name} Ligi grubundaki herkes, bu haftaki düello galibiyetine göre.</p>
           <div className="overflow-hidden rounded-2xl border-2 border-line bg-card">
-            {data.leaderboard.length === 0 && <p className="p-6 text-center text-ink-soft">İlk kupayı sen al, sıralama seni bekliyor.</p>}
+            {data.leaderboard.length === 0 && <p className="p-6 text-center text-ink-soft">Grubun doluyor. İlk düelloyu sen başlat!</p>}
             {data.leaderboard.map((r) => (
-              <div key={r.username} className={clsx('flex items-center gap-3 border-b-2 border-line px-4 py-2.5 last:border-b-0', r.is_me && 'bg-butter/12')}>
+              <Link to={`/u/${r.username}`} key={r.username} className={clsx('flex items-center gap-3 border-b-2 border-line px-4 py-2.5 last:border-b-0 hover:bg-paper-2', r.is_me && 'bg-butter/12')}>
                 <span className={clsx('w-7 text-center font-display font-black tabular-nums', r.position <= 3 ? 'text-butter-deep' : 'text-ink-soft')}>{r.position <= 3 ? <Crown className="mx-auto size-5" /> : r.position}</span>
-                <span className="grid size-9 shrink-0 place-items-center rounded-full bg-paper-2 font-display font-black">{r.name[0]}</span>
+                <UserAvatar name={r.name} avatar={r.avatar} avatarUrl={r.avatar_url} frame={r.frame} className="size-10" />
                 <span className="min-w-0 flex-1">
-                  <span className="block truncate font-bold">{r.name}{r.is_me && ' (sen)'}</span>
-                  <span className="block text-xs text-ink-soft">{r.rank}</span>
+                  <span className="block truncate font-bold">{r.is_me ? 'Sen' : r.name}</span>
                 </span>
-                <span className="flex items-center gap-1 font-display font-black tabular-nums"><Trophy className="size-4 text-butter-deep" /> {r.trophies}</span>
-              </div>
+                <span className="flex items-center gap-1 font-display font-black tabular-nums"><Swords className="size-4 text-flame" /> {r.wins}</span>
+              </Link>
             ))}
           </div>
         </section>
@@ -475,9 +461,9 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
           {phase === 'intro' && (
             <motion.div key="intro" exit={{ opacity: 0, scale: 1.1 }} className="mx-auto flex h-full max-w-3xl flex-col items-center justify-center gap-8 px-4 py-10">
               <div className="flex w-full items-center justify-center gap-4 sm:gap-10">
-                <Fighter name={user?.name ?? 'Sen'} sub={`${user?.stats.duel_trophies ?? 0} kupa`} />
+                <Fighter name={user?.name ?? 'Sen'} sub={`${user?.stats.league_name ?? ''} Ligi`} look={user ? { avatar: user.avatar ?? '', frame: user.frame } : undefined} />
                 <motion.span initial={{ scale: 0.4, rotate: -20 }} animate={{ scale: [1, 1.12, 1], rotate: 0 }} transition={{ scale: { repeat: Infinity, duration: 0.85 } }} className="grid size-16 place-items-center rounded-full bg-butter font-display text-xl font-black text-[#1f2433] shadow-[0_0_30px_rgba(255,194,51,.5)]">VS</motion.span>
-                <Fighter name={duel.ghost.name} sub={`${duel.ghost.rank.name} · ${duel.ghost.trophies} kupa`} ghost training={duel.ghost.training} />
+                <Fighter name={duel.ghost.name} sub={duel.ghost.training ? 'Antrenman' : `${duel.ghost.league?.name ?? ''} Ligi${duel.ghost.same_group ? ' · grubundan' : ''}`} look={duel.ghost.look ?? undefined} ghost training={duel.ghost.training} />
               </div>
               <div className="grid w-full max-w-md grid-cols-4 gap-2">
                 {duel.rounds.map((r, i) => (
@@ -563,12 +549,17 @@ function ClockRing({ left, total }: { left: number; total: number }) {
   )
 }
 
-function Fighter({ name, sub, ghost, training }: { name: string; sub: string; ghost?: boolean; training?: boolean }) {
+function Fighter({ name, sub, ghost, training, look }: { name: string; sub: string; ghost?: boolean; training?: boolean; look?: { avatar: string; avatar_url?: string | null; frame?: string | null } }) {
   return (
     <motion.div initial={{ opacity: 0, x: ghost ? 40 : -40 }} animate={{ opacity: 1, x: 0 }} className="flex w-32 flex-col items-center text-center sm:w-44">
-      <span className={clsx('grid size-20 place-items-center rounded-full font-display text-3xl font-black sm:size-24', ghost ? 'bg-ink/10 text-ink/60 ring-4 ring-dashed ring-ink/15' : 'bg-flame text-white ring-4 ring-flame/25')}>
-        {ghost ? <Ghost className="size-10" /> : name[0]}
-      </span>
+      {look && !training ? (
+        <span className={clsx('relative', ghost && 'opacity-80 grayscale-[.35]')}>
+          <UserAvatar name={name} avatar={look.avatar} avatarUrl={look.avatar_url} frame={look.frame} className="size-20 sm:size-24" />
+          {ghost && <span className="absolute -bottom-1 -right-1 grid size-8 place-items-center rounded-full bg-ink text-paper"><Ghost className="size-4" /></span>}
+        </span>
+      ) : (
+        <span className="grid size-20 place-items-center rounded-full bg-ink/10 text-ink/60 ring-4 ring-dashed ring-ink/15 sm:size-24"><Ghost className="size-10" /></span>
+      )}
       <p className="mt-3 w-full truncate font-display text-lg font-black">{name}</p>
       <p className="text-xs font-bold text-ink-soft">{training ? 'Antrenman gölgesi' : sub}</p>
     </motion.div>
@@ -587,11 +578,10 @@ function ResultView({ duel, result, onExit, onRematch }: { duel: DuelData; resul
         </motion.div>
         <p className={clsx('mt-2 text-sm font-black uppercase tracking-[0.2em]', win ? 'text-mint-deep' : draw ? 'text-ink-soft' : 'text-berry')}>{win ? 'Galibiyet' : draw ? 'Berabere' : 'Mağlubiyet'}</p>
         <h2 className="mt-1 text-4xl tabular-nums sm:text-5xl">{result.score} <span className="text-ink-soft">-</span> {result.ghost_score}</h2>
-        <p className={clsx('mt-2 inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-display text-lg font-black tabular-nums', result.trophies_delta >= 0 ? 'bg-mint/12 text-mint-deep' : 'bg-berry/10 text-berry')}>
-          <Trophy className="size-5" /> {result.trophies_delta >= 0 ? `+${result.trophies_delta}` : result.trophies_delta} kupa
-        </p>
-        {result.rank_up && <p className="mt-3 font-display text-xl font-black text-butter-deep">Yeni rütbe: {result.rank.name}!</p>}
-        {!win && result.next_rank && <p className="mt-2 text-sm text-ink-soft">Rövanşla kupalarını geri al, {result.next_rank.name} rütbesi seni bekliyor.</p>}
+        {!!result.reward?.xp_gained && (
+          <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-butter/25 px-3 py-1 font-display text-lg font-black tabular-nums">+{result.reward.xp_gained} XP · lig tablona eklendi</p>
+        )}
+        {!win && <p className="mt-2 text-sm text-ink-soft">Rövanşla puanları geri al; rakiplerin yine liginden.</p>}
       </div>
 
       <div className="mt-8 overflow-hidden rounded-2xl border-2 border-line bg-card">

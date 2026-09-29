@@ -338,3 +338,17 @@ html[data-age='teen'] {
 @keyframes spin-border {
   to { --a: 360deg; }
 }
+
+/* Writing lab paper: ruled lines sit exactly under each line of text (they start
+   at the content box, like the text), with a soft margin rule on the left. */
+.notebook {
+  line-height: 2rem;
+  background-color: var(--card);
+  background-image:
+    linear-gradient(90deg, transparent 2.1rem, color-mix(in oklab, var(--color-flame) 35%, transparent) 2.1rem, color-mix(in oklab, var(--color-flame) 35%, transparent) calc(2.1rem + 2px), transparent calc(2.1rem + 2px)),
+    linear-gradient(transparent calc(2rem - 1px), var(--line) calc(2rem - 1px));
+  background-size: 100% 100%, 100% 2rem;
+  background-origin: border-box, content-box;
+  background-attachment: local;
+}
+.notebook::placeholder { color: var(--ink-soft); opacity: .7; }

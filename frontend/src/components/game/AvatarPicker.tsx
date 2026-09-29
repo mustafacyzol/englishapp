@@ -3,98 +3,149 @@ import { Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { Check, Crown, Lock } from 'lucide-react'
+import { Check, Crown, Lock, ShoppingBag } from 'lucide-react'
 import { ApiError, patch } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
-import { AVATARS, avatarUrl } from '@/lib/avatars'
+import { avatarUrl, useAvatarCatalog } from '@/lib/avatars'
 import type { Me } from '@/lib/types'
 import { Modal } from '@/components/ui/Misc'
 import { Button } from '@/components/ui/Button'
 import { useToast } from '@/components/ui/Toast'
-import { UserAvatar } from './UserAvatar'
+import { FRAMES, UserAvatar } from './UserAvatar'
+import { BANNERS, ProfileBanner } from './ProfileBanner'
+
+type Tab = 'avatar' | 'frame' | 'banner' | 'bio'
 
 /**
- * Pick a profile avatar: a big live preview on top, then the standard set and the
- * premium collection. Locked premium avatars can still be previewed, so people
- * see what they would get before upgrading.
+ * The profile studio: pick an avatar, wear a frame or cover you own and write a
+ * short line about yourself, with a live preview of the card others see in the
+ * league and arena. Locked items can be previewed before buying.
  */
-export function AvatarPicker({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolean; onClose: () => void; start?: Tab }) {
   const { user, setUser } = useAuth()
   const toast = useToast()
-  const [tab, setTab] = useState<'standard' | 'premium'>('standard')
-  const [pick, setPick] = useState<string | null | undefined>(undefined)
+  const cat = useAvatarCatalog()
+  const [tab, setTab] = useState<Tab>(start)
+  const [draft, setDraft] = useState<{ avatar?: string; frame?: string | null; banner?: string | null; bio?: string }>({})
   const save = useMutation({
-    mutationFn: (avatar: string | null) => patch<{ user: Me }>('/account', { avatar }),
-    onSuccess: (r) => { setUser(r.user); toast('Avatarın güncellendi', 'success'); onClose() },
+    mutationFn: (b: typeof draft) => patch<{ user: Me }>('/account', b),
+    onSuccess: (r) => { setUser(r.user); setDraft({}); toast('Profilin güncellendi', 'success'); onClose() },
     onError: (e: ApiError) => toast(e.first(), 'error'),
   })
   if (!user) return null
-  const current = pick === undefined ? user.avatar : pick
+  const owned = user.cosmetics ?? { frames: [], banners: [] }
+  const avatar = draft.avatar ?? user.avatar ?? undefined
+  const frame = draft.frame !== undefined ? draft.frame : user.frame ?? null
+  const banner = draft.banner !== undefined ? draft.banner : user.banner ?? null
+  const bio = draft.bio ?? user.bio ?? ''
   const premium = user.premium.active
-  const lockedPick = !premium && AVATARS.premium.some((a) => a.key === current)
-  const label = [...AVATARS.standard, ...AVATARS.premium].find((a) => a.key === current)?.label
+  const lockedAvatar = !premium && cat.premium.some((a) => a.key === avatar)
+  const lockedFrame = !!frame && !owned.frames.includes(frame)
+  const lockedBanner = !!banner && !owned.banners.includes(banner)
+  const locked = lockedAvatar || lockedFrame || lockedBanner
+  const changed = Object.keys(draft).length > 0
 
+  const TABS: [Tab, string][] = [['avatar', 'Avatar'], ['frame', 'Çerçeve'], ['banner', 'Kapak'], ['bio', 'Hakkımda']]
   return (
-    <Modal open={open} onClose={onClose}>
-      <div className="flex flex-col items-center text-center">
-        <AnimatePresence mode="popLayout">
-          <motion.div key={current ?? 'none'} initial={{ scale: 0.7, opacity: 0, rotate: -6 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} exit={{ scale: 0.8, opacity: 0 }} transition={{ type: 'spring', stiffness: 380, damping: 22 }}>
-            <UserAvatar name={user.name} avatar={current} frame={user.preferences.frame} className="size-28 text-5xl" rounded="rounded-[32px]" />
-          </motion.div>
-        </AnimatePresence>
-        <p className="mt-3 font-display text-xl font-black">{label ?? 'Baş harfin'}</p>
-        <p className="text-sm text-ink-soft">{lockedPick ? 'Bu avatar Premium koleksiyonunda.' : 'Profilinde, ligde ve düellolarda böyle görünürsün.'}</p>
+    <Modal open={open} onClose={onClose} className="max-w-lg">
+      {/* live preview: the card others see */}
+      <div className="overflow-hidden rounded-3xl border-2 border-line">
+        <ProfileBanner banner={banner} className="h-20" />
+        <div className="-mt-10 flex items-end gap-3 px-4 pb-4">
+          <AnimatePresence mode="popLayout">
+            <motion.div key={`${avatar}-${frame}`} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 380, damping: 22 }}>
+              <UserAvatar name={user.name} avatar={avatar} frame={frame} className="size-20 border-4 border-card" rounded="rounded-[26px]" />
+            </motion.div>
+          </AnimatePresence>
+          <div className="min-w-0 pb-1">
+            <p className="truncate font-display text-lg font-black">{user.name}</p>
+            <p className="line-clamp-1 text-sm text-ink-soft">{bio || '@' + user.username}</p>
+          </div>
+        </div>
       </div>
 
-      <div role="tablist" className="mx-auto mt-5 flex w-fit gap-1 rounded-2xl bg-paper-2 p-1">
-        {(['standard', 'premium'] as const).map((k) => (
-          <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={clsx('relative flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-extrabold transition', tab === k ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
-            {tab === k && <motion.span layoutId="av-tab" className="absolute inset-0 rounded-xl bg-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
-            {k === 'premium' && <Crown className="relative size-4 text-butter" />}
-            <span className="relative">{k === 'standard' ? 'Standart' : 'Premium'}</span>
-            <span className="relative text-xs opacity-60">{AVATARS[k].length}</span>
+      <div role="tablist" className="no-scrollbar mt-4 flex gap-1 overflow-x-auto rounded-2xl bg-paper-2 p-1">
+        {TABS.map(([k, l]) => (
+          <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={clsx('relative flex-1 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-extrabold transition', tab === k ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
+            {tab === k && <motion.span layoutId="studio-tab" className="absolute inset-0 rounded-xl bg-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+            <span className="relative">{l}</span>
           </button>
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-3 gap-3 sm:gap-4">
-        {tab === 'standard' && (
-          <button onClick={() => setPick(null)} aria-pressed={current === null} className={clsx('col-span-3 flex items-center justify-center gap-2 rounded-2xl border-2 py-2 text-sm font-bold transition', current === null ? 'border-ink' : 'border-line hover:border-ink/30')}>
-            <UserAvatar name={user.name} className="size-7 text-sm" /> Baş harfimi kullan
-          </button>
+      <div className="mt-4 max-h-[42dvh] overflow-y-auto pr-1">
+        {tab === 'avatar' && (
+          <>
+            <Grid>
+              {cat.standard.map((a) => <Tile key={a.key} on={avatar === a.key} label={a.label} onClick={() => setDraft((d) => ({ ...d, avatar: a.key }))}><img src={avatarUrl(a.key, a.url)!} alt="" className="size-full object-cover" /></Tile>)}
+            </Grid>
+            <p className="mb-2 mt-5 flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-ink-soft"><Crown className="size-4 text-butter-deep" /> Premium koleksiyon</p>
+            <Grid>
+              {cat.premium.map((a) => <Tile key={a.key} on={avatar === a.key} locked={!premium} label={a.label} onClick={() => setDraft((d) => ({ ...d, avatar: a.key }))}><img src={avatarUrl(a.key, a.url)!} alt="" className="size-full object-cover" /></Tile>)}
+            </Grid>
+          </>
         )}
-        {AVATARS[tab].map((a, i) => {
-          const on = current === a.key
-          const locked = tab === 'premium' && !premium
-          return (
-            <motion.button
-              key={a.key}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.025 }}
-              whileHover={{ y: -3 }}
-              whileTap={{ scale: 0.94 }}
-              onClick={() => setPick(a.key)}
-              aria-pressed={on}
-              aria-label={`${a.label}${locked ? ' (Premium)' : ''}`}
-              className={clsx('group relative aspect-square overflow-hidden rounded-3xl border-[3px] transition', on ? 'border-flame shadow-[0_0_0_4px_rgba(255,90,54,.18)]' : 'border-transparent')}
-            >
-              <img src={avatarUrl(a.key)!} alt="" className={clsx('size-full object-cover transition duration-300 group-hover:scale-105', locked && !on && 'saturate-[.7]')} draggable={false} />
-              {locked && <span className="absolute right-1.5 top-1.5 grid size-7 place-items-center rounded-full bg-black/55 text-butter backdrop-blur"><Lock className="size-3.5" /></span>}
-              {on && <span className="absolute bottom-1.5 right-1.5 grid size-7 place-items-center rounded-full bg-flame text-white"><Check className="size-4" strokeWidth={3} /></span>}
-            </motion.button>
-          )
-        })}
+        {tab === 'frame' && (
+          <Grid>
+            <Tile on={!frame} label="Çerçevesiz" onClick={() => setDraft((d) => ({ ...d, frame: null }))}><UserAvatar name={user.name} avatar={avatar} className="m-auto size-14" /></Tile>
+            {Object.entries(FRAMES).map(([k, f]) => (
+              <Tile key={k} on={frame === k} locked={!owned.frames.includes(k)} label={f.label} onClick={() => setDraft((d) => ({ ...d, frame: k }))}>
+                <span className="grid size-full place-items-center"><UserAvatar name={user.name} avatar={avatar} frame={k} className="size-14" /></span>
+              </Tile>
+            ))}
+          </Grid>
+        )}
+        {tab === 'banner' && (
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(BANNERS).map(([k, b]) => {
+              const key = k === 'default' ? null : k
+              const on = banner === key
+              const lock = !!key && !owned.banners.includes(key)
+              return (
+                <button key={k} onClick={() => setDraft((d) => ({ ...d, banner: key }))} aria-pressed={on} className={clsx('relative overflow-hidden rounded-2xl border-[3px] text-left transition', on ? 'border-flame' : 'border-transparent')}>
+                  <ProfileBanner banner={key} className="h-16" />
+                  <span className="flex items-center justify-between bg-card px-3 py-1.5 text-sm font-extrabold">{b.label}{lock ? <Lock className="size-3.5 text-ink-soft" /> : on ? <Check className="size-4 text-flame" /> : null}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+        {tab === 'bio' && (
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-bold">Kısa bir cümle (ligde ve profilinde görünür)</span>
+            <textarea value={bio} maxLength={120} rows={3} onChange={(e) => setDraft((d) => ({ ...d, bio: e.target.value }))} placeholder="ör. Londra'ya gitmeden önce konuşmamı açıyorum" className="w-full rounded-2xl border-2 border-line bg-card px-4 py-3 focus:border-sky focus:outline-none" />
+            <span className="block text-right text-xs text-ink-soft">{bio.length}/120</span>
+          </label>
+        )}
       </div>
 
-      <div className="mt-5 flex gap-2">
-        <Button variant="secondary" className="flex-1" onClick={onClose}>Vazgeç</Button>
-        {lockedPick ? (
+      <div className="mt-4 flex gap-2">
+        <Button variant="secondary" className="flex-1" onClick={() => { setDraft({}); onClose() }}>Vazgeç</Button>
+        {lockedAvatar ? (
           <Link to="/premium" onClick={onClose} className="press flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-butter font-extrabold text-ink shadow-hard-sm"><Crown className="size-4" /> Premium ile aç</Link>
+        ) : locked ? (
+          <Link to="/shop" onClick={onClose} className="press flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-ink font-extrabold text-paper shadow-hard-sm"><ShoppingBag className="size-4" /> Mağazada gör</Link>
         ) : (
-          <Button className="flex-1" loading={save.isPending} disabled={current === user.avatar} onClick={() => save.mutate(current ?? null)}>Uygula</Button>
+          <Button className="flex-1" loading={save.isPending} disabled={!changed} onClick={() => save.mutate(draft)}>Kaydet</Button>
         )}
       </div>
     </Modal>
+  )
+}
+
+function Grid({ children }: { children: React.ReactNode }) {
+  return <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">{children}</div>
+}
+
+function Tile({ on, locked, label, onClick, children }: { on: boolean; locked?: boolean; label: string; onClick: () => void; children: React.ReactNode }) {
+  return (
+    <motion.button whileTap={{ scale: 0.94 }} onClick={onClick} aria-pressed={on} aria-label={`${label}${locked ? ' (kilitli)' : ''}`} className="group text-center">
+      <span className={clsx('relative block aspect-square overflow-hidden rounded-2xl border-[3px] bg-paper-2 transition', on ? 'border-flame shadow-[0_0_0_4px_rgba(255,90,54,.18)]' : 'border-transparent group-hover:border-line')}>
+        {children}
+        {locked && <span className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-black/55 text-butter backdrop-blur"><Lock className="size-3" /></span>}
+        {on && <span className="absolute bottom-1 right-1 grid size-6 place-items-center rounded-full bg-flame text-white"><Check className="size-3.5" strokeWidth={3} /></span>}
+      </span>
+      <span className="mt-1 block truncate text-[11px] font-bold text-ink-soft">{label}</span>
+    </motion.button>
   )
 }

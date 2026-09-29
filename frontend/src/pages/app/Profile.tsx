@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { SkillMeter } from '@/components/game/SkillMeter'
 import clsx from 'clsx'
-import { BookOpen, Brain, ChevronRight, Clock, Flame, Layers, Mic, Pencil, Settings, Share2, Target, Zap } from 'lucide-react'
+import { ChevronRight, Flame, Palette, Pencil, Settings, Share2, Target, Zap } from 'lucide-react'
+import { ProfileBanner } from '@/components/game/ProfileBanner'
 import { get } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { dateTR, num } from '@/lib/format'
@@ -18,14 +19,14 @@ import { UserAvatar } from '@/components/game/UserAvatar'
 import { AvatarPicker } from '@/components/game/AvatarPicker'
 
 /** Kept for other screens: the profile picture at the large profile size. */
-export function Avatar({ name, avatar, frame, size = 'size-24' }: { name: string; avatar?: string | null; frame?: string; size?: string }) {
+export function Avatar({ name, avatar, frame, size = 'size-24' }: { name: string; avatar?: string | null; frame?: string | null; size?: string }) {
   return <UserAvatar name={name} avatar={avatar} frame={frame} className={clsx('border-4 border-card text-4xl shadow-lg', size)} rounded="rounded-[28px]" />
 }
 
 export default function Profile() {
   const { user } = useAuth()
   const toast = useToast()
-  const [picker, setPicker] = useState(false)
+  const [picker, setPicker] = useState<null | 'avatar' | 'frame' | 'banner' | 'bio'>(null)
   const stats = useQuery({ queryKey: ['stats'], queryFn: () => get<{ data: Record<string, number> }>('/me/stats') })
   const cal = useQuery({ queryKey: ['calendar'], queryFn: () => get<{ data: { date: string; xp: number; goal_met: boolean; freeze_used: boolean }[] }>('/me/calendar') })
   const ach = useQuery({ queryKey: ['achievements'], queryFn: () => get<{ data: Achievement[] }>('/achievements') })
@@ -48,31 +49,33 @@ export default function Profile() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <section className="ink-card relative mb-6 overflow-hidden p-6">
-        <Img src={img('photos/classroom.webp')} alt="" className="absolute inset-x-0 top-0 h-20 w-full object-cover opacity-90" />
-        <div className="relative flex flex-wrap items-end gap-5 pt-6">
-          <button onClick={() => setPicker(true)} className="group relative rounded-[28px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/30" aria-label="Avatarını değiştir">
-            <Avatar name={user.name} avatar={user.avatar} frame={user.preferences.frame} />
+      <section className="ink-card relative mb-6 overflow-hidden">
+        <ProfileBanner banner={user.banner} className="h-28 sm:h-32" />
+        <div className="relative -mt-12 flex flex-wrap items-end gap-4 px-5 sm:px-6">
+          <button onClick={() => setPicker('avatar')} className="group relative rounded-[28px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/30" aria-label="Avatarını değiştir">
+            <Avatar name={user.name} avatar={user.avatar} frame={user.frame} />
             <span className="absolute -bottom-1 -right-1 grid size-9 place-items-center rounded-full border-4 border-card bg-ink text-paper transition group-hover:scale-110"><Pencil className="size-3.5" /></span>
           </button>
-          <AvatarPicker open={picker} onClose={() => setPicker(false)} />
-          <div className="order-3 min-w-0 basis-full sm:order-none sm:basis-0 sm:flex-1 sm:pt-12">
-            <h1 className="text-3xl font-extrabold">{user.name}</h1>
-            <p className="font-semibold text-ink-soft">@{user.username} · {dateTR(user.created_at)} tarihinden beri</p>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <span className="ink-chip py-0.5">{user.cefr_level}</span>
-              <span className="ink-chip py-0.5">Seviye {user.stats.level}</span>
-              {user.premium.active && <span className="ink-chip bg-butter/30 py-0.5 text-ink"><Img src={img('rewards/crown.webp')} alt="" className="size-4" /> Premium</span>}
-            </div>
-          </div>
-          <div className="ml-auto flex gap-2 self-end sm:ml-0">
+          <div className="ml-auto flex gap-2 pb-1">
+            <button onClick={() => setPicker('frame')} className="press flex h-11 items-center gap-2 rounded-xl border-2 border-line bg-card px-3 text-sm font-extrabold shadow-hard-sm"><Palette className="size-4" /> Profili düzenle</button>
             <button onClick={share} className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm" aria-label="Paylaş"><Share2 className="size-5" /></button>
             <Link to="/settings" className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm" aria-label="Ayarlar"><Settings className="size-5" /></Link>
           </div>
         </div>
-        <div className="relative mt-5">
-          <div className="mb-1 flex justify-between text-xs font-bold text-ink-soft"><span>Seviye {user.stats.level}</span><span>{num(user.stats.xp_total)} / {num(user.stats.level_ceil)} XP</span></div>
-          <Progress value={user.stats.xp_total - user.stats.level_floor} max={user.stats.level_ceil - user.stats.level_floor} color="bg-flame" tall />
+        {picker && <AvatarPicker open onClose={() => setPicker(null)} start={picker} />}
+        <div className="px-5 pb-6 pt-3 sm:px-6">
+          <h1 className="text-3xl font-extrabold">{user.name}</h1>
+          <p className="font-semibold text-ink-soft">@{user.username} · {dateTR(user.created_at)} tarihinden beri</p>
+          {user.bio ? <p className="mt-2 max-w-lg text-[15px]">{user.bio}</p> : <button onClick={() => setPicker('bio')} className="mt-2 text-sm font-bold text-flame">+ Kendinden bir cümle ekle</button>}
+          <div className="mt-3 flex flex-wrap gap-2">
+            <span className="ink-chip py-0.5">{user.cefr_level}</span>
+            <span className="ink-chip py-0.5">Seviye {user.stats.level}</span>
+            {user.premium.active && <span className="ink-chip bg-butter/30 py-0.5 text-ink"><Img src={img('rewards/crown.webp')} alt="" className="size-4" /> Premium</span>}
+          </div>
+          <div className="mt-5">
+            <div className="mb-1 flex justify-between text-xs font-bold text-ink-soft"><span>Seviye {user.stats.level}</span><span>{num(user.stats.xp_total)} / {num(user.stats.level_ceil)} XP</span></div>
+            <Progress value={user.stats.xp_total - user.stats.level_floor} max={user.stats.level_ceil - user.stats.level_floor} color="bg-flame" tall />
+          </div>
         </div>
       </section>
 
@@ -90,15 +93,15 @@ export default function Profile() {
 
       <section className="ink-card mb-6 p-5">
         <h2 className="mb-4 text-xl font-extrabold">İstatistikler</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <Skill icon={BookOpen} label="Okunan hikaye" v={s?.stories_read} color="bg-butter" />
-          <Skill icon={Layers} label="Kelime" v={s?.words_saved} color="bg-mint" />
-          <Skill icon={Mic} label="Konuşma" v={s?.speaking} color="bg-flame" />
-          <Skill icon={Brain} label="Defne mesajı" v={s?.ai_messages} color="bg-sky" />
-          <Skill icon={Target} label="Ders" v={s?.lessons_completed} color="bg-lilac" />
-          <Skill icon={Zap} label="Hatasız ders" v={s?.perfect_lessons} color="bg-butter" />
-          <Skill icon={Brain} label="Ustalaşılan kelime" v={s?.words_mastered} color="bg-mint" />
-          <Skill icon={Clock} label="Dakika" v={s?.minutes} color="bg-sky" />
+        <div className="grid grid-cols-2 gap-x-6 gap-y-5 sm:grid-cols-4">
+          <Stat label="Ders" v={s?.lessons_completed} tone="#8f7cf8" />
+          <Stat label="Hatasız ders" v={s?.perfect_lessons} tone="#ffc233" />
+          <Stat label="Okunan hikâye" v={s?.stories_read} tone="#ff5a36" />
+          <Stat label="Çalışma dakikası" v={s?.minutes} tone="#2f7cf6" />
+          <Stat label="Defterdeki kelime" v={s?.words_saved} tone="#22b573" />
+          <Stat label="Ustalaşılan kelime" v={s?.words_mastered} tone="#0f8a55" />
+          <Stat label="Konuşma denemesi" v={s?.speaking} tone="#ff7fb0" />
+          <Stat label="Defne ile mesaj" v={s?.ai_messages} tone="#3ad7ff" />
         </div>
       </section>
 
@@ -137,14 +140,13 @@ function StatTile({ icon, value, label }: { icon: React.ReactNode; value: React.
   )
 }
 
-function Skill({ icon: Icon, label, v, color }: { icon: typeof Mic; label: string; v?: number; color: string }) {
+/** One number, one label and a short colour tick: quiet, readable, no clip-art. */
+function Stat({ label, v, tone }: { label: string; v?: number; tone: string }) {
   return (
-    <div className="flex items-center gap-3 rounded-2xl border-2 border-line/15 p-3">
-      <span className={clsx('grid size-10 place-items-center rounded-xl border-2 border-line text-ink', color)}><Icon className="size-5" /></span>
-      <div>
-        <p className="font-display text-xl font-extrabold leading-none">{v ?? '-'}</p>
-        <p className="text-[11px] font-bold text-ink-soft">{label}</p>
-      </div>
+    <div>
+      <span aria-hidden className="mb-2 block h-1 w-6 rounded-full" style={{ background: tone }} />
+      <p className="font-display text-3xl font-black leading-none tabular-nums">{v === undefined ? '-' : num(v)}</p>
+      <p className="mt-1 text-xs font-bold text-ink-soft">{label}</p>
     </div>
   )
 }

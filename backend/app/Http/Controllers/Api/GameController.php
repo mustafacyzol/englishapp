@@ -380,7 +380,7 @@ class GameController extends Controller
     public function referrals(Request $request): JsonResponse
     {
         $user = $request->user();
-        $list = $user->referrals()->with('referee:id,name,username,avatar,created_at')->latest()->limit(100)->get();
+        $list = $user->referrals()->with('referee:id,name,username,avatar,preferences,premium_until,created_at')->latest()->limit(100)->get();
 
         return response()->json([
             'code' => $user->referral_code,
@@ -395,7 +395,7 @@ class GameController extends Controller
                 'qualified' => $list->where('status', '!=', 'pending')->count(),
                 'rewarded' => $list->where('status', 'rewarded')->count(),
             ],
-            'data' => $list->map(fn ($r) => ['name' => $r->referee?->name, 'username' => $r->referee?->username, 'avatar' => $r->referee?->displayAvatar(), 'status' => $r->status, 'joined_at' => $r->created_at->toIso8601String()]),
+            'data' => $list->map(fn ($r) => ['name' => $r->referee?->name, 'username' => $r->referee?->username, 'avatar' => $r->referee?->displayAvatar(), 'frame' => $r->referee?->preferences['frame'] ?? null, 'status' => $r->status, 'joined_at' => $r->created_at->toIso8601String()]),
         ]);
     }
 
@@ -404,6 +404,13 @@ class GameController extends Controller
         $user = User::query()->where('username', $username)->where('is_banned', false)->firstOrFail();
         $badges = $user->userAchievements()->with('achievement:id,key,title,tier,icon,category')->latest('unlocked_at')->limit(12)->get()->pluck('achievement');
 
-        return response()->json(['user' => UserPresenter::public($user), 'badges' => $badges]);
+        return response()->json([
+            'user' => UserPresenter::public($user) + [
+                'league_name' => app(\App\Services\LeagueService::class)->tierName($user->league_tier),
+                'streak_longest' => $user->streak_longest,
+                'badges_count' => $user->userAchievements()->count(),
+            ],
+            'badges' => $badges,
+        ]);
     }
 }

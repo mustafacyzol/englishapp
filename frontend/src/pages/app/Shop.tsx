@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { Gem } from 'lucide-react'
-import { ApiError, get, post } from '@/lib/api'
+import { ApiError, get, patch, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { num } from '@/lib/format'
 import { sfx } from '@/lib/fx'
@@ -11,15 +11,19 @@ import { ChestOpening, type ChestResult } from '@/components/game/ChestOpening'
 import { rewardImg, img } from '@/lib/assets'
 import { RARITY } from '@/components/game/RewardCard'
 import { Button, LinkButton } from '@/components/ui/Button'
-import { PageHeader, SkeletonPage } from '@/components/ui/Misc'
+import { PageHeader, SkeletonPage, Tabs } from '@/components/ui/Misc'
+import { UserAvatar } from '@/components/game/UserAvatar'
+import { ProfileBanner } from '@/components/game/ProfileBanner'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 
-const GROUPS = [
-  { title: 'Sandıklar', text: 'Olasılıklar açık, iş ortaklarımızdan hediyeler dahil.', types: ['chest'] },
-  { title: 'Güçlendiriciler', text: 'XP takviyesi, can ve seri koruması.', types: ['xp_boost', 'streak_freeze', 'heart_refill'] },
-  { title: 'Profil çerçeveleri', text: 'Profilinde ve liglerde görünür.', types: ['avatar_frame'] },
-  { title: 'Premium', text: 'Elmaslarınla Premium günleri aç.', types: ['premium_days'] },
+type TabKey = 'look' | 'boost' | 'pack' | 'chest' | 'premium'
+const GROUPS: { key: TabKey; title: string; text: string; types: string[] }[] = [
+  { key: 'look', title: 'Görünüm', text: 'Çerçeve ve kapaklar profilinde, ligde ve arenada herkese görünür.', types: ['avatar_frame', 'profile_banner'] },
+  { key: 'boost', title: 'Güçlendiriciler', text: 'XP takviyesi, can ve seri koruması.', types: ['xp_boost', 'streak_freeze', 'heart_refill'] },
+  { key: 'pack', title: 'Paketler', text: 'Birlikte al, daha az öde. Paket açılınca kartlar kasana düşer.', types: ['bundle'] },
+  { key: 'chest', title: 'Sandıklar', text: 'Olasılıklar açık, iş ortaklarımızdan hediyeler dahil.', types: ['chest'] },
+  { key: 'premium', title: 'Premium', text: 'Elmaslarınla Premium günleri aç.', types: ['premium_days'] },
 ]
 
 export default function Shop() {
@@ -28,6 +32,12 @@ export default function Shop() {
   const toast = useToast()
   const { data, isLoading } = useQuery({ queryKey: ['shop'], queryFn: () => get<{ items: RewardItem[]; gems: number; heart_refill_gems: number }>('/shop') })
   const [chest, setChest] = useState<UserItem | null>(null)
+  const [tab, setTab] = useState<TabKey>('look')
+  const wear = useMutation({
+    mutationFn: (b: { frame?: string | null; banner?: string | null }) => patch<{ user: Me }>('/account', b),
+    onSuccess: (r) => { setUser(r.user); toast('Profilinde! Ligde ve arenada artık böyle görünüyorsun.', 'success') },
+    onError: (e: ApiError) => toast(e.first(), 'error'),
+  })
   const buy = useMutation({
     mutationFn: (id: number) => post<{ user: Me; item: UserItem }>(`/shop/${id}/buy`),
     onSuccess: (r, id) => {
@@ -35,6 +45,10 @@ export default function Shop() {
       qc.invalidateQueries({ queryKey: ['inventory'] })
       // A chest opens right away, straight into the ceremony.
       if (r.item?.item?.type === 'chest') return setChest({ ...r.item, odds: data?.items.find((x) => x.id === id)?.odds })
+      // A frame or cover is worn straight away.
+      const v = r.item?.item?.value as { frame?: string; banner?: string } | undefined
+      if (r.item?.item?.type === 'avatar_frame' && v?.frame) return wear.mutate({ frame: v.frame })
+      if (r.item?.item?.type === 'profile_banner' && v?.banner) return wear.mutate({ banner: v.banner })
       sfx.reward()
       toast('Satın alındı! Kartın Ödül Kasası\'nda seni bekliyor.', 'success')
     },
@@ -69,28 +83,44 @@ export default function Shop() {
         )}
       </section>
 
-      {GROUPS.map((g) => {
+      <div className="sticky top-[64px] z-20 -mx-4 mb-5 bg-paper/90 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0">
+        <Tabs value={tab} onChange={setTab} items={GROUPS.filter((g) => data.items.some((it) => g.types.includes(it.type))).map((g) => ({ value: g.key, label: g.title }))} />
+      </div>
+      {GROUPS.filter((g) => g.key === tab).map((g) => {
         const items = data.items.filter((it) => g.types.includes(it.type))
         if (!items.length) return null
         return (
           <section key={g.title} className="mb-10">
-            <div className="mb-4 flex items-baseline justify-between gap-3">
-              <h2 className="text-xl font-extrabold">{g.title}</h2>
-              <p className="text-sm text-ink-soft">{g.text}</p>
-            </div>
+            <p className="mb-4 text-sm text-ink-soft">{g.text}</p>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((it) => {
                 const r = RARITY[it.rarity] ?? RARITY.common
                 const afford = user.stats.gems >= (it.price_gems ?? 0)
+                const val = (it.value ?? {}) as { frame?: string; banner?: string; items?: { item: string; qty: number }[] }
+                const cos = it.type === 'avatar_frame' ? val.frame : it.type === 'profile_banner' ? val.banner : undefined
+                const owned = !!cos && [...(user.cosmetics?.frames ?? []), ...(user.cosmetics?.banners ?? [])].includes(cos)
+                const worn = !!cos && (user.frame === cos || user.banner === cos)
                 return (
                   <article key={it.id} className={clsx('ink-card group flex flex-col overflow-hidden', it.type === 'chest' && 'sm:col-span-2 lg:col-span-1')}>
-                    <div className={clsx('relative grid h-36 place-items-center bg-gradient-to-b to-transparent', r.glow)}>
-                      <span className={clsx('absolute left-4 top-3 text-[11px] font-extrabold uppercase tracking-widest', r.text)}>{r.label}</span>
-                      <Img src={rewardImg(it.icon)} alt="" loading="lazy" className="size-28 object-contain drop-shadow-lg transition duration-300 group-hover:-translate-y-1 group-hover:scale-105" />
+                    <div className={clsx('relative grid h-36 place-items-center overflow-hidden bg-gradient-to-b to-transparent', r.glow)}>
+                      {it.type === 'profile_banner' && <ProfileBanner banner={val.banner} className="absolute inset-0" />}
+                      <span className={clsx('absolute left-4 top-3 z-10 rounded-full px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-widest', r.text, it.type === 'profile_banner' && 'bg-white/85')}>{r.label}</span>
+                      {it.type === 'avatar_frame' ? (
+                        <UserAvatar name={user.name} avatar={user.avatar} frame={val.frame} className="size-24 transition duration-300 group-hover:scale-105" rounded="rounded-[28px]" />
+                      ) : it.type === 'profile_banner' ? (
+                        <UserAvatar name={user.name} avatar={user.avatar} frame={user.frame} className="relative mt-8 size-16 border-4 border-card" rounded="rounded-[22px]" />
+                      ) : (
+                        <Img src={rewardImg(it.icon)} alt="" loading="lazy" className="size-28 object-contain drop-shadow-lg transition duration-300 group-hover:-translate-y-1 group-hover:scale-105" />
+                      )}
                     </div>
                     <div className="flex flex-1 flex-col items-center gap-2 px-5 pb-5 text-center">
                       <h3 className="font-display text-xl font-extrabold">{it.name}</h3>
                       <p className="flex-1 text-sm text-ink-soft">{it.description}</p>
+                      {it.type === 'bundle' && !!val.items?.length && (
+                        <ul className="flex flex-wrap justify-center gap-1.5">
+                          {val.items.map((x) => <li key={x.item} className="rounded-full bg-paper-2 px-2.5 py-1 text-xs font-bold">{x.qty} × {data.items.find((d) => d.key === x.item)?.name ?? x.item}</li>)}
+                        </ul>
+                      )}
                       {!!it.odds?.length && (
                         <ul className="mt-1 w-full space-y-1 rounded-2xl bg-paper-2 p-2.5 text-left text-xs font-bold">
                           {it.odds.map((o, k) => (
@@ -102,9 +132,15 @@ export default function Shop() {
                           ))}
                         </ul>
                       )}
-                      <Button block className="mt-3" variant={afford ? 'primary' : 'secondary'} disabled={!afford} loading={buy.isPending && buy.variables === it.id} onClick={() => buy.mutate(it.id)} icon={<Gem className="size-4" />}>
-                        {it.type === 'chest' && afford ? `${num(it.price_gems ?? 0)} · Aç` : num(it.price_gems ?? 0)}
-                      </Button>
+                      {owned ? (
+                        <Button block className="mt-3" variant={worn ? 'secondary' : 'success'} disabled={worn} loading={wear.isPending} onClick={() => wear.mutate(it.type === 'avatar_frame' ? { frame: cos } : { banner: cos })}>
+                          {worn ? 'Takılı' : 'Sende · Tak'}
+                        </Button>
+                      ) : (
+                        <Button block className="mt-3" variant={afford ? 'primary' : 'secondary'} disabled={!afford} loading={buy.isPending && buy.variables === it.id} onClick={() => buy.mutate(it.id)} icon={<Gem className="size-4" />}>
+                          {it.type === 'chest' && afford ? `${num(it.price_gems ?? 0)} · Aç` : afford ? num(it.price_gems ?? 0) : `${num((it.price_gems ?? 0) - user.stats.gems)} elmas eksik`}
+                        </Button>
+                      )}
                     </div>
                   </article>
                 )

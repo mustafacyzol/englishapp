@@ -22,6 +22,7 @@ Route::prefix('v1')->group(function () {
     // ---- Public -------------------------------------------------------------
     Route::get('config', [PublicController::class, 'config']);
     Route::get('economy', [PublicController::class, 'economy']);
+    Route::get('avatars', [PublicController::class, 'avatars']);
     Route::get('landing', [PublicController::class, 'landing']);
     Route::get('plans', [BillingController::class, 'plans']);
     Route::get('stories', [StoryController::class, 'index']);
@@ -78,6 +79,9 @@ Route::prefix('v1')->group(function () {
         Route::post('institution/invite', [InstitutionController::class, 'invite'])->middleware('throttle:20,1');
         Route::delete('institution/members/{member}', [InstitutionController::class, 'removeMember']);
         Route::post('notifications/read', [AccountController::class, 'readNotifications']);
+        Route::post('notifications/{id}/read', [AccountController::class, 'readNotification']);
+        Route::delete('notifications/{id}', [AccountController::class, 'deleteNotification']);
+        Route::delete('notifications', [AccountController::class, 'clearNotifications']);
 
         // Everything below requires a verified e-mail
         Route::middleware('verified.api')->group(function () {
@@ -177,6 +181,7 @@ Route::prefix('v1')->group(function () {
             Route::get('audit', [AdminController::class, 'audit'])->middleware('perm:audit');
             Route::post('newsletter/send', [AdminController::class, 'sendNewsletter'])->middleware(['perm:marketing', 'throttle:10,60']);
             Route::post('redeem-codes/generate', [ResourceController::class, 'generateCodes'])->middleware('perm:gamification');
+            Route::post('avatars/upload', [AdminController::class, 'uploadAvatar'])->middleware(['perm:gamification', 'throttle:30,1']);
             Route::middleware('perm:institutions')->group(function () {
                 Route::get('institutions/{institution}/report', [AdminController::class, 'institutionReport']);
                 Route::post('institutions/{institution}/invite', [AdminController::class, 'institutionInvite']);

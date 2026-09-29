@@ -4,7 +4,7 @@
  * Mutations update an in-memory copy, and Defne's replies come from a small rule-based script.
  */
 import fixture from './fixture.json'
-import { isPremiumAvatar } from '@/lib/avatars'
+const isPremiumAvatar = (k: string) => ['astronaut', 'wizard', 'king', 'pilot', 'scientist', 'chef', 'jazz', 'detective', 'explorer'].includes(k)
 
 type Json = any // eslint-disable-line @typescript-eslint/no-explicit-any
 const F = fixture as { get: Record<string, Json>; post: Record<string, Json>; err: Record<string, { status: number; message: string }>; fresh?: Record<string, Json> }
@@ -453,9 +453,14 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   if ((m = path.match(/^\/shop\/(\d+)\/buy$/))) {
     const it = db['/shop'].items.find((x: Json) => x.id === +m![1])
     if (!it || me().stats.gems < it.price_gems) throw new DemoError(422, 'Yeterli elmasın yok.')
+    const cos = it.value?.frame ?? it.value?.banner
+    const mine = me().cosmetics ?? (me().cosmetics = { frames: [], banners: [] })
+    if (cos && [...mine.frames, ...mine.banners].includes(cos)) throw new DemoError(422, 'Bu görünüm zaten sende. Profilinden takabilirsin.')
     addGems(-it.price_gems)
     const owned = { id: nextMsg++, status: 'available', source: 'shop', code: null, created_at: new Date().toISOString(), item: it, odds: it.odds }
     db['/inventory'].data.unshift(owned)
+    if (it.type === 'avatar_frame') mine.frames.push(it.value.frame)
+    if (it.type === 'profile_banner') mine.banners.push(it.value.banner)
     return { user: me(), item: owned }
   }
   if ((m = path.match(/^\/inventory\/(\d+)\/activate$/))) {
@@ -551,7 +556,23 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
 
   if (path === '/checkout/quote') return body.coupon ? F.post.quote_coupon ?? F.post.quote : F.post.quote
   if (path === '/checkout') return { order: { uuid: 'demo-order', status: 'paid' }, checkout: null }
-  if (path === '/notifications/read') return null
+  if (path === '/notifications/read') {
+    for (const n of db['/notifications']?.data ?? []) n.read = true
+    if (db['/notifications']) db['/notifications'].unread = 0
+    return null
+  }
+  if ((m = path.match(/^\/notifications\/([^/?]+)\/read$/))) {
+    const n = db['/notifications']?.data.find((x: Json) => x.id === m![1])
+    if (n && !n.read) { n.read = true; db['/notifications'].unread = Math.max(0, db['/notifications'].unread - 1) }
+    return { ok: true }
+  }
+  if (path.startsWith('/notifications') && method === 'DELETE') {
+    const box = db['/notifications']
+    const id = path.match(/^\/notifications\/([^/?]+)$/)?.[1]
+    box.data = box.data.filter((n: Json) => (id ? n.id !== id : path.includes('read=1') ? !n.read : false))
+    box.unread = box.data.filter((n: Json) => !n.read).length
+    return { ok: true }
+  }
 
   // --- exam mode: graded against the recorded answer key, like ExamController
   if (path === '/exam/answer') {
@@ -579,6 +600,11 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   // --- account
   if (path === '/account' && method === 'PATCH') {
     if (body.avatar && isPremiumAvatar(body.avatar) && !me().premium?.active) throw new DemoError(403, 'Bu avatar Premium üyelere özel.')
+    const own = me().cosmetics ?? { frames: [], banners: [] }
+    if (body.frame && !own.frames.includes(body.frame)) throw new DemoError(403, 'Önce mağazadan edinmelisin.')
+    if (body.banner && !own.banners.includes(body.banner)) throw new DemoError(403, 'Önce mağazadan edinmelisin.')
+    // keep the league table in step with the new look
+    for (const r of db['/league']?.rows ?? []) if (r.is_me) Object.assign(r, 'frame' in body ? { frame: body.frame } : {}, body.avatar ? { avatar: body.avatar } : {})
     Object.assign(me(), body, body.preferences ? { preferences: { ...me().preferences, ...body.preferences } } : {})
     if (db['/exam'] && 'exam_target' in body) db['/exam'].target = body.exam_target
     if (db['/exam'] && 'exam_date' in body) {

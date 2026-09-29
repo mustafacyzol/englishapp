@@ -74,7 +74,7 @@ export default function Learn() {
     <div className="mx-auto max-w-2xl">
       {/* The "where you left off" bar stays pinned under the header instead of popping in:
           when your stop scrolls away it simply shows which way it is. */}
-      <div className="sticky top-[66px] z-20 -mx-1 px-1 pb-2 pt-2">
+      <div className="sticky top-[66px] z-[25] -mx-1 px-1 pb-2 pt-2">
         <ContinueCard data={data} stats={stats} onJump={jump} onPick={() => setPicker(true)} away={!currentVisible ? (curAbove ? 'up' : 'down') : null} />
       </div>
 

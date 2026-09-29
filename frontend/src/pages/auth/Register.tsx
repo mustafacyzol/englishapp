@@ -49,7 +49,7 @@ interface Draft {
 const AGES = [
   { key: 'kid', label: 'Çocuk', range: '7-12 yaş', art: 'braids', tint: 'bg-mint/15', points: ['Oyun gibi kısa dersler', 'Yalnızca yaşıtlarla düello', 'Veli onayıyla, reklamsız'] },
   { key: 'teen', label: 'Genç', range: '13-17 yaş', art: 'cap', tint: 'bg-sky/15', points: ['Okul, dizi, müzik, oyun', 'Arkadaşlarla lig', 'İsteğe bağlı YDT hazırlığı'] },
-  { key: 'adult', label: 'Yetişkin', range: '18 yaş ve üzeri', art: 'beard', tint: 'bg-butter/20', points: ['İş, seyahat, günlük hayat', 'Defne ile konuşma provası', 'İsteğe bağlı sınav modu'] },
+  { key: 'adult', label: 'Yetişkin', range: '18 yaş ve üzeri', art: 'glasses', tint: 'bg-butter/20', points: ['İş, seyahat, günlük hayat', 'Defne ile konuşma provası', 'İsteğe bağlı sınav modu'] },
 ] as const
 
 /** The exam step only appears for teens and adults who want it: exam as the goal, or ticked as an extra. */

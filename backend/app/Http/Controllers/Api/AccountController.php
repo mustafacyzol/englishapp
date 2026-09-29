@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\UserPresenter;
+use App\Models\Avatar;
 use App\Services\OtpService;
 use App\Support\Audit;
 use App\Support\Exams;
@@ -24,7 +25,10 @@ class AccountController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'min:2', 'max:60'],
             'username' => ['sometimes', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9_.]+$/', Rule::unique('users', 'username')->ignore($user->id)],
-            'avatar' => ['sometimes', 'nullable', Rule::in(array_merge(config('dilgo.avatars.standard'), config('dilgo.avatars.premium')))],
+            'avatar' => ['sometimes', 'required', Rule::in(array_keys(Avatar::catalog()))],
+            'bio' => ['sometimes', 'nullable', 'string', 'max:120'],
+            'frame' => ['sometimes', 'nullable', Rule::in(config('dilgo.cosmetics.frames'))],
+            'banner' => ['sometimes', 'nullable', Rule::in(config('dilgo.cosmetics.banners'))],
             'cefr_level' => ['sometimes', 'in:A1,A2,B1,B2,C1,C2'],
             'learning_goal' => ['sometimes', 'nullable', 'in:travel,career,exam,school,fun'],
             'daily_goal_xp' => ['sometimes', 'integer', Rule::in(config('dilgo.gamification.daily_goal_options'))],
@@ -50,8 +54,22 @@ class AccountController extends Controller
             'preferences.exam_mode' => ['sometimes', 'boolean'],
         ], ['username.regex' => 'Kullanıcı adı yalnızca küçük harf, rakam, nokta ve alt çizgi içerebilir.']);
 
-        if (! empty($data['avatar']) && in_array($data['avatar'], config('dilgo.avatars.premium'), true) && ! $user->isPremium()) {
+        if (! empty($data['avatar']) && (Avatar::catalog()[$data['avatar']]['tier'] ?? '') === 'premium' && ! $user->isPremium()) {
             abort(403, 'Bu avatar Premium üyelere özel.');
+        }
+        // Frames and banners are worn only once owned; null takes them off.
+        $owned = $user->ownedCosmetics();
+        foreach (['frame' => 'frames', 'banner' => 'banners'] as $field => $list) {
+            if (array_key_exists($field, $data)) {
+                abort_if($data[$field] !== null && ! in_array($data[$field], $owned[$list], true), 403, 'Önce mağazadan edinmelisin.');
+                $prefs = $user->preferences ?? [];
+                $prefs[$field] = $data[$field];
+                $user->preferences = $prefs;
+                unset($data[$field]);
+            }
+        }
+        if (array_key_exists('bio', $data)) {
+            $data['bio'] = $data['bio'] === null ? null : (trim(strip_tags($data['bio'])) ?: null);
         }
         // Age group guards content, rivals and gifts, so it is not a switch to flip back and
         // forth (that is how one account gets shared between siblings): children's accounts
@@ -197,10 +215,36 @@ class AccountController extends Controller
 
         return response()->json([
             'unread' => $user->unreadNotifications()->count(),
-            'data' => $user->notifications()->limit(30)->get()->map(fn ($n) => [
+            'data' => $user->notifications()->limit(60)->get()->map(fn ($n) => [
                 'id' => $n->id, 'data' => $n->data, 'read' => $n->read_at !== null, 'created_at' => $n->created_at->toIso8601String(),
             ]),
         ]);
+    }
+
+    public function readNotification(Request $request, string $id): JsonResponse
+    {
+        $request->user()->notifications()->whereKey($id)->firstOrFail()->markAsRead();
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function deleteNotification(Request $request, string $id): JsonResponse
+    {
+        $request->user()->notifications()->whereKey($id)->delete();
+
+        return response()->json(['ok' => true]);
+    }
+
+    /** Clear the inbox: everything, or only what has been read (?read=1). */
+    public function clearNotifications(Request $request): JsonResponse
+    {
+        $q = $request->user()->notifications();
+        if ($request->boolean('read')) {
+            $q->whereNotNull('read_at');
+        }
+        $q->delete();
+
+        return response()->json(['ok' => true]);
     }
 
     public function readNotifications(Request $request): JsonResponse

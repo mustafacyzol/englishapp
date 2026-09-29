@@ -114,7 +114,7 @@ export default function WritingLab() {
                   onChange={(e) => setText(e.target.value)}
                   disabled={scanning}
                   placeholder="Write here in English…"
-                  className="min-h-72 w-full resize-y rounded-2xl border-2 border-line bg-paper/60 p-5 font-read text-lg leading-relaxed [background-image:linear-gradient(transparent_calc(2em-1px),var(--line)_calc(2em-1px))] [background-size:100%_2em] [line-height:2em] focus:border-ink/30 focus:bg-card focus:outline-none"
+                  className="notebook min-h-72 w-full resize-y rounded-2xl border-2 border-line py-4 pl-12 pr-5 font-read text-lg focus:border-ink/30 focus:outline-none"
                 />
               )}
               <AnimatePresence>{scanning && <ScanOverlay />}</AnimatePresence>
@@ -243,7 +243,7 @@ function Annotated({ text, mistakes }: { text: string; mistakes: Mistake[] }) {
   const [open, setOpen] = useState<number | null>(null)
   const segs = useMemo(() => segments(text, mistakes), [text, mistakes])
   return (
-    <div className="min-h-72 whitespace-pre-wrap rounded-2xl border-2 border-line bg-paper/60 p-5 font-read text-lg leading-[2.1]">
+    <div className="notebook min-h-72 whitespace-pre-wrap rounded-2xl border-2 border-line py-4 pl-12 pr-5 font-read text-lg">
       {segs.map((s, k) =>
         s.m ? (
           <span key={k} className="relative">

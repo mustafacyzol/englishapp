@@ -51,7 +51,7 @@ class User extends Authenticatable
     ];
 
     protected $fillable = [
-        'name', 'username', 'email', 'password', 'avatar', 'locale', 'timezone',
+        'name', 'username', 'email', 'password', 'avatar', 'bio', 'locale', 'timezone',
         'cefr_level', 'learning_goal', 'daily_goal_xp', 'onboarded', 'marketing_opt_in', 'preferences',
         'focus_skill', 'interests', 'study_time', 'motivation', 'exam_target', 'exam_date', 'age_group',
     ];
@@ -91,6 +91,11 @@ class User extends Authenticatable
         static::creating(function (User $user) {
             $user->referral_code ??= static::generateReferralCode();
             $user->username ??= static::generateUsername($user->name ?? 'learner');
+            // Everyone starts with a picture; they can change it any time.
+            if (! $user->avatar) {
+                $standard = Avatar::standardKeys() ?: array_column(config('dilgo.avatars.labels.standard'), 0);
+                $user->avatar = $standard[array_rand($standard)];
+            }
         });
     }
 
@@ -151,15 +156,44 @@ class User extends Authenticatable
         return $this->role === 'super_admin';
     }
 
-    /** The avatar to show: a premium one only while Premium is active, otherwise none (initial). */
-    public function displayAvatar(): ?string
+    /**
+     * The avatar to show. Everyone has one: a premium avatar only while Premium is
+     * active, and a missing or retired key falls back to a standard avatar.
+     */
+    public function displayAvatar(): string
     {
-        $known = array_merge(config('dilgo.avatars.standard', []), config('dilgo.avatars.premium', []));
-        if (! $this->avatar || ! in_array($this->avatar, $known, true)) {
-            return null;
+        $catalog = Avatar::catalog();
+        $a = $catalog[$this->avatar ?? ''] ?? null;
+        if ($a && ($a['tier'] !== 'premium' || $this->isPremium())) {
+            return $this->avatar;
         }
+        $standard = Avatar::standardKeys() ?: ['headphones'];
 
-        return in_array($this->avatar, config('dilgo.avatars.premium', []), true) && ! $this->isPremium() ? null : $this->avatar;
+        return $standard[($this->id ?? 0) % count($standard)];
+    }
+
+    /** Frames and banners this learner owns (bought, won or granted). */
+    public function ownedCosmetics(): array
+    {
+        $items = $this->items()->whereHas('item', fn ($q) => $q->whereIn('type', ['avatar_frame', 'profile_banner']))
+            ->where('status', '!=', 'expired')->with('item:id,type,value,key')->get();
+        $pick = fn (string $type, string $field) => $items->filter(fn ($ui) => $ui->item?->type === $type)
+            ->map(fn ($ui) => $ui->item->value[$field] ?? null)->filter()->unique()->values()->all();
+
+        return ['frames' => $pick('avatar_frame', 'frame'), 'banners' => $pick('profile_banner', 'banner')];
+    }
+
+    /** The look others see: avatar, frame and banner (only ones still owned). */
+    public function look(): array
+    {
+        $prefs = $this->preferences ?? [];
+
+        return [
+            'avatar' => $this->displayAvatar(),
+            'avatar_url' => Avatar::catalog()[$this->displayAvatar()]['url'] ?? null,
+            'frame' => $prefs['frame'] ?? null,
+            'banner' => $prefs['banner'] ?? null,
+        ];
     }
 
     public function isPremium(): bool

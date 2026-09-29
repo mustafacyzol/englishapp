@@ -28,7 +28,7 @@ export function XpGuide({ only, className }: { only?: 'words'; className?: strin
   const rows = [
     { k: 'words', icon: Layers, t: 'Kelime oyunları ve tekrar', v: `Her doğru cevap ${e.xp.practice_per_correct} XP, her tekrar kartı ${e.xp.review_per_word} XP`, c: cap('words') },
     { k: 'lesson', icon: BookOpen, t: 'Ders', v: `Dersin değeri kadar (en az ${e.xp.lesson_min} XP), hatasızsa +${e.xp.perfect_bonus}`, c: cap('lesson') },
-    { k: 'story', icon: BookOpen, t: 'Hikâye', v: `İlk okuma ${e.xp.story_first} XP + quiz bonusu, tekrar ${e.xp.story_repeat} XP`, c: cap('story') },
+    { k: 'story', icon: BookOpen, t: 'Hikâye', v: `Bitirince ${e.xp.story_first} XP + her doğru cevaba ${e.xp.story_per_correct} XP (tekrar okumada ${e.xp.story_repeat} + ${e.xp.story_repeat_per_correct})`, c: cap('story') },
     { k: 'duel', icon: Swords, t: 'Gölge Düellosu', v: `${e.xp.duel_base} XP + doğru başına ${e.xp.duel_per_correct}, kazanırsan +${e.xp.duel_win}`, c: cap('duel') },
     { k: 'ai', icon: MessageCircle, t: 'Defne ile konuşma', v: `Mesaj başına ${e.xp.ai_message} XP (sesli ${e.xp.ai_spoken}), yazma görevi ${e.xp.writing} XP`, c: cap('ai') },
     { k: 'exam', icon: GraduationCap, t: 'Sınav soruları', v: `Doğru ${e.xp.exam_correct} XP, yanlış ${e.xp.exam_attempt} XP`, c: cap('exam') },

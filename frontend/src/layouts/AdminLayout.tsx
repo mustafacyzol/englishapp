@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { ArrowLeft, Building2, Menu, X, BookOpen, Boxes, ClipboardList, Crown, FileQuestion, Gift, Handshake, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Package, Quote, Receipt, ScrollText, Send, Settings, ShieldCheck, Swords, Ticket, Trophy, UserCog, Users, Wallet } from 'lucide-react'
+import { ArrowLeft, Building2, Menu, X, BookOpen, Boxes, ClipboardList, Crown, FileQuestion, Gift, Handshake, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Package, Quote, Receipt, ScrollText, Send, Settings, ShieldCheck, SmilePlus, Swords, Ticket, Trophy, UserCog, Users, Wallet } from 'lucide-react'
 import { can, roleLabel } from '@/lib/adminAccess'
 import type { Me } from '@/lib/types'
 import { useAuth } from '@/lib/auth'
@@ -44,7 +44,8 @@ const GROUPS: { title: string; items: Item[] }[] = [
   { title: 'Oyunlaştırma', items: [
     { to: '/admin/r/achievements', label: 'Rozetler', icon: Trophy, perm: 'gamification' },
     { to: '/admin/r/quests', label: 'Görevler', icon: Swords, perm: 'gamification' },
-    { to: '/admin/r/reward-items', label: 'Ödül kartları ve sandıklar', icon: Boxes, perm: 'gamification' },
+    { to: '/admin/r/avatars', label: 'Avatarlar', icon: SmilePlus, perm: 'gamification' },
+    { to: '/admin/r/reward-items', label: 'Mağaza, kartlar ve sandıklar', icon: Boxes, perm: 'gamification' },
     { to: '/admin/r/redeem-codes', label: 'Hediye kodları', icon: KeyRound, perm: 'gamification' },
     { to: '/admin/r/partners', label: 'İş ortakları', icon: Handshake, perm: 'gamification' },
     { to: '/admin/r/partner-offers', label: 'Sandık teklifleri', icon: Gift, perm: 'gamification' },

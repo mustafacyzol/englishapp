@@ -11,6 +11,11 @@ export interface Me {
   permissions?: string[]
   is_staff: boolean
   avatar: string | null
+  avatar_url?: string | null
+  frame?: string | null
+  banner?: string | null
+  bio?: string | null
+  cosmetics?: { frames: string[]; banners: string[] }
   cefr_level: Cefr
   learning_goal: string | null
   daily_goal_xp: number

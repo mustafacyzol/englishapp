@@ -22,6 +22,12 @@ class PublicController extends Controller
      * what keeps a streak alive and what pays gems. Straight from config, so the
      * rules page can never drift from what the server actually grants.
      */
+    /** The avatar catalogue: bundled ones resolve on the client (url null), uploads carry a URL. */
+    public function avatars(): JsonResponse
+    {
+        return response()->json(['data' => collect(\App\Models\Avatar::catalog())->map(fn ($a, $k) => ['key' => $k] + $a)->values()]);
+    }
+
     public function economy(): JsonResponse
     {
         $e = config('dilgo.economy');
