@@ -3,17 +3,50 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#11141c" media="(prefers-color-scheme: dark)" />
-    <title>DilGO · Oku, dinle, konuş, yaz. İngilizce tek uygulamada.</title>
-    <meta name="description" content="Bayrak Dil Okulları'nın oyunlaştırılmış İngilizce platformu: hikayelerle okuma ve dinleme, AI öğretmen Defne ile konuşma ve yazma, seriler, ligler ve gerçek canlı ders ödülleri." />
-    <meta property="og:title" content="DilGO · Dört beceri, tek uygulama" />
-    <meta property="og:description" content="Hikayelerle oku ve dinle, AI öğretmen Defne ile konuş ve yaz. Bayrak Dil Okulları güvencesiyle." />
+    <meta name="color-scheme" content="light dark" />
+    <title>DilGO · İngilizceyi kendi hızında öğren | Defne AI ile konuş</title>
+    <meta name="description" content="DilGO ile İngilizceyi her yaşta, günde birkaç dakikada öğren: kısa dersler, sahne sahne hikâyeler, kelime oyunları, ligler ve seninle konuşan yapay zekâ öğretmen Defne. Ücretsiz başla." />
+    <meta name="keywords" content="İngilizce öğren, İngilizce uygulaması, yapay zeka İngilizce öğretmeni, İngilizce konuşma pratiği, YDS, YÖKDİL, IELTS, çocuklar için İngilizce, Bayrak Dil Okulları" />
+    <meta name="author" content="Bayrak Dil Okulları" />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href="%VITE_SITE_URL%/" />
+    <meta name="application-name" content="DilGO" />
+    <meta name="apple-mobile-web-app-title" content="DilGO" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <meta property="og:site_name" content="DilGO" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="tr_TR" />
+    <meta property="og:url" content="%VITE_SITE_URL%/" />
+    <meta property="og:title" content="DilGO · İngilizceyi kendi hızında öğren" />
+    <meta property="og:description" content="Kısa dersler, hikâyeler, oyunlar ve seninle konuşan yapay zekâ öğretmen Defne. Ücretsiz başla." />
+    <meta property="og:image" content="%VITE_SITE_URL%/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="DilGO maskotu Higo telefondan fırlıyor" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DilGO · İngilizceyi kendi hızında öğren" />
+    <meta name="twitter:description" content="Kısa dersler, hikâyeler, oyunlar ve yapay zekâ öğretmen Defne." />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.jpg" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          { "@type": "Organization", "name": "Bayrak Dil Okulları", "url": "%VITE_SITE_URL%/", "logo": "%VITE_SITE_URL%/icon-512.png" },
+          { "@type": "WebSite", "name": "DilGO", "url": "%VITE_SITE_URL%/", "inLanguage": "tr-TR" },
+          { "@type": "SoftwareApplication", "name": "DilGO", "applicationCategory": "EducationalApplication", "operatingSystem": "Web, Android, iOS", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" } }
+        ]
+      }
+    </script>
     <script>
       // apply saved theme before paint to avoid flashes
       try {

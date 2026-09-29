@@ -1,0 +1,14 @@
+# DilGO
+User-agent: *
+Allow: /
+Disallow: /admin
+Disallow: /kurum
+Disallow: /learn
+Disallow: /settings
+Disallow: /notifications
+Disallow: /lesson/
+Disallow: /verify-email
+Disallow: /newsletter/
+
+# Sitemap is served by the API (blog posts included). Update the domain when you deploy.
+Sitemap: https://api.dilgo.app/sitemap.xml

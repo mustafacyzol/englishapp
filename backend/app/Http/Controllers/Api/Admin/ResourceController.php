@@ -374,11 +374,12 @@ class ResourceController extends Controller
         /** @var Model $model */
         $q = $cfg['model']::query()->with($cfg['with'] ?? []);
 
-        if ($s = $request->query('q')) {
+        // Query values are only ever used as bound parameters; arrays (q[]=) are ignored.
+        if (is_string($s = $request->query('q')) && $s !== '') {
             $q->where(fn ($w) => collect($cfg['search'])->each(fn ($f) => $w->orWhere($f, 'like', "%{$s}%")));
         }
         foreach ($cfg['filters'] ?? [] as $f) {
-            if ($request->filled($f)) {
+            if ($request->filled($f) && is_scalar($request->query($f))) {
                 $q->where($f, $request->query($f));
             }
         }
@@ -389,7 +390,7 @@ class ResourceController extends Controller
         }
         $q->orderBy(ltrim($order, '-'), str_starts_with($order, '-') ? 'desc' : 'asc');
 
-        return response()->json($q->paginate(min(100, (int) $request->query('per_page', 25)))->through(fn ($m) => $this->reveal($cfg, $m)));
+        return response()->json($q->paginate(max(1, min(100, (int) $request->query('per_page', 25))))->through(fn ($m) => $this->reveal($cfg, $m)));
     }
 
     public function show(string $resource, int $id): JsonResponse

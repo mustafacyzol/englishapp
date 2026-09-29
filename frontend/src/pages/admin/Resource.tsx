@@ -233,7 +233,7 @@ export default function Resource() {
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
   const [editing, setEditing] = useState<Row | 'new' | null>(null)
-  useEffect(() => { setPage(1); setQ('') }, [resource])
+  useEffect(() => { setPage(1); setQ(''); setEditing(null) }, [resource])
 
   const params = new URLSearchParams({ page: String(page), ...(q && { q }) })
   const { data, isLoading } = useQuery({ queryKey: ['res', resource, params.toString()], queryFn: () => get<Paginated<Row>>(`/admin/${resource}?${params}`, true), enabled: !!cfg })
@@ -326,7 +326,7 @@ function Editor({ resource, cfg, row, onClose }: { resource: string; cfg: Cfg; r
   }
 
   return (
-    <Modal open onClose={onClose} className="sm:max-w-3xl">
+    <Modal open onClose={onClose} className="sm:!max-w-3xl">
       <h2 className="mb-5 text-2xl font-extrabold">{row ? 'Düzenle' : 'Yeni kayıt'} · {cfg.title}</h2>
       {(err || jsonErr) && <div className="mb-4"><Alert tone="error">{jsonErr || err!.first()}</Alert></div>}
       {row && cfg.preview?.(row)}

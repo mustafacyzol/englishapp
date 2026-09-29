@@ -19,7 +19,7 @@ class AdminRecovery extends Command
     protected $signature = 'dilgo:admin {email}
         {--create : Create the account if it does not exist}
         {--name= : Display name when creating}
-        {--role=super_admin : user|editor|admin|super_admin}
+        {--role=super_admin : user|support|editor|admin|super_admin}
         {--reset-password : Generate a new random password}
         {--reset-2fa : Remove TOTP 2FA}
         {--unlock : Clear lockout/ban}';

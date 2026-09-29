@@ -84,7 +84,7 @@ class ExamPartnerAuthTest extends TestCase
         $coupon = UserItem::query()->where('user_id', $user->id)->where('source', 'chest')->first();
         $this->assertNotNull($coupon->code);
         $this->assertSame('active', $coupon->status);
-        $this->assertSame(1, PartnerOffer::query()->sum('awarded'));
+        $this->assertSame(1, (int) PartnerOffer::query()->sum('awarded'));
 
         // With every offer out of stock the chest still pays out (gems fallback).
         PartnerOffer::query()->update(['stock' => 1, 'awarded' => 1]);

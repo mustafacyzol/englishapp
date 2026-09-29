@@ -15,7 +15,7 @@ class WordController extends Controller
     {
         $user = $request->user();
         $words = $user->words()
-            ->when($request->query('q'), fn ($q, $s) => $q->where('word', 'like', "%{$s}%"))
+            ->when(is_string($request->query('q')) ? $request->query('q') : null, fn ($q, $s) => $q->where('word', 'like', "%{$s}%"))
             ->when($request->query('filter') === 'due', fn ($q) => $q->where('due_at', '<=', now()))
             ->when($request->query('filter') === 'mastered', fn ($q) => $q->where('interval_days', '>=', 21))
             ->latest()->paginate(50);

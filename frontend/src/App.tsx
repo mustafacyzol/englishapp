@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { RouteSeo } from './lib/seo'
 import { useAuth } from './lib/auth'
 import { Spinner } from './components/ui/Misc'
 import AppLayout from './layouts/AppLayout'
@@ -86,6 +87,7 @@ export default function App() {
   return (
     <Suspense fallback={<Spinner className="min-h-[60vh]" />}>
       {DEMO && <DemoBar />}
+      <RouteSeo />
       <Routes>
         <Route element={<PublicLayout />}>
           <Route path="/" element={user ? <Navigate to="/learn" replace /> : <Landing />} />

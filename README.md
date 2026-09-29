@@ -15,6 +15,7 @@ HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyun
 - [Klasör yapısı](#klasör-yapısı)
 - [Güvenlik](#güvenlik)
 - [Mobil uygulama (iOS / Android)](#mobil-uygulama-ios--android)
+- [Kurulum rehberi (veritabanı, SQL, güvenlik, SEO)](docs/KURULUM.md) · tek komut: `./scripts/install.sh`
 - [Yayına alma (Hostinger)](docs/DEPLOY_HOSTINGER.md)
 - [Ürün stratejisi ve farkımız](docs/PRODUCT.md)
 
@@ -127,7 +128,7 @@ backend/
 frontend/
   src/pages/public|auth|app|admin     src/components/ui|game     src/lib (api, auth, speech, fx)
   capacitor.config.ts                  public/.htaccess (SPA + güvenlik başlıkları)
-docs/   DEPLOY_HOSTINGER.md · PRODUCT.md
+docs/   KURULUM.md · DEPLOY_HOSTINGER.md · PRODUCT.md · ECONOMY.md
 scripts/build-release.sh               Hostinger'a yüklenecek zip'leri üretir
 ```
 

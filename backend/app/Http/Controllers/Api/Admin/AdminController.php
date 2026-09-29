@@ -57,7 +57,7 @@ class AdminController extends Controller
     public function users(Request $request): JsonResponse
     {
         $q = User::query()
-            ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $w->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%")->orWhere('username', 'like', "%{$s}%")))
+            ->when(is_string($request->query('q')) ? $request->query('q') : null, fn ($q, $s) => $q->where(fn ($w) => $w->where('name', 'like', "%{$s}%")->orWhere('email', 'like', "%{$s}%")->orWhere('username', 'like', "%{$s}%")))
             ->when($request->query('role'), fn ($q, $r) => $q->where('role', $r))
             ->when($request->query('status') === 'premium', fn ($q) => $q->where('premium_until', '>', now()))
             ->when($request->query('status') === 'banned', fn ($q) => $q->where('is_banned', true))
@@ -286,7 +286,7 @@ class AdminController extends Controller
             ->when($status === 'expiring', fn ($q) => $q->where('status', 'active')->whereBetween('ends_at', [now(), now()->addDays(7)]))
             ->when($status === 'ended', fn ($q) => $q->where(fn ($w) => $w->where('status', '!=', 'active')->orWhere('ends_at', '<=', now())))
             ->when($request->query('source'), fn ($q, $s) => $q->where('source', $s))
-            ->when($request->query('q'), fn ($q, $s) => $q->whereHas('user', fn ($u) => $u->where('email', 'like', "%{$s}%")->orWhere('name', 'like', "%{$s}%")))
+            ->when(is_string($request->query('q')) ? $request->query('q') : null, fn ($q, $s) => $q->whereHas('user', fn ($u) => $u->where('email', 'like', "%{$s}%")->orWhere('name', 'like', "%{$s}%")))
             ->latest('starts_at');
 
         return response()->json($q->paginate(25)->toArray() + ['counts' => [
@@ -299,7 +299,7 @@ class AdminController extends Controller
     {
         $q = Order::query()->with('user:id,name,email', 'plan:id,name', 'coupon:id,code')
             ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s))
-            ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $w->where('uuid', 'like', "%{$s}%")->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$s}%"))))
+            ->when(is_string($request->query('q')) ? $request->query('q') : null, fn ($q, $s) => $q->where(fn ($w) => $w->where('uuid', 'like', "%{$s}%")->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$s}%"))))
             ->latest();
 
         return response()->json($q->paginate(25));

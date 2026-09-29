@@ -26,8 +26,8 @@ kaydını yeni tamamlamış bir hesaptan kaydedilmiştir.
 | Etkinlik | XP | Günlük tavan (grup) |
 | --- | --- | --- |
 | Ders | dersin kendi değeri (10-20) + hatasızsa 5 | yok (canlarla zaten sınırlı) |
-| Hikâye, ilk okuma | 15 + quiz puanı/20 (en çok 20) | 120 (hikâye) |
-| Hikâye, tekrar | 5 | 120 (hikâye) |
+| Hikâye, ilk okuma | 8 + doğru cevap başına 3 | 120 (hikâye) |
+| Hikâye, tekrar | 3 + doğru cevap başına 1 | 120 (hikâye) |
 | Kelime tekrarı | kelime başına 1 | 60 (kelime) |
 | Kelime oyunları | doğru başına 1 | 60 (kelime) |
 | Sınav sorusu | doğru 3, yanlış 1 | 80 (sınav) |

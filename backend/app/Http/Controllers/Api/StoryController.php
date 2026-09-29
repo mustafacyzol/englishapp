@@ -17,7 +17,7 @@ class StoryController extends Controller
         $q = Story::query()->where('is_published', true)
             ->when($request->query('level'), fn ($q, $l) => $q->where('cefr_level', $l))
             ->when($request->query('category'), fn ($q, $c) => $q->where('category', $c))
-            ->when($request->query('q'), fn ($q, $s) => $q->where(fn ($w) => $w->where('title', 'like', "%{$s}%")->orWhere('title_tr', 'like', "%{$s}%")))
+            ->when(is_string($request->query('q')) ? $request->query('q') : null, fn ($q, $s) => $q->where(fn ($w) => $w->where('title', 'like', "%{$s}%")->orWhere('title_tr', 'like', "%{$s}%")))
             ->orderByRaw('published_at IS NULL, published_at DESC')->orderByDesc('id');
 
         $page = $q->paginate(min(48, (int) $request->query('per_page', 24)), ['id', 'slug', 'title', 'title_tr', 'summary', 'cefr_level', 'category', 'cover_image', 'reading_minutes', 'word_count', 'is_premium', 'reads_count', 'audio_url']);

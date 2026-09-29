@@ -5,6 +5,7 @@ import { get } from '@/lib/api'
 import { dateTR } from '@/lib/format'
 import { media } from '@/lib/assets'
 import { Markdown } from '@/lib/markdown'
+import { useSeo } from '@/lib/seo'
 import type { Paginated } from '@/lib/types'
 import { SkeletonPage } from '@/components/ui/Misc'
 import { LinkButton } from '@/components/ui/Button'
@@ -58,6 +59,8 @@ export function BlogList() {
 export function BlogPost() {
   const { slug } = useParams()
   const { data, isLoading } = useQuery({ queryKey: ['post', slug], queryFn: () => get<{ post: Post; related: Post[] }>(`/blog/${slug}`) })
+  const post = data?.post as (Post & { seo_title?: string | null; seo_description?: string | null }) | undefined
+  useSeo({ title: post ? post.seo_title || post.title : 'Blog', description: post ? post.seo_description || post.excerpt || undefined : undefined, image: post?.cover_image || undefined })
   if (isLoading || !data) return <SkeletonPage variant="cards" />
   const p = data.post
   return (

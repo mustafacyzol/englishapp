@@ -1,5 +1,7 @@
 # Hostinger Premium Web Hosting'e kurulum
 
+> Genel kurulum, hazır SQL dosyası, güvenlik ve SEO kontrol listesi için: [KURULUM.md](KURULUM.md). SSH erişiminiz varsa `./scripts/install.sh` adımların çoğunu sizin yerinize yapar.
+
 Hedef düzen (önerilen):
 
 | Adres | Ne çalışır | Sunucudaki klasör |
@@ -105,6 +107,8 @@ Ardından:
 ```bash
 php artisan migrate --force
 php artisan db:seed --force          # müfredat, hikayeler, rozetler, görevler, paketler, AI senaryoları (demo hesap OLUŞTURMAZ)
+# SSH yoksa bu iki komut yerine phpMyAdmin ile backend/database/sql/dilgo_install.sql dosyasını içe aktarabilirsiniz
+php artisan storage:link             # admin panelinden yüklenen avatarlar için
 php artisan dilgo:admin siz@bayrakdilokullari.com --create --name="Adınız" --role=super_admin
 php artisan config:cache && php artisan route:cache && php artisan view:cache
 chmod -R 775 storage bootstrap/cache

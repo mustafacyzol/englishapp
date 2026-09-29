@@ -260,7 +260,7 @@ export function BlogEdit() {
           <section className="ink-card space-y-3 p-5">
             <h2 className="font-extrabold">Arama motoru (SEO)</h2>
             <div className="rounded-2xl border-2 border-line bg-card p-3">
-              <p className="truncate text-xs text-ink-soft">dilgo.com.tr › blog › {p.slug || 'adres'}</p>
+              <p className="truncate text-xs text-ink-soft">dilgo.app › blog › {p.slug || 'adres'}</p>
               <p className="mt-0.5 line-clamp-1 text-[17px] font-semibold text-[#1a0dab] dark:text-sky">{seoTitle || 'Sayfa başlığı'}</p>
               <p className="mt-0.5 line-clamp-2 text-xs text-ink-soft">{seoDesc || 'Arama sonucunda görünecek kısa açıklama.'}</p>
             </div>

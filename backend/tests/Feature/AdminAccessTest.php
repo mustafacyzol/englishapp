@@ -79,4 +79,17 @@ class AdminAccessTest extends TestCase
             ->assertJsonPath('periods.all.orders', 3);
         $this->getJson('/api/v1/admin/subscribers')->assertOk()->assertJsonStructure(['data', 'counts' => ['active', 'expiring']]);
     }
+
+    public function test_hostile_query_input_is_harmless(): void
+    {
+        $this->staff('admin');
+        $this->getJson("/api/v1/admin/users?q=' OR 1=1 --")->assertOk()->assertJsonPath('total', 0);
+        $this->getJson('/api/v1/admin/stories?q[]=x&is_published[]=1&per_page=-5')->assertOk();
+        $this->getJson('/api/v1/admin/stories?sort=password')->assertOk();
+    }
+
+    public function test_sitemap_lists_published_posts(): void
+    {
+        $this->get('/sitemap.xml')->assertOk()->assertHeader('Content-Type', 'application/xml; charset=UTF-8')->assertSee('<urlset', false)->assertSee('/blog/', false);
+    }
 }
