@@ -54,9 +54,9 @@ php artisan db:seed --force
 - phpMyAdmin: veritabanını seçin, *İçe aktar* sekmesi, dosyayı seçin, karakter seti `utf8mb4`, *Git*.
 - Komut satırı: `mysql -u dilgo -p dilgo < backend/database/sql/dilgo_install.sql`
 
-Dosya; 55 tablonun tamamını, kursları ve dersleri, hikâyeleri, rozetleri, görevleri, mağaza ürünlerini, Premium paketlerini, sınav sorularını, avatarları ve migration kayıtlarını içerir. **Hiçbir kullanıcı hesabı içermez.** Migration kayıtları dahil olduğu için sonradan `php artisan migrate` çalıştırırsanız yalnızca yeni sürümlerde eklenen değişiklikler uygulanır.
+Dosya; 57 tablonun tamamını, kursları ve dersleri, hikâyeleri, rozetleri, görevleri, mağaza ürünlerini, Premium paketlerini, sınav sorularını, avatarları ve migration kayıtlarını içerir. **Hiçbir kullanıcı hesabı içermez.** Migration kayıtları dahil olduğu için sonradan `php artisan migrate` çalıştırırsanız yalnızca yeni sürümlerde eklenen değişiklikler uygulanır.
 
-> Bu SQL dosyası gerçek bir MariaDB üzerinde tüm migration'lar çalıştırılarak üretildi ve geri içe aktarılarak doğrulandı. Test takımı (54 test) hem SQLite hem MySQL üzerinde geçiyor.
+> Bu SQL dosyası gerçek bir MariaDB üzerinde tüm migration'lar çalıştırılarak üretildi ve geri içe aktarılarak doğrulandı. Test takımı (58 test) hem SQLite hem MySQL üzerinde geçiyor.
 
 ## 4) Backend ayarları (`backend/.env`)
 
@@ -114,7 +114,7 @@ Her dakika çalışacak tek bir cron yeterlidir:
 * * * * * /usr/bin/php /YOL/backend/artisan schedule:run >> /dev/null 2>&1
 ```
 
-Bu cron; e-posta kuyruğunu, lig kapanışlarını (pazartesi 00:05), seri hatırlatmalarını, süresi dolan kartları ve token temizliğini yürütür.
+Bu cron; e-posta kuyruğunu, lig kapanışlarını (pazartesi 00:05), seri hatırlatmalarını, pazartesi sabahı haftalık karne e-postasını, bir süredir girmeyen öğrencilere en fazla üç nazik "geri dön" notunu (2, 5 ve 14. gün), süresi dolan kartları ve token temizliğini yürütür.
 
 ## 7) Otomatik kurulum betiği
 
@@ -170,7 +170,7 @@ Sizin yapmanız gerekenler:
 ```bash
 cd backend
 php artisan migrate:status        # hepsi "Ran" olmalı
-php artisan test                  # geliştirme ortamında: 54 test geçmeli
+php artisan test                  # geliştirme ortamında: 58 test geçmeli
 curl https://api.dilgo.app/up     # 200 dönmeli
 curl https://api.dilgo.app/api/v1/config
 curl https://api.dilgo.app/sitemap.xml

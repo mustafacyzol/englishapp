@@ -92,6 +92,22 @@ CREATE TABLE `ai_scenarios` (
   UNIQUE KEY `ai_scenarios_key_unique` (`key`)
 ) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `arena_presence`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `arena_presence` (
+  `user_id` bigint(20) unsigned NOT NULL,
+  `status` varchar(12) NOT NULL DEFAULT 'idle',
+  `last_seen_at` timestamp NOT NULL,
+  `searching_since` timestamp NULL DEFAULT NULL,
+  `matched_duel_id` bigint(20) unsigned DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  KEY `arena_presence_matched_duel_id_foreign` (`matched_duel_id`),
+  KEY `arena_presence_last_seen_at_index` (`last_seen_at`),
+  CONSTRAINT `arena_presence_matched_duel_id_foreign` FOREIGN KEY (`matched_duel_id`) REFERENCES `duels` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `arena_presence_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `audit_logs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -313,9 +329,12 @@ CREATE TABLE `duels` (
   `finished_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
+  `match_id` varchar(20) DEFAULT NULL,
+  `live` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`live`)),
   PRIMARY KEY (`id`),
   KEY `duels_user_id_created_at_index` (`user_id`,`created_at`),
   KEY `duels_ghost_id_finished_at_index` (`ghost_id`,`finished_at`),
+  KEY `duels_match_id_index` (`match_id`),
   CONSTRAINT `duels_ghost_id_foreign` FOREIGN KEY (`ghost_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
   CONSTRAINT `duels_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -420,7 +439,7 @@ CREATE TABLE `institution_members` (
   KEY `institution_members_user_id_status_index` (`user_id`,`status`),
   CONSTRAINT `institution_members_institution_id_foreign` FOREIGN KEY (`institution_id`) REFERENCES `institutions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `institution_members_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `institutions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -447,7 +466,7 @@ CREATE TABLE `institutions` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `institutions_slug_unique` (`slug`),
   UNIQUE KEY `institutions_join_code_unique` (`join_code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `job_batches`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -565,7 +584,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `newsletter_subscribers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -705,6 +724,27 @@ CREATE TABLE `personal_access_tokens` (
   UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
   KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`),
   KEY `personal_access_tokens_expires_at_index` (`expires_at`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `placement_results`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `placement_results` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `token` varchar(64) NOT NULL,
+  `user_id` bigint(20) unsigned DEFAULT NULL,
+  `level` varchar(2) NOT NULL,
+  `score` tinyint(3) unsigned NOT NULL,
+  `bands` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`bands`)),
+  `skills` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`skills`)),
+  `answered` smallint(5) unsigned NOT NULL,
+  `claimed_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `placement_results_token_unique` (`token`),
+  KEY `placement_results_user_id_foreign` (`user_id`),
+  CONSTRAINT `placement_results_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `plans`;
@@ -1144,7 +1184,7 @@ CREATE TABLE `users` (
   KEY `users_duel_trophies_index` (`duel_trophies`),
   CONSTRAINT `users_institution_id_foreign` FOREIGN KEY (`institution_id`) REFERENCES `institutions` (`id`) ON DELETE SET NULL,
   CONSTRAINT `users_referred_by_id_foreign` FOREIGN KEY (`referred_by_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `xp_events`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;

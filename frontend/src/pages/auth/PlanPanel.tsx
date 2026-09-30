@@ -55,8 +55,6 @@ const AGE_SHORT: Record<string, string> = { kid: 'Çocuk (7-12)', teen: 'Genç (
 export function PassPanel({ name, age, mot, exam, interests, focus, level, slot, pace, weeks, step }: PassProps) {
   const higo = HIGO[step] ?? HIGO.name
   const at = Math.max(0, ORDER.indexOf(step))
-  const steps = ORDER.filter((k) => k !== 'exam' || exam || step === 'exam')
-  const idx = Math.max(0, steps.indexOf(step))
   const rows = [
     { k: 'age', l: 'Yaş', v: age ? AGE_SHORT[age] : '' },
     { k: 'goal', l: 'Hedef', v: mot?.label ?? '' },
@@ -74,10 +72,6 @@ export function PassPanel({ name, age, mot, exam, interests, focus, level, slot,
       <div className="relative z-10 px-10 pt-9 xl:px-14">
         <div className="flex items-center justify-between">
           <Link to="/" className="font-display text-3xl font-black tracking-tight text-[#1f2433]">dil<span className="text-flame">go</span></Link>
-          <span className="font-mono text-xs font-bold text-[#676d7c]">{idx + 1} / {steps.length}</span>
-        </div>
-        <div className="mt-5 flex gap-1.5" aria-hidden>
-          {steps.map((k, i) => <span key={k} className="h-1.5 flex-1 overflow-hidden rounded-full bg-[#ece4d8]"><motion.span className="block h-full rounded-full bg-flame" initial={false} animate={{ width: i < idx ? '100%' : i === idx ? '45%' : '0%' }} transition={{ type: 'spring', stiffness: 120, damping: 20 }} /></span>)}
         </div>
       </div>
 

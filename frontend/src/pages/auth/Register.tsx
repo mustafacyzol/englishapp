@@ -207,7 +207,8 @@ export default function Register() {
         <motion.div key={key} initial={{ x: 28, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -28, opacity: 0 }} transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}>
           {key === 'name' && (
             <form onSubmit={(e) => { e.preventDefault(); if (canNext.name) next() }} className="space-y-5">
-              <div className="flex items-center gap-4 rounded-3xl bg-paper-2/70 p-4">
+              {/* on phones Higo greets here; on desktop he speaks from the side panel */}
+              <div className="flex items-center gap-4 rounded-3xl bg-paper-2/70 p-4 lg:hidden">
                 <img src={higoImg('wave')} alt="Higo" className="size-16 shrink-0 object-contain" />
                 <p className="font-semibold text-ink-soft">“Ben Higo, DilGO rehberin. Adını yaz, planını sana özel kuralım.”</p>
               </div>
