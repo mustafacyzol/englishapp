@@ -10,7 +10,7 @@ import { useAuth } from '@/lib/auth'
 import { storage } from '@/lib/storage'
 import type { Cefr, Me, SkillKey } from '@/lib/types'
 import { SKILL, SKILLS } from '@/lib/skills'
-import { EXAMS, FOCUS_TEXT, INTERESTS, MOTIVATIONS, PACES, STUDY_TIMES } from '@/lib/onboarding'
+import { EXAMS, FOCUS_TEXT, INTERESTS, MOTIVATIONS, PACES, PLACEMENT_TOKEN, STUDY_TIMES } from '@/lib/onboarding'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert } from '@/components/ui/Misc'
@@ -53,7 +53,8 @@ const AGES = [
 ] as const
 
 /** The exam step only appears for teens and adults who want it: exam as the goal, or ticked as an extra. */
-const flowFor = (d: Pick<Draft, 'motivation' | 'examOpt' | 'age'>): StepKey[] => ['name', 'age', 'goal', ...(d.age !== 'kid' && (d.motivation === 'exam' || d.examOpt) ? (['exam'] as const) : []), 'interests', 'focus', 'level', 'time', 'account']
+// With a finished placement test the level step is skipped: the test result becomes the level.
+const flowFor = (d: Pick<Draft, 'motivation' | 'examOpt' | 'age'>, placed = false): StepKey[] => ['name', 'age', 'goal', ...(d.age !== 'kid' && (d.motivation === 'exam' || d.examOpt) ? (['exam'] as const) : []), 'interests', 'focus', ...(placed ? [] : (['level'] as const)), 'time', 'account']
 const EMPTY: Draft = { step: 'name', name: '', age: '', motivation: '', exam: '', examDate: '', interests: [], focus: '', level: 'A1', time: '', daily: 20, examOpt: false }
 
 export default function Register() {
@@ -64,7 +65,7 @@ export default function Register() {
   const nav = useNavigate()
   const [d, setD] = useState<Draft>(EMPTY)
   const [loaded, setLoaded] = useState(false)
-  const [placed, setPlaced] = useState(false)
+  const [placementToken, setPlacementToken] = useState<string | null>(null)
   const [form, setForm] = useState({ email: '', password: '', password_confirmation: '', referral_code: '', accept_terms: false, marketing_opt_in: false, parent_consent: false })
   const [captcha, setCaptcha] = useState('')
   const inv = useQuery({ queryKey: ['invite', invite], queryFn: () => get<{ institution: { name: string }; email: string }>(`/invites/${invite}`), enabled: !!invite, retry: false })
@@ -87,11 +88,7 @@ export default function Register() {
       } catch {
         /* corrupt draft */
       }
-      const lvl = await storage.get('dilgo.placement')
-      if (lvl) {
-        draft = { ...draft, level: lvl as Cefr }
-        setPlaced(true)
-      }
+      setPlacementToken(await storage.get(PLACEMENT_TOKEN))
       setD(draft)
       setLoaded(true)
     })()
@@ -103,7 +100,7 @@ export default function Register() {
     if (inv.data?.email) setForm((f) => ({ ...f, email: f.email || inv.data!.email }))
   }, [inv.data])
 
-  const flow = useMemo(() => flowFor(d), [d.motivation, d.examOpt, d.age]) // eslint-disable-line react-hooks/exhaustive-deps
+  const flow = useMemo(() => flowFor(d, !!placementToken), [d.motivation, d.examOpt, d.age, placementToken]) // eslint-disable-line react-hooks/exhaustive-deps
   const step = Math.max(0, flow.indexOf(d.step))
   const key = flow[step]
   const total = flow.length
@@ -128,7 +125,8 @@ export default function Register() {
     focus_skill: d.focus || undefined,
     study_time: d.time || undefined,
     daily_goal_xp: d.daily,
-    cefr_level: d.level,
+    cefr_level: placementToken ? undefined : d.level,
+    placement_token: placementToken || undefined,
     invite: invite || undefined,
     referral_code: form.referral_code || undefined,
   })
@@ -136,7 +134,6 @@ export default function Register() {
   const finish = async (token: string, u: Me, remember = true) => {
     await storage.remove('dilgo.ref')
     await storage.remove(DRAFT)
-    await storage.remove('dilgo.placement')
     await signIn(token, u, remember)
     nav(u.email_verified ? '/learn' : '/verify-email', { replace: true })
   }
@@ -322,7 +319,6 @@ export default function Register() {
 
           {key === 'level' && (
             <div className="space-y-3">
-              {placed && <Alert tone="success">Seviye testinden: <b>{d.level}</b>. İstersen değiştirebilirsin.</Alert>}
               {LEVELS.map((l) => (
                 <button key={l.v} onClick={pick({ level: l.v })} className={clsx('press flex w-full items-center gap-4 rounded-2xl border-2 px-4 py-3.5 text-left transition', d.level === l.v ? 'border-ink shadow-[0_3px_0_0_var(--ink)]' : 'border-line shadow-hard hover:border-ink/25')}>
                   <span className={clsx('grid size-11 shrink-0 place-items-center rounded-xl font-display font-black', d.level === l.v ? 'bg-ink text-paper' : 'bg-paper-2')}>{l.v}</span>

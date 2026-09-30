@@ -19,8 +19,12 @@ import { Empty, PageHeader, Progress, SkeletonPage, Tabs } from '@/components/ui
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 
-type Tab = 'vault' | 'kupon' | 'yol' | 'xp' | 'redeem' | 'invite'
-const HASH: Record<string, Tab> = { '#yol': 'yol', '#seri': 'yol', '#xp': 'xp', '#kuponlar': 'kupon' }
+/**
+ * Three plain questions, three tabs: what do I have (cards and partner coupons),
+ * how do I earn more (streak track, XP and gems), and codes or invites.
+ */
+type Tab = 'vault' | 'earn' | 'extra'
+const HASH: Record<string, Tab> = { '#yol': 'earn', '#seri': 'earn', '#xp': 'earn', '#kuponlar': 'vault', '#davet': 'extra', '#kod': 'extra' }
 
 export default function Rewards() {
   const { hash } = useLocation()
@@ -33,16 +37,38 @@ export default function Rewards() {
   const live = coupons.data?.data.filter((c) => c.status === 'active').length ?? 0
   return (
     <div className="mx-auto max-w-5xl">
-      <PageHeader kicker="Kazandıkların" title="Ödüller" />
+      <PageHeader kicker="Kazandıkların" title="Ödüllerim" />
       <div className="mb-8">
-        <Tabs value={tab} onChange={setTab} items={[{ value: 'vault', label: 'Kasam' }, ...(coupons.data?.data.length ? [{ value: 'kupon' as Tab, label: live ? `Kuponlarım (${live})` : 'Kuponlarım' }] : []), { value: 'yol', label: 'Seri ödülleri' }, { value: 'xp', label: 'XP ve elmas' }, { value: 'redeem', label: 'Kod kullan' }, { value: 'invite', label: 'Arkadaş davet et' }]} />
+        <Tabs value={tab} onChange={setTab} items={[{ value: 'vault', label: live ? `Kasam · ${live} kupon` : 'Kasam' }, { value: 'earn', label: 'Nasıl kazanırım?' }, { value: 'extra', label: 'Kod ve davet' }]} />
       </div>
-      {tab === 'vault' && <Vault />}
-      {tab === 'kupon' && <Coupons list={coupons.data?.data} />}
-      {tab === 'yol' && <Roadmap onVault={() => setTab('vault')} />}
-      {tab === 'xp' && <Earn />}
-      {tab === 'redeem' && <Redeem />}
-      {tab === 'invite' && <Invite />}
+      {tab === 'vault' && (
+        <>
+          {!!coupons.data?.data.length && (
+            <section className="mb-10">
+              <h2 className="mb-3 font-display text-xl font-black">İş ortağı kuponların</h2>
+              <Coupons list={coupons.data?.data} />
+            </section>
+          )}
+          {!!coupons.data?.data.length && <h2 className="mb-3 font-display text-xl font-black">Kartların</h2>}
+          <Vault />
+        </>
+      )}
+      {tab === 'earn' && (
+        <>
+          <h2 className="mb-1 font-display text-xl font-black">Seri ödülleri</h2>
+          <p className="mb-5 text-sm text-ink-soft">Seri günlerin arttıkça bu duraklarda kartlar açılır ve kasana düşer.</p>
+          <Roadmap onVault={() => setTab('vault')} />
+          <h2 className="mb-1 mt-12 font-display text-xl font-black">XP ve elmas nereden gelir?</h2>
+          <p className="mb-5 text-sm text-ink-soft">Her etkinliğin kazandırdığı puanlar. Elmaslarını Mağaza’da harcarsın.</p>
+          <Earn />
+        </>
+      )}
+      {tab === 'extra' && (
+        <div className="grid gap-8 lg:grid-cols-2">
+          <section><h2 className="mb-3 font-display text-xl font-black">Kod kullan</h2><Redeem /></section>
+          <section><h2 className="mb-3 font-display text-xl font-black">Arkadaşını davet et</h2><Invite /></section>
+        </div>
+      )}
     </div>
   )
 }

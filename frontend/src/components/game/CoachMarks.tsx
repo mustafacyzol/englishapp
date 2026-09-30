@@ -6,7 +6,9 @@ import clsx from 'clsx'
 import { patch } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { TUTOR } from '@/lib/tutor'
-import { examName, examOn } from '@/lib/onboarding'
+import { examName, examOn, PLACEMENT_TOKEN } from '@/lib/onboarding'
+import { storage } from '@/lib/storage'
+import { HigoMotion } from './HigoMotion'
 import { higoImg } from './Higo'
 
 interface Mark {
@@ -31,7 +33,16 @@ export function CoachMarks() {
   const [ready, setReady] = useState(false)
   const [rect, setRect] = useState<DOMRect | null>(null)
   const [closed, setClosed] = useState(false)
-  const active = !!user && !user.preferences?.tour_done && !closed && loc.pathname === '/learn'
+  const [intro, setIntro] = useState(true)
+  // A placement result is revealed first; the tour waits until that is closed.
+  const [waiting, setWaiting] = useState(true)
+  useEffect(() => {
+    storage.get(PLACEMENT_TOKEN).then((t) => !t && setWaiting(false))
+    const done = () => setWaiting(false)
+    window.addEventListener('dilgo:reveal-done', done)
+    return () => window.removeEventListener('dilgo:reveal-done', done)
+  }, [])
+  const active = !!user && !user.preferences?.tour_done && !closed && !waiting && loc.pathname === '/learn'
 
   const marks = useMemo<Mark[]>(() => {
     if (!user) return []
@@ -72,7 +83,7 @@ export function CoachMarks() {
   }, [find, marks, i])
 
   useLayoutEffect(() => {
-    if (!active || !ready) return
+    if (!active || !ready || intro) return
     const el = find(marks[i])
     if (!el) {
       // Nothing to point at on this screen size: move on.
@@ -90,7 +101,7 @@ export function CoachMarks() {
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }
-  }, [active, ready, i, marks, find, measure])
+  }, [active, ready, intro, i, marks, find, measure])
 
   const finish = useCallback(() => {
     setClosed(true)
@@ -115,7 +126,25 @@ export function CoachMarks() {
     return () => window.removeEventListener('keydown', key)
   }, [active, ready, next, finish])
 
-  if (!active || !ready || !rect) return null
+  if (active && ready && intro && user)
+    return (
+      <div className="fixed inset-0 z-[70] grid place-items-center bg-[rgba(10,12,18,.55)] p-4 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-label="Hoş geldin">
+        <motion.div initial={{ opacity: 0, y: 30, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 22 }} className="relative w-full max-w-sm overflow-hidden rounded-[28px] border-2 border-line bg-card p-6 pt-2 text-center shadow-soft">
+          <HigoMotion className="mx-auto -mb-2 size-44 object-contain" label="Higo el sallıyor" />
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-flame">DilGO’ya hoş geldin</p>
+          <h2 className="mt-1 font-display text-2xl font-black leading-tight">Merhaba {user.name.split(' ')[0]}, ben Higo!</h2>
+          <p className="mt-2 text-sm leading-relaxed text-ink-soft">Seni 30 saniyede gezdireyim: yolun, serin, kelime pratiği, Defne ve Arena. Sonra doğrudan ilk dersine geçersin.</p>
+          <div className="mt-4 flex flex-wrap justify-center gap-1.5">
+            {['Yol haritası', 'Seri', 'Pratik', 'Defne', 'Arena'].map((t, k) => (
+              <motion.span key={t} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25 + k * 0.06 }} className="rounded-full bg-paper-2 px-2.5 py-1 text-xs font-extrabold">{t}</motion.span>
+            ))}
+          </div>
+          <button onClick={() => setIntro(false)} className="press mt-6 flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-flame font-display font-extrabold uppercase tracking-wide text-white shadow-[0_3px_0_0_var(--color-flame-deep)]">Turu başlat <ArrowRight className="size-4" /></button>
+          <button onClick={finish} className="mt-2 w-full rounded-xl py-2 text-sm font-bold text-ink-soft hover:text-ink">Kendim keşfederim</button>
+        </motion.div>
+      </div>
+    )
+  if (!active || !ready || !rect || intro) return null
   const m = marks[i]
   const vw = window.innerWidth
   const vh = window.innerHeight

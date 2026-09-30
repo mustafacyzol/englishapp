@@ -164,11 +164,36 @@ class LearningLoopTest extends TestCase
         $this->postJson('/api/v1/ai/conversations/'.$conv->json('conversation.id').'/messages', ['text' => 'A latte please'])->assertStatus(503);
     }
 
-    public function test_placement_sets_level(): void
+    public function test_placement_is_applied_without_revealing_the_level(): void
     {
         $bank = json_decode(file_get_contents(database_path('data/placement.json')), true);
         $answers = collect($bank)->map(fn ($q) => in_array($q['level'], ['A1', 'A2'], true) ? $q['answer'] : -1)->all();
-        $this->postJson('/api/v1/placement', ['answers' => $answers])->assertOk()->assertJsonPath('level', 'B1');
+
+        // signed in: the level is applied at once, but the response only carries a token
+        $res = $this->postJson('/api/v1/placement', ['answers' => $answers])->assertCreated()->assertJsonMissingPath('level');
         $this->assertSame('B1', $this->user->fresh()->cefr_level);
+        $this->postJson('/api/v1/placement/claim', ['token' => $res->json('token')])->assertOk()->assertJsonPath('result.level', 'B1');
+
+        // someone else cannot take a result that already belongs to this learner
+        $other = User::factory()->create();
+        $this->actingAs($other, 'sanctum')->postJson('/api/v1/placement/claim', ['token' => $res->json('token')])->assertNotFound();
+        $this->postJson('/api/v1/placement/claim', ['token' => 'nope'])->assertNotFound();
+    }
+
+    public function test_guest_placement_is_applied_on_sign_up(): void
+    {
+        $bank = json_decode(file_get_contents(database_path('data/placement.json')), true);
+        $answers = collect($bank)->map(fn ($q) => $q['level'] !== 'C1' ? $q['answer'] : 0)->all();
+        app('auth')->forgetGuards();
+        $token = $this->withHeaders(['Authorization' => ''])->postJson('/api/v1/placement', ['answers' => $answers])->assertCreated()->json('token');
+        $this->assertDatabaseHas('placement_results', ['token' => $token, 'user_id' => null, 'level' => 'C1']);
+
+        $this->postJson('/api/v1/auth/register', [
+            'name' => 'Deniz', 'email' => 'deniz.test@example.com', 'password' => 'secret123', 'password_confirmation' => 'secret123',
+            'accept_terms' => true, 'placement_token' => $token,
+        ])->assertCreated();
+        $u = User::query()->where('email', 'deniz.test@example.com')->first();
+        $this->assertSame('C1', $u->cefr_level);
+        $this->assertDatabaseHas('placement_results', ['token' => $token, 'user_id' => $u->id]);
     }
 }

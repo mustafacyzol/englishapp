@@ -17,6 +17,7 @@ import { useSiteConfig } from '@/lib/site'
 import { SideRail, type Dashboard } from './SideRail'
 import { Img } from '@/components/ui/Img'
 import { CoachMarks } from '@/components/game/CoachMarks'
+import { PlacementReveal } from '@/components/game/PlacementReveal'
 import { examOn } from '@/lib/onboarding'
 import { UserAvatar } from '@/components/game/UserAvatar'
 import { TUTOR } from '@/lib/tutor'
@@ -67,7 +68,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
 /** Pages that live together under one menu entry, switched with a tab strip. */
 export const HUBS: { key: string; tabs: { to: string; label: string; icon: NavIcon }[] }[] = [
   { key: 'arena', tabs: [{ to: '/duel', label: 'Gölge Düellosu', icon: IconGhost }, { to: '/leagues', label: 'Ligler', icon: IconCup }] },
-  { key: 'rewards', tabs: [{ to: '/rewards', label: 'Kasa', icon: IconGift }, { to: '/quests', label: 'Görevler', icon: IconQuest }, { to: '/shop', label: 'Mağaza', icon: IconBag }] },
+  { key: 'rewards', tabs: [{ to: '/rewards', label: 'Ödüllerim', icon: IconGift }, { to: '/quests', label: 'Görevler', icon: IconQuest }, { to: '/shop', label: 'Mağaza', icon: IconBag }] },
 ]
 
 /**
@@ -194,6 +195,7 @@ export default function AppLayout() {
 
       <MoreSheet open={more} onClose={() => setMore(false)} staff={!!user.is_staff} manager={user.institution_role === 'manager'} exam={on('exam')} />
       <CoachMarks />
+      <PlacementReveal />
     </div>
   )
 }

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { SkillMeter } from '@/components/game/SkillMeter'
 import clsx from 'clsx'
-import { ChevronRight, Flame, Palette, Pencil, Settings, Share2, Target, Zap } from 'lucide-react'
+import { ChevronRight, Flame, ImageIcon, Pencil, Settings, Share2, Target, Zap } from 'lucide-react'
 import { ProfileBanner } from '@/components/game/ProfileBanner'
 import { get } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
@@ -50,23 +50,36 @@ export default function Profile() {
   return (
     <div className="mx-auto max-w-3xl">
       <section className="ink-card relative mb-6 overflow-hidden">
-        <ProfileBanner banner={user.banner} className="h-28 sm:h-32" />
-        <div className="relative -mt-12 flex flex-wrap items-end gap-4 px-5 sm:px-6">
-          <button onClick={() => setPicker('avatar')} className="group relative rounded-[28px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/30" aria-label="Avatarını değiştir">
-            <Avatar name={user.name} avatar={user.avatar} frame={user.frame} />
-            <span className="absolute -bottom-1 -right-1 grid size-9 place-items-center rounded-full border-4 border-card bg-ink text-paper transition group-hover:scale-110"><Pencil className="size-3.5" /></span>
+        {/* the cover is only a picture: nothing sits on it except a small "change cover" chip */}
+        <div className="relative">
+          <ProfileBanner banner={user.banner} className="h-32 sm:h-40" />
+          <button onClick={() => setPicker('banner')} className="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-black/45 px-3 py-1.5 text-xs font-extrabold text-white backdrop-blur transition hover:bg-black/60">
+            <ImageIcon className="size-3.5" /> Kapağı değiştir
           </button>
-          <div className="ml-auto flex gap-2 pb-1">
-            <button onClick={() => setPicker('frame')} className="press flex h-11 items-center gap-2 rounded-xl border-2 border-line bg-card px-3 text-sm font-extrabold shadow-hard-sm"><Palette className="size-4" /> Profili düzenle</button>
-            <button onClick={share} className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm" aria-label="Paylaş"><Share2 className="size-5" /></button>
-            <Link to="/settings" className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm" aria-label="Ayarlar"><Settings className="size-5" /></Link>
-          </div>
         </div>
-        {picker && <AvatarPicker open onClose={() => setPicker(null)} start={picker} />}
-        <div className="px-5 pb-6 pt-3 sm:px-6">
-          <h1 className="text-3xl font-extrabold">{user.name}</h1>
-          <p className="font-semibold text-ink-soft">@{user.username} · {dateTR(user.created_at)} tarihinden beri</p>
-          {user.bio ? <p className="mt-2 max-w-lg text-[15px]">{user.bio}</p> : <button onClick={() => setPicker('bio')} className="mt-2 text-sm font-bold text-flame">+ Kendinden bir cümle ekle</button>}
+        <div className="px-5 pb-6 sm:px-6">
+          <div className="-mt-12 flex items-end gap-4">
+            <button onClick={() => setPicker('avatar')} className="group relative shrink-0 rounded-[28px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/30" aria-label="Avatarını değiştir">
+              <Avatar name={user.name} avatar={user.avatar} frame={user.frame} />
+              <span className="absolute -bottom-1 -right-1 grid size-9 place-items-center rounded-full border-4 border-card bg-ink text-paper transition group-hover:scale-110"><Pencil className="size-3.5" /></span>
+            </button>
+          </div>
+
+          <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <h1 className="text-3xl font-extrabold leading-tight">{user.name}</h1>
+              <p className="font-semibold text-ink-soft">@{user.username} · {dateTR(user.created_at)} tarihinden beri</p>
+            </div>
+            {/* one primary action, two quiet ones, all below the cover */}
+            <div className="flex shrink-0 gap-2">
+              <button onClick={() => setPicker('avatar')} className="press flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-ink px-4 text-sm font-extrabold text-paper shadow-hard-sm sm:flex-none"><Pencil className="size-4" /> Profili düzenle</button>
+              <button onClick={share} className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card" aria-label="Profilini paylaş" title="Paylaş"><Share2 className="size-5" /></button>
+              <Link to="/settings" className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card" aria-label="Ayarlar" title="Ayarlar"><Settings className="size-5" /></Link>
+            </div>
+          </div>
+          {picker && <AvatarPicker open onClose={() => setPicker(null)} start={picker} />}
+
+          {user.bio ? <p className="mt-3 max-w-lg text-[15px]">{user.bio}</p> : <button onClick={() => setPicker('bio')} className="mt-3 text-sm font-bold text-flame">+ Kendinden bir cümle ekle</button>}
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="ink-chip py-0.5">{user.cefr_level}</span>
             <span className="ink-chip py-0.5">Seviye {user.stats.level}</span>

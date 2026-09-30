@@ -64,3 +64,6 @@ export const examName = (k?: string | null) => EXAMS.find((e) => e.key === k)?.n
  */
 export const examOn = (u?: { exam_target?: string | null; learning_goal?: string | null; age_group?: string | null; preferences?: { exam_mode?: boolean } } | null) =>
   !!u && u.age_group !== 'kid' && (u.preferences?.exam_mode ?? (!!u.exam_target || u.learning_goal === 'exam'))
+
+/** Token of a finished placement test, kept until the account exists and the result is revealed. */
+export const PLACEMENT_TOKEN = 'dilgo.placement_token'

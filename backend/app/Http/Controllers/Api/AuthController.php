@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Presenters\UserPresenter;
+use App\Models\PlacementResult;
 use App\Models\User;
 use App\Services\InstitutionService;
 use App\Services\OtpService;
@@ -57,6 +58,7 @@ class AuthController extends Controller
             'captcha' => ['nullable', 'string'],
             'website' => ['prohibited'], // honeypot
             'device' => ['nullable', 'string', 'max:40'],
+            'placement_token' => ['nullable', 'string', 'max:64'],
         ], [
             'email.unique' => 'Bu e-posta ile zaten bir hesap var.',
             'accept_terms.accepted' => 'Kullanım koşullarını kabul etmelisin.',
@@ -85,6 +87,7 @@ class AuthController extends Controller
         ]);
 
         $this->referrals->attach($user, $data['referral_code'] ?? null);
+        PlacementResult::claimable($data['placement_token'] ?? null, $user)?->applyTo($user);
         if (! empty($data['invite'])) {
             app(InstitutionService::class)->acceptToken($user, $data['invite']);
         }
@@ -179,6 +182,7 @@ class AuthController extends Controller
             'parent_consent' => ['accepted_if:age_group,kid'],
             'referral_code' => ['nullable', 'string', 'max:16'],
             'invite' => ['nullable', 'string', 'max:64'],
+            'placement_token' => ['nullable', 'string', 'max:64'],
         ]);
 
         $claims = SocialToken::verify($provider, $data['id_token']);
@@ -215,6 +219,7 @@ class AuthController extends Controller
             ]);
             $user->forceFill([$column => $claims['sub'], 'email_verified_at' => $claims['email_verified'] ? now() : null])->save();
             $this->referrals->attach($user, $data['referral_code'] ?? null);
+            PlacementResult::claimable($data['placement_token'] ?? null, $user)?->applyTo($user);
             if (! empty($data['invite'])) {
                 app(InstitutionService::class)->acceptToken($user, $data['invite']);
             }

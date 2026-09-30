@@ -331,7 +331,8 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   }
   if ((m = path.match(/^\/auth\/social\/(google|apple)$/))) return { token: 'demo-token', remember: true, user: me() }
   if (path === '/contact') return ok('Mesajın bize ulaştı. En geç 1 iş günü içinde dönüş yapacağız.')
-  if (path === '/placement') return { level: 'A2', score: 68 }
+  if (path === '/placement') return { token: 'demo-placement', answered: 28, total: 30 }
+  if (path === '/placement/claim') return { result: { level: 'B1', score: 64, skills: { vocabulary: 72, grammar: 66, reading: 70, listening: 48 }, bands: {} }, user: me() }
 
   // --- learning
   if ((m = path.match(/^\/lessons\/(\d+)\/complete$/))) {

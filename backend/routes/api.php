@@ -53,6 +53,7 @@ Route::prefix('v1')->group(function () {
 
     Route::middleware(['auth:sanctum', 'active'])->group(function () {
         Route::get('auth/me', [AuthController::class, 'me']);
+        Route::post('placement/claim', [PlacementController::class, 'claim'])->middleware('throttle:20,1');
         Route::post('auth/logout', [AuthController::class, 'logout']);
         Route::post('auth/email/send', [AuthController::class, 'sendVerification'])->middleware('throttle:otp');
         Route::post('auth/email/verify', [AuthController::class, 'verifyEmail'])->middleware('throttle:auth');

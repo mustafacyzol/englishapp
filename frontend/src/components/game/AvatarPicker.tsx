@@ -19,7 +19,8 @@ type Tab = 'avatar' | 'frame' | 'banner' | 'bio'
 /**
  * The profile studio: pick an avatar, wear a frame or cover you own and write a
  * short line about yourself, with a live preview of the card others see in the
- * league and arena. Locked items can be previewed before buying.
+ * league and arena. Only owned frames and covers are listed here; new ones are
+ * bought in the shop (Mağaza > Görünüm), linked from each tab.
  */
 export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolean; onClose: () => void; start?: Tab }) {
   const { user, setUser } = useAuth()
@@ -40,25 +41,25 @@ export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolea
   const bio = draft.bio ?? user.bio ?? ''
   const premium = user.premium.active
   const lockedAvatar = !premium && cat.premium.some((a) => a.key === avatar)
-  const lockedFrame = !!frame && !owned.frames.includes(frame)
-  const lockedBanner = !!banner && !owned.banners.includes(banner)
-  const locked = lockedAvatar || lockedFrame || lockedBanner
+  const ownedFrames = Object.keys(FRAMES).filter((k) => owned.frames.includes(k))
+  const ownedBanners = Object.keys(BANNERS).filter((k) => k !== 'default' && owned.banners.includes(k))
   const changed = Object.keys(draft).length > 0
 
   const TABS: [Tab, string][] = [['avatar', 'Avatar'], ['frame', 'Çerçeve'], ['banner', 'Kapak'], ['bio', 'Hakkımda']]
   return (
     <Modal open={open} onClose={onClose} className="max-w-lg">
       {/* live preview: the card others see */}
-      <div className="overflow-hidden rounded-3xl border-2 border-line">
-        <ProfileBanner banner={banner} className="h-20" />
-        <div className="-mt-10 flex items-end gap-3 px-4 pb-4">
+      <div className="overflow-hidden rounded-3xl border-2 border-line bg-card">
+        <ProfileBanner banner={banner} className="h-24" />
+        <div className="flex gap-3 px-4 pb-4">
           <AnimatePresence mode="popLayout">
-            <motion.div key={`${avatar}-${frame}`} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 380, damping: 22 }}>
-              <UserAvatar name={user.name} avatar={avatar} frame={frame} className="size-20 border-4 border-card" rounded="rounded-[26px]" />
+            <motion.div key={`${avatar}-${frame}`} className="-mt-9 shrink-0" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 380, damping: 22 }}>
+              <UserAvatar name={user.name} avatar={avatar} frame={frame} className="size-[72px] border-4 border-card" rounded="rounded-[24px]" />
             </motion.div>
           </AnimatePresence>
-          <div className="min-w-0 pb-1">
-            <p className="truncate font-display text-lg font-black">{user.name}</p>
+          {/* name and bio sit on the card, below the cover, so any cover stays readable */}
+          <div className="min-w-0 pt-2">
+            <p className="truncate font-display text-lg font-black leading-tight">{user.name}</p>
             <p className="line-clamp-1 text-sm text-ink-soft">{bio || '@' + user.username}</p>
           </div>
         </div>
@@ -86,29 +87,37 @@ export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolea
           </>
         )}
         {tab === 'frame' && (
-          <Grid>
-            <Tile on={!frame} label="Çerçevesiz" onClick={() => setDraft((d) => ({ ...d, frame: null }))}><UserAvatar name={user.name} avatar={avatar} className="m-auto size-14" /></Tile>
-            {Object.entries(FRAMES).map(([k, f]) => (
-              <Tile key={k} on={frame === k} locked={!owned.frames.includes(k)} label={f.label} onClick={() => setDraft((d) => ({ ...d, frame: k }))}>
-                <span className="grid size-full place-items-center"><UserAvatar name={user.name} avatar={avatar} frame={k} className="size-14" /></span>
-              </Tile>
-            ))}
-          </Grid>
+          <>
+            <Grid>
+              <Tile on={!frame} label="Çerçevesiz" onClick={() => setDraft((d) => ({ ...d, frame: null }))}><span className="grid size-full place-items-center"><UserAvatar name={user.name} avatar={avatar} className="size-14" /></span></Tile>
+              {ownedFrames.map((k) => (
+                <Tile key={k} on={frame === k} label={FRAMES[k].label} onClick={() => setDraft((d) => ({ ...d, frame: k }))}>
+                  <span className="grid size-full place-items-center"><UserAvatar name={user.name} avatar={avatar} frame={k} className="size-14" /></span>
+                </Tile>
+              ))}
+              <ShopTile onClose={onClose} label="Yeni çerçeve" />
+            </Grid>
+            {!ownedFrames.length && <p className="mt-3 text-sm text-ink-soft">Henüz çerçeven yok. Mağazada elmasla alabilir, sandıktan kazanabilirsin.</p>}
+          </>
         )}
         {tab === 'banner' && (
-          <div className="grid grid-cols-2 gap-3">
-            {Object.entries(BANNERS).map(([k, b]) => {
-              const key = k === 'default' ? null : k
-              const on = banner === key
-              const lock = !!key && !owned.banners.includes(key)
-              return (
-                <button key={k} onClick={() => setDraft((d) => ({ ...d, banner: key }))} aria-pressed={on} className={clsx('relative overflow-hidden rounded-2xl border-[3px] text-left transition', on ? 'border-flame' : 'border-transparent')}>
-                  <ProfileBanner banner={key} className="h-16" />
-                  <span className="flex items-center justify-between bg-card px-3 py-1.5 text-sm font-extrabold">{b.label}{lock ? <Lock className="size-3.5 text-ink-soft" /> : on ? <Check className="size-4 text-flame" /> : null}</span>
-                </button>
-              )
-            })}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-3">
+              {['default', ...ownedBanners].map((k) => {
+                const key = k === 'default' ? null : k
+                const on = banner === key
+                return (
+                  <button key={k} onClick={() => setDraft((d) => ({ ...d, banner: key }))} aria-pressed={on} className={clsx('relative overflow-hidden rounded-2xl border-[3px] bg-card text-left transition', on ? 'border-flame' : 'border-line hover:border-ink/25')}>
+                    <ProfileBanner banner={key} className="h-16" />
+                    <span className="flex items-center justify-between px-3 py-2 text-sm font-extrabold">{BANNERS[k].label}{on && <Check className="size-4 text-flame" strokeWidth={3} />}</span>
+                  </button>
+                )
+              })}
+              <Link to="/shop?tab=look" onClick={onClose} className="grid min-h-[100px] place-items-center rounded-2xl border-[3px] border-dashed border-line p-3 text-center text-sm font-extrabold text-ink-soft transition hover:border-flame hover:text-flame">
+                <span><ShoppingBag className="mx-auto mb-1 size-5" />Yeni kapak al</span>
+              </Link>
+            </div>
+          </>
         )}
         {tab === 'bio' && (
           <label className="block">
@@ -123,8 +132,6 @@ export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolea
         <Button variant="secondary" className="flex-1" onClick={() => { setDraft({}); onClose() }}>Vazgeç</Button>
         {lockedAvatar ? (
           <Link to="/premium" onClick={onClose} className="press flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-butter font-extrabold text-ink shadow-hard-sm"><Crown className="size-4" /> Premium ile aç</Link>
-        ) : locked ? (
-          <Link to="/shop" onClick={onClose} className="press flex h-12 flex-1 items-center justify-center gap-2 rounded-2xl bg-ink font-extrabold text-paper shadow-hard-sm"><ShoppingBag className="size-4" /> Mağazada gör</Link>
         ) : (
           <Button className="flex-1" loading={save.isPending} disabled={!changed} onClick={() => save.mutate(draft)}>Kaydet</Button>
         )}
@@ -147,5 +154,15 @@ function Tile({ on, locked, label, onClick, children }: { on: boolean; locked?: 
       </span>
       <span className="mt-1 block truncate text-[11px] font-bold text-ink-soft">{label}</span>
     </motion.button>
+  )
+}
+
+/** The last tile of a grid: new frames and covers are bought in the shop. */
+function ShopTile({ onClose, label }: { onClose: () => void; label: string }) {
+  return (
+    <Link to="/shop?tab=look" onClick={onClose} className="group text-center">
+      <span className="grid aspect-square place-items-center rounded-2xl border-[3px] border-dashed border-line text-ink-soft transition group-hover:border-flame group-hover:text-flame"><ShoppingBag className="size-6" /></span>
+      <span className="mt-1 block truncate text-[11px] font-bold text-ink-soft">{label}</span>
+    </Link>
   )
 }

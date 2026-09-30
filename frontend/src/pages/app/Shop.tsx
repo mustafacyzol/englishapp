@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { Gem } from 'lucide-react'
@@ -32,7 +33,8 @@ export default function Shop() {
   const toast = useToast()
   const { data, isLoading } = useQuery({ queryKey: ['shop'], queryFn: () => get<{ items: RewardItem[]; gems: number; heart_refill_gems: number }>('/shop') })
   const [chest, setChest] = useState<UserItem | null>(null)
-  const [tab, setTab] = useState<TabKey>('look')
+  const [params] = useSearchParams()
+  const [tab, setTab] = useState<TabKey>(() => (GROUPS.some((g) => g.key === params.get('tab')) ? (params.get('tab') as TabKey) : 'look'))
   const wear = useMutation({
     mutationFn: (b: { frame?: string | null; banner?: string | null }) => patch<{ user: Me }>('/account', b),
     onSuccess: (r) => { setUser(r.user); toast('Profilinde! Ligde ve arenada artık böyle görünüyorsun.', 'success') },
@@ -63,7 +65,7 @@ export default function Shop() {
   if (isLoading || !data || !user) return <SkeletonPage variant="cards" />
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader kicker="Elmaslarını harca" title="Mağaza">
+      <PageHeader kicker="Elmasla al, hemen kullan" title="Mağaza">
         <span className="ink-chip bg-sky/10 text-lg"><Img src={img('rewards/gems.webp')} alt="" className="size-7" /> {num(user.stats.gems)}</span>
       </PageHeader>
 
