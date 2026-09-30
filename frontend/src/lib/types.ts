@@ -20,7 +20,7 @@ export interface Me {
   learning_goal: string | null
   daily_goal_xp: number
   onboarded: boolean
-  preferences: { email_reminders?: boolean; sound?: boolean; tts_rate?: number; tts_voice?: string; theme?: 'light' | 'dark' | 'system'; frame?: string; tour_done?: boolean; language?: 'tr' | 'en'; exam_mode?: boolean }
+  preferences: { email_reminders?: boolean; email_weekly?: boolean; sound?: boolean; tts_rate?: number; tts_voice?: string; theme?: 'light' | 'dark' | 'system'; frame?: string; tour_done?: boolean; language?: 'tr' | 'en'; exam_mode?: boolean }
   focus_skill: SkillKey | null
   interests: string[]
   study_time: 'morning' | 'lunch' | 'evening' | 'night' | null

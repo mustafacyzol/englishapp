@@ -196,4 +196,20 @@ class LearningLoopTest extends TestCase
         $this->assertSame('C1', $u->cefr_level);
         $this->assertDatabaseHas('placement_results', ['token' => $token, 'user_id' => $u->id]);
     }
+
+    public function test_weekly_report_and_come_back_notes_are_sent_once(): void
+    {
+        \Illuminate\Support\Facades\Notification::fake();
+        $lastWeek = \App\Support\Period::now()->subWeek()->startOfWeek()->addDay()->toDateString();
+        \Illuminate\Support\Facades\DB::table('daily_activities')->insert(['user_id' => $this->user->id, 'date' => $lastWeek, 'xp' => 40, 'lessons' => 2]);
+        $this->artisan('dilgo:weekly-report')->assertSuccessful();
+        \Illuminate\Support\Facades\Notification::assertSentTo($this->user, \App\Notifications\WeeklyReport::class, fn ($n) => $n->week['xp'] === 40 && $n->week['lessons'] === 2);
+
+        $away = User::factory()->create();
+        \Illuminate\Support\Facades\DB::table('daily_activities')->insert(['user_id' => $away->id, 'date' => \App\Support\Period::now()->subDays(5)->toDateString(), 'xp' => 10]);
+        $this->artisan('dilgo:come-back')->assertSuccessful();
+        $this->artisan('dilgo:come-back')->assertSuccessful();
+        \Illuminate\Support\Facades\Notification::assertSentToTimes($away, \App\Notifications\ComeBack::class, 1);
+        $this->assertSame(2, $away->fresh()->preferences['comeback_stage']);
+    }
 }
