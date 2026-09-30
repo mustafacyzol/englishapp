@@ -352,3 +352,41 @@ html[data-age='teen'] {
   background-attachment: local;
 }
 .notebook::placeholder { color: var(--ink-soft); opacity: .7; }
+
+/* ---------------------------------------------------------------- arcade */
+/* The arena's own look: neon title, a glowing grid floor, faint CRT scanlines
+   and a chunky coin-op button. Used only inside `.arcade` blocks. */
+.arcade-title {
+  background: linear-gradient(180deg, #fff6d6 0%, #ffc233 45%, #ff5a36 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: drop-shadow(0 0 18px rgba(255, 120, 60, 0.55)) drop-shadow(0 4px 0 #7a1d10);
+}
+.arcade-floor {
+  background-image: linear-gradient(rgba(143, 124, 248, 0.35) 1px, transparent 1px), linear-gradient(90deg, rgba(143, 124, 248, 0.35) 1px, transparent 1px);
+  background-size: 44px 44px;
+  transform: perspective(420px) rotateX(62deg);
+  transform-origin: bottom;
+  mask-image: linear-gradient(to top, #000 10%, transparent 85%);
+  animation: arcade-floor 2.4s linear infinite;
+}
+@keyframes arcade-floor {
+  to { background-position: 0 44px; }
+}
+.arcade-scan {
+  background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 3px);
+  mix-blend-mode: overlay;
+}
+.arcade-btn {
+  background: linear-gradient(180deg, #ffe07a, #ffb020);
+  box-shadow: 0 6px 0 0 #b86e00, 0 0 0 3px rgba(255, 194, 51, 0.25), 0 0 34px rgba(255, 176, 32, 0.55);
+  animation: arcade-glow 1.6s ease-in-out infinite;
+}
+.arcade-btn:active { box-shadow: 0 2px 0 0 #b86e00, 0 0 20px rgba(255, 176, 32, 0.5); }
+@keyframes arcade-glow {
+  50% { box-shadow: 0 6px 0 0 #b86e00, 0 0 0 6px rgba(255, 194, 51, 0.12), 0 0 52px rgba(255, 176, 32, 0.8); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .arcade-floor, .arcade-btn { animation: none; }
+}

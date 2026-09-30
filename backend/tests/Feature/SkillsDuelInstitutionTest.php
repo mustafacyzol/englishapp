@@ -125,4 +125,42 @@ class SkillsDuelInstitutionTest extends TestCase
         $this->assertSame(2, $report->json('summary.students'));
         $this->actingAs($existing)->getJson('/api/v1/institution')->assertForbidden();
     }
+
+    public function test_two_searchers_are_paired_into_a_live_match(): void
+    {
+        $this->seed([GameSeeder::class, CourseSeeder::class]);
+        $a = $this->learner(['xp_total' => 50]);
+        $b = $this->learner(['xp_total' => 60]);
+
+        $this->actingAs($a)->getJson('/api/v1/arena/lobby')->assertOk()->assertJsonPath('online', 1);
+        $this->actingAs($a)->postJson('/api/v1/arena/queue')->assertOk()->assertJsonPath('status', 'searching');
+        $this->actingAs($b)->getJson('/api/v1/arena/lobby')->assertOk()->assertJsonPath('online', 2)->assertJsonPath('searching', 1);
+
+        // b joins: paired with a on the spot; a sees the match on the next poll
+        $mine = $this->actingAs($b)->postJson('/api/v1/arena/queue')->assertOk()->assertJsonPath('status', 'matched')->assertJsonPath('duel.ghost.live', true)->json('duel');
+        $theirs = $this->actingAs($a)->getJson('/api/v1/arena/queue')->assertOk()->assertJsonPath('status', 'matched')->json('duel');
+        $this->assertSame($a->name, $mine['ghost']['name']);
+        $this->assertSame($b->name, $theirs['ghost']['name']);
+        // same questions for both
+        $this->assertSame(array_column($mine['rounds'], 'skill'), array_column($theirs['rounds'], 'skill'));
+        $this->assertSame($mine['rounds'][0]['items'][0]['ex'], $theirs['rounds'][0]['items'][0]['ex']);
+
+        // live progress flows to the rival
+        $this->actingAs($a)->postJson("/api/v1/duel/{$theirs['id']}/progress", ['i' => 3, 'score' => 420])->assertOk();
+        $this->actingAs($b)->getJson("/api/v1/duel/{$mine['id']}/rival")->assertOk()
+            ->assertJsonPath('rival.i', 3)->assertJsonPath('rival.score', 420)->assertJsonPath('rival.connected', true);
+        // nobody can read another player's duel
+        $this->actingAs($a)->getJson("/api/v1/duel/{$mine['id']}/rival")->assertNotFound();
+    }
+
+    public function test_a_lonely_search_times_out_to_a_ghost(): void
+    {
+        $this->seed([GameSeeder::class, CourseSeeder::class]);
+        $a = $this->learner();
+        $this->actingAs($a)->postJson('/api/v1/arena/queue')->assertJsonPath('status', 'searching');
+        $this->travel(16)->seconds();
+        $this->actingAs($a)->getJson('/api/v1/arena/queue')->assertJsonPath('status', 'timeout');
+        $this->actingAs($a)->deleteJson('/api/v1/arena/queue')->assertOk();
+        $this->actingAs($a)->getJson('/api/v1/arena/queue')->assertJsonPath('status', 'idle');
+    }
 }

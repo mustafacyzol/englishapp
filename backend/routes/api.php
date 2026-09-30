@@ -146,6 +146,12 @@ Route::prefix('v1')->group(function () {
             Route::get('duel', [DuelController::class, 'index'])->middleware('feature:duel');
             Route::post('duel', [DuelController::class, 'start'])->middleware(['feature:duel', 'throttle:20,1']);
             Route::post('duel/{duel}/finish', [DuelController::class, 'finish'])->middleware('throttle:30,1');
+            Route::get('arena/lobby', [DuelController::class, 'lobby'])->middleware(['feature:duel', 'throttle:60,1']);
+            Route::post('arena/queue', [DuelController::class, 'queue'])->middleware(['feature:duel', 'throttle:20,1']);
+            Route::get('arena/queue', [DuelController::class, 'queue'])->middleware(['feature:duel', 'throttle:90,1']);
+            Route::delete('arena/queue', [DuelController::class, 'leave']);
+            Route::post('duel/{duel}/progress', [DuelController::class, 'progress'])->middleware('throttle:120,1');
+            Route::get('duel/{duel}/rival', [DuelController::class, 'rival'])->middleware('throttle:120,1');
 
             // Sınav modu (YDS, YÖKDİL, YDT, IELTS, TOEFL)
             Route::get('exam', [ExamController::class, 'index'])->middleware('feature:exam');

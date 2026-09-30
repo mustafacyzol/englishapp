@@ -101,15 +101,48 @@ class DuelService
 
     public function start(User $user): Duel
     {
+        $this->assertCanPlay($user);
+        $ghost = $this->pickGhost($user);
+
+        return $this->create($user, $ghost, $this->buildRounds($user, $this->skillsOf($ghost, $user)));
+    }
+
+    /** Throws when the learner has no free duels left today. */
+    public function assertCanPlay(User $user): void
+    {
         $this->expireStale($user);
         $user->refresh();
         abort_if($this->ticketsLeft($user) === 0, 402, 'Bugünkü ücretsiz düello hakların bitti. Yarın yenilenir, ya da Premium ile sınırsız oyna.');
+    }
 
-        $ghost = $this->pickGhost($user);
-        $ghostSkills = $ghost ? collect($this->game->skillReport($ghost)['skills'])->pluck('level', 'key')->all() : $this->trainingSkills($user);
+    /**
+     * A live match: two learners who pressed "Rakip bul" at the same time get the
+     * same questions, each facing the other. While both play, the arena shows the
+     * rival's real progress; the replay built from their skills is the fallback if
+     * they drop out, so a match always finishes.
+     *
+     * @return array{0: Duel, 1: Duel}
+     */
+    public function startLive(User $a, User $b): array
+    {
+        $match = 'm'.bin2hex(random_bytes(6));
+        $roundsForA = $this->buildRounds($a, $this->skillsOf($b, $a));
+        $skillsA = $this->skillsOf($a, $b);
+        mt_srand(random_int(1, PHP_INT_MAX >> 1));
+        $roundsForB = array_map(fn ($r) => ['skill' => $r['skill'], 'items' => array_map(fn ($it) => ['ex' => $it['ex'], 'ghost' => $this->ghostAnswer((int) ($skillsA[$r['skill']] ?? 0))], $r['items'])], $roundsForA);
+        mt_srand();
 
-        $seed = random_int(1, PHP_INT_MAX >> 1);
-        mt_srand($seed);
+        return [$this->create($a, $b, $roundsForA, $match), $this->create($b, $a, $roundsForB, $match)];
+    }
+
+    private function skillsOf(?User $ghost, User $me): array
+    {
+        return $ghost ? collect($this->game->skillReport($ghost)['skills'])->pluck('level', 'key')->all() : $this->trainingSkills($me);
+    }
+
+    private function buildRounds(User $user, array $ghostSkills): array
+    {
+        mt_srand(random_int(1, PHP_INT_MAX >> 1));
         $rounds = [];
         foreach (Skills::ALL as $skill) {
             $items = [];
@@ -120,14 +153,20 @@ class DuelService
         }
         mt_srand();
 
+        return $rounds;
+    }
+
+    private function create(User $user, ?User $ghost, array $rounds, ?string $match = null): Duel
+    {
         return $user->duels()->create([
             'ghost_id' => $ghost?->id,
             'ghost_name' => $ghost?->name ?? self::TRAINING_GHOSTS[array_rand(self::TRAINING_GHOSTS)],
             'ghost_trophies' => $ghost?->duel_trophies ?? max(0, $user->duel_trophies + random_int(-40, 40)),
             'ghost_tier' => $ghost?->league_tier ?? $user->league_tier,
-            'ghost_skills' => $ghostSkills,
+            'ghost_skills' => $ghost ? $this->skillsOf($ghost, $user) : $this->trainingSkills($user),
             'rounds' => $rounds,
             'status' => 'active',
+            'match_id' => $match,
         ]);
     }
 
@@ -160,6 +199,11 @@ class DuelService
         return DB::transaction(function () use ($duel, $score, $results, $status, $skillCorrect) {
             $user = $duel->user()->lockForUpdate()->first();
             $ghostScore = self::score(collect($this->flatItems($duel))->map(fn ($p) => [$p[1]['ghost']['correct'], $p[1]['ghost']['ms']])->all())['total'];
+            // Live match: once the rival has finished, you are measured against their real score.
+            $rivalDuel = $duel->match_id ? Duel::query()->where('match_id', $duel->match_id)->whereKeyNot($duel->id)->first() : null;
+            if ($rivalDuel && $rivalDuel->status === 'finished') {
+                $ghostScore = $rivalDuel->score;
+            }
             $result = $score > $ghostScore ? 'win' : ($score < $ghostScore ? 'loss' : 'draw');
 
             $delta = match ($result) {
@@ -174,8 +218,9 @@ class DuelService
             $rankAfter = self::rankFor($user->duel_trophies);
 
             // The opponent's ghost defended (or lost) while they were away.
+            // (A live rival plays their own side of the match, so nothing is taken from them here.)
             $ghostDelta = 0;
-            if ($duel->ghost_id && ($ghost = User::query()->lockForUpdate()->find($duel->ghost_id))) {
+            if ($duel->ghost_id && ! $duel->match_id && ($ghost = User::query()->lockForUpdate()->find($duel->ghost_id))) {
                 $ghostDelta = match ($result) {
                     'loss' => 10,
                     'win' => -min(6, $ghost->duel_trophies),
@@ -335,6 +380,7 @@ class DuelService
                     ->where('league_group_id', \App\Models\LeagueMembership::query()->where('user_id', $duel->user_id)->where('week_key', \App\Support\Period::weekKey())->value('league_group_id'))->exists(),
                 'skills' => $duel->ghost_skills,
                 'training' => $duel->ghost_id === null,
+                'live' => $duel->match_id !== null,
             ],
             'rounds' => array_map(fn ($r) => [
                 'skill' => $r['skill'],
@@ -427,7 +473,7 @@ class DuelService
     }
 
     /** A replayed answer: accuracy and speed grow with the ghost's level in that skill. */
-    private function ghostAnswer(int $level): array
+    public function ghostAnswer(int $level): array
     {
         $p = min(0.92, 0.5 + 0.07 * $level);
         $correct = mt_rand() / mt_getrandmax() < $p;

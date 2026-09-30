@@ -14,6 +14,7 @@ class Duel extends Model
         return [
             'rounds' => 'array',
             'ghost_skills' => 'array',
+            'live' => 'array',
             'ghost_notified' => 'boolean',
             'finished_at' => 'datetime',
         ];

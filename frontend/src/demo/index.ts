@@ -170,6 +170,23 @@ const FREE: [string, string][] = [
 
 const convs: Record<number, Json> = {}
 let activeDuel: Json = null
+// Demo arena: a few classmates are "online"; a search finds one of them after ~4 s,
+// and their progress in the live match advances on its own.
+let queueSince = 0
+let liveStart = 0
+const liveRival = (): Json => {
+  const players = (db['/duel']?.leaderboard ?? []).filter((r: Json) => !r.is_me)
+  return players[0] ?? { name: 'Selin Aydın', username: 'selin', avatar: 'braids' }
+}
+function demoLiveDuel(): Json {
+  const d = structuredClone(F.post.duel_start)
+  const r = liveRival()
+  d.duel.id = nextMsg++
+  d.duel.ghost = { ...d.duel.ghost, name: r.name, look: { avatar: r.avatar, avatar_url: r.avatar_url ?? null, frame: r.frame ?? null }, training: false, live: true }
+  activeDuel = d.duel
+  liveStart = Date.now()
+  return d
+}
 
 /** Same rules as LessonService::gradeOne on the server. */
 function gradeEx(ex: Json, a: Json): boolean {
@@ -237,6 +254,25 @@ const ROLE_DEFAULT: Record<string, string[]> = { support: ['users', 'marketing',
 function getRoute(path: string, admin: boolean): Json {
   // Coupons are the partner gifts in the inventory, so a chest win shows up here at once.
   if (path === '/coupons') return { data: (db['/inventory']?.data ?? []).filter((x: Json) => x.item?.type === 'partner_coupon') }
+  if (path === '/arena/lobby') {
+    const players = (db['/duel']?.leaderboard ?? []).filter((r: Json) => !r.is_me).slice(0, 8)
+    const st = ['idle', 'searching', 'playing', 'idle', 'playing', 'idle', 'searching', 'idle']
+    return { online: players.length + 1, searching: 2, playing: 2, queue_seconds: 15, players: players.map((p: Json, i: number) => ({ ...p, status: st[i % st.length] })) }
+  }
+  if (path === '/arena/queue') {
+    if (!queueSince) return { status: 'idle' }
+    if (Date.now() - queueSince > 4000) {
+      queueSince = 0
+      const d = demoLiveDuel()
+      return { status: 'matched', duel: d.duel, tickets_left: db['/duel']?.me.tickets_left ?? null }
+    }
+    return { status: 'searching', waited: Math.round((Date.now() - queueSince) / 1000), searching: 2 }
+  }
+  if (/^\/duel\/\d+\/rival$/.test(path)) {
+    const t = (Date.now() - liveStart) / 1000
+    const i = Math.min(12, Math.floor(t / 5.2))
+    return { rival: { i, score: Math.round(i * 128), finished: i >= 12, connected: true } }
+  }
   if (db[path] !== undefined) return db[path]
   const [base, qs = ''] = path.split('?')
   const params = new URLSearchParams(qs)
@@ -491,6 +527,18 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     me().hearts.hearts = 5
     syncUser()
     return { user: me() }
+  }
+  // --- live arena
+  if (path === '/arena/queue') {
+    if (method === 'DELETE') { queueSince = 0; return { ok: true } }
+    if (db['/duel']?.me.tickets_left === 0) throw new DemoError(402, 'Bugünkü ücretsiz düello hakların bitti. Yarın yenilenir, ya da Premium ile sınırsız oyna.')
+    queueSince = Date.now()
+    return { status: 'searching', waited: 0, searching: 2 }
+  }
+  if (/^\/duel\/\d+\/progress$/.test(path)) {
+    const t = (Date.now() - liveStart) / 1000
+    const i = Math.min(12, Math.floor(t / 5.2))
+    return { rival: { i, score: Math.round(i * 128), finished: i >= 12, connected: true } }
   }
   // --- Gölge Düellosu (graded here the same way the server does)
   if (path === '/duel') {

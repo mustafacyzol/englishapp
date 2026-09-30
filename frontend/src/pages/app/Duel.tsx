@@ -3,8 +3,8 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import clsx from 'clsx'
-import { Check, Crown, Flame, Ghost, Shield, ShieldAlert, Swords, Ticket, X } from 'lucide-react'
-import { ApiError, get, post } from '@/lib/api'
+import { Check, Crown, Flame, Ghost, Shield, ShieldAlert, Swords, X } from 'lucide-react'
+import { ApiError, del, get, post } from '@/lib/api'
 import { leagueImg, rewardImg } from '@/lib/assets'
 import { SKILL, SKILLS } from '@/lib/skills'
 import type { Exercise, RewardSummary, SkillKey } from '@/lib/types'
@@ -28,11 +28,19 @@ interface Overview {
   ranks: Rank[]
   league?: { tier: number; name: string }
 }
+interface Lobby {
+  online: number
+  searching: number
+  playing: number
+  queue_seconds: number
+  players: { name: string; username: string; trophies: number; rank: string; status: 'idle' | 'searching' | 'matched' | 'playing'; avatar?: string; avatar_url?: string | null; frame?: string | null }[]
+}
+interface Rival { i: number; score: number; finished: boolean; connected: boolean }
 interface Rules { item_ms: number; combo_step: number; combo_max: number; base: number; speed_max: number; speed_ms_per_point: number }
 interface DuelData {
   id: number
   rules?: Rules
-  ghost: { name: string; trophies: number; rank: Rank; league?: { tier: number; name: string }; look?: { avatar: string; avatar_url?: string | null; frame?: string | null } | null; same_group?: boolean; skills: Record<SkillKey, number>; training: boolean }
+  ghost: { name: string; trophies: number; rank: Rank; league?: { tier: number; name: string }; look?: { avatar: string; avatar_url?: string | null; frame?: string | null } | null; same_group?: boolean; skills: Record<SkillKey, number>; training: boolean; live?: boolean }
   rounds: { skill: SkillKey; label: string; items: { ex: Exercise; ghost: { correct: boolean; ms: number } }[] }[]
 }
 interface DuelResult {
@@ -65,9 +73,12 @@ export default function Duel() {
   const qc = useQueryClient()
   const toast = useToast()
   const nav = useNavigate()
-  const { refresh } = useAuth()
+  const { user, refresh } = useAuth()
   const { data, isLoading } = useQuery({ queryKey: ['duel'], queryFn: () => get<Overview>('/duel') })
+  // the heartbeat: being on this page counts as being in the arena
+  const lobby = useQuery({ queryKey: ['arena-lobby'], queryFn: () => get<Lobby>('/arena/lobby'), refetchInterval: 15_000 })
   const [duel, setDuel] = useState<DuelData | null>(null)
+  const [searching, setSearching] = useState(false)
   const start = useMutation({
     mutationFn: () => post<{ duel: DuelData }>('/duel'),
     onSuccess: (r) => setDuel(r.duel),
@@ -82,58 +93,92 @@ export default function Duel() {
 
   return (
     <div className="space-y-10">
-      {/* ------------------------------------------------------------ Stage */}
-      <section className="relative overflow-hidden rounded-[28px] bg-[#151922] text-white">
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:repeating-linear-gradient(135deg,#fff_0_1px,transparent_1px_14px)]" />
-        <div className="relative grid gap-8 p-6 sm:p-9 lg:grid-cols-[1fr_auto] lg:items-center">
+      {/* ------------------------------------------------------------ Lobby */}
+      <section className="arcade relative overflow-hidden rounded-[28px] bg-[#0a0d1a] text-white">
+        <div aria-hidden className="arcade-floor pointer-events-none absolute inset-x-0 bottom-0 h-1/2" />
+        <div aria-hidden className="arcade-scan pointer-events-none absolute inset-0" />
+        <div className="relative grid gap-8 p-6 sm:p-9 lg:grid-cols-[1.2fr_1fr] lg:items-center">
           <div>
-            <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-white/55"><Ghost className="size-4" /> DilGO’ya özel</p>
-            <h1 className="mt-2 text-4xl leading-[1.05] sm:text-5xl">Gölge Düellosu <span className="align-middle text-xl text-butter sm:text-2xl">BLITZ</span></h1>
-            <p className="mt-3 max-w-xl text-[17px] leading-relaxed text-white/70">
-              Dört tur, on iki blitz soru, her biri <b className="text-white">12 saniye</b>. Hızlı cevap bonus getirir, üst üste doğrular puanını <b className="text-butter">x2</b>’ye kadar katlar. Rakibin <b className="text-white">kendi liginden</b> gelir ve gölgesi aynı soruları canlı olarak seninle cevaplar. Kazandığın düellonun XP’si lig tablona yazılır; sen yokken de gölgen seni savunur.
-            </p>
-            <div className="mt-6 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => start.mutate()}
-                disabled={start.isPending || noTickets}
-                className="press flex h-14 items-center gap-2.5 rounded-2xl bg-butter px-7 font-display text-lg font-extrabold uppercase tracking-wide text-[#1f2433] shadow-[0_4px_0_0_var(--color-butter-deep)] disabled:opacity-50"
-              >
-                <Swords className="size-6" /> {start.isPending ? 'Rakip aranıyor…' : 'Düelloya gir'}
-              </button>
-              <span className="flex items-center gap-2 rounded-2xl bg-white/8 px-4 py-3 text-sm font-bold text-white/80">
-                <Ticket className="size-4 text-butter" />
-                {me.tickets_left === null ? 'Premium · sınırsız düello' : `Bugün ${me.tickets_left}/${me.tickets_total} hak`}
-              </span>
+            <LiveDot lobby={lobby.data} />
+            <h1 className="arcade-title mt-3 font-display text-[clamp(3rem,9vw,5.5rem)] font-black italic leading-[0.9] tracking-tight">ARENA</h1>
+            <p className="mt-2 font-display text-sm font-black uppercase tracking-[0.3em] text-butter">Gölge Düellosu · Blitz</p>
+            <div className="mt-5 flex flex-wrap gap-2 text-xs font-black uppercase tracking-wider">
+              {['4 tur', '12 soru', '12 sn', 'Combo x2'].map((t) => <span key={t} className="rounded-lg border border-white/15 bg-white/[0.04] px-2.5 py-1.5 text-white/80">{t}</span>)}
             </div>
-            {noTickets && (
-              <p className="mt-3 text-sm text-white/60">Hakların yarın yenilenir. <Link to="/premium" className="font-bold text-butter underline">Premium</Link> ile sınırsız oyna.</p>
-            )}
+            <div className="mt-7 flex flex-wrap items-center gap-4">
+              <motion.button
+                onClick={() => setSearching(true)}
+                disabled={noTickets || searching || start.isPending}
+                whileHover={{ scale: 1.03 }}
+                whileTap={{ scale: 0.97, y: 4 }}
+                className="arcade-btn relative flex h-16 items-center gap-3 rounded-2xl px-8 font-display text-xl font-black uppercase tracking-wider text-[#1a1203] disabled:opacity-40"
+              >
+                <Swords className="size-7" /> Rakip bul
+              </motion.button>
+              <div>
+                <div className="flex gap-1" aria-label="Bugünkü düello hakların">
+                  {me.tickets_left === null ? <span className="text-sm font-black text-butter">∞ SINIRSIZ</span> : Array.from({ length: me.tickets_total ?? 5 }, (_, i) => <span key={i} className={clsx('grid size-6 place-items-center rounded-full border-2 text-[10px] font-black', i < (me.tickets_left ?? 0) ? 'border-butter bg-butter/20 text-butter shadow-[0_0_10px_rgba(255,194,51,.5)]' : 'border-white/15 text-white/20')}>★</span>)}
+                </div>
+                <p className="mt-1 text-[11px] font-black uppercase tracking-wider text-white/45">{me.tickets_left === null ? 'Premium' : 'Bugünkü hak'}</p>
+              </div>
+            </div>
+            {noTickets && <p className="mt-3 text-sm text-white/60">Hakların yarın yenilenir. <Link to="/premium" className="font-bold text-butter underline">Premium</Link> ile sınırsız oyna.</p>}
           </div>
 
-          <Link to="/leagues" className="group flex items-center gap-5 rounded-3xl bg-white/6 p-5 ring-1 ring-white/10 transition hover:bg-white/10 lg:w-[340px]">
-            <Img src={leagueImg(league.tier)} alt="" className="size-24 shrink-0 object-contain drop-shadow-xl transition group-hover:scale-105" />
-            <div className="min-w-0 flex-1">
-              <p className="text-xs font-black uppercase tracking-[0.14em] text-white/55">Arena ligin</p>
-              <p className="font-display text-2xl font-black">{league.name} Ligi</p>
-              <p className="mt-1 text-sm text-white/65">Rakiplerin önce lig grubundan, sonra aynı ligden gelir. Ligde yükseldikçe rakiplerin de güçlenir.</p>
-              <p className="mt-2 text-xs font-bold text-butter">Lig tablosunu gör →</p>
+          {/* player card */}
+          <div className="rounded-3xl border border-white/10 bg-white/[0.04] p-5 backdrop-blur-sm">
+            <div className="flex items-center gap-4">
+              <UserAvatar name={user?.name ?? ''} avatar={user?.avatar} frame={user?.frame} className="size-16" />
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-display text-xl font-black">{user?.name.split(' ')[0]}</p>
+                <p className="text-sm font-bold text-white/60">{me.rank.name} · {league.name} Ligi</p>
+              </div>
+              <Img src={leagueImg(league.tier)} alt="" className="size-14 object-contain drop-shadow-[0_0_14px_rgba(255,194,51,.35)]" />
             </div>
-          </Link>
-        </div>
-        <div className="relative grid grid-cols-4 border-t border-white/10 text-center">
-          {[
-            ['Galibiyet', me.wins],
-            ['Mağlubiyet', me.losses],
-            ['Seri', me.win_streak],
-            ['Grupta sıran', `#${me.position}`],
-          ].map(([l, v]) => (
-            <div key={l as string} className="border-r border-white/10 px-2 py-3 last:border-r-0">
-              <p className="font-display text-xl font-black tabular-nums">{v}</p>
-              <p className="text-[11px] font-bold uppercase tracking-wider text-white/50">{l}</p>
+            <div className="mt-4">
+              <div className="mb-1 flex justify-between text-[11px] font-black uppercase tracking-wider text-white/50"><span>{me.trophies} kupa</span><span>{me.next_rank ? `${me.next_rank.name}: ${me.next_rank.min}` : 'Zirve'}</span></div>
+              <div className="h-2.5 overflow-hidden rounded-full bg-white/10"><div className="h-full rounded-full bg-gradient-to-r from-flame to-butter" style={{ width: `${me.next_rank ? Math.min(100, ((me.trophies - me.rank.min) / Math.max(1, me.next_rank.min - me.rank.min)) * 100) : 100}%` }} /></div>
             </div>
-          ))}
+            <div className="mt-4 grid grid-cols-4 gap-2 text-center">
+              {([['G', me.wins, 'text-mint'], ['M', me.losses, 'text-berry'], ['Seri', me.win_streak, 'text-butter'], ['Sıra', `#${me.position}`, 'text-sky']] as const).map(([l, v, c]) => (
+                <div key={l} className="rounded-xl bg-black/30 py-2">
+                  <p className={clsx('font-mono text-xl font-black tabular-nums', c)}>{v}</p>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-white/45">{l}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
+
+        {/* who is in the arena right now */}
+        {!!lobby.data?.players.length && (
+          <div className="relative border-t border-white/10 px-6 py-4 sm:px-9">
+            <p className="mb-2.5 text-[11px] font-black uppercase tracking-[0.18em] text-white/45">Şu an arenada</p>
+            <div className="no-scrollbar flex gap-4 overflow-x-auto">
+              {lobby.data.players.map((p) => (
+                <Link key={p.username} to={`/u/${p.username}`} className="flex w-16 shrink-0 flex-col items-center gap-1 text-center">
+                  <span className="relative">
+                    <UserAvatar name={p.name} avatar={p.avatar} avatarUrl={p.avatar_url} frame={p.frame} className="size-12" />
+                    <span className={clsx('absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-[#0a0d1a]', p.status === 'searching' ? 'animate-pulse bg-butter' : p.status === 'idle' ? 'bg-mint' : 'bg-berry')} />
+                  </span>
+                  <span className="w-full truncate text-[11px] font-bold text-white/70">{p.name.split(' ')[0]}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
+
+      <AnimatePresence>
+        {searching && (
+          <Matchmaking
+            lobby={lobby.data}
+            onMatched={(d) => { setSearching(false); setDuel(d) }}
+            onGhost={() => { setSearching(false); start.mutate() }}
+            onCancel={() => setSearching(false)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* ------------------------------------------------------ Ghost report */}
       {data.defenses.length > 0 && (
@@ -155,21 +200,6 @@ export default function Duel() {
 
       <div className="grid gap-8 xl:grid-cols-[1.2fr_1fr] [&>*]:min-w-0">
         <div className="space-y-8">
-          {/* ------------------------------------- How the arena feeds the league */}
-          <section className="grid gap-3 sm:grid-cols-3">
-            {[
-              ['Rakip ligden', 'Her düelloda ligindeki biriyle eşleşirsin; kimse seviyene göre çok güçlü değil.'],
-              ['XP lige yazılır', 'Düello XP’si haftalık lig tablona eklenir; kazanmak terfi demek.'],
-              ['Seri sandık getirir', 'Üst üste 3 galibiyette Gizemli Sandık kasana düşer.'],
-            ].map(([t, x], i) => (
-              <div key={t} className="rounded-2xl border-2 border-line bg-card p-4">
-                <p className="font-display text-2xl font-black text-flame">{i + 1}</p>
-                <p className="font-extrabold">{t}</p>
-                <p className="text-sm text-ink-soft">{x}</p>
-              </div>
-            ))}
-          </section>
-
           {/* ------------------------------------------------ Four-skill record */}
           <section>
             <h2 className="mb-4 text-xl">Düello karnesi</h2>
@@ -246,7 +276,7 @@ export default function Duel() {
             onRematch={() => {
               setDuel(null)
               qc.invalidateQueries({ queryKey: ['duel'] })
-              start.mutate()
+              setSearching(true)
             }}
             onPremium={() => nav('/premium')}
           />
@@ -275,6 +305,9 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
   const [banner, setBanner] = useState<string | null>(null)
   const [now, setNow] = useState(0)
   const [result, setResult] = useState<DuelResult | null>(null)
+  // live match: the rival's real progress, polled every 2 s and returned with each of our answers
+  const live = !!duel.ghost.live
+  const [rival, setRival] = useState<Rival | null>(null)
   const itemStart = useRef(0)
   const matchStart = useRef(0)
   const lastBeat = useRef(0)
@@ -340,11 +373,17 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
       setCombo(c)
       setMyScore((s) => s + pts)
       setAnswers((a) => [...a, [v, ms]])
+      if (live) post<{ rival: Rival | null }>(`/duel/${duel.id}/progress`, { i: idx + 1, score: myScore + pts }).then((r) => setRival(r.rival)).catch(() => {})
       if (ok) setPop({ id: Date.now(), pts, mult })
       ok ? sfx.correct(c) : sfx.wrong()
     },
-    [checked, item, combo, R],
+    [checked, item, combo, R, live, duel.id, idx, myScore],
   )
+  useEffect(() => {
+    if (!live || phase !== 'play') return
+    const t = setInterval(() => get<{ rival: Rival | null }>(`/duel/${duel.id}/rival`).then((r) => setRival(r.rival)).catch(() => {}), 2000)
+    return () => clearInterval(t)
+  }, [live, phase, duel.id])
 
   // Heartbeat in the last seconds, a miss when the clock runs out.
   useEffect(() => {
@@ -397,9 +436,12 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
     })
   }, [flat, R])
   const elapsed = phase === 'play' ? now - matchStart.current : 0
-  const ghostDone = ghostTimeline.filter((g) => g.at <= elapsed).length
-  const ghostScore = ghostTimeline.slice(0, ghostDone).reduce((s, g) => s + g.pts, 0)
-  const lastGhost = ghostDone ? ghostTimeline[ghostDone - 1] : null
+  const replayDone = ghostTimeline.filter((g) => g.at <= elapsed).length
+  // A connected live rival shows their real score; if they drop, their ghost carries on.
+  const rivalLive = live && !!rival?.connected
+  const ghostDone = rivalLive ? rival!.i : replayDone
+  const ghostScore = rivalLive ? rival!.score : ghostTimeline.slice(0, replayDone).reduce((s, g) => s + g.pts, 0)
+  const lastGhost = !rivalLive && replayDone ? ghostTimeline[replayDone - 1] : null
   const ghostFresh = lastGhost && elapsed - lastGhost.at < 1100
 
   const round = duel.rounds.findIndex((r) => r.skill === item?.skill)
@@ -430,7 +472,7 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
               )}
             </AnimatePresence>
             <div className="min-w-0 text-right">
-              <p className="truncate text-xs font-black uppercase tracking-widest text-sky"><Ghost className="mr-1 inline size-3.5" />{duel.ghost.name.split(' ')[0]}</p>
+              <p className="truncate text-xs font-black uppercase tracking-widest text-sky">{live ? <span className={clsx('mr-1.5 inline-flex items-center gap-1 rounded px-1 py-px text-[9px] text-white', rivalLive ? 'bg-berry' : 'bg-ink-soft')}><span className="size-1.5 animate-pulse rounded-full bg-white" />{rivalLive ? 'CANLI' : 'GÖLGE'}</span> : <Ghost className="mr-1 inline size-3.5" />}{duel.ghost.name.split(' ')[0]}</p>
               <motion.p key={ghostScore} initial={{ scale: 1.25 }} animate={{ scale: 1 }} className="font-display text-3xl font-black leading-none tabular-nums text-ink/85">{ghostScore}</motion.p>
             </div>
           </div>
@@ -444,7 +486,9 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
           <div className="mt-1.5 flex h-4 items-center justify-between text-[11px] font-black">
             <span className="text-ink-soft">{phase === 'play' && item ? `Tur ${round + 1}/4 · Soru ${idx + 1}/${flat.length}` : ''}</span>
             <AnimatePresence mode="wait">
-              {phase === 'play' && (ghostFresh ? (
+              {phase === 'play' && (rivalLive ? (
+                <motion.span key={`r${ghostDone}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="text-sky">{rival!.finished ? 'Rakip bitirdi!' : `Rakip ${ghostDone}/${flat.length}. soruda`}</motion.span>
+              ) : ghostFresh ? (
                 <motion.span key={`g${ghostDone}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className={lastGhost!.ok ? 'text-sky' : 'text-ink-soft'}>
                   {lastGhost!.ok ? `Gölge bildi +${lastGhost!.pts}${lastGhost!.combo >= 2 ? ` · seri x${lastGhost!.combo}` : ''}` : 'Gölge kaçırdı!'}
                 </motion.span>
@@ -624,5 +668,99 @@ function Dots({ v }: { v: boolean[] }) {
         <span key={i} className={clsx('grid size-6 place-items-center rounded-md text-white', ok ? 'bg-mint' : 'bg-berry/80')}>{ok ? <Check className="size-3.5" strokeWidth={3} /> : <X className="size-3.5" strokeWidth={3} />}</span>
       ))}
     </span>
+  )
+}
+
+/* ============================================================ Live lobby */
+
+function LiveDot({ lobby }: { lobby?: Lobby }) {
+  if (!lobby) return <p className="h-5" />
+  return (
+    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-black uppercase tracking-[0.14em] text-white/60">
+      <span className="flex items-center gap-1.5 text-mint"><span className="relative flex size-2.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-mint opacity-70" /><span className="relative inline-flex size-2.5 rounded-full bg-mint" /></span>{lobby.online} çevrimiçi</span>
+      {lobby.searching > 0 && <span className="text-butter">{lobby.searching} rakip arıyor</span>}
+      {lobby.playing > 0 && <span>{lobby.playing} maçta</span>}
+    </p>
+  )
+}
+
+/**
+ * Looking for a rival: a radar sweeps, faces from the lobby flicker past, and the
+ * queue is polled every 1.5 s. A real rival starts a live match; after the
+ * queue time the rival's ghost (or a training ghost) steps in, so nobody waits.
+ */
+function Matchmaking({ lobby, onMatched, onGhost, onCancel }: { lobby?: Lobby; onMatched: (d: DuelData) => void; onGhost: () => void; onCancel: () => void }) {
+  const toast = useToast()
+  const limit = lobby?.queue_seconds ?? 15
+  const [t, setT] = useState(0)
+  const [found, setFound] = useState<DuelData | null>(null)
+  const [face, setFace] = useState(0)
+  const done = useRef(false)
+  const faces = lobby?.players.length ? lobby.players : []
+
+  useEffect(() => {
+    let live = true
+    const handle = (r: { status: string; duel?: DuelData }) => {
+      if (!live || done.current) return
+      if (r.status === 'matched' && r.duel) {
+        done.current = true
+        sfx.levelup()
+        setFound(r.duel)
+        setTimeout(() => live && onMatched(r.duel!), 1600)
+      } else if (r.status === 'timeout') {
+        done.current = true
+        del('/arena/queue').catch(() => {})
+        onGhost()
+      }
+    }
+    post<{ status: string; duel?: DuelData }>('/arena/queue').then(handle).catch((e: ApiError) => { toast(e.message, 'error'); onCancel() })
+    const poll = setInterval(() => get<{ status: string; duel?: DuelData }>('/arena/queue').then(handle).catch(() => {}), 1500)
+    const clock = setInterval(() => setT((x) => x + 1), 1000)
+    const flick = setInterval(() => setFace((f) => f + 1), 180)
+    return () => { live = false; clearInterval(poll); clearInterval(clock); clearInterval(flick) }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const cancel = () => {
+    done.current = true
+    del('/arena/queue').catch(() => {})
+    onCancel()
+  }
+  const f = faces.length ? faces[face % faces.length] : null
+  return (
+    <motion.div className="arcade fixed inset-0 z-[65] grid place-items-center bg-[#070912]/95 px-5 text-white backdrop-blur" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} role="dialog" aria-modal="true" aria-label="Rakip aranıyor">
+      <div aria-hidden className="arcade-scan pointer-events-none absolute inset-0" />
+      <div className="relative flex flex-col items-center text-center">
+        {/* radar */}
+        <div className="relative grid size-64 place-items-center sm:size-72">
+          {[0, 1, 2].map((k) => <span key={k} className="absolute rounded-full border border-mint/25" style={{ inset: `${k * 16}%` }} />)}
+          {!found && <motion.span aria-hidden className="absolute inset-0 rounded-full [background:conic-gradient(from_0deg,rgba(34,181,115,.45),transparent_28%)]" animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1.6, ease: 'linear' }} />}
+          <AnimatePresence mode="wait">
+            {found ? (
+              <motion.div key="found" initial={{ scale: 3, opacity: 0, rotate: -12 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 14 }} className="relative">
+                <UserAvatar name={found.ghost.name} avatar={found.ghost.look?.avatar} avatarUrl={found.ghost.look?.avatar_url} frame={found.ghost.look?.frame} className="size-28" />
+              </motion.div>
+            ) : f ? (
+              <UserAvatar key={face} name={f.name} avatar={f.avatar} avatarUrl={f.avatar_url} frame={f.frame} className="size-24 opacity-80 blur-[1px]" />
+            ) : (
+              <Swords className="size-16 text-mint" />
+            )}
+          </AnimatePresence>
+        </div>
+        {found ? (
+          <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
+            <p className="arcade-title mt-6 font-display text-4xl font-black italic">RAKİP BULUNDU!</p>
+            <p className="mt-2 text-lg font-bold text-white/80">{found.ghost.name} · {found.ghost.league?.name} Ligi</p>
+            <p className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-berry px-3 py-1 text-xs font-black uppercase tracking-wider"><span className="size-2 animate-pulse rounded-full bg-white" /> Canlı maç</p>
+          </motion.div>
+        ) : (
+          <>
+            <p className="mt-6 font-display text-3xl font-black uppercase tracking-wide">Rakip aranıyor<motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.2 }}>…</motion.span></p>
+            <p className="mt-2 max-w-xs text-sm font-bold text-white/60">Ligindeki canlı oyuncular taranıyor. {Math.max(0, limit - t)} sn içinde kimse gelmezse bir rakibin gölgesiyle eşleşirsin.</p>
+            <div className="mt-5 h-1.5 w-56 overflow-hidden rounded-full bg-white/10"><motion.div className="h-full bg-mint" animate={{ width: `${Math.min(100, (t / limit) * 100)}%` }} /></div>
+            <button onClick={cancel} className="mt-8 rounded-xl border border-white/20 px-5 py-2.5 text-sm font-black uppercase tracking-wider text-white/80 hover:bg-white/10">Vazgeç</button>
+          </>
+        )}
+      </div>
+    </motion.div>
   )
 }
