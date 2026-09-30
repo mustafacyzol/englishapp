@@ -70,7 +70,8 @@ export default function AiChat() {
   }
   // read the opening line aloud once
   useEffect(() => {
-    if (data && voice && !callRef.current && !spokenRef.current && data.conversation.messages.length === 1) {
+    // A speaking conversation opens straight into the call, which greets on its own: never say it twice.
+    if (data && voice && !callRef.current && data.conversation.mode !== 'speaking' && !spokenRef.current && data.conversation.messages.length === 1) {
       spokenRef.current = true
       setTimeout(() => say(data.conversation.messages[0].content), 400)
     }

@@ -1,9 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
 import clsx from 'clsx'
-import { Bookmark, BookmarkCheck, Check, ChevronLeft, Headphones, Languages, Pause, Plus, Sparkles, Type, Volume2, X } from 'lucide-react'
+import { ArrowLeft, Bookmark, BookmarkCheck, Check, Gauge, Languages, Minus, Pause, Play, Plus, Sparkles, Volume2, X } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { speak, stopSpeaking } from '@/lib/speech'
@@ -21,29 +21,17 @@ import { Img } from '@/components/ui/Img'
 
 interface Resp { story: Story; locked: boolean; read: { bookmarked: boolean; progress: number; completed_at: string | null } }
 
-type Card = { kind: 'cover' } | { kind: 'scene'; i: number } | { kind: 'check'; qi: number } | { kind: 'paywall' } | { kind: 'end' }
-
-/** Spread the questions between scenes so understanding is checked as you go. */
-function buildCards(scenes: number, questions: number, locked: boolean): Card[] {
-  const out: Card[] = [{ kind: 'cover' }]
-  const after = new Map<number, number[]>()
-  for (let q = 0; q < questions; q++) {
-    const at = Math.max(0, Math.min(scenes - 1, Math.round(((q + 1) * scenes) / (questions + 1)) - 1))
-    after.set(at, [...(after.get(at) ?? []), q])
-  }
-  for (let i = 0; i < scenes; i++) {
-    out.push({ kind: 'scene', i })
-    if (!locked) for (const qi of after.get(i) ?? []) out.push({ kind: 'check', qi })
-  }
-  out.push(locked ? { kind: 'paywall' } : { kind: 'end' })
-  return out
-}
+const SIZES = ['text-[18px] leading-[1.8]', 'text-[20px] leading-[1.85]', 'text-[23px] leading-[1.85]']
+const RATES = [0.75, 0.9, 1.05]
 
 /**
- * A story told in short scenes, one screen at a time: tap a word for its meaning,
- * listen, and answer a quick check every few scenes. Right answers pay XP on the
- * spot, so there is always a next small win. Built for short attention spans:
- * a scene is a few sentences, a check is one tap.
+ * A story read like a book, not a slideshow (the pattern of LingQ, Beelinguapp
+ * and Kindle): the whole text flows on one calm page in a reading typeface, a
+ * thin bar shows how far you are, and a player stays at the bottom that reads
+ * the story aloud paragraph by paragraph while highlighting the line. Turkish
+ * can sit under each paragraph (parallel text), any word opens its meaning and
+ * saves to the word book, and the questions come once, at the end, where each
+ * right answer pays XP.
  */
 export default function StoryReader() {
   const { slug } = useParams()
@@ -57,29 +45,52 @@ export default function StoryReader() {
   const { data: eco } = useEconomy()
   const { data, isLoading, error } = useQuery({ queryKey: ['story', slug], queryFn: () => get<Resp>(`/stories/${slug}`) })
 
-  const [step, setStep] = useState(0)
-  const [dir, setDir] = useState(1)
   const [tr, setTr] = useState(false)
-  const [voice, setVoice] = useState(false)
-  const [big, setBig] = useState(false)
-  const [playing, setPlaying] = useState(false)
+  const [size, setSize] = useState(1)
+  const [rate, setRate] = useState(1)
+  const [playing, setPlaying] = useState<number | null>(null)
   const [charIdx, setCharIdx] = useState(-1)
-  const [word, setWord] = useState<{ w: string; p: number; x: number; y: number } | null>(null)
+  const [word, setWord] = useState<{ w: string; p: number } | null>(null)
   const [quiz, setQuiz] = useState<Record<number, number>>({})
   const [bookmarked, setBookmarked] = useState(false)
+  const [saved, setSaved] = useState<string[]>([])
+  const [listened, setListened] = useState(false)
+  const [read, setRead] = useState(0)
   const started = useRef(Date.now())
+  const run = useRef(0)
+  const paras = useRef<(HTMLElement | null)[]>([])
+  const { scrollYProgress } = useScroll()
+  const bar = useSpring(scrollYProgress, { stiffness: 160, damping: 28 })
 
   const vocab = useMemo(() => new Map((data?.story.vocabulary ?? []).map((v) => [v.word.toLowerCase(), v])), [data])
-  const cards = useMemo(() => (data ? buildCards(data.story.paragraphs.length, data.story.questions?.length ?? 0, data.locked) : []), [data])
-  const card = cards[step]
   useEffect(() => setBookmarked(!!data?.read.bookmarked), [data])
-  useEffect(() => () => stopSpeaking(), [])
+  useEffect(() => () => { run.current++; stopSpeaking() }, [])
+
+  // Paragraphs scrolled past count as read; progress is saved as you go.
+  useEffect(() => {
+    if (!data) return
+    const io = new IntersectionObserver((es) => {
+      for (const e of es) {
+        const i = Number((e.target as HTMLElement).dataset.i)
+        if (e.isIntersecting || e.boundingClientRect.top < 0) setRead((r) => Math.max(r, i + 1))
+      }
+    }, { rootMargin: '0px 0px -40% 0px' })
+    paras.current.forEach((el) => el && io.observe(el))
+    return () => io.disconnect()
+  }, [data])
+  useEffect(() => {
+    if (!data || !read) return
+    const pct = Math.round((read / data.story.paragraphs.length) * 100)
+    const t = setTimeout(() => post(`/stories/${slug}/progress`, { progress: pct }).catch(() => {}), 800)
+    return () => clearTimeout(t)
+  }, [read, data, slug])
 
   const saveWord = useMutation({
     mutationFn: (w: { word: string; translation?: string; example?: string }) => post('/words', { ...w, source: 'story', source_id: data?.story.id }),
-    onSuccess: () => {
+    onSuccess: (_, w) => {
       toast('Kelime defterine eklendi', 'success')
       qc.invalidateQueries({ queryKey: ['words'] })
+      setSaved((s) => [...new Set([...s, w.word])])
       setWord(null)
     },
   })
@@ -87,7 +98,7 @@ export default function StoryReader() {
   const complete = useMutation({
     mutationFn: async () => {
       const qs = data!.story.questions ?? []
-      const r = await post<{ score: number; correct: number; total: number; reward: RewardSummary }>(`/stories/${slug}/complete`, { answers: qs.length ? qs.map((_, i) => quiz[i] ?? null) : null, minutes: Math.max(1, Math.round((Date.now() - started.current) / 60000)), listened: voice })
+      const r = await post<{ score: number; correct: number; total: number; reward: RewardSummary }>(`/stories/${slug}/complete`, { answers: qs.length ? qs.map((_, i) => quiz[i] ?? null) : null, minutes: Math.max(1, Math.round((Date.now() - started.current) / 60000)), listened })
       if (lessonId) await post(`/lessons/${lessonId}/complete`, { answers: [] })
       return r
     },
@@ -101,40 +112,29 @@ export default function StoryReader() {
     onError: (e: ApiError) => toast(e.message, 'error'),
   })
 
-  const say = (i: number) => {
-    if (!data) return
-    stopSpeaking()
-    setPlaying(true)
+  /** Read aloud from paragraph i to the end, following along on the page. */
+  const playFrom = (i: number) => {
+    if (!data || i >= data.story.paragraphs.length) return stop()
+    const id = ++run.current
+    setPlaying(i)
+    setListened(true)
     setCharIdx(-1)
-    speak(data.story.paragraphs[i].en, { rate: user?.preferences?.tts_rate ?? 0.92, onBoundary: setCharIdx, onEnd: () => { setCharIdx(-1); setPlaying(false) } })
+    paras.current[i]?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    speak(data.story.paragraphs[i].en, {
+      rate: (user?.preferences?.tts_rate ?? 0.92) * (RATES[rate] / 0.9),
+      onBoundary: (c) => id === run.current && setCharIdx(c),
+      onEnd: () => { if (id === run.current) playFrom(i + 1) },
+    })
   }
-  const go = (d: number) => {
-    const next = Math.max(0, Math.min(cards.length - 1, step + d))
-    if (next === step) return
+  const stop = () => {
+    run.current++
     stopSpeaking()
-    setPlaying(false)
-    setWord(null)
-    setDir(d)
-    setStep(next)
-    const pct = Math.round((next / Math.max(1, cards.length - 1)) * 100)
-    post(`/stories/${slug}/progress`, { progress: pct }).catch(() => {})
-    const c = cards[next]
-    if (voice && c?.kind === 'scene') setTimeout(() => say(c.i), 350)
+    setPlaying(null)
+    setCharIdx(-1)
   }
-  // a check has to be answered before moving on
-  const blocked = card?.kind === 'check' && quiz[card.qi] === undefined
-  useEffect(() => {
-    const k = (e: KeyboardEvent) => {
-      if ((e.target as HTMLElement)?.tagName === 'INPUT') return
-      if (e.key === 'ArrowRight' && !blocked) go(1)
-      if (e.key === 'ArrowLeft') go(-1)
-    }
-    window.addEventListener('keydown', k)
-    return () => window.removeEventListener('keydown', k)
-  })
 
   if (isLoading) return <SkeletonPage variant="reader" />
-  if (error || !data || !card) return <p className="p-8 text-center font-bold">{(error as ApiError)?.message ?? 'Hikâye bulunamadı.'}</p>
+  if (error || !data) return <p className="p-8 text-center font-bold">{(error as ApiError)?.message ?? 'Hikâye bulunamadı.'}</p>
   const { story } = data
   const questions = story.questions ?? []
   const first = !data.read.completed_at
@@ -142,177 +142,163 @@ export default function StoryReader() {
   const base = first ? eco?.xp.story_first ?? 8 : eco?.xp.story_repeat ?? 3
   const right = questions.filter((q, i) => quiz[i] === q.answer).length
   const answered = Object.keys(quiz).length
+  const words = story.paragraphs.reduce((n, p) => n + p.en.split(/\s+/).length, 0)
+  const hasTr = story.paragraphs.some((p) => p.tr)
 
   return (
-    <div className="mx-auto flex min-h-[calc(100dvh-9rem)] max-w-2xl flex-col">
-      {/* top bar: close, story segments, tools */}
-      <div className="mb-4 flex items-center gap-2">
-        <Link to="/stories" className="grid size-10 shrink-0 place-items-center rounded-xl text-ink-soft hover:bg-paper-2" aria-label="Kütüphaneye dön"><X className="size-6" /></Link>
-        <div className="flex flex-1 gap-1" aria-label={`Sahne ${step + 1}/${cards.length}`}>
-          {cards.map((c, k) => (
-            <span key={k} className={clsx('h-1.5 flex-1 rounded-full transition-colors duration-300', k < step ? (c.kind === 'check' ? (quiz[c.qi] === questions[c.qi]?.answer ? 'bg-mint' : 'bg-berry/60') : 'bg-flame') : k === step ? 'bg-flame/60' : 'bg-line')} />
-          ))}
+    <div className="mx-auto max-w-[680px] pb-28">
+      {/* reading progress, a hairline under the app header */}
+      <motion.div aria-hidden className="fixed inset-x-0 top-[64px] z-30 h-[3px] origin-left bg-flame" style={{ scaleX: bar }} />
+
+      {/* toolbar */}
+      <div className="sticky top-[67px] z-20 -mx-2 mb-4 flex items-center gap-1 rounded-2xl bg-paper/90 px-2 py-1.5 backdrop-blur">
+        <Link to={lessonId ? '/learn' : '/stories'} className="grid size-10 shrink-0 place-items-center rounded-xl text-ink-soft hover:bg-paper-2" aria-label="Geri"><ArrowLeft className="size-5" /></Link>
+        <p className="min-w-0 flex-1 truncate font-display font-black">{story.title}</p>
+        {hasTr && <ToolBtn on={tr} onClick={() => setTr((v) => !v)} label="Türkçesi"><Languages className="size-[18px]" /></ToolBtn>}
+        <div className="flex items-center rounded-xl border-2 border-line">
+          <button onClick={() => setSize((s) => Math.max(0, s - 1))} disabled={size === 0} className="grid size-8 place-items-center text-ink-soft disabled:opacity-30" aria-label="Yazıyı küçült"><Minus className="size-4" /></button>
+          <span className="font-read text-sm font-bold">Aa</span>
+          <button onClick={() => setSize((s) => Math.min(2, s + 1))} disabled={size === 2} className="grid size-8 place-items-center text-ink-soft disabled:opacity-30" aria-label="Yazıyı büyüt"><Plus className="size-4" /></button>
         </div>
-        <button onClick={() => bookmark.mutate()} className="grid size-10 shrink-0 place-items-center rounded-xl hover:bg-paper-2" aria-label="Kaydet">{bookmarked ? <BookmarkCheck className="size-5 text-flame" /> : <Bookmark className="size-5 text-ink-soft" />}</button>
+        <ToolBtn on={bookmarked} onClick={() => bookmark.mutate()} label="Kaydet">{bookmarked ? <BookmarkCheck className="size-[18px]" /> : <Bookmark className="size-[18px]" />}</ToolBtn>
       </div>
 
-      <div className="relative flex-1">
-        <AnimatePresence mode="wait" custom={dir}>
-          <motion.section
-            key={step}
-            custom={dir}
-            initial={{ opacity: 0, x: dir * 40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: dir * -40 }}
-            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
-            drag={blocked ? false : 'x'}
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
-            onDragEnd={(_, i) => { if (i.offset.x < -70) go(1); else if (i.offset.x > 70) go(-1) }}
-            className="touch-pan-y"
-          >
-            {card.kind === 'cover' && (
-              <div className="overflow-hidden rounded-[28px] border-2 border-line bg-card">
-                <div className="relative aspect-[16/10]">
-                  <StoryCover story={story} />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-6 text-white">
-                    <div className="mb-2 flex flex-wrap gap-2 text-xs font-black">
-                      <span className="rounded-full bg-butter px-2.5 py-1 text-[#1f2433]">{story.cefr_level}</span>
-                      <span className="rounded-full bg-white/20 px-2.5 py-1 backdrop-blur">{story.paragraphs.length} sahne · ~{story.reading_minutes} dk</span>
-                    </div>
-                    <h1 className="text-3xl leading-tight sm:text-4xl">{story.title}</h1>
-                    {story.title_tr && <p className="text-white/80">{story.title_tr}</p>}
-                  </div>
-                </div>
-                <div className="p-6">
-                  {story.summary && <p className="text-[15px]">{story.summary}</p>}
-                  <div className="mt-4 grid grid-cols-3 gap-2 text-center">
-                    <Chip v={`${story.paragraphs.length}`} l="kısa sahne" />
-                    <Chip v={`${questions.length}`} l="hızlı kontrol" />
-                    <Chip v={`${base}+${perRight}×`} l="XP / doğru" />
-                  </div>
-                  <div className="mt-4 flex flex-wrap gap-2">
-                    <Toggle on={voice} onClick={() => setVoice((v) => !v)} icon={<Headphones className="size-4" />}>Sahneleri seslendir</Toggle>
-                    <Toggle on={tr} onClick={() => setTr((v) => !v)} icon={<Languages className="size-4" />}>Türkçesini göster</Toggle>
-                    <Toggle on={big} onClick={() => setBig((v) => !v)} icon={<Type className="size-4" />}>Büyük yazı</Toggle>
-                  </div>
-                  <p className="mt-4 text-sm text-ink-soft">Altı çizili kelimelere dokun: anlamı çıkar, tek dokunuşla defterine eklersin.</p>
-                </div>
-              </div>
-            )}
-
-            {card.kind === 'scene' && (() => {
-              const p = story.paragraphs[card.i]
-              return (
-                <div className="rounded-[28px] border-2 border-line bg-card p-6 sm:p-8">
-                  <div className="mb-4 flex items-center justify-between">
-                    <span className="text-xs font-black uppercase tracking-widest text-ink-soft">Sahne {card.i + 1}/{story.paragraphs.length}</span>
-                    <div className="flex gap-1.5">
-                      {p.tr && <button onClick={() => setTr((v) => !v)} className={clsx('grid size-10 place-items-center rounded-full border-2', tr ? 'border-flame bg-flame/10 text-flame' : 'border-line text-ink-soft')} aria-label="Türkçesi"><Languages className="size-4" /></button>}
-                      <button onClick={() => (playing ? (stopSpeaking(), setPlaying(false)) : say(card.i))} className="grid size-10 place-items-center rounded-full bg-sky text-white" aria-label="Dinle">{playing ? <Pause className="size-4" /> : <Volume2 className="size-4" />}</button>
-                    </div>
-                  </div>
-                  <p className={clsx('font-read', big ? 'text-[24px] leading-[1.75]' : 'text-[20px] leading-[1.75]')}>
-                    <Tokens text={p.en} activeChar={playing ? charIdx : -1} vocab={vocab} onWord={(w, e) => { const r = (e.target as HTMLElement).getBoundingClientRect(); setWord({ w, p: card.i, x: r.left + r.width / 2, y: r.bottom + window.scrollY }) }} />
-                  </p>
-                  <AnimatePresence>
-                    {tr && p.tr && (
-                      <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="mt-4 overflow-hidden border-l-4 border-flame pl-3 text-base italic text-ink-soft">{p.tr}</motion.p>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )
-            })()}
-
-            {card.kind === 'check' && (() => {
-              const q = questions[card.qi]
-              const pick = quiz[card.qi]
-              const done = pick !== undefined
-              return (
-                <div className="rounded-[28px] border-2 border-line bg-card p-6 sm:p-8">
-                  <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-lilac"><Sparkles className="size-4" /> Hızlı kontrol · +{perRight} XP</p>
-                  <h2 className="mt-2 text-2xl leading-snug">{q.q}</h2>
-                  <div className="mt-5 grid gap-2.5">
-                    {q.options.map((o, oi) => {
-                      const right = oi === q.answer
-                      return (
-                        <motion.button
-                          key={oi}
-                          whileTap={done ? undefined : { scale: 0.98 }}
-                          disabled={done}
-                          onClick={() => { setQuiz((s) => ({ ...s, [card.qi]: oi })); oi === q.answer ? sfx.correct(1) : sfx.wrong() }}
-                          animate={done && pick === oi && !right ? { x: [0, -6, 6, -4, 4, 0] } : {}}
-                          className={clsx('relative flex items-center gap-3 rounded-2xl border-2 px-4 py-3.5 text-left font-bold transition', !done && 'border-line hover:border-ink/30', done && right && 'border-mint bg-mint/10', done && pick === oi && !right && 'border-berry bg-berry/8', done && pick !== oi && !right && 'border-line opacity-50')}
-                        >
-                          <span className="flex-1">{o}</span>
-                          {done && right && <Check className="size-5 text-mint-deep" strokeWidth={3} />}
-                        </motion.button>
-                      )
-                    })}
-                  </div>
-                  <AnimatePresence>
-                    {done && (
-                      <motion.p initial={{ opacity: 0, y: 8, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} className={clsx('mt-4 inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-display font-black', pick === q.answer ? 'bg-mint/15 text-mint-deep' : 'bg-berry/10 text-berry')}>
-                        {pick === q.answer ? `Doğru! +${perRight} XP` : 'Olsun, doğrusu yeşil olan.'}
-                      </motion.p>
-                    )}
-                  </AnimatePresence>
-                </div>
-              )
-            })()}
-
-            {card.kind === 'paywall' && (
-              <div className="relative overflow-hidden rounded-[28px] bg-[#1f2433] p-8 text-center text-white">
-                <Img src={rewardImg('crown')} alt="" className="mx-auto mb-3 size-20 object-contain" />
-                <h2 className="text-2xl">Hikâyenin devamı Premium'da</h2>
-                <p className="mx-auto mb-6 mt-2 max-w-sm text-white/70">Tüm hikâyeler, sesli okumalar ve sınırsız pratik için Premium'a geç.</p>
-                <LinkButton to="/premium" variant="butter">Premium'u keşfet</LinkButton>
-              </div>
-            )}
-
-            {card.kind === 'end' && (
-              <div className="rounded-[28px] border-2 border-line bg-card p-6 text-center sm:p-8">
-                <Img src={higoImg(right === questions.length ? 'cheer' : 'thumbs')} alt="" className="mx-auto size-24 object-contain" />
-                <h2 className="mt-2 text-3xl">Son sahne!</h2>
-                {questions.length > 0 && <p className="mt-1 text-ink-soft">{answered < questions.length ? `${questions.length - answered} kontrol cevapsız kaldı.` : `${right}/${questions.length} doğru cevap`}</p>}
-                <p className="mx-auto mt-4 inline-flex items-center gap-2 rounded-2xl bg-butter/25 px-4 py-2 font-display text-2xl font-black tabular-nums">+{base + right * perRight} XP</p>
-                <p className="mt-1 text-xs font-bold text-ink-soft">{base} bitirme + {right} × {perRight} doğru cevap{!first && ' (tekrar okuma)'}</p>
-                {!!story.vocabulary?.length && (
-                  <div className="mt-6 text-left">
-                    <p className="mb-2 text-xs font-black uppercase tracking-widest text-ink-soft">Bu hikâyenin kelimeleri</p>
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      {story.vocabulary.map((v) => (
-                        <div key={v.word} className="flex items-center gap-2 rounded-2xl border-2 border-line px-3 py-2">
-                          <button onClick={() => speak(v.word)} className="text-sky" aria-label="Dinle"><Volume2 className="size-4" /></button>
-                          <span className="min-w-0 flex-1"><b>{v.word}</b> <span className="text-sm text-ink-soft">{v.meaning}</span></span>
-                          <button onClick={() => saveWord.mutate({ word: v.word, translation: v.meaning, example: v.example })} className="grid size-8 place-items-center rounded-lg bg-mint/15 text-mint-deep" aria-label="Deftere ekle"><Plus className="size-4" /></button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                <Button block size="lg" className="mt-6" loading={complete.isPending} onClick={() => complete.mutate()}>Hikâyeyi bitir ve XP’yi al</Button>
-              </div>
-            )}
-          </motion.section>
-        </AnimatePresence>
-      </div>
-
-      {/* bottom controls stay in thumb reach */}
-      {card.kind !== 'end' && card.kind !== 'paywall' && (
-        <div className="sticky bottom-24 mt-5 flex items-center gap-3 lg:bottom-4">
-          <button onClick={() => go(-1)} disabled={step === 0} className="press grid size-14 place-items-center rounded-2xl border-2 border-line bg-card disabled:opacity-30" aria-label="Önceki"><ChevronLeft className="size-6" /></button>
-          <Button block size="lg" disabled={blocked} onClick={() => go(1)}>{card.kind === 'cover' ? 'Okumaya başla' : blocked ? 'Bir seçenek seç' : 'Devam'}</Button>
+      {/* title page */}
+      <header className="mb-8">
+        <div className="relative aspect-[16/8] overflow-hidden rounded-[28px]">
+          <StoryCover story={story} />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 to-transparent" />
+          <div className="absolute bottom-4 left-5 flex flex-wrap gap-2 text-xs font-black">
+            <span className="rounded-full bg-butter px-2.5 py-1 text-[#1f2433]">{story.cefr_level}</span>
+            <span className="rounded-full bg-white/20 px-2.5 py-1 text-white backdrop-blur">~{story.reading_minutes} dk · {words} kelime</span>
+          </div>
         </div>
+        <h1 className="mt-6 font-read text-[clamp(2rem,6vw,2.75rem)] font-bold leading-tight">{story.title}</h1>
+        {story.title_tr && <p className="mt-1 text-ink-soft">{story.title_tr}</p>}
+        {story.summary && <p className="mt-3 text-[15px] text-ink-soft">{story.summary}</p>}
+        <p className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 rounded-2xl bg-paper-2 px-4 py-3 text-sm font-semibold text-ink-soft">
+          <span>Bir kelimeye dokun: anlamı çıksın.</span>
+          <span className="inline-flex items-center gap-1.5"><span className="h-[3px] w-5 rounded bg-butter" /> Altı çizililer bu hikâyenin kelimeleri</span>
+        </p>
+      </header>
+
+      {/* the text */}
+      <article className={clsx('font-read text-ink', SIZES[size])}>
+        {story.paragraphs.map((p, i) => (
+          <section key={i} ref={(el) => { paras.current[i] = el }} data-i={i} className={clsx('group relative -mx-3 mb-6 rounded-2xl px-3 py-1 transition-colors', playing === i && 'bg-sky/[0.07]')}>
+            <button onClick={() => (playing === i ? stop() : playFrom(i))} aria-label={playing === i ? 'Durdur' : 'Bu paragraftan dinle'} className={clsx('absolute -left-9 top-2 hidden size-7 place-items-center rounded-full transition sm:grid', playing === i ? 'bg-sky text-white' : 'text-ink-soft/50 opacity-0 hover:bg-paper-2 group-hover:opacity-100')}>
+              {playing === i ? <Pause className="size-3.5" /> : <Volume2 className="size-3.5" />}
+            </button>
+            <p className={clsx(i === 0 && 'first-letter:float-left first-letter:mr-2 first-letter:mt-1 first-letter:font-display first-letter:text-[3.4em] first-letter:font-black first-letter:leading-[0.8] first-letter:text-flame')}>
+              <Tokens text={p.en} activeChar={playing === i ? charIdx : -1} vocab={vocab} saved={saved} onWord={(w) => setWord({ w, p: i })} />
+            </p>
+            <AnimatePresence initial={false}>
+              {tr && p.tr && (
+                <motion.p initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden font-sans text-[15px] leading-relaxed text-ink-soft">
+                  <span className="mt-2 block border-l-[3px] border-flame/60 pl-3">{p.tr}</span>
+                </motion.p>
+              )}
+            </AnimatePresence>
+          </section>
+        ))}
+      </article>
+
+      <div className="my-10 flex items-center gap-3 text-ink-soft" aria-hidden><span className="h-px flex-1 bg-line" /><Sparkles className="size-4" /><span className="h-px flex-1 bg-line" /></div>
+
+      {data.locked ? (
+        <div className="relative overflow-hidden rounded-[28px] bg-[#1f2433] p-8 text-center text-white">
+          <Img src={rewardImg('crown')} alt="" className="mx-auto mb-3 size-20 object-contain" />
+          <h2 className="text-2xl">Hikâyenin devamı Premium'da</h2>
+          <p className="mx-auto mb-6 mt-2 max-w-sm text-white/70">Tüm hikâyeler, sesli okumalar ve sınırsız pratik için Premium'a geç.</p>
+          <LinkButton to="/premium" variant="butter">Premium'u keşfet</LinkButton>
+        </div>
+      ) : (
+        <>
+          {questions.length > 0 && (
+            <section className="rounded-[28px] border-2 border-line bg-card p-5 sm:p-7">
+              <p className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-lilac"><Sparkles className="size-4" /> Anladın mı?</p>
+              <h2 className="mt-1 font-display text-2xl font-black">{questions.length} kısa soru · her doğru +{perRight} XP</h2>
+              <ol className="mt-5 space-y-6">
+                {questions.map((q, qi) => {
+                  const pick = quiz[qi]
+                  const done = pick !== undefined
+                  return (
+                    <li key={qi}>
+                      <p className="mb-2.5 font-bold"><span className="mr-2 font-mono text-sm text-ink-soft">{qi + 1}.</span>{q.q}</p>
+                      <div className="grid gap-2 sm:grid-cols-2">
+                        {q.options.map((o, oi) => {
+                          const ok = oi === q.answer
+                          return (
+                            <motion.button
+                              key={oi}
+                              disabled={done}
+                              whileTap={done ? undefined : { scale: 0.98 }}
+                              animate={done && pick === oi && !ok ? { x: [0, -6, 6, -4, 4, 0] } : {}}
+                              onClick={() => { setQuiz((s) => ({ ...s, [qi]: oi })); ok ? sfx.correct(1) : sfx.wrong() }}
+                              className={clsx('flex items-center gap-2 rounded-xl border-2 px-3.5 py-2.5 text-left text-[15px] font-bold transition', !done && 'border-line hover:border-ink/30', done && ok && 'border-mint bg-mint/10', done && pick === oi && !ok && 'border-berry bg-berry/8', done && pick !== oi && !ok && 'border-line opacity-45')}
+                            >
+                              <span className="flex-1">{o}</span>
+                              {done && ok && <Check className="size-4 text-mint-deep" strokeWidth={3} />}
+                            </motion.button>
+                          )
+                        })}
+                      </div>
+                    </li>
+                  )
+                })}
+              </ol>
+            </section>
+          )}
+
+          <section className="mt-6 rounded-[28px] border-2 border-line bg-card p-6 text-center">
+            <Img src={higoImg(questions.length && right === questions.length ? 'cheer' : 'thumbs')} alt="" className="mx-auto size-20 object-contain" />
+            <p className="mx-auto mt-2 inline-flex items-center gap-2 rounded-2xl bg-butter/25 px-4 py-2 font-display text-2xl font-black tabular-nums">+{base + right * perRight} XP</p>
+            <p className="mt-1 text-xs font-bold text-ink-soft">{base} bitirme + {right} × {perRight} doğru cevap{!first && ' (tekrar okuma)'}{questions.length > answered && ` · ${questions.length - answered} soru cevapsız`}</p>
+            {!!story.vocabulary?.length && (
+              <div className="mt-5 text-left">
+                <p className="mb-2 text-xs font-black uppercase tracking-widest text-ink-soft">Bu hikâyenin kelimeleri</p>
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {story.vocabulary.map((v) => {
+                    const has = saved.includes(v.word.toLowerCase()) || saved.includes(v.word)
+                    return (
+                      <div key={v.word} className="flex items-center gap-2 rounded-2xl border-2 border-line px-3 py-2">
+                        <button onClick={() => speak(v.word)} className="text-sky" aria-label="Dinle"><Volume2 className="size-4" /></button>
+                        <span className="min-w-0 flex-1"><b>{v.word}</b> <span className="text-sm text-ink-soft">{v.meaning}</span></span>
+                        <button disabled={has} onClick={() => saveWord.mutate({ word: v.word, translation: v.meaning, example: v.example })} className="grid size-8 place-items-center rounded-lg bg-mint/15 text-mint-deep disabled:opacity-60" aria-label="Deftere ekle">{has ? <Check className="size-4" /> : <Plus className="size-4" />}</button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+            <Button block size="lg" className="mt-6" loading={complete.isPending} onClick={() => complete.mutate()}>Hikâyeyi bitir ve XP’yi al</Button>
+          </section>
+        </>
       )}
 
+      {/* the player: always in thumb reach */}
+      <div className="fixed inset-x-0 bottom-[92px] z-30 px-3 lg:bottom-5 lg:left-[256px]">
+        <div className="mx-auto flex max-w-[680px] items-center gap-3 rounded-2xl border-2 border-line bg-card/95 p-2 pr-3 shadow-soft backdrop-blur">
+          <button onClick={() => (playing !== null ? stop() : playFrom(Math.min(read, story.paragraphs.length - 1)))} className="press grid size-11 shrink-0 place-items-center rounded-xl bg-sky text-white" aria-label={playing !== null ? 'Durdur' : 'Sesli dinle'}>
+            {playing !== null ? <Pause className="size-5" /> : <Play className="size-5 fill-current" />}
+          </button>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-sm font-extrabold">{playing !== null ? `Okunuyor · paragraf ${playing + 1}/${story.paragraphs.length}` : 'Sesli dinle'}</p>
+            <span className="mt-1 flex gap-0.5">
+              {story.paragraphs.map((_, k) => <span key={k} className={clsx('h-1 flex-1 rounded-full', playing === k ? 'bg-sky' : k < read ? 'bg-flame/70' : 'bg-line')} />)}
+            </span>
+          </div>
+          <button onClick={() => setRate((r) => (r + 1) % RATES.length)} className="flex h-9 shrink-0 items-center gap-1 rounded-xl border-2 border-line px-2 font-mono text-xs font-bold" aria-label="Okuma hızı"><Gauge className="size-3.5" />{RATES[rate]}×</button>
+        </div>
+      </div>
+
+      {/* word sheet */}
       <AnimatePresence>
         {word && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setWord(null)} />
-            <motion.div initial={{ opacity: 0, y: -6, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0 }} className="absolute z-50 w-64 -translate-x-1/2" style={{ left: Math.min(Math.max(word.x, 140), window.innerWidth - 140), top: word.y + 8 }}>
-              <WordCard word={word.w} meaning={vocab.get(word.w)?.meaning} example={story.paragraphs[word.p].en} onSave={(t) => saveWord.mutate({ word: word.w, translation: t, example: story.paragraphs[word.p].en })} saving={saveWord.isPending} />
+            <motion.div className="fixed inset-0 z-40 bg-black/20" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setWord(null)} />
+            <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }} transition={{ type: 'spring', stiffness: 420, damping: 38 }} className="safe-bottom fixed inset-x-0 bottom-0 z-50 mx-auto max-w-lg px-3 pb-3">
+              <WordCard key={word.w} word={word.w} meaning={vocab.get(word.w)?.meaning} saved={saved.includes(word.w)} onClose={() => setWord(null)} onSave={(t) => saveWord.mutate({ word: word.w, translation: t, example: story.paragraphs[word.p].en })} saving={saveWord.isPending} />
             </motion.div>
           </>
         )}
@@ -321,22 +307,11 @@ export default function StoryReader() {
   )
 }
 
-function Chip({ v, l }: { v: string; l: string }) {
-  return (
-    <div className="rounded-2xl bg-paper-2 px-2 py-2.5">
-      <p className="font-display text-xl font-black tabular-nums">{v}</p>
-      <p className="text-[11px] font-bold text-ink-soft">{l}</p>
-    </div>
-  )
+function ToolBtn({ on, onClick, label, children }: { on: boolean; onClick: () => void; label: string; children: React.ReactNode }) {
+  return <button onClick={onClick} aria-pressed={on} aria-label={label} title={label} className={clsx('grid size-10 shrink-0 place-items-center rounded-xl transition', on ? 'bg-flame/10 text-flame' : 'text-ink-soft hover:bg-paper-2')}>{children}</button>
 }
 
-function Toggle({ on, onClick, icon, children }: { on: boolean; onClick: () => void; icon: React.ReactNode; children: React.ReactNode }) {
-  return (
-    <button onClick={onClick} aria-pressed={on} className={clsx('inline-flex items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-sm font-extrabold transition', on ? 'border-flame bg-flame/10 text-flame' : 'border-line text-ink-soft hover:text-ink')}>{icon}{children}</button>
-  )
-}
-
-function Tokens({ text, activeChar, vocab, onWord }: { text: string; activeChar: number; vocab: Map<string, unknown>; onWord: (w: string, e: React.MouseEvent) => void }) {
+function Tokens({ text, activeChar, vocab, saved, onWord }: { text: string; activeChar: number; vocab: Map<string, unknown>; saved: string[]; onWord: (w: string) => void }) {
   const parts = useMemo(() => {
     const out: { t: string; start: number; word: boolean }[] = []
     const re = /[A-Za-z’'-]+|[^A-Za-z’'-]+/g
@@ -350,9 +325,10 @@ function Tokens({ text, activeChar, vocab, onWord }: { text: string; activeChar:
         if (!p.word) return <span key={i}>{p.t}</span>
         const clean = p.t.toLowerCase().replace(/[’']s$/, '').replace(/[’']/g, "'")
         const known = vocab.has(clean)
+        const mine = saved.includes(clean)
         const active = activeChar >= p.start && activeChar < p.start + p.t.length
         return (
-          <span key={i} role="button" tabIndex={0} onClick={(e) => onWord(clean, e)} className={clsx('cursor-pointer rounded px-[1px] transition', active ? 'bg-flame text-white' : known ? 'underline decoration-butter decoration-[3px] underline-offset-4 hover:bg-butter/50' : 'hover:bg-butter/50')}>
+          <span key={i} role="button" tabIndex={0} onClick={() => onWord(clean)} onKeyDown={(e) => e.key === 'Enter' && onWord(clean)} className={clsx('cursor-pointer rounded-[4px] transition-colors', active ? 'bg-sky text-white' : mine ? 'bg-mint/20' : known ? 'underline decoration-butter decoration-[3px] underline-offset-[5px] hover:bg-butter/40' : 'hover:bg-butter/40')}>
             {p.t}
           </span>
         )
@@ -361,18 +337,20 @@ function Tokens({ text, activeChar, vocab, onWord }: { text: string; activeChar:
   )
 }
 
-function WordCard({ word, meaning, onSave, saving }: { word: string; meaning?: string; example: string; onSave: (translation?: string) => void; saving: boolean }) {
+function WordCard({ word, meaning, saved, onSave, onClose, saving }: { word: string; meaning?: string; saved: boolean; onSave: (translation?: string) => void; onClose: () => void; saving: boolean }) {
   const [t, setT] = useState(meaning ?? '')
+  useEffect(() => { speak(word, { rate: 0.85 }) }, [word])
   return (
-    <div className="ink-card p-4 font-sans">
-      <div className="mb-2 flex items-center justify-between">
-        <p className="text-2xl font-black">{word}</p>
-        <button onClick={() => speak(word)} className="grid size-9 place-items-center rounded-full bg-sky text-white" aria-label="Dinle"><Volume2 className="size-4" /></button>
+    <div className="rounded-3xl border-2 border-line bg-card p-5 shadow-soft">
+      <div className="mb-1 flex items-center gap-3">
+        <button onClick={() => speak(word, { rate: 0.85 })} className="grid size-11 shrink-0 place-items-center rounded-full bg-sky text-white" aria-label="Dinle"><Volume2 className="size-5" /></button>
+        <p className="min-w-0 flex-1 truncate font-read text-3xl font-bold">{word}</p>
+        <button onClick={onClose} className="grid size-9 place-items-center rounded-full text-ink-soft hover:bg-paper-2" aria-label="Kapat"><X className="size-5" /></button>
       </div>
-      {meaning ? <p className="mb-3 font-semibold">{meaning}</p> : (
-        <input value={t} onChange={(e) => setT(e.target.value)} placeholder="Türkçesi (isteğe bağlı)" className="mb-3 h-10 w-full rounded-xl border-2 border-line bg-paper-2 px-3 text-sm font-semibold focus:outline-none" />
+      {meaning ? <p className="mb-4 mt-2 text-lg font-bold">{meaning}</p> : (
+        <input value={t} onChange={(e) => setT(e.target.value)} placeholder="Türkçesini yaz (isteğe bağlı)" className="mb-4 mt-3 h-11 w-full rounded-xl border-2 border-line bg-paper-2 px-3 font-semibold focus:border-sky focus:outline-none" />
       )}
-      <Button size="sm" block loading={saving} onClick={() => onSave(t || undefined)} icon={<Plus className="size-4" />}>Kelime defterine ekle</Button>
+      <Button block loading={saving} disabled={saved} onClick={() => onSave(t || undefined)} icon={saved ? <Check className="size-4" /> : <Plus className="size-4" />}>{saved ? 'Defterinde' : 'Kelime defterine ekle'}</Button>
     </div>
   )
 }

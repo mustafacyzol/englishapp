@@ -96,7 +96,7 @@ export function ParagraphsField({ value, onChange }: { value: Para[]; onChange: 
       {list.map((p, i) => (
         <div key={i} className="rounded-2xl border-2 border-line p-3">
           <div className="mb-2 flex items-center gap-2 text-xs font-black uppercase tracking-widest text-ink-soft">
-            Sahne {i + 1}
+            Paragraf {i + 1}
             <span className="ml-auto flex gap-1">
               <button type="button" disabled={i === 0} onClick={() => move(i, -1)} className="grid size-7 place-items-center rounded-lg hover:bg-paper-2 disabled:opacity-30" aria-label="Yukarı"><ArrowUp className="size-4" /></button>
               <button type="button" disabled={i === list.length - 1} onClick={() => move(i, 1)} className="grid size-7 place-items-center rounded-lg hover:bg-paper-2 disabled:opacity-30" aria-label="Aşağı"><ArrowDown className="size-4" /></button>
@@ -109,8 +109,8 @@ export function ParagraphsField({ value, onChange }: { value: Para[]; onChange: 
           </div>
         </div>
       ))}
-      <button type="button" onClick={() => onChange([...list, { en: '', tr: '' }])} className="inline-flex items-center gap-1.5 rounded-xl border-2 border-line px-3 py-2 text-sm font-extrabold"><Plus className="size-4" /> Sahne ekle</button>
-      <p className="text-xs text-ink-soft">İpucu: kısa sahneler (2-4 cümle) okurun dikkatini tutar. Okuyucu hikâyeyi sahne sahne gösterir.</p>
+      <button type="button" onClick={() => onChange([...list, { en: '', tr: '' }])} className="inline-flex items-center gap-1.5 rounded-xl border-2 border-line px-3 py-2 text-sm font-extrabold"><Plus className="size-4" /> Paragraf ekle</button>
+      <p className="text-xs text-ink-soft">İpucu: 3-5 cümlelik paragraflar okumayı akıcı tutar. Okuyucu hikâyeyi tek sayfada, kitap gibi gösterir ve sesli okurken paragrafı vurgular.</p>
     </div>
   )
 }
@@ -139,7 +139,7 @@ export function QuestionsField({ value, onChange }: { value: Question[]; onChang
         </div>
       ))}
       <button type="button" onClick={() => onChange([...list, { q: '', options: ['', '', '', ''], answer: 0 }])} className="inline-flex items-center gap-1.5 rounded-xl border-2 border-line px-3 py-2 text-sm font-extrabold"><Sparkles className="size-4" /> Soru ekle</button>
-      <p className="text-xs text-ink-soft">Yuvarlak işaretli seçenek doğru cevaptır. Sorular okuma sırasında "hızlı kontrol" olarak sahnelerin arasına dağıtılır.</p>
+      <p className="text-xs text-ink-soft">Yuvarlak işaretli seçenek doğru cevaptır. Sorular hikâyenin sonunda "Anladın mı?" bölümünde sorulur.</p>
     </div>
   )
 }

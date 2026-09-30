@@ -164,15 +164,22 @@ export function VoiceCall({
     })
   }, [messages, say, startListening])
 
-  // Speak each new reply from Defne once.
+  // Speak each new reply from Defne exactly once. The latest functions sit in refs so a
+  // re-render (new props, new callbacks) can neither cancel a queued line nor queue it again.
+  const sayRef = useRef(say)
+  sayRef.current = say
+  const greetRef = useRef(playGreeting)
+  greetRef.current = playGreeting
+  const queued = useRef<ReturnType<typeof setTimeout>>(undefined)
   useEffect(() => {
     const last = messages[messages.length - 1]
     if (!last || last.role !== 'assistant' || lastSpoken.current === last.id) return
     const first = lastSpoken.current === null
     lastSpoken.current = last.id
-    const t = setTimeout(() => (first && greet ? playGreeting() : say(last.content)), first ? 700 : 150)
-    return () => clearTimeout(t)
-  }, [messages, greet, playGreeting, say])
+    clearTimeout(queued.current)
+    queued.current = setTimeout(() => (first && greet ? greetRef.current() : sayRef.current(last.content)), first ? 700 : 150)
+  }, [messages, greet])
+  useEffect(() => () => clearTimeout(queued.current), [])
 
   const hangUp = () => {
     stopSpeaking()

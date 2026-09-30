@@ -147,10 +147,18 @@ let current: { stop: () => void } | null = null
  * avatar's mouth opens with the actual syllables and closes in the pauses. Without
  * it, the browser voice is used and each spoken word gives the mouth a short pulse.
  */
+/** Bumped on every new line and on stop, so a reply that was still downloading never plays late. */
+let voiceGen = 0
+
 export async function speakNeural(text: string, opts: VoiceOpts = {}) {
   current?.stop()
+  current = null
+  stopSpeaking()
+  const gen = ++voiceGen
   const { postBlob } = await import('./api')
   const blob = await postBlob('/ai/tts', { text })
+  // Something newer started (or the call was stopped) while this line was on its way.
+  if (gen !== voiceGen) return
   if (!blob) {
     let pulse = 0
     let raf = 0
@@ -172,7 +180,8 @@ export async function speakNeural(text: string, opts: VoiceOpts = {}) {
       onEnd: () => {
         cancelAnimationFrame(raf)
         opts.onLevel?.(0)
-        opts.onEnd?.()
+        // only a line that finished by itself hands the turn back (not one that was cut off)
+        if (gen === voiceGen) opts.onEnd?.()
       },
     })
     current = { stop: () => { cancelAnimationFrame(raf); stopSpeaking() } }
@@ -198,11 +207,14 @@ export async function speakNeural(text: string, opts: VoiceOpts = {}) {
     if (el.duration) opts.onBoundary?.(Math.round((el.currentTime / el.duration) * text.length))
     raf = requestAnimationFrame(tick)
   }
-  const done = () => {
+  const cleanup = () => {
     cancelAnimationFrame(raf)
     opts.onLevel?.(0)
     URL.revokeObjectURL(url)
-    opts.onEnd?.()
+  }
+  const done = () => {
+    cleanup()
+    if (gen === voiceGen) opts.onEnd?.()
   }
   el.onplay = () => {
     opts.onStart?.()
@@ -210,11 +222,12 @@ export async function speakNeural(text: string, opts: VoiceOpts = {}) {
   }
   el.onended = done
   el.onerror = done
-  current = { stop: () => { el.pause(); done() } }
+  current = { stop: () => { el.pause(); cleanup() } }
   await el.play().catch(done)
 }
 
 export function stopVoice() {
+  voiceGen++
   current?.stop()
   current = null
   stopSpeaking()
