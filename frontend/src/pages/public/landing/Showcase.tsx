@@ -209,7 +209,7 @@ export function AudiencesPro() {
   const { i, pick, progress, bind } = useAutoplay(AUDIENCES.length, 4200, inView)
   const cur = AUDIENCES[i]
   return (
-    <section id="kimler-icin" ref={ref} className="mx-auto max-w-6xl px-5 py-20 md:py-28" {...bind}>
+    <section id="kimler-icin" ref={ref} className="mx-auto max-w-6xl overflow-x-clip px-5 py-20 md:py-28" {...bind}>
       <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div className="max-w-2xl">
           <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Kimin için?</p>
