@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { Building2, Coins, Globe2, KeyRound, Megaphone, Save, Share2, ToggleRight } from 'lucide-react'
+import { Briefcase, Building2, Coins, Globe2, KeyRound, Megaphone, Save, Share2, ToggleRight } from 'lucide-react'
 import { ApiError, get, put } from '@/lib/api'
 import { useSiteConfig } from '@/lib/site'
 import { Button } from '@/components/ui/Button'
@@ -19,6 +19,7 @@ const TABS = [
   { key: 'brand', label: 'Marka ve iletişim', icon: Building2 },
   { key: 'social', label: 'Sosyal medya', icon: Share2 },
   { key: 'features', label: 'Özellikler', icon: ToggleRight },
+  { key: 'corporate', label: 'Kurumsal paket', icon: Briefcase },
   { key: 'economy', label: 'Ekonomi ve limitler', icon: Coins },
   { key: 'auth', label: 'Giriş ve güvenlik', icon: KeyRound },
 ] as const
@@ -158,6 +159,23 @@ export default function AdminSettings() {
           <Card title="Özellikleri aç / kapat" text="Kapalı bir özellik menüden kalkar ve API tarafında da erişime kapanır.">
             <div className="divide-y-2 divide-line/10">
               {FEATURES.map(([k, l, d]) => <Toggle key={k} label={l} description={d} checked={s[k] !== false} onChange={(v) => set(k, v)} />)}
+            </div>
+          </Card>
+        )}
+
+        {tab === 'corporate' && (
+          <Card title="Kurumsal paket kartı" text="Ana sayfadaki ve Premium sayfasındaki paketlerin yanında görünür. Bireysel paketleri Paketler sayfasından düzenlersin.">
+            <div className="divide-y-2 divide-line/10">
+              <Toggle label="Kurumsal kartı göster" description="Kapalıyken yalnızca bireysel paketler listelenir." checked={s['corporate.enabled'] !== false} onChange={(v) => set('corporate.enabled', v)} />
+            </div>
+            <div className="mt-4 grid gap-4 sm:grid-cols-2">
+              <Input label="Paket adı" value={str('corporate.name')} onChange={(e) => set('corporate.name', e.target.value || null)} maxLength={60} />
+              <Input label="Kısa açıklama" value={str('corporate.tagline')} onChange={(e) => set('corporate.tagline', e.target.value || null)} maxLength={140} />
+              <Input label="Fiyat yazısı" value={str('corporate.price')} onChange={(e) => set('corporate.price', e.target.value || null)} maxLength={40} hint="ör. Teklif alın ya da ₺90 / öğrenci" />
+              <Input label="Fiyatın altındaki not" value={str('corporate.note')} onChange={(e) => set('corporate.note', e.target.value || null)} maxLength={140} />
+              <Textarea label="Özellikler (her satıra bir tane)" className="sm:col-span-2" rows={5} value={str('corporate.features')} onChange={(e) => set('corporate.features', e.target.value || null)} maxLength={1000} />
+              <Input label="Buton yazısı" value={str('corporate.cta')} onChange={(e) => set('corporate.cta', e.target.value || null)} maxLength={40} />
+              <Input label="Buton bağlantısı" value={str('corporate.url')} onChange={(e) => set('corporate.url', e.target.value || null)} placeholder="/contact?konu=corporate" hint="Site içi yol (/ ile başlar) ya da https adresi" />
             </div>
           </Card>
         )}

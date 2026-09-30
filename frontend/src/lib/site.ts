@@ -18,6 +18,7 @@ export interface SiteConfig {
     social?: Partial<Record<'instagram' | 'youtube' | 'tiktok' | 'linkedin' | 'x', string | null>>
     seo?: { description?: string | null }
     features?: Partial<Record<'duel' | 'ai' | 'stories' | 'exam' | 'chest_partners' | 'social_login' | 'leagues', boolean>>
+    corporate?: { enabled?: boolean; name?: string; tagline?: string; price?: string; note?: string; features?: string; cta?: string; url?: string }
   }
   social_login?: { google: string | null; apple: string | null }
   exams?: { key: ExamKey; name: string; full: string; about: string }[]

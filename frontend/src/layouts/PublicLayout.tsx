@@ -1,9 +1,9 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useOutlet } from 'react-router-dom'
-import { AnimatePresence, motion, useScroll, useSpring, useTransform } from 'motion/react'
+import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { ArrowRight, ArrowUp, ArrowUpRight, Check, Clock, Mail, Menu, Smartphone, X } from 'lucide-react'
+import { ArrowRight, ArrowUp, ArrowUpRight, Check, Mail, Menu, X } from 'lucide-react'
 import { ApiError, post } from '@/lib/api'
 import { higoImg } from '@/components/game/Higo'
 import { useAuth } from '@/lib/auth'
@@ -234,10 +234,10 @@ const SOCIAL_ICON: Record<string, (p: { className?: string }) => React.JSX.Eleme
 }
 
 const COLS: { title: string; links: [string, string][] }[] = [
-  { title: 'Ürün', links: [['/#nasil', 'Nasıl çalışır'], ['/#paketler', 'Paketler'], ['/placement', 'Seviye testi'], ['/#kurumlar', 'Kurumlar için'], ['/register', 'Ücretsiz başla']] },
-  { title: 'Şirket', links: [['/about', 'Hakkımızda'], ['/about#okul', 'Bayrak Dil Okulları'], ['/blog', 'Blog'], ['/contact?konu=partnership', 'İş birliği'], ['/contact', 'İletişim']] },
-  { title: 'Destek', links: [['/#sss', 'Sık sorulanlar'], ['/contact?konu=support', 'Teknik destek'], ['/contact?konu=course', 'Kurs bilgisi'], ['/contact?konu=corporate', 'Kurumsal eğitim'], ['#bulten', 'Bülten aboneliği']] },
-  { title: 'Yasal', links: [['/terms', 'Kullanım koşulları'], ['/privacy', 'Gizlilik ve KVKK'], ['/cookies', 'Çerez politikası'], ['/distance-sales', 'Mesafeli satış sözleşmesi'], ['/refund', 'İptal ve iade']] },
+  { title: 'Ürün', links: [['/#nasil', 'Nasıl çalışır'], ['/#paketler', 'Paketler'], ['/placement', 'Seviye testi'], ['/#kurumlar', 'Kurumlar için']] },
+  { title: 'Şirket', links: [['/about', 'Hakkımızda'], ['/blog', 'Blog'], ['/contact?konu=partnership', 'İş birliği'], ['/contact', 'İletişim']] },
+  { title: 'Destek', links: [['/#sss', 'Sık sorulanlar'], ['/contact?konu=support', 'Teknik destek'], ['/contact?konu=course', 'Kurs bilgisi'], ['/contact?konu=corporate', 'Kurumsal eğitim']] },
+  { title: 'Yasal', links: [['/terms', 'Kullanım koşulları'], ['/privacy', 'Gizlilik ve KVKK'], ['/distance-sales', 'Mesafeli satış'], ['/refund', 'İptal ve iade']] },
 ]
 
 /** Social accounts, in this order; the addresses come from Yönetim > Site ayarları. */
@@ -251,40 +251,33 @@ function Newsletter() {
   const sub = useMutation({ mutationFn: () => post<{ message: string }>('/newsletter', { email, source: 'footer', website: trap || undefined }) })
   const err = sub.error as ApiError | null
   return (
-    <div id="bulten" className="relative scroll-mt-24 overflow-hidden rounded-[32px] bg-gradient-to-br from-[#1d2334] to-[#141926] p-6 ring-1 ring-white/10 sm:p-10">
-      <div aria-hidden className="absolute -right-24 -top-24 size-72 rounded-full bg-flame/25 blur-3xl" />
-      <div className="relative grid items-center gap-8 md:grid-cols-[auto_1fr_1.2fr]">
-        <img src={higoImg('read')} alt="" className="hidden w-20 drop-shadow-[0_14px_16px_rgba(0,0,0,.35)] md:block" />
-        <div>
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-butter">Bülten</p>
-          <h3 className="mt-2 font-display text-2xl font-black leading-tight text-white sm:text-3xl">Haftada bir ipucu, sıfır spam.</h3>
-          <p className="mt-2 text-sm text-white/65">İngilizce ipuçları, yeni hikâyeler ve DilGO yenilikleri. İstediğin an tek tıkla çık.</p>
-        </div>
-        {sub.isSuccess ? (
-          <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-3 rounded-2xl bg-mint/15 px-4 py-4 font-bold text-mint">
-            <Check className="size-5 shrink-0" strokeWidth={3} /> {sub.data?.message ?? 'Onay bağlantısını e-postana gönderdik.'}
-          </motion.p>
-        ) : (
-          <form onSubmit={(e) => { e.preventDefault(); sub.mutate() }} className="w-full">
-            <div className="flex flex-col gap-2 rounded-2xl bg-white/[0.06] p-1.5 ring-1 ring-white/10 focus-within:ring-2 focus-within:ring-flame/70 sm:flex-row">
-              <label htmlFor="nl-email" className="sr-only">E-posta adresin</label>
-              <input id="nl-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@eposta.com" className="h-12 min-w-0 flex-1 bg-transparent px-4 text-[15px] font-semibold text-white placeholder:text-white/40 focus:outline-none" />
-              <input tabIndex={-1} aria-hidden value={trap} onChange={(e) => setTrap(e.target.value)} className="hidden" name="website" />
-              <button type="submit" disabled={sub.isPending} className="press flex h-12 items-center justify-center gap-2 rounded-xl bg-flame px-5 font-extrabold text-white disabled:opacity-60">
-                {sub.isPending ? <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <>Abone ol <ArrowRight className="size-4" /></>}
-              </button>
-            </div>
-            <p className={clsx('mt-2 px-1 text-xs', err ? 'font-bold text-berry' : 'text-white/45')}>{err ? err.first() : <>Abone olarak <Link to="/privacy" className="underline underline-offset-2 hover:text-white">Gizlilik Politikası</Link>’nı kabul etmiş olursun.</>}</p>
-          </form>
-        )}
-      </div>
+    <div id="bulten" className="mt-6 max-w-sm scroll-mt-24">
+      <p className="mb-2 text-sm font-extrabold">Haftada bir İngilizce ipucu</p>
+      {sub.isSuccess ? (
+        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 rounded-2xl bg-mint/12 px-3 py-3 text-sm font-bold text-mint-deep">
+          <Check className="size-4 shrink-0" strokeWidth={3} /> {sub.data?.message ?? 'Onay bağlantısını e-postana gönderdik.'}
+        </motion.p>
+      ) : (
+        <form onSubmit={(e) => { e.preventDefault(); sub.mutate() }}>
+          <div className="flex gap-1.5 rounded-2xl border-2 border-line bg-card p-1 transition focus-within:border-flame/60">
+            <label htmlFor="nl-email" className="sr-only">E-posta adresin</label>
+            <input id="nl-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@eposta.com" className="h-10 min-w-0 flex-1 bg-transparent px-3 text-sm font-semibold placeholder:text-ink-soft/60 focus:outline-none" />
+            <input tabIndex={-1} aria-hidden value={trap} onChange={(e) => setTrap(e.target.value)} className="hidden" name="website" />
+            <button type="submit" disabled={sub.isPending} aria-label="Abone ol" className="press grid h-10 shrink-0 place-items-center rounded-xl bg-ink px-4 text-paper disabled:opacity-60">
+              {sub.isPending ? <span className="size-4 animate-spin rounded-full border-2 border-paper border-t-transparent" /> : <ArrowRight className="size-4" />}
+            </button>
+          </div>
+          <p className={clsx('mt-1.5 px-1 text-[11px]', err ? 'font-bold text-berry' : 'text-ink-soft')}>{err ? err.first() : <>Sıfır spam, tek tıkla çık. <Link to="/privacy" className="underline underline-offset-2">Gizlilik</Link></>}</p>
+        </form>
+      )}
     </div>
   )
 }
 
 /**
- * Corporate, dark footer: the newsletter card, the brand and contact block, four
- * link columns, and a giant wordmark that rises into view as the page ends.
+ * A calm, compact footer: brand, contact and a one-line newsletter, four short
+ * link columns, then a thin bar with socials, legal links and "back to top".
+ * It sits on the page colour with a hairline accent, so the page ends quietly.
  */
 function Footer() {
   const { data } = useSiteConfig()
@@ -292,80 +285,51 @@ function Footer() {
   // Social links are filled in from the admin panel (Yönetim > Site ayarları).
   const social = (data?.site?.social ?? {}) as Record<string, string | null>
   const SOCIAL = SOCIAL_ORDER.filter((k) => !!social[k]).map((k) => ({ label: SOCIAL_NAME[k], href: social[k] as string, icon: SOCIAL_ICON[k] }))
-  const ref = useRef<HTMLDivElement>(null)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end end'] })
-  const wordY = useTransform(scrollYProgress, [0, 1], ['30%', '0%'])
-  const wordO = useTransform(scrollYProgress, [0, 0.6, 1], [0, 0.4, 1])
 
   return (
-    <footer className="relative overflow-hidden bg-[#0e1119] text-white">
-      <div aria-hidden className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] [background-size:56px_56px] [mask-image:linear-gradient(to_bottom,#000,transparent_70%)]" />
-      <div className="relative mx-auto max-w-6xl px-5 pt-16">
-        <Newsletter />
-
-        <div className="mt-16 grid gap-12 lg:grid-cols-[1.4fr_2.6fr]">
+    <footer className="relative border-t-2 border-line bg-paper-2/50">
+      <span aria-hidden className="absolute inset-x-0 -top-[2px] mx-auto h-[2px] max-w-3xl bg-gradient-to-r from-transparent via-flame to-transparent" />
+      <div className="mx-auto max-w-6xl px-5 pt-12">
+        <div className="grid gap-10 lg:grid-cols-[1fr_1.9fr]">
           <div>
-            <Link to="/" aria-label="DilGO ana sayfa" className="font-display text-3xl font-black tracking-tight">dil<span className="text-flame">go</span></Link>
-            <p className="mt-4 max-w-sm leading-relaxed text-white/60">
-              Bayrak Dil Okulları’nın İngilizce uygulaması. Oku, dinle, konuş, yaz; her gün birkaç dakika, gerçek öğretmen desteğiyle.
-            </p>
-            <ul className="mt-6 space-y-2.5 text-sm font-semibold text-white/70">
-              <li className="flex items-center gap-2.5"><Mail className="size-4 text-flame" /><a href={`mailto:${email}`} className="hover:text-white">{email}</a></li>
-              <li className="flex items-center gap-2.5"><Clock className="size-4 text-butter" /> Hafta içi 09:00-19:00</li>
-              <li className="flex items-center gap-2.5"><Smartphone className="size-4 text-mint" /> Web, iOS ve Android</li>
-            </ul>
-            {SOCIAL.length > 0 && (
-              <div className="mt-7">
-                <p className="mb-3 text-xs font-black uppercase tracking-[0.18em] text-white/40">Bizi takip et</p>
-                <div className="flex flex-wrap gap-2">
-                  {SOCIAL.map((s) => (
-                    <a key={s.label} href={s.href} aria-label={s.label} title={s.label} target="_blank" rel="noreferrer" className="grid size-11 place-items-center rounded-xl bg-white/[0.06] ring-1 ring-white/10 transition hover:-translate-y-0.5 hover:bg-flame hover:ring-flame">
-                      <s.icon className="size-5" />
-                    </a>
-                  ))}
-                </div>
-              </div>
-            )}
+            <Link to="/" aria-label="DilGO ana sayfa" className="inline-flex items-center gap-2">
+              <img src={higoImg('wave')} alt="" className="size-9" />
+              <span className="font-display text-2xl font-black tracking-tight">dil<span className="text-flame">go</span></span>
+            </Link>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink-soft">Bayrak Dil Okulları’nın İngilizce uygulaması. Her gün birkaç dakika, her yaşa uygun.</p>
+            <a href={`mailto:${email}`} className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-ink-soft transition hover:text-ink"><Mail className="size-4 text-flame" />{email}</a>
+            <Newsletter />
           </div>
 
-          <div className="grid grid-cols-2 gap-10 lg:grid-cols-4">
+          <nav aria-label="Alt bilgi" className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
             {COLS.map((c) => (
               <div key={c.title}>
-                <p className="mb-4 text-xs font-black uppercase tracking-[0.18em] text-white/40">{c.title}</p>
-                <ul className="space-y-2.5">
+                <p className="mb-3 text-[11px] font-black uppercase tracking-[0.16em] text-ink-soft/80">{c.title}</p>
+                <ul className="space-y-2">
                   {c.links.map(([to, l]) => (
-                    <li key={to + l}>
-                      {to.startsWith('#') ? (
-                        <a href={to} onClick={(e) => { e.preventDefault(); document.getElementById(to.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }} className="group inline-flex items-center gap-1 text-[15px] font-semibold text-white/75 transition hover:text-white">{l}</a>
-                      ) : (
-                        <Link to={to} className="group inline-flex items-center gap-1 text-[15px] font-semibold text-white/75 transition hover:text-white">
-                          {l}<ArrowUpRight className="size-3.5 -translate-x-1 opacity-0 transition group-hover:translate-x-0 group-hover:opacity-100" />
-                        </Link>
-                      )}
-                    </li>
+                    <li key={to + l}><Link to={to} className="text-[14px] font-semibold text-ink/75 transition hover:text-flame">{l}</Link></li>
                   ))}
                 </ul>
               </div>
             ))}
-          </div>
+          </nav>
         </div>
-      </div>
 
-      {/* the closing wordmark: rises as the page ends, fully visible, with Higo waving beside it */}
-      <div ref={ref} className="relative mx-auto mt-14 flex max-w-6xl select-none items-end justify-center gap-4 px-5 pb-8" aria-hidden>
-        <motion.p style={{ y: wordY, opacity: wordO, backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,.28), rgba(255,255,255,.04))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }} className="font-display text-[clamp(4.5rem,17vw,13rem)] font-black leading-[1.05] tracking-[-0.04em]">
-          dilgo
-        </motion.p>
-        <motion.img style={{ y: wordY, opacity: wordO }} src={higoImg('wave')} alt="" className="mb-[4%] w-[clamp(44px,7vw,84px)] shrink-0 drop-shadow-[0_12px_14px_rgba(0,0,0,.4)]" />
-      </div>
-
-      <div className="safe-bottom relative border-t border-white/10">
-        <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 px-5 py-5 text-sm font-semibold text-white/50 sm:flex-row">
-          <p>© {new Date().getFullYear()} Bayrak Dil Okulları · Tüm hakları saklıdır.</p>
-          <div className="flex items-center gap-5">
-            <Link to="/privacy" className="hover:text-white">Gizlilik</Link>
-            <Link to="/cookies" className="hover:text-white">Çerezler</Link>
-            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-1.5 font-bold hover:text-white">Başa dön <ArrowUp className="size-4" /></button>
+        <div className="safe-bottom mt-10 flex flex-col-reverse items-center justify-between gap-3 border-t-2 border-line/70 py-5 text-[13px] font-semibold text-ink-soft sm:flex-row">
+          <p>© {new Date().getFullYear()} Bayrak Dil Okulları</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
+            {SOCIAL.length > 0 && (
+              <div className="flex gap-0.5">
+                {SOCIAL.map((s) => (
+                  <a key={s.label} href={s.href} aria-label={s.label} title={s.label} target="_blank" rel="noreferrer" className="grid size-9 place-items-center rounded-xl transition hover:bg-card hover:text-flame">
+                    <s.icon className="size-[18px]" />
+                  </a>
+                ))}
+              </div>
+            )}
+            <Link to="/privacy" className="hover:text-ink">Gizlilik</Link>
+            <Link to="/cookies" className="hover:text-ink">Çerezler</Link>
+            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-1 font-bold hover:text-ink">Başa dön <ArrowUp className="size-3.5" /></button>
           </div>
         </div>
       </div>

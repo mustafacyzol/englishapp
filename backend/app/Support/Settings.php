@@ -44,6 +44,15 @@ class Settings
         'features.chest_partners' => true,
         'features.social_login' => true,
         'features.leagues' => true,
+        // The corporate card shown next to the plans on the pricing section.
+        'corporate.enabled' => true,
+        'corporate.name' => 'Kurumsal',
+        'corporate.tagline' => 'Okullar, dershaneler ve şirketler için',
+        'corporate.price' => 'Teklif alın',
+        'corporate.note' => 'Öğrenci sayısına göre fiyatlandırılır',
+        'corporate.features' => "Kendi logonuzla kurum paneli\nSınıf ve ekip bazında ilerleme raporu\nE-posta ya da kodla toplu katılım\nTüm öğrencilere Premium özellikler\nÖncelikli destek",
+        'corporate.cta' => 'Kurumsal teklif al',
+        'corporate.url' => '/contact?konu=corporate',
         // Economy
         'gamification.daily_chest' => true,
         'auth.remember_days' => 'dilgo.security.token_ttl_days',
@@ -51,7 +60,8 @@ class Settings
 
     /** The subset safe to expose on the public /config endpoint. */
     public const PUBLIC = ['brand.tagline', 'contact.email', 'contact.phone', 'contact.address', 'social.instagram', 'social.youtube', 'social.tiktok', 'social.linkedin', 'social.x', 'seo.description',
-        'features.duel', 'features.ai', 'features.stories', 'features.exam', 'features.chest_partners', 'features.social_login', 'features.leagues'];
+        'features.duel', 'features.ai', 'features.stories', 'features.exam', 'features.chest_partners', 'features.social_login', 'features.leagues',
+        'corporate.enabled', 'corporate.name', 'corporate.tagline', 'corporate.price', 'corporate.note', 'corporate.features', 'corporate.cta', 'corporate.url'];
 
     public static function all(): array
     {

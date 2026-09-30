@@ -44,8 +44,8 @@ const GROUPS: { title: string; items: Item[] }[] = [
   {
     title: 'Öğren',
     items: [
-      { to: '/ai', label: 'Defne AI', icon: IconTalk, tone: 'sage', feature: 'ai', tour: 'ai', badge: 'Canlı' },
       { to: '/learn', label: 'Yol haritası', icon: IconPath, tone: 'flame', tour: 'path' },
+      { to: '/ai', label: 'Defne AI', icon: IconTalk, tone: 'sage', feature: 'ai', tour: 'ai', badge: 'Canlı' },
       { to: '/stories', label: 'Hikâyeler', icon: IconBook, tone: 'butter', feature: 'stories' },
       { to: '/practice', label: 'Kelime pratiği', icon: IconCards, tone: 'sky', tour: 'practice' },
       { to: '/exam', label: 'Sınav modu', icon: IconExam, tone: 'lilac', feature: 'exam', tour: 'exam' },
@@ -152,7 +152,7 @@ export default function AppLayout() {
               <span className="hidden sm:inline"><Logo small /></span>
             </Link>
             <p className="hidden min-w-0 truncate text-sm font-bold text-ink-soft lg:block">
-              {data?.announcement ? <span className="rounded-lg bg-butter/20 px-2 py-1 text-ink">📣 {data.announcement}</span> : <>Merhaba, {user.name.split(' ')[0]}! Bugün de biraz İngilizce?</>}
+              {data?.announcement && <span className="rounded-lg bg-butter/20 px-2 py-1 text-ink">📣 {data.announcement}</span>}
             </p>
             <div className="flex min-w-0 items-center gap-0.5 sm:gap-1">
               <span data-tour="stats" className="flex min-w-0"><StatChips user={user} /></span>

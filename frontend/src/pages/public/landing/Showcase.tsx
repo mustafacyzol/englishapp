@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
-import { AnimatePresence, motion, useInView, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTransform } from 'motion/react'
+import { AnimatePresence, motion, useInView, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTime, useTransform } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, Check, Crown, Flame, Sparkles } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { ArrowRight, Building2, Check, Crown, Flame, Sparkles } from 'lucide-react'
+import { useSiteConfig } from '@/lib/site'
 import { rewardImg, img, PHOTO } from '@/lib/assets'
 import { tl } from '@/lib/format'
 import type { Plan } from '@/lib/types'
 import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
 import { Defne } from '@/components/game/Defne'
-import { higoImg, type HigoPose } from '@/components/game/Higo'
+import { higoImg } from '@/components/game/Higo'
+import { HIGO_SEQ, HigoMotion } from '@/components/game/HigoMotion'
 import { DefneMock, DuelMock, ExamMock, PathMock, Phone, SwipeMock } from './Mocks'
 
 const ease = [0.22, 1, 0.36, 1] as const
@@ -54,12 +57,54 @@ function useAutoplay(count: number, ms: number, inView: boolean, pauseOnHover = 
  * product itself (a phone with the real path screen, three small moments from
  * the app, Higo peeking over the edge). Pointer movement adds gentle depth.
  */
-const WORDS = [
-  { t: 'Hello!', x: '-150%', y: -150, c: 'bg-sky text-white' },
-  { t: 'Merhaba', x: '60%', y: -120, c: 'bg-butter text-[#1f2433]' },
-  { t: 'Let’s talk', x: '-160%', y: 30, c: 'bg-card text-ink ring-1 ring-line' },
-  { t: 'You got it!', x: '70%', y: 60, c: 'bg-mint text-white' },
+const ORBIT = [
+  { t: 'Hello!', c: 'bg-sky text-white' },
+  { t: 'Merhaba', c: 'bg-butter text-[#1f2433]' },
+  { t: 'Let’s talk', c: 'bg-card text-ink ring-1 ring-line' },
+  { t: 'Well done!', c: 'bg-mint text-white' },
+  { t: 'Why?', c: 'bg-lilac text-white' },
 ]
+
+/**
+ * A word chip travelling round an ellipse: it grows and comes forward on the
+ * near side, shrinks and slips behind Higo on the far side, which reads as 3D.
+ */
+function OrbitChip({ word, phase }: { word: (typeof ORBIT)[number]; phase: number }) {
+  const t = useTime()
+  const ang = useTransform(t, (ms) => (ms / 14000 + phase) * Math.PI * 2)
+  const x = useTransform(ang, (a) => `${Math.cos(a) * 47}cqw`)
+  const y = useTransform(ang, (a) => `${Math.sin(a) * 15}cqw`)
+  const scale = useTransform(ang, (a) => 0.78 + (Math.sin(a) + 1) * 0.16)
+  const zIndex = useTransform(ang, (a) => (Math.sin(a) > 0 ? 20 : 1))
+  const opacity = useTransform(ang, (a) => 0.55 + (Math.sin(a) + 1) * 0.225)
+  return (
+    <motion.span aria-hidden style={{ x, y, scale, zIndex, opacity, translateX: '-50%', translateY: '-50%' }} className={clsx('absolute left-1/2 top-[60%] whitespace-nowrap rounded-2xl px-3 py-1.5 font-display text-sm font-black shadow-[0_12px_24px_-12px_rgba(31,36,51,.35)] sm:text-base', word.c)}>
+      {word.t}
+    </motion.span>
+  )
+}
+
+const LINES = ['Hi, I’m Higo!', 'Merhaba!', 'Ready to talk?', 'Hadi başlayalım!']
+
+/** Higo’s speech bubble: a new line every few seconds, typed in. */
+function SpeechBubble() {
+  const reduced = useReducedMotion()
+  const [k, setK] = useState(0)
+  useEffect(() => {
+    if (reduced) return
+    const id = setInterval(() => setK((x) => (x + 1) % LINES.length), 3200)
+    return () => clearInterval(id)
+  }, [reduced])
+  return (
+    <div className="absolute left-[56%] top-[4%] z-30 sm:left-[60%]">
+      <AnimatePresence mode="wait">
+        <motion.p key={k} initial={{ opacity: 0, scale: 0.6, y: 10, rotate: -6 }} animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }} exit={{ opacity: 0, scale: 0.8, y: -6 }} transition={{ type: 'spring', stiffness: 420, damping: 22 }} className="relative origin-bottom-left whitespace-nowrap rounded-2xl rounded-bl-md bg-ink px-3.5 py-2 font-display text-sm font-black text-paper shadow-[0_14px_28px_-14px_rgba(31,36,51,.5)] sm:text-base">
+          {LINES[k]}
+        </motion.p>
+      </AnimatePresence>
+    </div>
+  )
+}
 
 export function HeroPro() {
   const reduced = useReducedMotion()
@@ -115,35 +160,25 @@ export function HeroPro() {
           </motion.div>
         </div>
 
-        {/* Higo bursting out of the phone (a short looping film), with the words he
-            brings along flying out around him */}
-        <div className="relative mx-auto aspect-[560/752] w-full max-w-[250px] sm:max-w-[340px] lg:max-w-[420px]">
-          <motion.div aria-hidden className="absolute inset-[8%] rounded-full bg-gradient-to-br from-flame/20 via-butter/15 to-sky/20 blur-3xl" animate={reduced ? {} : { scale: [1, 1.06, 1] }} transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }} />
-          <motion.div style={ph} initial={{ opacity: 0, y: 30, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.8, ease }} className="relative size-full overflow-hidden rounded-[36px] dark:bg-white dark:shadow-[0_30px_60px_-30px_rgba(0,0,0,.6)]">
-            <video className="size-full object-cover mix-blend-multiply dark:mix-blend-normal" autoPlay muted loop playsInline preload="auto" poster={img('hero/higo-phone.webp')} aria-label="Higo telefondan fırlıyor">
-              <source src={img('hero/higo-phone.webm')} type="video/webm" />
-              <source src={img('hero/higo-phone.mp4')} type="video/mp4" />
-            </video>
+        {/* Higo himself, animated on a transparent stage: words in several
+            languages orbit him like little moons, passing in front and behind */}
+        <div className="relative mx-auto aspect-square w-full max-w-[300px] [container-type:inline-size] sm:max-w-[400px] lg:max-w-[480px]">
+          <motion.div aria-hidden className="absolute inset-[14%] rounded-full bg-[radial-gradient(circle,color-mix(in_oklab,var(--color-flame)_22%,transparent),transparent_68%)]" animate={reduced ? {} : { scale: [1, 1.08, 1], opacity: [0.8, 1, 0.8] }} transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut' }} />
+          <svg aria-hidden viewBox="0 0 100 100" className="absolute inset-0 size-full overflow-visible">
+            <ellipse cx="50" cy="60" rx="47" ry="15" fill="none" stroke="currentColor" strokeWidth="0.35" strokeDasharray="0.6 2.2" className="text-ink/25" />
+          </svg>
+          {!reduced && ORBIT.map((w, k) => <OrbitChip key={w.t} word={w} phase={k / ORBIT.length} />)}
+          <motion.div style={ph} initial={{ opacity: 0, y: 40, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.9, ease }} className="absolute inset-[4%] z-10">
+            <HigoMotion className="size-full object-contain drop-shadow-[0_24px_24px_rgba(200,60,20,.22)]" />
           </motion.div>
+          <span aria-hidden className="absolute bottom-[9%] left-1/2 z-0 h-[5%] w-[34%] -translate-x-1/2 rounded-[50%] bg-ink/15 blur-md" />
+          <SpeechBubble />
 
-          {!reduced && WORDS.map((w, k) => (
-            <motion.span
-              key={w.t}
-              aria-hidden
-              className={clsx('absolute left-1/2 top-[42%] z-10 whitespace-nowrap rounded-2xl px-3 py-1.5 font-display text-sm font-black shadow-[0_12px_24px_-12px_rgba(31,36,51,.35)] sm:text-base', w.c)}
-              initial={{ x: '-50%', y: 0, scale: 0.3, opacity: 0 }}
-              animate={{ x: ['-50%', w.x], y: [0, w.y], scale: [0.3, 1, 1], opacity: [0, 1, 1, 0] }}
-              transition={{ duration: 3.2, times: [0, 0.35, 1], repeat: Infinity, repeatDelay: 1.2, delay: 1.2 + k * 1.1, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {w.t}
-            </motion.span>
-          ))}
-
-          <motion.div style={a} initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.7, type: 'spring', stiffness: 140, damping: 16 }} className="absolute -left-6 bottom-[14%] z-20 hidden w-[200px] rounded-2xl bg-card p-3 shadow-[0_20px_40px_-18px_rgba(31,36,51,.35)] ring-1 ring-line sm:block lg:-left-20">
+          <motion.div style={a} initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.9, type: 'spring', stiffness: 140, damping: 16 }} className="absolute -left-4 bottom-[6%] z-30 hidden w-[200px] rounded-2xl bg-card p-3 shadow-[0_20px_40px_-18px_rgba(31,36,51,.35)] ring-1 ring-line sm:block lg:-left-16">
             <div className="mb-1.5 flex items-center gap-2"><Defne className="size-7" /><p className="text-sm font-black">Defne</p><span className="ml-auto rounded-full bg-mint/12 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-mint-deep">Düzeltme</span></div>
             <p className="text-sm"><s className="text-berry">I am agree</s> → <b className="text-mint-deep">I agree</b></p>
           </motion.div>
-          <motion.div style={c} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1, type: 'spring', stiffness: 140, damping: 16 }} className="absolute -right-4 top-[10%] z-20 flex items-center gap-2.5 rounded-2xl bg-[#141926] px-3.5 py-2.5 text-white shadow-[0_20px_40px_-18px_rgba(0,0,0,.5)] lg:-right-14">
+          <motion.div style={c} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, type: 'spring', stiffness: 140, damping: 16 }} className="absolute -right-2 top-[12%] z-30 flex items-center gap-2.5 rounded-2xl bg-[#141926] px-3.5 py-2.5 text-white shadow-[0_20px_40px_-18px_rgba(0,0,0,.5)] lg:-right-10">
             <Flame className="size-5 fill-flame text-flame" />
             <span><span className="block font-display text-base font-black leading-none">21 gün</span><span className="text-[11px] font-bold text-white/60">seri</span></span>
           </motion.div>
@@ -171,7 +206,7 @@ const AUDIENCES = [
 export function AudiencesPro() {
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { amount: 0.35 })
-  const { i, pick, progress, bind } = useAutoplay(AUDIENCES.length, 6500, inView)
+  const { i, pick, progress, bind } = useAutoplay(AUDIENCES.length, 4200, inView)
   const cur = AUDIENCES[i]
   return (
     <section id="kimler-icin" ref={ref} className="mx-auto max-w-6xl px-5 py-20 md:py-28" {...bind}>
@@ -184,26 +219,26 @@ export function AudiencesPro() {
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
         {/* tabs */}
-        <div role="tablist" className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0">
+        <motion.div role="tablist" initial="hide" whileInView="show" viewport={{ once: true, amount: 0.4 }} variants={{ show: { transition: { staggerChildren: 0.06 } } }} className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0">
           {AUDIENCES.map((x, k) => {
             const on = k === i
             return (
-              <button key={x.key} role="tab" aria-selected={on} onClick={() => pick(k)} className={clsx('relative shrink-0 overflow-hidden rounded-2xl border-2 px-4 py-3 text-left transition lg:py-4', on ? 'border-ink bg-card' : 'border-line bg-card/60 hover:border-ink/25')}>
+              <motion.button variants={{ hide: { opacity: 0, y: 24, scale: 0.9 }, show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 420, damping: 24 } } }} key={x.key} role="tab" aria-selected={on} onClick={() => pick(k)} className={clsx('relative shrink-0 overflow-hidden rounded-2xl border-2 px-4 py-3 text-left transition-colors lg:py-4', on ? 'border-ink bg-card' : 'border-line bg-card/60 hover:border-ink/25')}>
                 <span className="block font-display text-[15px] font-black lg:text-lg">{x.tab}</span>
                 <span className="hidden text-xs font-bold text-ink-soft lg:block">{x.age}</span>
                 <span className="absolute inset-x-0 bottom-0 h-[3px] bg-line/60">
                   <span className="block h-full bg-flame" style={{ width: on ? `${progress * 100}%` : k < i ? '100%' : '0%', opacity: k < i ? 0.25 : 1 }} />
                 </span>
-              </button>
+              </motion.button>
             )
           })}
-        </div>
+        </motion.div>
 
-        {/* stage */}
-        <div className="grid overflow-hidden rounded-[32px] border-2 border-line bg-card md:grid-cols-[1.1fr_1fr]">
+        {/* stage: wipes open when it scrolls in */}
+        <motion.div initial={{ opacity: 0, x: 90, rotateY: -14 }} whileInView={{ opacity: 1, x: 0, rotateY: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ type: 'spring', stiffness: 110, damping: 20 }} style={{ transformPerspective: 1400 }} className="grid overflow-hidden rounded-[32px] border-2 border-line bg-card md:grid-cols-[1.1fr_1fr]">
           <div className="relative aspect-[4/3] overflow-hidden bg-paper-2 md:aspect-auto md:min-h-[420px]">
             <AnimatePresence initial={false}>
-              <motion.div key={cur.key} className="absolute inset-0" initial={{ opacity: 0, scale: 1.08 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ opacity: { duration: 0.6 }, scale: { duration: 6.5, ease: 'linear' } }}>
+              <motion.div key={cur.key} className="absolute inset-0 z-[1]" initial={{ clipPath: 'circle(0% at 12% 88%)', scale: 1.12 }} animate={{ clipPath: 'circle(150% at 12% 88%)', scale: 1 }} exit={{ zIndex: 0 }} transition={{ clipPath: { duration: 0.7, ease }, scale: { duration: 4.4, ease: 'linear' } }}>
                 <Img src={cur.photo} alt="" className="size-full object-cover" />
               </motion.div>
             </AnimatePresence>
@@ -214,12 +249,12 @@ export function AudiencesPro() {
           </div>
           <div className="relative flex min-h-[340px] flex-col justify-center p-6 sm:p-9">
             <AnimatePresence mode="wait">
-              <motion.div key={cur.key} initial="hide" animate="show" exit="hide" variants={{ show: { transition: { staggerChildren: 0.06 } }, hide: {} }}>
-                <motion.span variants={{ hide: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0 } }} className={clsx('inline-block rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider', cur.tone)}>{cur.tab}</motion.span>
-                <motion.h3 variants={{ hide: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }} className="mt-4 font-display text-3xl font-black leading-tight">{cur.title}</motion.h3>
+              <motion.div key={cur.key} initial="hide" animate="show" exit={{ opacity: 0, x: -24, transition: { duration: 0.14 } }} variants={{ show: { transition: { staggerChildren: 0.045 } }, hide: {} }}>
+                <motion.span variants={{ hide: { opacity: 0, x: 30 }, show: { opacity: 1, x: 0 } }} className={clsx('inline-block rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider', cur.tone)}>{cur.tab}</motion.span>
+                <motion.h3 variants={{ hide: { opacity: 0, x: 40 }, show: { opacity: 1, x: 0 } }} className="mt-4 font-display text-3xl font-black leading-tight">{cur.title}</motion.h3>
                 <ul className="mt-5 space-y-3">
                   {cur.points.map((p) => (
-                    <motion.li key={p} variants={{ hide: { opacity: 0, x: -10 }, show: { opacity: 1, x: 0 } }} className="flex gap-3 text-[16px]">
+                    <motion.li key={p} variants={{ hide: { opacity: 0, x: 36 }, show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 420, damping: 30 } } }} className="flex gap-3 text-[16px]">
                       <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-ink text-paper"><Check className="size-3.5" strokeWidth={3.5} /></span>{p}
                     </motion.li>
                   ))}
@@ -230,7 +265,7 @@ export function AudiencesPro() {
               </motion.div>
             </AnimatePresence>
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   )
@@ -238,95 +273,163 @@ export function AudiencesPro() {
 
 /* -------------------------------------------------------------- Meet Higo */
 
-/** A day with Higo: five moments from morning to night, each a small real screen. */
-const DAY: { time: string; pose: HigoPose; bg: string; ink: string; kicker: string; title: string; text: string; Scene: ComponentType }[] = [
-  { time: '07:30', pose: 'wave', bg: '#fff1e2', ink: '#1f2433', kicker: 'Günaydın', title: 'Seni nazikçe hatırlatır', text: 'Seçtiğin saatte tek bir bildirim: “5 dakikan var mı?” Serin kopmaz, baskı hissetmezsin.', Scene: () => <Notif /> },
-  { time: '08:10', pose: 'point', bg: '#e8f1ff', ink: '#1f2433', kicker: 'Yolda', title: 'Kısa ders, net hedef', text: 'Metroda iki durak: bir ders biter. Higo sıradaki durağı gösterir, kaybolmazsın.', Scene: () => <MiniLesson /> },
-  { time: '12:40', pose: 'think', bg: '#f1ecff', ink: '#1f2433', kicker: 'Takıldığında', title: 'Birlikte düşünür', text: 'Yanlış yaptığında azar yok: Türkçe açıklama ve bir ipucu. Doğrusu bir dokunuş uzakta.', Scene: () => <Hint /> },
-  { time: '19:00', pose: 'music', bg: '#e6f7ef', ink: '#1f2433', kicker: 'Akşam', title: 'Oyunla tekrar ettirir', text: 'Kelimle ve kelime avı: sıkılmadan tekrar, unutmadan önce tam zamanında.', Scene: () => <Tiles /> },
-  { time: '21:30', pose: 'cheer', bg: '#1d2236', ink: '#ffffff', kicker: 'Gün sonu', title: 'Başarını kutlar', text: 'Günlük hedef tamam, seri bir gün daha uzadı, sandık seni bekliyor. Yarın görüşürüz!', Scene: () => <Win /> },
+/**
+ * Higo's story in five beats. Each beat owns a slice of the scroll (`from`), a
+ * colour, and the real bit of the app it is about.
+ */
+const BEATS: { from: number; tint: string; kicker: string; title: string; text: string; Scene: ComponentType }[] = [
+  { from: 0, tint: '#ff7a45', kicker: 'Merhaba', title: 'Ben Higo, yol arkadaşın', text: 'Seçtiğin saatte tek bir nazik hatırlatma: “5 dakikan var mı?” Serin kopmaz, baskı hissetmezsin.', Scene: () => <Notif /> },
+  { from: 0.12, tint: '#2f7cf6', kicker: 'Okuma', title: 'Birlikte hikâye okuruz', text: 'Seviyene göre kısa hikâyeler. Bilmediğin kelimeye dokun, anlamı hemen çıksın; okurken kelime biriktir.', Scene: () => <StoryTap /> },
+  { from: 0.4, tint: '#8f7cf8', kicker: 'Takıldığında', title: 'Azar yok, ipucu var', text: 'Yanlışta Türkçe açıklama ve tek cümlelik ipucu. Doğrusu bir dokunuş uzakta.', Scene: () => <Hint /> },
+  { from: 0.58, tint: '#22b573', kicker: 'Tekrar', title: 'Oyunla, tam zamanında', text: 'Kelimle ve kelime avı: unutmak üzere olduğun kelime, oyunun içinde geri gelir.', Scene: () => <Tiles /> },
+  { from: 0.76, tint: '#ffb020', kicker: 'Gün sonu', title: 'Her başarını kutlar', text: 'Günlük hedef tamam, seri bir gün uzadı, sandık seni bekliyor. Yarın görüşürüz!', Scene: () => <Win /> },
 ]
+const beatAt = (p: number) => BEATS.reduce((acc, b, k) => (p >= b.from ? k : acc), 0)
 
 /**
- * Meet Higo as "a day with Higo". Scrolling down moves the day sideways: the sky
- * shifts from morning to night, the clock turns, and Higo walks from scene to
- * scene, changing pose. Each scene shows the real bit of the app that moment is
- * about. With reduced motion it becomes a simple list.
+ * Meet Higo, scroll-driven: the page scrubs through a real animation of Higo
+ * (wave, read, think, cheer), frame by frame on a canvas, so he transforms
+ * smoothly as you scroll. Each beat brings its colour, a line of text and the
+ * real piece of the app it is about. With reduced motion it is a simple list.
  */
 export function MeetHigoPro() {
   const ref = useRef<HTMLElement>(null)
+  const canvas = useRef<HTMLCanvasElement>(null)
+  const frames = useRef<HTMLImageElement[]>([])
   const reduced = useReducedMotion()
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
+  const smooth = useSpring(scrollYProgress, { stiffness: 180, damping: 32, restDelta: 0.0005 })
   const [i, setI] = useState(0)
-  useMotionValueEvent(scrollYProgress, 'change', (v) => setI(Math.max(0, Math.min(DAY.length - 1, Math.round(v * (DAY.length - 1))))))
-  const bg = useTransform(scrollYProgress, DAY.map((_, k) => k / (DAY.length - 1)), DAY.map((d) => d.bg))
-  const sun = useTransform(scrollYProgress, [0, 1], [-10, 190])
-  const sunLeft = useTransform(sun, (v) => `${40 + v / 3.5}%`)
-  const higoLeft = useTransform(scrollYProgress, [0, 1], ['6%', '78%'])
-  const cur = DAY[i]
-  const night = i === DAY.length - 1
+  const tint = useTransform(smooth, BEATS.map((b) => b.from + 0.04), BEATS.map((b) => b.tint))
+  const blobR = useTransform(smooth, [0, 0.25, 0.5, 0.75, 1], ['46% 54% 52% 48%', '58% 42% 45% 55%', '42% 58% 60% 40%', '55% 45% 40% 60%', '50% 50% 50% 50%'])
+  const rot = useTransform(smooth, [0, 1], [-8, 28])
+  const rotBack = useTransform(rot, (r) => -r * 1.6)
+  const wash = useTransform(tint, (c) => `radial-gradient(60rem 40rem at 30% 55%, ${c}, transparent 70%)`)
+
+  const draw = (p: number) => {
+    const c = canvas.current
+    const list = frames.current
+    if (!c || !list.length) return
+    const want = Math.round(Math.min(1, Math.max(0, p)) * (HIGO_SEQ.count - 1))
+    // the nearest frame that has loaded, so a slow network never shows a gap
+    let f = want
+    for (let d = 0; d < HIGO_SEQ.count; d++) {
+      if (list[want - d]?.complete && list[want - d].naturalWidth) { f = want - d; break }
+      if (list[want + d]?.complete && list[want + d].naturalWidth) { f = want + d; break }
+    }
+    const im = list[f]
+    if (!im?.complete) return
+    const ctx = c.getContext('2d')
+    if (!ctx) return
+    ctx.clearRect(0, 0, c.width, c.height)
+    ctx.drawImage(im, 0, 0, c.width, c.height)
+  }
+
+  useEffect(() => {
+    if (reduced) return
+    const list = Array.from({ length: HIGO_SEQ.count }, (_, n) => {
+      const im = new Image()
+      im.decoding = 'async'
+      im.src = HIGO_SEQ.src(n)
+      if (n === 0) im.onload = () => draw(smooth.get())
+      return im
+    })
+    frames.current = list
+  }, [reduced]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useMotionValueEvent(smooth, 'change', (v) => {
+    draw(v)
+    const k = beatAt(v)
+    if (k !== i) setI(k)
+  })
 
   if (reduced)
     return (
       <section className="mx-auto max-w-6xl space-y-6 px-5 py-16" aria-label="Higo ile tanış">
-        <h2 className="font-display text-[clamp(2rem,4.2vw,3.1rem)] font-black">Higo ile bir gün</h2>
-        {DAY.map((d) => <div key={d.time} className="rounded-3xl border-2 border-line p-5"><p className="font-mono text-sm">{d.time}</p><p className="font-display text-xl font-black">{d.title}</p><p className="text-ink-soft">{d.text}</p></div>)}
+        <h2 className="font-display text-[clamp(2rem,4.2vw,3.1rem)] font-black">Tanış: Higo</h2>
+        {BEATS.map((d) => <div key={d.title} className="rounded-3xl border-2 border-line p-5"><p className="text-xs font-black uppercase tracking-widest" style={{ color: d.tint }}>{d.kicker}</p><p className="font-display text-xl font-black">{d.title}</p><p className="text-ink-soft">{d.text}</p></div>)}
       </section>
     )
 
+  const cur = BEATS[i]
+  const go = (k: number) => {
+    const el = ref.current
+    if (!el) return
+    const top = el.getBoundingClientRect().top + window.scrollY
+    window.scrollTo({ top: top + (BEATS[k].from + 0.02) * (el.offsetHeight - window.innerHeight), behavior: 'smooth' })
+  }
+
   return (
-    <section ref={ref} className="relative" style={{ height: `${DAY.length * 90}vh` }} aria-label="Higo ile tanış">
-      <motion.div className="sticky top-0 flex h-dvh flex-col overflow-hidden" style={{ backgroundColor: bg }}>
-        {/* sky: a sun (then moon) arcs across, the clock shows the time */}
-        <motion.span aria-hidden className={clsx('absolute top-[34%] hidden size-14 sm:block rounded-full opacity-70 blur-[1px] transition-colors duration-700 sm:size-20', night ? 'bg-[#f3f0e6] shadow-[0_0_40px_rgba(255,255,255,.5)]' : 'bg-[#ffc233] shadow-[0_0_60px_rgba(255,194,51,.7)]')} style={{ left: sunLeft }} />
-        {night && Array.from({ length: 18 }, (_, k) => <motion.span key={k} aria-hidden className="absolute size-1 rounded-full bg-white" style={{ left: `${(k * 37) % 100}%`, top: `${(k * 23) % 40}%` }} initial={{ opacity: 0 }} animate={{ opacity: [0.2, 1, 0.2] }} transition={{ repeat: Infinity, duration: 2 + (k % 3), delay: k * 0.1 }} />)}
+    <section ref={ref} className="relative" style={{ height: '480vh' }} aria-label="Higo ile tanış">
+      <div className="sticky top-0 flex h-dvh items-center overflow-hidden">
+        {/* a soft wash of the beat's colour, never a hard panel */}
+        <motion.div aria-hidden className="absolute inset-0 opacity-[0.10]" style={{ background: wash }} />
 
-        <div className="relative z-10 mx-auto flex w-full max-w-6xl items-start justify-between px-5 pt-20 sm:pt-24">
-          <div style={{ color: cur.ink }} className="transition-colors duration-500">
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Tanış: Higo</p>
-            <h2 className="mt-2 font-display text-[clamp(1.8rem,4vw,3rem)] font-black leading-[1.05] tracking-tight">Higo ile bir gün</h2>
-          </div>
-          <AnimatePresence mode="popLayout">
-            <motion.p key={cur.time} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 24 }} className={clsx('rounded-2xl px-3 py-1.5 font-mono text-2xl font-black tabular-nums sm:text-4xl', night ? 'bg-white/10 text-white' : 'bg-white/70 text-[#1f2433]')}>{cur.time}</motion.p>
-          </AnimatePresence>
-        </div>
-
-        {/* the day slides sideways */}
-        <motion.div className="relative z-10 flex flex-1" style={{ width: `${DAY.length * 100}%` }} animate={{ x: `-${(i * 100) / DAY.length}%` }} transition={{ type: 'spring', stiffness: 90, damping: 20 }}>
-          {DAY.map((d, k) => (
-            <div key={d.time} className="flex w-full items-center" style={{ width: `${100 / DAY.length}%` }}>
-              <div className="mx-auto grid w-full max-w-6xl items-center gap-6 px-5 pb-40 sm:pb-24 lg:grid-cols-2 lg:gap-16 lg:pb-10 [&_.max-w-sm]:lg:max-w-md">
-                <div className="lg:order-2" style={{ color: d.ink }}>
-                  <p className="text-xs font-black uppercase tracking-[0.2em] opacity-70">{d.kicker}</p>
-                  <h3 className="mt-2 font-display text-[clamp(1.6rem,3.2vw,2.6rem)] font-black leading-tight">{d.title}</h3>
-                  <p className="mt-3 max-w-md text-[17px] leading-relaxed opacity-80">{d.text}</p>
-                </div>
-                <motion.div className="lg:order-1" animate={{ scale: k === i ? 1 : 0.9, opacity: k === i ? 1 : 0.4 }} transition={{ duration: 0.4 }}>
-                  <d.Scene />
+        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-4 px-5 pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pt-0">
+          {/* Higo on his stage */}
+          <div className="relative mx-auto aspect-[560/515] w-[min(78vw,44vh)] lg:w-[min(100%,62vh)]">
+            <motion.span aria-hidden className="absolute inset-[10%] opacity-25 blur-2xl" style={{ backgroundColor: tint, borderRadius: blobR, rotate: rot }} />
+            <motion.span aria-hidden className="absolute inset-[16%] border-[3px] border-dashed opacity-40" style={{ borderColor: tint, borderRadius: blobR, rotate: rotBack }} />
+            <canvas ref={canvas} width={HIGO_SEQ.w} height={HIGO_SEQ.h} className="relative size-full drop-shadow-[0_24px_24px_rgba(160,50,20,.18)]" role="img" aria-label="Higo animasyonu" />
+            <span aria-hidden className="absolute bottom-[4%] left-1/2 h-[5%] w-[32%] -translate-x-1/2 rounded-[50%] bg-ink/15 blur-md" />
+            {/* the real bit of the app for this beat, popping in beside him */}
+            <div className="absolute -bottom-8 right-[-8%] w-[58%] sm:w-[50%] lg:-bottom-2 lg:right-[-6%] lg:w-[50%]">
+              <AnimatePresence mode="popLayout" initial={false}>
+                <motion.div key={i} initial={{ opacity: 0, scale: 0.7, y: 24, rotate: 6 }} animate={{ opacity: 1, scale: 1, y: 0, rotate: -2 }} exit={{ opacity: 0, scale: 0.85, y: -16, rotate: -8 }} transition={{ type: 'spring', stiffness: 320, damping: 22 }} className="origin-bottom-left [&>div]:max-w-none [&>div]:p-3.5 sm:[&>div]:p-4">
+                  <cur.Scene />
                 </motion.div>
-              </div>
+              </AnimatePresence>
             </div>
-          ))}
-        </motion.div>
+          </div>
 
-        {/* Higo walks along the bottom, changing pose for each moment */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-32 sm:h-40">
-          <span aria-hidden className={clsx('absolute inset-x-0 bottom-0 h-10 transition-colors duration-500', night ? 'bg-white/5' : 'bg-black/[0.04]')} />
-          <motion.div className="absolute bottom-4 w-24 sm:w-32" style={{ left: higoLeft }}>
-            <AnimatePresence mode="popLayout" initial={false}>
-              <motion.img key={cur.pose} src={higoImg(cur.pose)} alt="Higo" initial={{ y: 30, opacity: 0, rotate: -10 }} animate={{ y: [0, -10, 0], opacity: 1, rotate: 0 }} exit={{ y: 20, opacity: 0 }} transition={{ y: { duration: 0.6 }, default: { type: 'spring', stiffness: 260, damping: 16 } }} className="w-full drop-shadow-[0_16px_16px_rgba(160,40,10,.25)]" />
-            </AnimatePresence>
-          </motion.div>
-          <div className="absolute bottom-3 right-5 flex gap-1.5 sm:right-10">
-            {DAY.map((d, k) => <span key={d.time} className={clsx('h-1.5 rounded-full transition-all duration-300', k === i ? 'w-8 bg-flame' : night ? 'w-3 bg-white/30' : 'w-3 bg-black/15')} />)}
+          {/* the words */}
+          <div className="relative mt-8 lg:mt-0">
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Tanış: Higo</p>
+            <div className="relative mt-3 min-h-[190px] sm:min-h-[210px]">
+              <AnimatePresence mode="wait" initial={false}>
+                <motion.div key={i} initial="hide" animate="show" exit="out" variants={{ show: { transition: { staggerChildren: 0.05 } } }}>
+                  <motion.p variants={WORD_V} className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em]" style={{ color: cur.tint }}>
+                    <span className="font-mono">0{i + 1}</span><span className="h-px w-6 bg-current" />{cur.kicker}
+                  </motion.p>
+                  <h2 className="mt-2 font-display text-[clamp(1.8rem,4vw,3rem)] font-black leading-[1.05] tracking-tight">
+                    {cur.title.split(' ').map((w, k) => <motion.span key={k} variants={WORD_V} className="mr-[0.25em] inline-block">{w}</motion.span>)}
+                  </h2>
+                  <motion.p variants={WORD_V} className="mt-3 max-w-md text-[17px] leading-relaxed text-ink-soft">{cur.text}</motion.p>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            {/* chapter rail: shows where you are, and jumps */}
+            <div className="mt-6 flex items-center gap-2">
+              {BEATS.map((b, k) => (
+                <button key={b.title} onClick={() => go(k)} aria-label={b.title} className="group relative h-2.5 overflow-hidden rounded-full bg-line transition-all duration-300" style={{ width: k === i ? 48 : 14 }}>
+                  <span className="absolute inset-0 rounded-full transition-opacity" style={{ background: b.tint, opacity: k <= i ? 1 : 0 }} />
+                </button>
+              ))}
+              <span className="ml-2 text-xs font-bold text-ink-soft">{i < BEATS.length - 1 ? 'Kaydırmaya devam et' : 'Hazırsın!'}</span>
+            </div>
           </div>
         </div>
-      </motion.div>
+      </div>
     </section>
   )
 }
 
+const WORD_V = {
+  hide: { opacity: 0, y: 18, filter: 'blur(6px)' },
+  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring' as const, stiffness: 380, damping: 28 } },
+  out: { opacity: 0, y: -10, transition: { duration: 0.15 } },
+}
+
 /* small scenes, each a real piece of the app */
+function StoryTap() {
+  return (
+    <Card>
+      <p className="text-xs font-black uppercase tracking-widest text-[#2f7cf6]">Hikâye · A2</p>
+      <p className="mt-2 text-[15px] leading-relaxed">Mia opened the door and saw a <span className="relative rounded bg-[#e8f1ff] px-1 font-extrabold text-[#2f7cf6] underline decoration-dotted underline-offset-4">puppy<motion.span initial={{ opacity: 0, y: 6 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="absolute -top-9 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-[#1f2433] px-2 py-1 text-xs font-bold text-white">yavru köpek</motion.span></span> on the step.</p>
+      <p className="mt-2 text-xs font-bold text-[#676d7c]">+1 kelime defterine eklendi</p>
+    </Card>
+  )
+}
 function Card({ children, className }: { children: ReactNode; className?: string }) {
   return <div className={clsx('mx-auto w-full max-w-sm rounded-3xl bg-white p-5 text-[#1f2433] shadow-[0_30px_60px_-30px_rgba(31,36,51,.45)]', className)}>{children}</div>
 }
@@ -338,16 +441,6 @@ function Notif() {
         <div className="min-w-0 flex-1"><p className="text-xs font-bold text-[#676d7c]">DilGO · şimdi</p><p className="font-extrabold">5 dakikan var mı? Serin 12. gününde!</p></div>
       </div>
       <div className="mt-3 flex gap-2"><span className="flex-1 rounded-xl bg-[#ff5a36] py-2 text-center text-sm font-extrabold text-white">Başla</span><span className="flex-1 rounded-xl bg-[#f3efe9] py-2 text-center text-sm font-extrabold">Sonra</span></div>
-    </Card>
-  )
-}
-function MiniLesson() {
-  return (
-    <Card>
-      <p className="text-xs font-black uppercase tracking-widest text-[#2f7cf6]">Ders 3 · 2/6</p>
-      <p className="mt-2 font-display text-xl font-black">“Otobüs durağı nerede?”</p>
-      <div className="mt-3 flex flex-wrap gap-2">{['Where', 'is', 'the', 'bus stop', '?'].map((w, k) => <motion.span key={w} initial={{ y: 10, opacity: 0 }} whileInView={{ y: 0, opacity: 1 }} transition={{ delay: k * 0.12 }} className="rounded-xl border-2 border-[#e7e1d8] px-2.5 py-1 font-bold">{w}</motion.span>)}</div>
-      <div className="mt-4 h-2 overflow-hidden rounded-full bg-[#f3efe9]"><motion.div className="h-full rounded-full bg-[#22b573]" initial={{ width: '10%' }} whileInView={{ width: '40%' }} transition={{ duration: 1.2 }} /></div>
     </Card>
   )
 }
@@ -401,7 +494,7 @@ const STRENGTHS: { kicker: string; title: string; text: string; Mock: ComponentT
 export function Strengths() {
   const ref = useRef<HTMLElement>(null)
   const inView = useInView(ref, { amount: 0.2 })
-  const { i, pick, progress, bind } = useAutoplay(STRENGTHS.length, 5000, inView)
+  const { i, pick, progress, bind } = useAutoplay(STRENGTHS.length, 3400, inView)
   const cur = STRENGTHS[i]
   return (
     <section id="nasil" ref={ref} className="relative overflow-hidden py-20 md:py-28" {...bind}>
@@ -419,11 +512,11 @@ export function Strengths() {
               </button>
             ))}
           </div>
-          <ol className="hidden space-y-2 lg:col-start-1 lg:block">
+          <motion.ol initial="hide" whileInView="show" viewport={{ once: true, amount: 0.3 }} variants={{ show: { transition: { staggerChildren: 0.07, delayChildren: 0.15 } } }} className="hidden space-y-2 lg:col-start-1 lg:block">
             {STRENGTHS.map((s, k) => {
               const on = k === i
               return (
-                <li key={s.title}>
+                <motion.li key={s.title} variants={{ hide: { opacity: 0, x: -60, rotate: -4 }, show: { opacity: 1, x: 0, rotate: 0, transition: { type: 'spring', stiffness: 260, damping: 22 } } }}>
                   <button onClick={() => pick(k)} aria-current={on} className={clsx('relative w-full overflow-hidden rounded-2xl border-2 px-5 py-4 text-left transition', on ? 'border-ink bg-card shadow-[0_14px_30px_-18px_rgba(31,36,51,.4)]' : 'border-transparent hover:bg-paper-2')}>
                     <span className="flex items-baseline gap-3">
                       <span className="font-mono text-xs font-bold text-ink-soft">0{k + 1}</span>
@@ -441,25 +534,27 @@ export function Strengths() {
                     </AnimatePresence>
                     {on && <span className="absolute inset-x-5 bottom-0 h-[3px] rounded bg-line/70"><span className="block h-full rounded" style={{ width: `${progress * 100}%`, background: s.tint }} /></span>}
                   </button>
-                </li>
+                </motion.li>
               )
             })}
-          </ol>
+          </motion.ol>
 
-          <div className="relative mx-auto w-[270px] sm:w-[300px] lg:col-start-2">
+          <motion.div initial={{ opacity: 0, y: 120, rotateX: 35, scale: 0.85 }} whileInView={{ opacity: 1, y: 0, rotateX: 0, scale: 1 }} viewport={{ once: true, amount: 0.25 }} transition={{ type: 'spring', stiffness: 120, damping: 18 }} className="relative mx-auto w-[270px] [perspective:1200px] sm:w-[300px] lg:col-start-2">
             <motion.span aria-hidden className="absolute left-1/2 top-1/2 size-[440px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-3xl" animate={{ backgroundColor: cur.tint, opacity: 0.18 }} transition={{ duration: 0.6 }} />
             <Phone>
-              <AnimatePresence mode="popLayout" initial={false}>
-                <motion.div key={i} className="absolute inset-0" initial={{ y: '14%', opacity: 0, filter: 'blur(6px)' }} animate={{ y: 0, opacity: 1, filter: 'blur(0px)' }} exit={{ y: '-10%', opacity: 0, filter: 'blur(6px)' }} transition={{ duration: 0.5, ease }}>
+              <div className="absolute inset-0 [perspective:900px]">
+              <AnimatePresence initial={false}>
+                <motion.div key={i} className="absolute inset-0 [backface-visibility:hidden] [transform-origin:50%_50%_-140px]" initial={{ rotateY: 90, opacity: 0.4 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: -90, opacity: 0.4 }} transition={{ duration: 0.42, ease: [0.65, 0, 0.35, 1] }}>
                   <cur.Mock />
                 </motion.div>
               </AnimatePresence>
+              </div>
             </Phone>
-          </div>
+          </motion.div>
 
           <div className="text-center lg:col-start-3 lg:text-left">
             <AnimatePresence mode="wait">
-              <motion.div key={i} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.35, ease }} className="mx-auto max-w-xs lg:mx-0">
+              <motion.div key={i} initial={{ opacity: 0, y: 26, scale: 0.96 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -14, transition: { duration: 0.12 } }} transition={{ type: 'spring', stiffness: 460, damping: 30 }} className="mx-auto max-w-xs lg:mx-0">
                 <p className="text-[11px] font-black uppercase tracking-[0.16em] lg:hidden" style={{ color: cur.tint }}>{cur.kicker}</p>
                 <p className="hidden font-display text-[5.5rem] font-black leading-none lg:block" style={{ color: cur.tint, opacity: 0.2 }}>0{i + 1}</p>
                 <p className="font-display text-2xl font-black lg:-mt-6">{cur.title}</p>
@@ -478,17 +573,18 @@ export function Strengths() {
 const FREE = ['Tüm ders yolu', 'Seçili hikâyeler', 'Kelime oyunları', 'Günde 10 Defne mesajı']
 
 /**
- * Pricing, light and calm: a free column and the paid plans on the page itself.
- * Each paid plan shows what it costs per day (the honest way to compare), its
- * monthly equivalent and the saving; the featured one gets a glowing outline
- * and Higo on top.
+ * Pricing, light and calm: the free column, the paid plans and the corporate
+ * card side by side, so a parent, a learner and a school all find their row in
+ * one place. The corporate card is edited in Yönetim > Site ayarları > Kurumsal paket.
  */
 export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, hazır olunca yüksel.', sub = 'Temel her şey ücretsiz. Premium sınırları kaldırır, canlı ders ve daha fazla konuşma pratiği ekler.' }: { plans: Plan[]; cta?: (p: Plan) => ReactNode; embedded?: boolean; title?: string; sub?: string }) {
+  const { data: cfg } = useSiteConfig()
+  const corp = cfg?.site?.corporate
+  const showCorp = !embedded && !!corp && corp.enabled !== false && !!corp.name
   const monthly = plans.find((p) => p.duration_days <= 31) ?? plans[0]
   const perMonth = (p: Plan) => Number(p.price) / Math.max(1, Math.round(p.duration_days / 30))
-  const perDay = (p: Plan) => Number(p.price) / Math.max(1, p.duration_days)
   const saving = (p: Plan) => (monthly && p !== monthly ? Math.round((1 - perMonth(p) / Number(monthly.price)) * 100) : 0)
-  const day = (n: number) => `₺${n.toFixed(n < 10 ? 1 : 0).replace('.', ',')}`
+  const cards = (embedded ? 0 : 1) + plans.length
   return (
     <section id={embedded ? undefined : 'paketler'} className={clsx('relative', embedded ? 'py-4' : 'py-24')}>
       <div className="mx-auto max-w-6xl px-5">
@@ -498,7 +594,7 @@ export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, ha
           <p className="mt-4 text-lg text-ink-soft">{sub}</p>
         </div>
 
-        <div className={clsx('grid items-stretch gap-5 md:grid-cols-2', embedded ? 'lg:grid-cols-3' : 'lg:grid-cols-4')}>
+        <div className={clsx('grid items-stretch gap-5 md:grid-cols-2', cards >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3')}>
           {!embedded && <PriceCard name="Ücretsiz" tagline="Her zaman" price="₺0" note="Kredi kartı gerekmez" features={FREE} cta={<LinkButton to="/register" block variant="secondary">Ücretsiz başla</LinkButton>} />}
           {plans.map((p) => (
             <PriceCard
@@ -508,7 +604,6 @@ export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, ha
               tagline={p.tagline ?? ''}
               price={tl(p.price)}
               was={p.compare_at_price ? tl(p.compare_at_price) : undefined}
-              daily={day(perDay(p))}
               note={p !== monthly ? `ayda ${tl(String(Math.round(perMonth(p))))}` : 'otomatik yenilenmez'}
               badge={p.is_featured ? 'En popüler' : saving(p) > 0 ? `%${saving(p)} tasarruf` : undefined}
               features={p.features ?? []}
@@ -517,15 +612,45 @@ export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, ha
           ))}
         </div>
 
+        {showCorp && <CorporateCard c={corp!} />}
+
         <ul className="mt-10 flex flex-wrap justify-center gap-x-8 gap-y-2 text-sm font-semibold text-ink-soft">
-          {(embedded ? ['Otomatik yenileme yok', 'Güvenli ödeme', 'Tek seferlik ödeme'] : ['Otomatik yenileme yok', 'İstediğin an iptal', 'Kurumlara özel fiyat']).map((t) => <li key={t} className="flex items-center gap-1.5"><Check className="size-4 text-mint-deep" strokeWidth={3} />{t}</li>)}
+          {(embedded ? ['Otomatik yenileme yok', 'Güvenli ödeme', 'Tek seferlik ödeme'] : ['Otomatik yenileme yok', 'İstediğin an iptal', 'Güvenli ödeme']).map((t) => <li key={t} className="flex items-center gap-1.5"><Check className="size-4 text-mint-deep" strokeWidth={3} />{t}</li>)}
         </ul>
       </div>
     </section>
   )
 }
 
-function PriceCard({ name, tagline, price, was, note, badge, features, cta, featured, daily }: { name: string; tagline: string; price: string; was?: string; note: string; badge?: string; features: string[]; cta: ReactNode; featured?: boolean; daily?: string }) {
+/** Schools and companies: one wide card under the plans, edited from the admin panel. */
+function CorporateCard({ c }: { c: NonNullable<NonNullable<ReturnType<typeof useSiteConfig>['data']>['site']>['corporate'] & object }) {
+  const features = (c.features ?? '').split('\n').map((f) => f.trim()).filter(Boolean)
+  const external = /^https?:/.test(c.url ?? '')
+  const btn = 'press inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-ink px-6 font-display font-extrabold uppercase tracking-wide text-paper shadow-hard-sm lg:w-auto'
+  return (
+    <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.5, ease }} className="relative mt-5 overflow-hidden rounded-[28px] border-2 border-line bg-card">
+      <span aria-hidden className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-sage to-mint" />
+      <div className="grid items-center gap-6 p-6 pl-8 lg:grid-cols-[1fr_1.5fr_auto] lg:gap-10">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="grid size-9 place-items-center rounded-xl bg-sage/15 text-sage-deep dark:text-sage"><Building2 className="size-5" /></span>
+            <p className="font-display text-xl font-black">{c.name}</p>
+            <span className="rounded-full bg-sage/15 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-sage-deep dark:text-sage">Okul ve şirket</span>
+          </div>
+          {c.tagline && <p className="mt-2 text-sm text-ink-soft">{c.tagline}</p>}
+          <p className="mt-3 font-display text-3xl font-black tracking-tight">{c.price}</p>
+          {c.note && <p className="text-sm font-bold text-ink-soft">{c.note}</p>}
+        </div>
+        <ul className="grid gap-2.5 sm:grid-cols-2">
+          {features.map((f) => <li key={f} className="flex gap-2.5 text-[14px]"><span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-sage/15 text-sage-deep dark:text-sage"><Check className="size-3" strokeWidth={3.5} /></span>{f}</li>)}
+        </ul>
+        {external ? <a href={c.url!} target="_blank" rel="noopener" className={btn}>{c.cta || 'Teklif al'} <ArrowRight className="size-4" /></a> : <Link to={c.url || '/contact?konu=corporate'} className={btn}>{c.cta || 'Teklif al'} <ArrowRight className="size-4" /></Link>}
+      </div>
+    </motion.div>
+  )
+}
+
+function PriceCard({ name, tagline, price, was, note, badge, features, cta, featured }: { name: string; tagline: string; price: string; was?: string; note: string; badge?: string; features: string[]; cta: ReactNode; featured?: boolean }) {
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.5, ease }} className={clsx('relative rounded-[28px] p-[2px]', featured ? 'bg-[conic-gradient(from_var(--a),#ff5a36,#ffc233,#ff8a3d,#ff5a36)] shadow-[0_30px_70px_-30px_rgba(255,90,54,.55)] [animation:spin-border_6s_linear_infinite] lg:-my-3' : 'bg-line')}>
       {featured && <img src={higoImg('thumbs')} alt="" className="absolute -right-3 -top-12 z-10 w-20 drop-shadow-[0_10px_12px_rgba(160,40,10,.25)]" />}
@@ -539,16 +664,10 @@ function PriceCard({ name, tagline, price, was, note, badge, features, cta, feat
           {badge && <span className={clsx('rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider', featured ? 'bg-flame text-white' : 'bg-mint/15 text-mint-deep')}>{badge}</span>}
         </div>
         <div className="mt-3 flex items-end gap-2">
-          <p className="font-display text-5xl font-black leading-none tracking-tight">{price}</p>
+          <p className={clsx('font-display font-black leading-none tracking-tight', price.length > 8 ? 'text-[2.1rem]' : 'text-5xl')}>{price}</p>
           {was && <p className="pb-1 text-sm font-bold text-ink-soft line-through">{was}</p>}
         </div>
         <p className="mt-1.5 text-sm font-bold text-ink-soft">{note}</p>
-        {daily && (
-          <p className="mt-4 flex items-center gap-2 rounded-2xl bg-paper-2 px-3 py-2 text-sm">
-            <span className="font-display text-lg font-black text-flame">{daily}</span>
-            <span className="font-semibold text-ink-soft">günlük maliyet</span>
-          </p>
-        )}
         <ul className="mt-5 flex-1 space-y-2.5">
           {features.map((f) => (
             <li key={f} className="flex gap-2.5 text-[14px]"><span className={clsx('mt-0.5 grid size-5 shrink-0 place-items-center rounded-full', featured ? 'bg-flame text-white' : 'bg-paper-2 text-ink')}>{featured ? <Sparkles className="size-3" /> : <Check className="size-3" strokeWidth={3.5} />}</span>{f}</li>

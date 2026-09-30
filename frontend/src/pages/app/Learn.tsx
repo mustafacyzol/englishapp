@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
@@ -14,8 +14,6 @@ import { Button } from '@/components/ui/Button'
 import { Modal, SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
-import { higoImg } from '@/components/game/Higo'
-import { TUTOR } from '@/lib/tutor'
 
 interface PathData {
   course: { id: number; title: string; cefr_level: string; color: string; description: string }
@@ -34,32 +32,16 @@ const NODE = 72
 const GAP = 44
 const courseOffset = (lvl: string) => ({ A1: 0, A2: 3, B1: 5 } as Record<string, number>)[lvl] ?? 0
 
-/**
- * "Only two minutes?" A row of bite-size starts for short attention spans: each
- * one opens straight into the activity, no menus in between.
- */
-function QuickBites() {
-  const items = [
-    { to: '/ai', t: 'Defne’ye 1 soru', s: '1 dk · konuş', img: TUTOR.avatar, tone: 'from-sage/25 to-mint/10' },
-    { to: '/practice', t: 'Kaydır kartları', s: '2 dk · 10 kelime', img: higoImg('think'), tone: 'from-sky/20 to-lilac/10' },
-    { to: '/stories', t: 'Bir hikâye sahnesi', s: '2 dk · oku', img: higoImg('read'), tone: 'from-butter/35 to-flame/10' },
-    { to: '/duel', t: 'Blitz düello', s: '3 dk · lig', img: higoImg('point'), tone: 'from-flame/20 to-berry/10' },
-  ]
+/** The one friendly line of the app, shown on the path only so other pages stay calm. */
+function Greeting() {
+  const { user } = useAuth()
+  if (!user) return null
+  const h = new Date().getHours()
+  const hello = h < 6 ? 'İyi geceler' : h < 12 ? 'Günaydın' : h < 18 ? 'Merhaba' : 'İyi akşamlar'
   return (
-    <section className="mt-5">
-      <p className="mb-2 text-xs font-black uppercase tracking-widest text-ink-soft">Sadece birkaç dakikan mı var?</p>
-      <div className="no-scrollbar -mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-4 sm:px-0">
-        {items.map((x, i) => (
-          <motion.div key={x.to} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 * i }} className="w-[42%] shrink-0 snap-start sm:w-auto">
-            <Link to={x.to} className={clsx('press group flex h-full flex-col rounded-2xl border-2 border-line bg-gradient-to-br p-3 transition hover:border-ink/25', x.tone)}>
-              <img src={x.img} alt="" className="mb-1 size-10 rounded-full object-cover transition group-hover:scale-110" />
-              <span className="text-sm font-extrabold leading-tight">{x.t}</span>
-              <span className="text-[11px] font-bold text-ink-soft">{x.s}</span>
-            </Link>
-          </motion.div>
-        ))}
-      </div>
-    </section>
+    <p className="px-1 text-sm font-bold text-ink-soft">
+      {hello}, <span className="text-ink">{user.name.split(' ')[0]}</span>! Bugün de biraz İngilizce?
+    </p>
   )
 }
 
@@ -103,13 +85,12 @@ export default function Learn() {
 
   return (
     <div className="mx-auto max-w-2xl">
+      <Greeting />
       {/* The "where you left off" bar stays pinned under the header instead of popping in:
           when your stop scrolls away it simply shows which way it is. */}
       <div className="sticky top-[66px] z-[25] -mx-1 px-1 pb-2 pt-2">
         <ContinueCard data={data} stats={stats} onJump={jump} onPick={() => setPicker(true)} away={!currentVisible ? (curAbove ? 'up' : 'down') : null} />
       </div>
-
-      <QuickBites />
 
       <div className="mt-8">
         {data.units.map((unit, ui) => (
