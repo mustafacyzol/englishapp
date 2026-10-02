@@ -1,6 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'motion/react'
+import clsx from 'clsx'
 import { ArrowLeft, Crown, UserX } from 'lucide-react'
 import { get } from '@/lib/api'
 import { dateTR, num } from '@/lib/format'
@@ -32,13 +33,13 @@ export default function PublicProfile() {
   return (
     <div className="mx-auto max-w-xl">
       <button onClick={() => nav(-1)} className="mb-3 flex items-center gap-1.5 text-sm font-bold text-ink-soft hover:text-ink"><ArrowLeft className="size-4" /> Geri</button>
-      <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="ink-card overflow-hidden">
+      <motion.section initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className={clsx('ink-card overflow-hidden', u.is_premium && 'premium-edge')}>
         <ProfileBanner banner={u.banner} className="h-32" />
         <div className="-mt-12 px-6">
-          <UserAvatar name={u.name} avatar={u.avatar} avatarUrl={u.avatar_url} frame={u.frame} className="size-24 border-4 border-card" rounded="rounded-[28px]" />
+          <UserAvatar name={u.name} avatar={u.avatar} avatarUrl={u.avatar_url} frame={u.frame} className={clsx('size-24 rounded-full', u.frame ? 'drop-shadow-[0_10px_18px_rgba(31,36,51,.28)]' : 'shadow-[0_10px_24px_-8px_rgba(31,36,51,.45)]')} rounded="rounded-full" />
         </div>
         <div className="px-6 pb-6 pt-3">
-          <h1 className="flex items-center gap-2 text-3xl font-extrabold">{u.name} {u.is_premium && <Crown className="size-6 fill-butter text-butter-deep" />}</h1>
+          <h1 className="flex items-center gap-2 text-3xl font-extrabold"><span className={clsx('min-w-0 truncate', u.is_premium && 'premium-name')}>{u.name}</span> {u.is_premium && <Crown className="size-6 shrink-0 fill-butter text-butter-deep" />}</h1>
           <p className="text-ink-soft">@{u.username} · {dateTR(u.joined_at)} tarihinden beri · {u.cefr_level}</p>
           {u.bio && <p className="mt-3 text-[15px]">{u.bio}</p>}
           <div className="mt-5 flex items-center gap-3 rounded-2xl bg-paper-2 p-3">

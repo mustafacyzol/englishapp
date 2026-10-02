@@ -25,9 +25,20 @@ class PathService
 {
     public const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 
+    /** Lessons a free learner may pass over (premium nodes), from the last states() call. */
+    private array $optional = [];
+
     public function courses(): Collection
     {
         return Course::query()->where('is_published', true)->orderBy('position')->get();
+    }
+
+    /** The course of the learner's level, or the highest one below it (levels above B2 review B2). */
+    public function courseFor(User $user): Course
+    {
+        $mine = array_search($user->cefr_level ?? 'A1', self::LEVELS, true);
+
+        return $this->courses()->filter(fn ($c) => array_search($c->cefr_level, self::LEVELS, true) <= $mine)->last() ?? $this->courses()->firstOrFail();
     }
 
     /** -1 below the learner's level, 0 their level, 1 above. */
@@ -48,6 +59,8 @@ class PathService
         $rel = $this->relation($user, $course);
         $opened = (int) (($user->path_unlocks ?? [])[(string) $course->id] ?? -1);
 
+        $premium = $user->isPremium();
+        $optional = [];
         $states = [];
         foreach ($course->units->values() as $u => $unit) {
             $prevDone = true;
@@ -60,16 +73,22 @@ class PathService
                     $k === 0, $prevDone => 'open',
                     default => 'locked',
                 };
-                $prevDone = $isDone;
+                // Premium nodes never block a free learner: they show, but the path walks past them.
+                $skip = $lesson->is_premium && ! $premium;
+                if ($skip) {
+                    $optional[$lesson->id] = true;
+                }
+                $prevDone = $isDone || ($skip && $prevDone);
             }
         }
-        // where to continue: the first open lesson in path order
+        // where to continue: the first open lesson in path order the learner can actually take
         foreach ($states as $id => $s) {
-            if ($s === 'open') {
+            if ($s === 'open' && ! isset($optional[$id])) {
                 $states[$id] = 'current';
                 break;
             }
         }
+        $this->optional = $optional;
 
         return $states;
     }
@@ -91,7 +110,7 @@ class PathService
         if (! $course) {
             return null;
         }
-        $states = $this->states($user, $course);
+        $states = array_diff_key($this->states($user, $course), $this->optional);
         if (! $states || in_array('locked', $states, true) || in_array('open', $states, true) || in_array('current', $states, true)) {
             return null;
         }
@@ -116,6 +135,10 @@ class PathService
             return;
         }
         $band = $bands[$level] ?? ['correct' => 0, 'total' => 1];
+        // top of the scale: a strong C1 band on top of a passed B2 opens most of B2
+        if ($level === 'B2' && isset($bands['C1']) && ($bands['C1']['correct'] ?? 0) / max(1, $bands['C1']['total'] ?? 1) >= 0.6) {
+            $band = ['correct' => 9, 'total' => 10];
+        }
         $ratio = ($band['correct'] ?? 0) / max(1, $band['total'] ?? 1);
         $units = $course->units()->count();
         $open = $ratio < 0.4 ? -1 : min($units - 2, (int) floor($ratio * $units) - 1);

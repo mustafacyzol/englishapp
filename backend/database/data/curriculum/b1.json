@@ -1,0 +1,2247 @@
+{
+ "slug": "b1-ozgur-konusma",
+ "title": "B1 · Özgürce Konuş",
+ "cefr_level": "B1",
+ "color": "#3A6FF7",
+ "description": "Deneyimlerini ve fikirlerini anlat, haberleri takip et, iş hayatında kendini ifade et.",
+ "units": [
+  {
+   "title": "Hayat Deneyimleri",
+   "desc": "Present perfect ve past simple, for / since",
+   "color": "#3A6FF7",
+   "guide": "## Ne zamandır?\nBu ünitede **present perfect** ile **past simple** arasındaki farkı ve **for / since** kullanımını öğreneceksin.\n\n## Present perfect mi, past simple mı?\n- Zaman belli değil ya da etkisi sürüyor: *I've lost my keys.* (hâlâ yok)\n- Zaman belli, bitmiş: *I lost my keys yesterday.*\n\n## for / since\nHâlâ devam eden durumlar için:\n- **for** + süre: *I've lived here for five years.*\n- **since** + başlangıç noktası: *I've lived here since 2020.*\n\n> Higo'nun ipucu: Türkçede \"İki yıldır İngilizce öğreniyorum\" şimdiki zamanla söylenir ama İngilizcede **present perfect continuous** gerekir: *I've been learning English for two years.*\n\n## just / already / yet\n- *I've just finished.* (az önce)\n- *She's already left.* (çoktan)\n- *Have you finished yet? I haven't finished yet.* (henüz)",
+   "vocab": [
+    [
+     "since",
+     "-den beri"
+    ],
+    [
+     "for",
+     "süredir"
+    ],
+    [
+     "already",
+     "çoktan"
+    ],
+    [
+     "yet",
+     "henüz"
+    ],
+    [
+     "just",
+     "az önce"
+    ],
+    [
+     "recently",
+     "son zamanlarda"
+    ],
+    [
+     "achieve",
+     "başarmak"
+    ],
+    [
+     "improve",
+     "geliştirmek"
+    ],
+    [
+     "career",
+     "kariyer"
+    ],
+    [
+     "lifetime",
+     "ömür boyu"
+    ]
+   ],
+   "vs": [
+    [
+     "I've just finished my project.",
+     "Projemi az önce bitirdim."
+    ],
+    [
+     "She has worked here since 2019.",
+     "2019'dan beri burada çalışıyor."
+    ],
+    [
+     "Have you finished your homework yet"
+    ]
+   ],
+   "fill": [
+    [
+     "Have you ever ___ sushi?",
+     [
+      "eat",
+      "ate",
+      "eaten"
+     ],
+     2
+    ],
+    [
+     "I've lived here ___ 2019.",
+     [
+      "for",
+      "since",
+      "from"
+     ],
+     1
+    ],
+    [
+     "She's worked here ___ five years.",
+     [
+      "for",
+      "since",
+      "during"
+     ],
+     0
+    ],
+    [
+     "I ___ my keys yesterday.",
+     [
+      "lost",
+      "'ve lost",
+      "lose"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Bu filmi üç kez izledim.",
+     "I've watched this film three times",
+     [
+      "watch",
+      "did"
+     ],
+     [
+      "I have watched this film three times",
+      "I've seen this film three times",
+      "I have seen this film three times"
+     ]
+    ],
+    [
+     "İki yıldır İngilizce öğreniyorum.",
+     "I've been learning English for two years",
+     [
+      "since",
+      "am"
+     ],
+     [
+      "I have been learning English for two years",
+      "I've studied English for two years"
+     ]
+    ]
+   ],
+   "err": [
+    "I live in Ankara since 2015",
+    1,
+    [
+     "have lived",
+     "lived",
+     "am living"
+    ],
+    0,
+    "Hâlâ devam eden bir durum \"since\" ile anlatılıyorsa present perfect gerekir: I've lived in Ankara since 2015. Türkçedeki \"-den beri yaşıyorum\" yapısı bu hatayı çok yaptırır."
+   ],
+   "sp": [
+    [
+     "I've been learning English for two years.",
+     "İki yıldır İngilizce öğreniyorum."
+    ],
+    [
+     "I haven't decided yet.",
+     "Henüz karar vermedim."
+    ],
+    [
+     "How long have you known her?",
+     "Onu ne zamandır tanıyorsun?"
+    ]
+   ],
+   "dlg": [
+    "Bir iş görüşmesinde deneyimin soruluyor.",
+    null,
+    [
+     {
+      "who": "Interviewer",
+      "text": "How long have you worked in tourism?"
+     }
+    ],
+    [
+     "I've worked in tourism for six years, since I finished university.",
+     "I work in tourism since six years.",
+     "I am working six years."
+    ],
+    0,
+    "Süren deneyimler için present perfect + for / since. \"Since six years\" yanlıştır; süre \"for\" ile verilir."
+   ],
+   "lc": [
+    [
+     "I've never been to Japan",
+     [
+      "I've never been to Japan",
+      "I never went to Japan",
+      "I'd never been to Japan"
+     ]
+    ],
+    [
+     "She's just left",
+     [
+      "She's just left",
+      "She's just laughed",
+      "She just left"
+     ]
+    ]
+   ],
+   "lt": [
+    "Have you finished your homework",
+    "I have known him since school"
+   ],
+   "game": "cloze",
+   "story": {
+    "slug": "the-second-chance",
+    "title": "The Second Chance",
+    "title_tr": "İkinci Şans",
+    "category": "Kariyer",
+    "summary": "Kırk yaşında mesleğini değiştiren bir muhasebecinin hikâyesi.",
+    "paragraphs": [
+     [
+      "Kemal has worked as an accountant in Bursa for fifteen years. He has a good salary and a nice flat, but recently he has felt that something is missing.",
+      "Kemal on beş yıldır Bursa'da muhasebeci olarak çalışıyor. İyi bir maaşı ve güzel bir dairesi var ama son zamanlarda bir şeylerin eksik olduğunu hissediyor."
+     ],
+     [
+      "Since he was a child, he has loved cooking. Every Sunday he cooks for his whole family, and they have always told him the same thing: \"You should open a restaurant.\"",
+      "Çocukluğundan beri yemek yapmayı seviyor. Her pazar bütün ailesine yemek yapıyor ve hep aynı şeyi söylüyorlar: \"Bir restoran açmalısın.\""
+     ],
+     [
+      "Last year, on his fortieth birthday, he made a decision. He took a cooking course in Istanbul and has worked in a famous kitchen for six months.",
+      "Geçen yıl, kırkıncı doğum gününde bir karar verdi. İstanbul'da bir aşçılık kursuna gitti ve altı aydır ünlü bir mutfakta çalışıyor."
+     ],
+     [
+      "It hasn't been easy. He has burnt his hands and he has worked until midnight many times. But he hasn't felt this alive for years. \"I haven't opened my restaurant yet,\" he says, \"but I will.\"",
+      "Kolay olmadı. Ellerini yaktı, birçok kez gece yarısına kadar çalıştı. Ama yıllardır kendini bu kadar canlı hissetmemişti. \"Restoranımı henüz açmadım,\" diyor, \"ama açacağım.\""
+     ]
+    ],
+    "vocabulary": [
+     [
+      "accountant",
+      "muhasebeci",
+      "My aunt is an accountant."
+     ],
+     [
+      "salary",
+      "maaş",
+      "He has a good salary."
+     ],
+     [
+      "missing",
+      "eksik",
+      "A page is missing."
+     ],
+     [
+      "alive",
+      "canlı, hayat dolu",
+      "I feel alive by the sea."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "How long has Kemal worked as an accountant?",
+      "options": [
+       "Five years",
+       "Fifteen years",
+       "Forty years"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "Kemal has already opened his restaurant.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "When did he make his decision?",
+      "options": [
+       "On his fortieth birthday",
+       "When he was a child",
+       "Six months ago"
+      ],
+      "answer": 0
+     }
+    ]
+   },
+   "talk": {
+    "key": "podcast-guest",
+    "title": "Podcast konuğu",
+    "emoji": "🎙️",
+    "category": "fun",
+    "cefr_min": "B1",
+    "description": "\"Hayat Dersleri\" adlı bir podcast'e konuk oldun. Deneyimlerini anlat.",
+    "is_premium": true,
+    "system_prompt": "You are Rachel, host of the podcast \"Life Lessons\". Interview the learner about experiences that changed them: the most interesting place they have been, something difficult they have achieved, how long they have done their hobby. Ask follow-ups that require present perfect vs past simple and for/since. B1 level.",
+    "opening_line": "Welcome to Life Lessons! Let's start with something easy. What's the most interesting place you've ever been to?",
+    "goals": [
+     "Present perfect ile bir deneyim anlat",
+     "for ya da since kullan",
+     "Aynı olayın detayını past simple ile ver"
+    ]
+   }
+  },
+  {
+   "title": "Eskiden",
+   "desc": "Past continuous ve used to",
+   "color": "#2F7CF6",
+   "guide": "## O sırada ne yapıyordun?\nBu ünitede geçmişte süren olayları (**past continuous**) ve eski alışkanlıkları (**used to**) öğreneceksin.\n\n## Past continuous\n**was / were + fiil-ing**: geçmişte belli bir anda süren eylem.\n*At 8 pm I was watching TV. They were sleeping when I called.*\n\n## Past continuous + past simple\nUzun süren arka plan olayı + onu kesen kısa olay:\n*I **was walking** home **when** it **started** to rain.*\n*While she was cooking, the phone rang.*\n\n## used to\nEskiden olan ama artık olmayan alışkanlık ve durumlar:\n*I used to play the piano. (Artık çalmıyorum.)*\n*Did you use to live in Adana?* · *We didn't use to have a car.*\n\n> Higo'nun ipucu: **used to** sadece geçmiş içindir. Şimdiki alışkanlık için geniş zaman kullan: *I usually walk to school.*",
+   "vocab": [
+    [
+     "while",
+     "-iken"
+    ],
+    [
+     "suddenly",
+     "aniden"
+    ],
+    [
+     "used to",
+     "eskiden …-irdi"
+    ],
+    [
+     "childhood",
+     "çocukluk"
+    ],
+    [
+     "remember",
+     "hatırlamak"
+    ],
+    [
+     "neighbourhood",
+     "mahalle"
+    ],
+    [
+     "happen",
+     "olmak, meydana gelmek"
+    ],
+    [
+     "ring",
+     "çalmak (telefon)"
+    ],
+    [
+     "notice",
+     "fark etmek"
+    ],
+    [
+     "memory",
+     "anı"
+    ]
+   ],
+   "vs": [
+    [
+     "I was reading when the lights went out.",
+     "Işıklar gittiğinde kitap okuyordum."
+    ],
+    [
+     "We used to play in the street every evening.",
+     "Eskiden her akşam sokakta oynardık."
+    ],
+    [
+     "What were you doing at nine"
+    ]
+   ],
+   "fill": [
+    [
+     "I ___ dinner when you called.",
+     [
+      "was having",
+      "had",
+      "have"
+     ],
+     0
+    ],
+    [
+     "While they ___ football, it started to rain.",
+     [
+      "were playing",
+      "played",
+      "was playing"
+     ],
+     0
+    ],
+    [
+     "I ___ to have long hair.",
+     [
+      "used",
+      "use",
+      "was used"
+     ],
+     0
+    ],
+    [
+     "Did you ___ to live in Adana?",
+     [
+      "used",
+      "use",
+      "using"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Sen aradığında duş alıyordum.",
+     "I was having a shower when you called",
+     [
+      "had",
+      "were"
+     ],
+     [
+      "I was taking a shower when you called"
+     ]
+    ],
+    [
+     "Eskiden çok çay içerdim.",
+     "I used to drink a lot of tea",
+     [
+      "use",
+      "was"
+     ],
+     []
+    ]
+   ],
+   "err": [
+    "When I was a child I use to play outside",
+    6,
+    [
+     "used",
+     "using",
+     "uses"
+    ],
+    0,
+    "Geçmişteki alışkanlıklar için \"used to\" kullanılır: I used to play outside. Olumsuz ve soruda ise \"use to\" olur: Did you use to …?"
+   ],
+   "sp": [
+    [
+     "I used to be very shy at school.",
+     "Okulda eskiden çok utangaçtım."
+    ],
+    [
+     "What were you doing at this time yesterday?",
+     "Dün bu saatte ne yapıyordun?"
+    ],
+    [
+     "Suddenly, someone knocked on the door.",
+     "Aniden biri kapıyı çaldı."
+    ]
+   ],
+   "dlg": [
+    "Bir arkadaşın çocukluğunu soruyor.",
+    null,
+    [
+     {
+      "who": "Ava",
+      "text": "What did you use to do in the summer holidays?"
+     }
+    ],
+    [
+     "We used to go to my grandparents' village and swim in the river.",
+     "We use to went village.",
+     "I was used to go village."
+    ],
+    0,
+    "Eski alışkanlıklar için \"used to + yalın fiil\"."
+   ],
+   "lc": [
+    [
+     "I was walking home when it started to rain",
+     [
+      "I was walking home when it started to rain",
+      "I walked home when it started to rain",
+      "I was waking home when it started to rain"
+     ]
+    ],
+    [
+     "She used to live in Adana",
+     [
+      "She used to live in Adana",
+      "She uses to live in Adana",
+      "She used to leave Adana"
+     ]
+    ]
+   ],
+   "lt": [
+    "What were you doing last night",
+    "I used to play the guitar"
+   ],
+   "game": "swipe",
+   "story": {
+    "slug": "the-old-photograph",
+    "title": "The Old Photograph",
+    "title_tr": "Eski Fotoğraf",
+    "category": "Gizem",
+    "summary": "Bit pazarında bulunan bir fotoğraf, kırk yıllık bir hikâyeyi ortaya çıkarıyor.",
+    "paragraphs": [
+     [
+      "Last Sunday, Derya was walking through a flea market in Kadıköy when she noticed a box of old photographs. One of them made her stop.",
+      "Geçen pazar Derya Kadıköy'deki bir bit pazarında yürürken eski fotoğraflarla dolu bir kutu fark etti. Fotoğraflardan biri onu durdurdu."
+     ],
+     [
+      "It showed a young woman standing in front of a bakery. The bakery was on the corner of Derya's street, the same bakery where she buys bread every morning.",
+      "Fotoğrafta bir fırının önünde duran genç bir kadın vardı. Fırın, Derya'nın sokağının köşesindeydi; her sabah ekmek aldığı fırının ta kendisi."
+     ],
+     [
+      "She bought the photo for ten lira and took it to the bakery. The old baker was cleaning the counter while she was explaining. Suddenly he stopped and looked at the photo for a long time.",
+      "Fotoğrafı on liraya aldı ve fırına götürdü. O anlatırken yaşlı fırıncı tezgâhı siliyordu. Aniden durdu ve fotoğrafa uzun uzun baktı."
+     ],
+     [
+      "\"That's my mother,\" he said quietly. \"She used to work here before I was born. We lost all our photos in a fire in 1985.\" Now the photo hangs on the bakery wall, and the baker never lets Derya pay for her bread.",
+      "\"Bu benim annem,\" dedi sessizce. \"Ben doğmadan önce burada çalışırdı. 1985'te bir yangında bütün fotoğraflarımızı kaybettik.\" Şimdi fotoğraf fırının duvarında asılı ve fırıncı Derya'nın ekmek parasını hiç almıyor."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "flea market",
+      "bit pazarı",
+      "I bought this lamp at a flea market."
+     ],
+     [
+      "bakery",
+      "fırın",
+      "The bakery opens at six."
+     ],
+     [
+      "counter",
+      "tezgâh",
+      "Put the money on the counter."
+     ],
+     [
+      "hang",
+      "asılı olmak",
+      "A clock hangs on the wall."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where did Derya find the photo?",
+      "options": [
+       "At a flea market",
+       "In the bakery",
+       "At home"
+      ],
+      "answer": 0
+     },
+     {
+      "q": "Who is the woman in the photo?",
+      "options": [
+       "Derya's grandmother",
+       "The baker's mother",
+       "A famous actress"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "The baker's family lost their photos in a fire.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 0
+     }
+    ]
+   },
+   "talk": {
+    "key": "childhood-memories",
+    "title": "Çocukluk anıları",
+    "emoji": "🧸",
+    "category": "daily",
+    "cefr_min": "B1",
+    "description": "Yeni bir arkadaşla çocukluk anılarınızı karşılaştırıyorsunuz.",
+    "is_premium": true,
+    "system_prompt": "You are Hannah, a friendly British woman in her thirties who grew up in a small town in Wales. Exchange childhood memories with the learner: games you used to play, school, a funny thing that happened. Encourage used to and past continuous + past simple. B1 level.",
+    "opening_line": "I was looking at my old school photos last night. What did you use to do when you were a kid?",
+    "goals": [
+     "used to ile 2 eski alışkanlık anlat",
+     "Past continuous + past simple ile bir anı anlat",
+     "Hannah'ya çocukluğu hakkında soru sor"
+    ]
+   }
+  },
+  {
+   "title": "Gelecek",
+   "desc": "Gelecek zamanlar ve first conditional",
+   "color": "#22B5C0",
+   "guide": "## Geleceği konuşmak\nB1'de geleceği anlatmanın üç yolunu ve **first conditional**'ı birlikte kullanacaksın.\n\n## Üç gelecek\n- **Present continuous**: kesinleşmiş randevular: *I'm meeting Sarah at six.*\n- **be going to**: planlar ve kanıta dayalı tahminler: *I'm going to apply for the job.*\n- **will**: anlık kararlar, sözler, fikre dayalı tahminler: *I think you'll love it.*\n\n## First conditional\nGerçekleşmesi muhtemel durumlar:\n**If + present simple, will + yalın fiil**\n*If it rains, we'll stay at home.*\n*If you study hard, you'll pass the exam.*\n\n> Higo'nun ipucu: **if** cümlesinde will kullanılmaz! ~~If it will rain~~ → **If it rains**. Aynı kural **when, as soon as, unless** için de geçerli.\n\n## unless\n\"…mezse\": *You won't pass unless you study.* = *If you don't study, you won't pass.*",
+   "vocab": [
+    [
+     "apply",
+     "başvurmak"
+    ],
+    [
+     "unless",
+     "-mezse"
+    ],
+    [
+     "as soon as",
+     "-ir -mez"
+    ],
+    [
+     "probably",
+     "muhtemelen"
+    ],
+    [
+     "definitely",
+     "kesinlikle"
+    ],
+    [
+     "appointment",
+     "randevu"
+    ],
+    [
+     "decide",
+     "karar vermek"
+    ],
+    [
+     "graduate",
+     "mezun olmak"
+    ],
+    [
+     "opportunity",
+     "fırsat"
+    ],
+    [
+     "goal",
+     "hedef"
+    ]
+   ],
+   "vs": [
+    [
+     "If I get the scholarship, I'll study in Germany.",
+     "Bursu alırsam Almanya'da okuyacağım."
+    ],
+    [
+     "I'm meeting my advisor tomorrow at ten.",
+     "Yarın saat onda danışmanımla görüşüyorum."
+    ],
+    [
+     "I will call you as soon as I arrive"
+    ]
+   ],
+   "fill": [
+    [
+     "If it ___ tomorrow, we'll cancel the picnic.",
+     [
+      "rains",
+      "will rain",
+      "rained"
+     ],
+     0
+    ],
+    [
+     "I'll text you as soon as I ___ home.",
+     [
+      "get",
+      "will get",
+      "got"
+     ],
+     0
+    ],
+    [
+     "You won't pass ___ you study.",
+     [
+      "if",
+      "unless",
+      "when"
+     ],
+     1
+    ],
+    [
+     "Look at that driver! He ___ crash.",
+     [
+      "'s going to",
+      "will",
+      "is"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Erken çıkarsak treni yakalarız.",
+     "If we leave early, we'll catch the train",
+     [
+      "will leave",
+      "catches"
+     ],
+     [
+      "If we leave early we will catch the train",
+      "We will catch the train if we leave early"
+     ]
+    ],
+    [
+     "Yarın akşam annemlerle yemek yiyorum.",
+     "I'm having dinner with my parents tomorrow evening",
+     [
+      "will",
+      "have"
+     ],
+     [
+      "I am having dinner with my parents tomorrow evening",
+      "I'm going to have dinner with my parents tomorrow evening"
+     ]
+    ]
+   ],
+   "err": [
+    "If I see him I tell him the news",
+    5,
+    [
+     "will tell",
+     "told",
+     "telling"
+    ],
+    0,
+    "First conditional'da sonuç kısmı \"will + fiil\" olur: If I see him, I will tell him the news. (\"If\" kısmında ise will kullanılmaz.)"
+   ],
+   "sp": [
+    [
+     "If I pass the exam, I'll celebrate with my friends.",
+     "Sınavı geçersem arkadaşlarımla kutlayacağım."
+    ],
+    [
+     "I'm probably going to study engineering.",
+     "Muhtemelen mühendislik okuyacağım."
+    ],
+    [
+     "What will you do if you don't get in?",
+     "Kazanamazsan ne yapacaksın?"
+    ]
+   ],
+   "dlg": [
+    "Bir kariyer danışmanıyla konuşuyorsun.",
+    null,
+    [
+     {
+      "who": "Advisor",
+      "text": "What will you do if you don't get into your first choice?"
+     }
+    ],
+    [
+     "If I don't get in, I'll take a gap year and work.",
+     "If I will not get in, I take gap year.",
+     "If I didn't get, I work."
+    ],
+    0,
+    "Olası bir durumu anlatırken: If + present simple, will + fiil."
+   ],
+   "lc": [
+    [
+     "If it rains, we'll stay home",
+     [
+      "If it rains, we'll stay home",
+      "If it rained, we'd stay home",
+      "If it rains, we stay home"
+     ]
+    ],
+    [
+     "I'm meeting her at six",
+     [
+      "I'm meeting her at six",
+      "I'll meet her at six",
+      "I met her at six"
+     ]
+    ]
+   ],
+   "lt": [
+    "If you hurry you will catch the bus",
+    "I'm going to apply for the job"
+   ],
+   "game": "choice",
+   "story": {
+    "slug": "the-scholarship",
+    "title": "The Scholarship",
+    "title_tr": "Burs",
+    "category": "Kariyer",
+    "summary": "Gaziantepli Elif, yurt dışı bursu için son mülakatına hazırlanıyor.",
+    "paragraphs": [
+     [
+      "Elif is eighteen and she lives in Gaziantep. Tomorrow at nine she is having the last interview for a scholarship to study medicine in Canada.",
+      "Elif on sekiz yaşında ve Gaziantep'te yaşıyor. Yarın saat dokuzda Kanada'da tıp okumak için bir bursun son mülakatına giriyor."
+     ],
+     [
+      "\"What if I forget everything?\" she asks her brother. \"You won't,\" he says. \"If you practise tonight, you'll feel more confident.\"",
+      "\"Ya her şeyi unutursam?\" diye soruyor ağabeyine. \"Unutmazsın,\" diyor ağabeyi. \"Bu gece pratik yaparsan kendini daha güvende hissedersin.\""
+     ],
+     [
+      "So they practise. He asks difficult questions and she answers in English. \"If they ask about my weaknesses, I'll be honest,\" she decides.",
+      "Pratik yapıyorlar. O zor sorular soruyor, Elif İngilizce cevaplıyor. \"Zayıf yönlerimi sorarlarsa dürüst olacağım,\" diye karar veriyor."
+     ],
+     [
+      "The next day, the interview goes well. On the bus home her phone rings. \"Congratulations, Elif. If you accept, you will start in September.\" She can't stop smiling.",
+      "Ertesi gün mülakat iyi geçiyor. Eve dönerken otobüste telefonu çalıyor. \"Tebrikler Elif. Kabul ederseniz eylülde başlayacaksınız.\" Gülümsemesini durduramıyor."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "scholarship",
+      "burs",
+      "She won a scholarship."
+     ],
+     [
+      "confident",
+      "kendinden emin",
+      "He looks confident."
+     ],
+     [
+      "weakness",
+      "zayıf yön",
+      "What is your biggest weakness?"
+     ],
+     [
+      "accept",
+      "kabul etmek",
+      "I accept your offer."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "What does Elif want to study?",
+      "options": [
+       "Medicine",
+       "Engineering",
+       "Law"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "truefalse",
+      "q": "Elif's brother helps her practise.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "gap",
+      "q": "If she accepts, she will start in ___.",
+      "options": [],
+      "answer": "September",
+      "accept": [
+       "september"
+      ]
+     }
+    ]
+   },
+   "talk": {
+    "key": "career-advisor",
+    "title": "Kariyer danışmanı",
+    "emoji": "🧭",
+    "category": "career",
+    "cefr_min": "B1",
+    "description": "Lise sonrası planlarını bir danışmanla konuşuyorsun.",
+    "is_premium": true,
+    "system_prompt": "You are Mr Ahmed, a supportive university and career advisor. Ask the learner about their plans after school or for their career, what they will do in different situations, and give advice. Push them to use going to, will, present continuous for arrangements and first conditionals. B1 level.",
+    "opening_line": "Hi, come in! So, tell me about your plans. What are you going to do next year?",
+    "goals": [
+     "going to ile bir plan söyle",
+     "First conditional ile bir cümle kur",
+     "Danışmana bir randevuyu present continuous ile söyle"
+    ]
+   }
+  },
+  {
+   "title": "Hayaller",
+   "desc": "Second conditional ve wish",
+   "color": "#8F7CF8",
+   "guide": "## Ya olsaydı?\nBu ünitede hayal ettiğimiz, gerçek olmayan durumlar için **second conditional** ve **wish** kullanacağız.\n\n## Second conditional\n**If + past simple, would + yalın fiil**\n*If I had more time, I would learn the guitar.* (Şu an vaktim yok.)\n*If I were you, I'd take the job.* (Tavsiye)\n\n> Higo'nun ipucu: Resmî İngilizcede bütün öznelerle **were** kullanılır: *If I were rich, if she were here.* Günlük konuşmada *was* da duyarsın.\n\n## First mi, second mı?\n- *If I win the match, I'll be happy.* (Mümkün, gerçekçi)\n- *If I won the lottery, I'd buy an island.* (Hayal)\n\n## wish + past simple\nŞu anki durumdan duyulan pişmanlık ya da istek:\n*I wish I lived by the sea. I wish I could speak Japanese.*",
+   "vocab": [
+    [
+     "would",
+     "-erdi, -ardı"
+    ],
+    [
+     "wish",
+     "keşke, dilemek"
+    ],
+    [
+     "lottery",
+     "piyango"
+    ],
+    [
+     "afford",
+     "parası yetmek"
+    ],
+    [
+     "island",
+     "ada"
+    ],
+    [
+     "imagine",
+     "hayal etmek"
+    ],
+    [
+     "rich",
+     "zengin"
+    ],
+    [
+     "if I were you",
+     "senin yerinde olsam"
+    ],
+    [
+     "dream",
+     "hayal"
+    ],
+    [
+     "abroad",
+     "yurt dışı"
+    ]
+   ],
+   "vs": [
+    [
+     "If I won the lottery, I'd travel around the world.",
+     "Piyangoyu kazansam dünyayı gezerdim."
+    ],
+    [
+     "I wish I could speak French.",
+     "Keşke Fransızca konuşabilsem."
+    ],
+    [
+     "If I were you I would take the job"
+    ]
+   ],
+   "fill": [
+    [
+     "If I ___ more money, I'd buy a car.",
+     [
+      "have",
+      "had",
+      "would have"
+     ],
+     1
+    ],
+    [
+     "If she studied more, she ___ pass.",
+     [
+      "will",
+      "would",
+      "is"
+     ],
+     1
+    ],
+    [
+     "I wish I ___ taller.",
+     [
+      "am",
+      "were",
+      "will be"
+     ],
+     1
+    ],
+    [
+     "If I ___ you, I'd apologise.",
+     [
+      "am",
+      "were",
+      "would be"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Senin yerinde olsam o işi alırdım.",
+     "If I were you, I'd take that job",
+     [
+      "was",
+      "will"
+     ],
+     [
+      "If I were you I would take that job",
+      "If I were you, I would take that job"
+     ]
+    ],
+    [
+     "Keşke denize yakın yaşasam.",
+     "I wish I lived near the sea",
+     [
+      "live",
+      "would"
+     ],
+     [
+      "I wish I lived by the sea"
+     ]
+    ]
+   ],
+   "err": [
+    "If I have more time I would travel more",
+    2,
+    [
+     "had",
+     "would have",
+     "will have"
+    ],
+    0,
+    "Second conditional'da \"if\" kısmında past simple kullanılır: If I had more time, I would travel more."
+   ],
+   "sp": [
+    [
+     "If I could live anywhere, I'd choose Lisbon.",
+     "Her yerde yaşayabilseydim Lizbon'u seçerdim."
+    ],
+    [
+     "What would you do if you were invisible?",
+     "Görünmez olsan ne yapardın?"
+    ],
+    [
+     "I wish I had more free time.",
+     "Keşke daha çok boş vaktim olsa."
+    ]
+   ],
+   "dlg": [
+    "Bir arkadaşın zor bir kararın eşiğinde.",
+    null,
+    [
+     {
+      "who": "Nick",
+      "text": "I got two job offers. One pays more, the other is closer to home. What would you do?"
+     }
+    ],
+    [
+     "If I were you, I'd choose the closer one. Time is more important.",
+     "If I am you, I will choose closer.",
+     "If I would be you, I choose."
+    ],
+    0,
+    "Tavsiye için en doğal kalıp: If I were you, I'd …"
+   ],
+   "lc": [
+    [
+     "If I had a car, I'd drive to work",
+     [
+      "If I had a car, I'd drive to work",
+      "If I have a car, I'll drive to work",
+      "If I had a card, I'd drive to work"
+     ]
+    ],
+    [
+     "I wish I knew the answer",
+     [
+      "I wish I knew the answer",
+      "I wish I know the answer",
+      "I wish I had the answer"
+     ]
+    ]
+   ],
+   "lt": [
+    "What would you do",
+    "I wish I could fly"
+   ],
+   "game": "truefalse",
+   "story": {
+    "slug": "the-wishing-coin",
+    "title": "The Wishing Coin",
+    "title_tr": "Dilek Parası",
+    "category": "Eğlence",
+    "summary": "Bir çeşmeye atılan para, Can'ın üç dileğini sorguya çekiyor.",
+    "paragraphs": [
+     [
+      "Can was sitting by an old fountain in Safranbolu when an old woman gave him a coin. \"This is a wishing coin,\" she said. \"You have three wishes. Choose carefully.\"",
+      "Can, Safranbolu'da eski bir çeşmenin yanında otururken yaşlı bir kadın ona bir madeni para verdi. \"Bu bir dilek parası,\" dedi. \"Üç dileğin var. Dikkatli seç.\""
+     ],
+     [
+      "Can laughed, but he started thinking. \"If I had a lot of money, I would buy a house by the sea. If I were famous, everyone would know my name.\"",
+      "Can güldü ama düşünmeye başladı. \"Çok param olsa denize yakın bir ev alırdım. Ünlü olsam herkes adımı bilirdi.\""
+     ],
+     [
+      "Then he thought about his grandmother, who lived alone in another city. \"I wish I saw her more often,\" he said. As soon as he said it, the coin felt warm in his hand.",
+      "Sonra başka bir şehirde yalnız yaşayan babaannesini düşündü. \"Keşke onu daha sık görsem,\" dedi. Bunu söyler söylemez para avucunda ısındı."
+     ],
+     [
+      "That evening his mother called. \"Your grandmother is moving to our neighbourhood!\" Can looked at the coin. He still had two wishes, but suddenly he didn't need them.",
+      "O akşam annesi aradı. \"Babaannen bizim mahalleye taşınıyor!\" Can paraya baktı. Hâlâ iki dileği vardı ama birden onlara ihtiyacı kalmamıştı."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "fountain",
+      "çeşme",
+      "We met by the fountain."
+     ],
+     [
+      "coin",
+      "madeni para",
+      "I found a coin on the floor."
+     ],
+     [
+      "carefully",
+      "dikkatlice",
+      "Read the question carefully."
+     ],
+     [
+      "alone",
+      "yalnız",
+      "She lives alone."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where was Can sitting?",
+      "options": [
+       "By a fountain",
+       "In a café",
+       "On a bus"
+      ],
+      "answer": 0
+     },
+     {
+      "q": "What did Can wish for in the end?",
+      "options": [
+       "A house by the sea",
+       "To be famous",
+       "To see his grandmother more often"
+      ],
+      "answer": 2
+     },
+     {
+      "type": "truefalse",
+      "q": "Can used all three wishes.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     }
+    ]
+   },
+   "talk": {
+    "key": "what-if-game",
+    "title": "Ya olsaydı?",
+    "emoji": "🌈",
+    "category": "fun",
+    "cefr_min": "B1",
+    "description": "Hayal gücü oyunu: tuhaf \"ya olsaydı\" sorularına cevap ver.",
+    "is_premium": true,
+    "system_prompt": "You are Defne running a playful \"What if…?\" imagination game. Ask unusual hypothetical questions (What would you do if you could fly? If you were the mayor of your city for a day…?), react with curiosity and ask the learner to justify. Encourage second conditionals and \"I wish\". B1 level.",
+    "opening_line": "Okay, imagination time! What would you do if you woke up tomorrow and could speak every language in the world?",
+    "goals": [
+     "Second conditional ile 2 cümle kur",
+     "\"I wish\" ile bir istek söyle",
+     "Cevabını bir sebeple destekle"
+    ]
+   }
+  },
+  {
+   "title": "Haberler",
+   "desc": "Edilgen yapı (passive voice)",
+   "color": "#3AB0E6",
+   "guide": "## Ne oldu, kim yaptı?\nHaberlerde çoğu zaman **işi yapan değil, işin kendisi** önemlidir. Bu ünitede **passive voice** (edilgen yapı) öğreneceksin.\n\n## Passive voice\n**be + fiilin 3. hâli (V3)**\n| Zaman | Edilgen |\n|---|---|\n| Present simple | The museum **is visited** by millions. |\n| Past simple | The bridge **was built** in 1973. |\n| Present perfect | A new law **has been passed**. |\n| will | The results **will be announced** tomorrow. |\n\nİşi yapanı söylemek gerekirse **by** kullanılır: *The book was written by Orhan Pamuk.*\n\n> Higo'nun ipucu: Türkçedeki \"-ıldı, -ildi\" ekleri genellikle passive ile karşılanır: *Köprü 1973'te yapıldı → The bridge was built in 1973.*",
+   "vocab": [
+    [
+     "news",
+     "haber"
+    ],
+    [
+     "headline",
+     "manşet"
+    ],
+    [
+     "journalist",
+     "gazeteci"
+    ],
+    [
+     "report",
+     "haber vermek, rapor"
+    ],
+    [
+     "announce",
+     "duyurmak"
+    ],
+    [
+     "build",
+     "inşa etmek"
+    ],
+    [
+     "damage",
+     "hasar (vermek)"
+    ],
+    [
+     "arrest",
+     "tutuklamak"
+    ],
+    [
+     "discover",
+     "keşfetmek"
+    ],
+    [
+     "publish",
+     "yayımlamak"
+    ]
+   ],
+   "vs": [
+    [
+     "The results will be announced on Friday.",
+     "Sonuçlar cuma günü açıklanacak."
+    ],
+    [
+     "The bridge was built in 1973.",
+     "Köprü 1973 yılında inşa edildi."
+    ],
+    [
+     "The story was published online"
+    ]
+   ],
+   "fill": [
+    [
+     "English ___ in many countries.",
+     [
+      "speaks",
+      "is spoken",
+      "spoke"
+     ],
+     1
+    ],
+    [
+     "The Galata Tower ___ in 1348.",
+     [
+      "built",
+      "was built",
+      "is building"
+     ],
+     1
+    ],
+    [
+     "A new hospital ___ next year.",
+     [
+      "will open",
+      "will be opened",
+      "opens"
+     ],
+     1
+    ],
+    [
+     "The thief ___ by the police last night.",
+     [
+      "arrested",
+      "was arrested",
+      "has arrest"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Bu roman Elif Şafak tarafından yazıldı.",
+     "This novel was written by Elif Shafak",
+     [
+      "wrote",
+      "from"
+     ],
+     [
+      "This novel was written by Elif Şafak"
+     ]
+    ],
+    [
+     "Toplantı ertelendi.",
+     "The meeting has been postponed",
+     [
+      "postponed",
+      "is"
+     ],
+     [
+      "The meeting was postponed"
+     ]
+    ]
+   ],
+   "err": [
+    "The new bridge was build last year",
+    4,
+    [
+     "built",
+     "builded",
+     "building"
+    ],
+    0,
+    "Passive'de fiilin 3. hâli kullanılır: build → built → built. Doğrusu: was built."
+   ],
+   "sp": [
+    [
+     "The museum is visited by millions of people every year.",
+     "Müze her yıl milyonlarca kişi tarafından ziyaret ediliyor."
+    ],
+    [
+     "Nobody was injured in the accident.",
+     "Kazada kimse yaralanmadı."
+    ],
+    [
+     "The match has been cancelled because of the rain.",
+     "Maç yağmur yüzünden iptal edildi."
+    ]
+   ],
+   "dlg": [
+    "Bir haber sunucusu olarak son dakika haberini okuyorsun.",
+    null,
+    [
+     {
+      "who": "Producer",
+      "text": "We're live in ten seconds. What happened at the stadium?"
+     }
+    ],
+    [
+     "The match was stopped after the lights were damaged by the storm.",
+     "Storm damaged lights was stopped match.",
+     "The match stopping by storm."
+    ],
+    0,
+    "Haber dilinde olayı öne almak için passive kullanılır."
+   ],
+   "lc": [
+    [
+     "The results will be announced tomorrow",
+     [
+      "The results will be announced tomorrow",
+      "The results were announced tomorrow",
+      "The results will announce tomorrow"
+     ]
+    ],
+    [
+     "It was built in 1973",
+     [
+      "It was built in 1973",
+      "It was filled in 1973",
+      "It is built in 1973"
+     ]
+    ]
+   ],
+   "lt": [
+    "The road was closed",
+    "The letter has been sent"
+   ],
+   "game": "cloze",
+   "story": {
+    "slug": "the-dolphin-headline",
+    "title": "The Dolphin Headline",
+    "title_tr": "Yunus Manşeti",
+    "category": "Haber",
+    "summary": "Stajyer gazeteci Barış'ın ilk büyük haberi bir yunusla ilgili.",
+    "paragraphs": [
+     [
+      "Barış is a young journalist. He has been working at a local newspaper in Muğla for three weeks, and he has only been given small stories so far.",
+      "Barış genç bir gazeteci. Üç haftadır Muğla'da yerel bir gazetede çalışıyor ve şimdiye kadar ona sadece küçük haberler verildi."
+     ],
+     [
+      "One morning, a phone call was received at the office. A baby dolphin had been found on a beach near Fethiye. Nobody else was free, so Barış was sent.",
+      "Bir sabah ofise bir telefon geldi. Fethiye yakınlarında bir plajda yavru bir yunus bulunmuştu. Başka kimse müsait değildi, bu yüzden Barış gönderildi."
+     ],
+     [
+      "When he arrived, the dolphin was being kept wet by a group of fishermen. A vet was called and the animal was carried back into deep water.",
+      "Vardığında yunus bir grup balıkçı tarafından ıslak tutuluyordu. Bir veteriner çağrıldı ve hayvan derin suya geri taşındı."
+     ],
+     [
+      "Barış wrote the story that night. The next day it was published on the front page, and the video was watched by more than a million people.",
+      "Barış haberi o gece yazdı. Ertesi gün haber ön sayfada yayımlandı ve video bir milyondan fazla kişi tarafından izlendi."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "local",
+      "yerel",
+      "a local newspaper"
+     ],
+     [
+      "so far",
+      "şimdiye kadar",
+      "So far, so good."
+     ],
+     [
+      "fisherman",
+      "balıkçı",
+      "The fishermen leave at dawn."
+     ],
+     [
+      "front page",
+      "ön sayfa",
+      "It was on the front page."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where was the dolphin found?",
+      "options": [
+       "Near Fethiye",
+       "In Istanbul",
+       "In a river"
+      ],
+      "answer": 0
+     },
+     {
+      "q": "Who kept the dolphin wet?",
+      "options": [
+       "Barış",
+       "Some fishermen",
+       "A vet"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "The video was watched by more than a million people.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 0
+     }
+    ]
+   },
+   "talk": {
+    "key": "news-reporter",
+    "title": "Muhabir ol",
+    "emoji": "📰",
+    "category": "fun",
+    "cefr_min": "B1",
+    "description": "Bir olay yerindesin; yayın yönetmeni ne olduğunu soruyor.",
+    "is_premium": true,
+    "system_prompt": "You are Ms Brooks, a TV news editor speaking to the learner, who is a reporter at the scene of a local event (a festival, a fire that was put out, a lost dog that was found). Ask what happened, what was done, who was helped. Encourage passive voice and clear reporting language. B1 level.",
+    "opening_line": "You're on air in two minutes. Quick, tell me: what happened there?",
+    "goals": [
+     "Passive ile 2 cümle kur (was / has been + V3)",
+     "Olayı sırayla anlat",
+     "by ile işi yapanı belirt"
+    ]
+   }
+  },
+  {
+   "title": "Dedi ki",
+   "desc": "Dolaylı anlatım (reported speech)",
+   "color": "#FF8A3D",
+   "guide": "## Ne dedi?\nBu ünitede birinin söylediklerini aktarmak için **reported speech** (dolaylı anlatım) öğreneceksin.\n\n## Zaman bir geri gider\n| Söylenen | Aktarılan |\n|---|---|\n| \"I **am** tired.\" | She said (that) she **was** tired. |\n| \"I **will** call you.\" | He said he **would** call me. |\n| \"We **have finished**.\" | They said they **had finished**. |\n| \"I **can** help.\" | She said she **could** help. |\n\n## say ve tell\n- **say** (something): *He said he was busy.*\n- **tell** + kişi: *He told me he was busy.* (~~He said me~~)\n\n## Sorular ve istekler\n- *\"Where do you live?\"* → *She asked me where I lived.* (soru düzeni bozulur)\n- *\"Do you like it?\"* → *He asked if I liked it.*\n- *\"Please sit down.\"* → *She told me to sit down.*\n\n> Higo'nun ipucu: Zaman ifadeleri de değişir: *tomorrow → the next day, yesterday → the day before, here → there.*",
+   "vocab": [
+    [
+     "said",
+     "söyledi"
+    ],
+    [
+     "told",
+     "anlattı, söyledi (birine)"
+    ],
+    [
+     "asked",
+     "sordu"
+    ],
+    [
+     "explain",
+     "açıklamak"
+    ],
+    [
+     "promise",
+     "söz vermek"
+    ],
+    [
+     "complain",
+     "şikâyet etmek"
+    ],
+    [
+     "suggest",
+     "önermek"
+    ],
+    [
+     "reply",
+     "cevap vermek"
+    ],
+    [
+     "whether",
+     "-ip -mediğini"
+    ],
+    [
+     "message",
+     "mesaj"
+    ]
+   ],
+   "vs": [
+    [
+     "She told me she was moving to Izmir.",
+     "Bana İzmir'e taşındığını söyledi."
+    ],
+    [
+     "He asked me where I lived.",
+     "Bana nerede yaşadığımı sordu."
+    ],
+    [
+     "They said they would be late"
+    ]
+   ],
+   "fill": [
+    [
+     "She said she ___ tired.",
+     [
+      "is",
+      "was",
+      "were"
+     ],
+     1
+    ],
+    [
+     "He ___ me that he was busy.",
+     [
+      "said",
+      "told",
+      "asked"
+     ],
+     1
+    ],
+    [
+     "They asked me where I ___.",
+     [
+      "live",
+      "lived",
+      "do live"
+     ],
+     1
+    ],
+    [
+     "The teacher told us ___ quiet.",
+     [
+      "be",
+      "to be",
+      "being"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Bana yarın arayacağını söyledi.",
+     "He told me he would call the next day",
+     [
+      "will",
+      "said"
+     ],
+     [
+      "He said he would call me the next day",
+      "He told me that he would call the next day"
+     ]
+    ],
+    [
+     "Bana nerede çalıştığımı sordu.",
+     "She asked me where I worked",
+     [
+      "do",
+      "work"
+     ],
+     [
+      "She asked where I worked"
+     ]
+    ]
+   ],
+   "err": [
+    "He said me that he was hungry",
+    1,
+    [
+     "told",
+     "asked",
+     "spoke"
+    ],
+    0,
+    "\"Say\" kişi nesnesi almaz. Kişiyi söyleyeceksen \"tell\" kullan: He told me that he was hungry. Ya da: He said that he was hungry."
+   ],
+   "sp": [
+    [
+     "She told me she would be there by eight.",
+     "Sekize kadar orada olacağını söyledi."
+    ],
+    [
+     "He asked if I wanted to join them.",
+     "Onlara katılmak isteyip istemediğimi sordu."
+    ],
+    [
+     "They said the shop was closed.",
+     "Dükkânın kapalı olduğunu söylediler."
+    ]
+   ],
+   "dlg": [
+    "Patronun aradı, mesajını iş arkadaşına aktarıyorsun.",
+    null,
+    [
+     {
+      "who": "Colleague",
+      "text": "What did the boss say on the phone?"
+     }
+    ],
+    [
+     "She said the meeting was cancelled and told us to send the report by Friday.",
+     "She said us meeting is cancel.",
+     "She told that meeting cancelled."
+    ],
+    0,
+    "Aktarırken zaman bir geri gider; \"tell\" kişiyle, \"say\" kişisiz kullanılır."
+   ],
+   "lc": [
+    [
+     "She said she was tired",
+     [
+      "She said she was tired",
+      "She says she is tired",
+      "She said she was tied"
+     ]
+    ],
+    [
+     "He asked where I lived",
+     [
+      "He asked where I lived",
+      "He asked where I left",
+      "He asked where do I live"
+     ]
+    ]
+   ],
+   "lt": [
+    "She told me to wait",
+    "He said he would help"
+   ],
+   "game": "memory",
+   "story": {
+    "slug": "the-message-chain",
+    "title": "The Message Chain",
+    "title_tr": "Mesaj Zinciri",
+    "category": "Eğlence",
+    "summary": "Bir ofiste aktarılan basit bir mesaj, kulaktan kulağa nasıl değişiyor?",
+    "paragraphs": [
+     [
+      "On Monday morning, the manager, Mrs Uysal, said to Ahmet: \"I'm taking the team out for lunch on Friday.\"",
+      "Pazartesi sabahı müdür Uysal Hanım Ahmet'e dedi ki: \"Cuma günü ekibi öğle yemeğine çıkarıyorum.\""
+     ],
+     [
+      "Ahmet told Sibel that Mrs Uysal was taking the team out on Friday. Sibel told Ozan that they were going out on Friday, but she didn't say it was for lunch.",
+      "Ahmet Sibel'e Uysal Hanım'ın cuma günü ekibi dışarı çıkaracağını söyledi. Sibel de Ozan'a cuma günü dışarı çıkacaklarını söyledi ama öğle yemeği olduğunu söylemedi."
+     ],
+     [
+      "Ozan asked Leyla if she was coming to the party on Friday night. Leyla told everyone that the manager had invited them to a party and that they should dress up.",
+      "Ozan Leyla'ya cuma akşamki partiye gelip gelmeyeceğini sordu. Leyla da herkese müdürün onları bir partiye davet ettiğini ve şık giyinmeleri gerektiğini söyledi."
+     ],
+     [
+      "On Friday at noon, Mrs Uysal found her whole team in suits and evening dresses. \"I said lunch,\" she laughed, \"not a wedding!\" They went to a kebab restaurant anyway, and it was the best-dressed lunch in the city.",
+      "Cuma öğlen Uysal Hanım bütün ekibini takım elbise ve gece elbiseleriyle buldu. \"Ben öğle yemeği dedim,\" diye güldü, \"düğün değil!\" Yine de bir kebapçıya gittiler ve şehrin en şık öğle yemeği oldu."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "take out",
+      "dışarı yemeğe götürmek",
+      "He took me out for dinner."
+     ],
+     [
+      "invite",
+      "davet etmek",
+      "They invited us to the wedding."
+     ],
+     [
+      "dress up",
+      "şık giyinmek",
+      "You don't need to dress up."
+     ],
+     [
+      "anyway",
+      "yine de",
+      "It was raining, but we went anyway."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "What did Mrs Uysal plan?",
+      "options": [
+       "A party",
+       "A lunch",
+       "A wedding"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "Who told everyone to dress up?",
+      "options": [
+       "Ahmet",
+       "Leyla",
+       "Mrs Uysal"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "order",
+      "q": "Cümleyi sırala",
+      "options": [
+       "She",
+       "said",
+       "she",
+       "was",
+       "taking",
+       "the",
+       "team",
+       "out"
+      ],
+      "answer": ""
+     }
+    ]
+   },
+   "talk": {
+    "key": "pass-the-message",
+    "title": "Mesajı ilet",
+    "emoji": "📞",
+    "category": "career",
+    "cefr_min": "B1",
+    "description": "Bir müşteri telefonda mesaj bıraktı. Müdürüne ne dediğini aktar.",
+    "is_premium": true,
+    "system_prompt": "You are Daniel, the learner's manager, who just came back to the office. Ask the learner what the customer said on the phone while you were out: what they wanted, what they asked, what they promised. If the learner uses direct speech, gently ask them to report it. Encourage reported statements, questions and requests. B1 level.",
+    "opening_line": "I'm back! Did anyone call while I was out? What did they say?",
+    "goals": [
+     "\"He / she said that …\" ile aktar",
+     "Bir soruyu \"asked if / where …\" ile aktar",
+     "\"told me to …\" kalıbını kullan"
+    ]
+   }
+  },
+  {
+   "title": "İnsanlar ve Yerler",
+   "desc": "Relative clauses: who, which, where",
+   "color": "#22B573",
+   "guide": "## Kimden, neyden bahsediyoruz?\nBu ünitede bir insanı, eşyayı ya da yeri tanımlamak için **relative clauses** (sıfat cümlecikleri) öğreneceksin.\n\n## who · which · that · where · whose\n- **who**: insanlar: *The woman who lives next door is a pilot.*\n- **which**: eşya, hayvan: *The phone which I bought is broken.*\n- **that**: insan ve eşya (resmî olmayan): *the book that you gave me*\n- **where**: yerler: *the café where we first met*\n- **whose**: sahiplik: *the boy whose dog is lost*\n\n## Ne zaman atlanabilir?\nRelative pronoun cümlenin **nesnesiyse** atılabilir:\n*The film (that) we watched was great.* ✓\nÖznesiyse atılamaz: *The man **who** called you…* ✓\n\n> Higo'nun ipucu: Türkçede sıfat cümlesi ismin önüne gelir (dün izlediğimiz film), İngilizcede **arkasına**: *the film we watched yesterday*.",
+   "vocab": [
+    [
+     "who",
+     "ki o (insan)"
+    ],
+    [
+     "which",
+     "ki o (eşya)"
+    ],
+    [
+     "where",
+     "… olan yer"
+    ],
+    [
+     "whose",
+     "ki onun"
+    ],
+    [
+     "neighbour",
+     "komşu"
+    ],
+    [
+     "colleague",
+     "iş arkadaşı"
+    ],
+    [
+     "describe",
+     "tarif etmek"
+    ],
+    [
+     "personality",
+     "kişilik"
+    ],
+    [
+     "generous",
+     "cömert"
+    ],
+    [
+     "reliable",
+     "güvenilir"
+    ]
+   ],
+   "vs": [
+    [
+     "The woman who lives next door is a pilot.",
+     "Yan dairede oturan kadın pilot."
+    ],
+    [
+     "This is the café where we first met.",
+     "Burası ilk tanıştığımız kafe."
+    ],
+    [
+     "I have a friend whose father is a chef"
+    ]
+   ],
+   "fill": [
+    [
+     "The man ___ called you is my uncle.",
+     [
+      "who",
+      "which",
+      "where"
+     ],
+     0
+    ],
+    [
+     "That's the school ___ my mother teaches.",
+     [
+      "which",
+      "where",
+      "who"
+     ],
+     1
+    ],
+    [
+     "The book ___ you lent me was amazing.",
+     [
+      "who",
+      "which",
+      "whose"
+     ],
+     1
+    ],
+    [
+     "I met a girl ___ brother plays for Fenerbahçe.",
+     [
+      "who",
+      "whose",
+      "which"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Dün izlediğimiz film harikaydı.",
+     "The film we watched yesterday was great",
+     [
+      "which was",
+      "who"
+     ],
+     [
+      "The film that we watched yesterday was great",
+      "The film which we watched yesterday was great"
+     ]
+    ],
+    [
+     "Bana yardım eden kadın bir doktordu.",
+     "The woman who helped me was a doctor",
+     [
+      "which",
+      "helps"
+     ],
+     [
+      "The woman that helped me was a doctor"
+     ]
+    ]
+   ],
+   "err": [
+    "The man which works here is very friendly",
+    2,
+    [
+     "who",
+     "where",
+     "whose"
+    ],
+    0,
+    "İnsanlar için \"who\" (ya da \"that\") kullanılır; \"which\" eşya ve hayvanlar içindir."
+   ],
+   "sp": [
+    [
+     "My best friend is someone who always tells the truth.",
+     "En iyi arkadaşım her zaman doğruyu söyleyen biri."
+    ],
+    [
+     "Izmir is the city where I grew up.",
+     "İzmir büyüdüğüm şehir."
+    ],
+    [
+     "Is this the bag you were looking for?",
+     "Aradığın çanta bu mu?"
+    ]
+   ],
+   "dlg": [
+    "Bir partide arkadaşın birini soruyor.",
+    null,
+    [
+     {
+      "who": "Kate",
+      "text": "Who is that woman by the window?"
+     }
+    ],
+    [
+     "That's Selin. She's the colleague who helped me with my project.",
+     "That Selin which help me.",
+     "Selin that window woman."
+    ],
+    0,
+    "Bir kişiyi tanımlarken \"who\" ile cümlecik kurmak doğal ve nettir."
+   ],
+   "lc": [
+    [
+     "the woman who lives next door",
+     [
+      "the woman who lives next door",
+      "the woman who leaves next door",
+      "the woman who lived next door"
+     ]
+    ],
+    [
+     "the café where we met",
+     [
+      "the café where we met",
+      "the café we were met",
+      "the café where we meet"
+     ]
+    ]
+   ],
+   "lt": [
+    "The man who called you is here",
+    "This is the house where I was born"
+   ],
+   "game": "search",
+   "story": {
+    "slug": "the-neighbour-upstairs",
+    "title": "The Neighbour Upstairs",
+    "title_tr": "Üst Kattaki Komşu",
+    "category": "Gizem",
+    "summary": "Her gece piyano sesi duyan Ece, üst kattaki gizemli komşusunu merak ediyor.",
+    "paragraphs": [
+     [
+      "Ece moved into a small flat in Ankara last autumn. Every night at eleven, she heard piano music which came from the flat upstairs.",
+      "Ece geçen sonbahar Ankara'da küçük bir daireye taşındı. Her gece saat on birde üst kattaki daireden gelen piyano sesini duyuyordu."
+     ],
+     [
+      "She asked the doorman, who knew everyone in the building. \"The man who lives there is very quiet,\" he said. \"He's a retired teacher whose wife died two years ago.\"",
+      "Binadaki herkesi tanıyan kapıcıya sordu. \"Orada yaşayan adam çok sessizdir,\" dedi kapıcı. \"Karısı iki yıl önce ölmüş emekli bir öğretmen.\""
+     ],
+     [
+      "One evening, Ece found a letter which had been delivered to her flat by mistake. It was addressed to the man upstairs. She decided to take it to him.",
+      "Bir akşam Ece yanlışlıkla kendi dairesine teslim edilmiş bir mektup buldu. Üst kattaki adama yazılmıştı. Ona götürmeye karar verdi."
+     ],
+     [
+      "Mr Turan opened the door and smiled. \"Are you the person who listens to my music? I play the songs that my wife loved.\" Now, every Sunday, Ece brings cake and he plays for her.",
+      "Turan Bey kapıyı açtı ve gülümsedi. \"Müziğimi dinleyen kişi sen misin? Karımın sevdiği şarkıları çalıyorum.\" Şimdi her pazar Ece kek getiriyor, o da onun için çalıyor."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "upstairs",
+      "üst kat",
+      "My room is upstairs."
+     ],
+     [
+      "doorman",
+      "kapıcı",
+      "The doorman opens the door."
+     ],
+     [
+      "by mistake",
+      "yanlışlıkla",
+      "I took your coat by mistake."
+     ],
+     [
+      "address",
+      "(mektup) adreslemek",
+      "The letter was addressed to me."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "What did Ece hear every night?",
+      "options": [
+       "A dog",
+       "Piano music",
+       "A television"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "Who is Mr Turan?",
+      "options": [
+       "A doorman",
+       "A retired teacher",
+       "A musician from Istanbul"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "Ece now visits Mr Turan every Sunday.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 0
+     }
+    ]
+   },
+   "talk": {
+    "key": "describe-a-person",
+    "title": "Kim bu?",
+    "emoji": "🕵️",
+    "category": "fun",
+    "cefr_min": "B1",
+    "description": "Tahmin oyunu: Defne'nin aklındaki ünlüyü bul ya da sen birini tarif et.",
+    "is_premium": true,
+    "system_prompt": "You are Defne playing a guessing game. First describe a famous person or place without saying the name, using relative clauses (\"It's a city where…\", \"She's a singer who…\"). Then ask the learner to describe someone or somewhere for you to guess. Praise good relative clauses. B1 level.",
+    "opening_line": "Guess who! I'm thinking of a Turkish writer who won the Nobel Prize and whose books are about Istanbul. Who is it?",
+    "goals": [
+     "who ile birini tarif et",
+     "where ile bir yer tarif et",
+     "which ya da whose kullan"
+    ]
+   }
+  },
+  {
+   "title": "İş Dünyası",
+   "desc": "Gerund / infinitive ve resmî e-posta",
+   "color": "#FFB400",
+   "guide": "## İş hayatında İngilizce\nB1'in son ünitesinde iş hayatında sık geçen kalıpları, **gerund ve infinitive** kullanımını ve resmî e-posta yazmayı öğreneceksin. Ünite sonunda **B1 seviye sınavı** var.\n\n## Gerund (-ing) alan fiiller\n**enjoy, avoid, finish, mind, suggest, consider, look forward to**\n*I look forward to hearing from you. Would you mind waiting?*\n\n## Infinitive (to + fiil) alan fiiller\n**want, decide, plan, hope, agree, offer, refuse, would like**\n*We decided to hire her. I'd like to apply for the position.*\n\n## Resmî e-posta kalıpları\n- Başlangıç: *Dear Mr Smith, / Dear Sir or Madam,*\n- Amaç: *I am writing to apply for…*\n- Rica: *Could you please send me…?* / *I would be grateful if…*\n- Kapanış: *I look forward to hearing from you. / Kind regards,*\n\n> Higo'nun ipucu: **look forward to** kalıbındaki **to** bir edattır, bu yüzden arkasından -ing gelir: ~~look forward to hear~~ → *look forward to hearing*.",
+   "vocab": [
+    [
+     "apply for",
+     "başvurmak"
+    ],
+    [
+     "position",
+     "pozisyon"
+    ],
+    [
+     "CV",
+     "özgeçmiş"
+    ],
+    [
+     "deadline",
+     "son teslim tarihi"
+    ],
+    [
+     "colleague",
+     "iş arkadaşı"
+    ],
+    [
+     "manager",
+     "müdür"
+    ],
+    [
+     "salary",
+     "maaş"
+    ],
+    [
+     "look forward to",
+     "dört gözle beklemek"
+    ],
+    [
+     "avoid",
+     "kaçınmak"
+    ],
+    [
+     "hire",
+     "işe almak"
+    ]
+   ],
+   "vs": [
+    [
+     "I am writing to apply for the position of sales assistant.",
+     "Satış asistanı pozisyonuna başvurmak için yazıyorum."
+    ],
+    [
+     "I look forward to hearing from you.",
+     "Sizden haber almayı dört gözle bekliyorum."
+    ],
+    [
+     "We decided to hire a new designer"
+    ]
+   ],
+   "fill": [
+    [
+     "I look forward to ___ you.",
+     [
+      "meet",
+      "meeting",
+      "to meet"
+     ],
+     1
+    ],
+    [
+     "She decided ___ the job offer.",
+     [
+      "accept",
+      "to accept",
+      "accepting"
+     ],
+     1
+    ],
+    [
+     "Would you mind ___ the window?",
+     [
+      "open",
+      "to open",
+      "opening"
+     ],
+     2
+    ],
+    [
+     "We should avoid ___ mistakes in the report.",
+     [
+      "make",
+      "to make",
+      "making"
+     ],
+     2
+    ]
+   ],
+   "tr": [
+    [
+     "Pazarlama pozisyonuna başvurmak istiyorum.",
+     "I'd like to apply for the marketing position",
+     [
+      "applying",
+      "to the"
+     ],
+     [
+      "I would like to apply for the marketing position"
+     ]
+    ],
+    [
+     "Raporu cumaya kadar bitirmeyi planlıyoruz.",
+     "We plan to finish the report by Friday",
+     [
+      "finishing",
+      "until"
+     ],
+     [
+      "We are planning to finish the report by Friday"
+     ]
+    ]
+   ],
+   "err": [
+    "I look forward to hear from you",
+    4,
+    [
+     "hearing",
+     "heard",
+     "to hear"
+    ],
+    0,
+    "\"Look forward to\" kalıbında \"to\" bir edattır; arkasından -ing gelir: I look forward to hearing from you."
+   ],
+   "sp": [
+    [
+     "Could you please send me more information about the position?",
+     "Pozisyon hakkında daha fazla bilgi gönderebilir misiniz lütfen?"
+    ],
+    [
+     "I'm good at working in a team.",
+     "Takım çalışmasında iyiyimdir."
+    ],
+    [
+     "Thank you for considering my application.",
+     "Başvurumu değerlendirdiğiniz için teşekkür ederim."
+    ]
+   ],
+   "dlg": [
+    "Resmî bir e-postanın son cümlesini seçiyorsun.",
+    null,
+    [
+     {
+      "who": "E-mail",
+      "text": "Dear Ms Clark, I am writing to apply for the position of receptionist advertised on your website. … "
+     }
+    ],
+    [
+     "I look forward to hearing from you. Kind regards,",
+     "Waiting your answer. Bye!",
+     "Answer me quickly please."
+    ],
+    0,
+    "Resmî e-posta kibar ve kalıplaşmış bir kapanışla biter: I look forward to hearing from you."
+   ],
+   "lc": [
+    [
+     "I look forward to hearing from you",
+     [
+      "I look forward to hearing from you",
+      "I look forward to hear from you",
+      "I looked for hearing from you"
+     ]
+    ],
+    [
+     "We've decided to hire her",
+     [
+      "We've decided to hire her",
+      "We've decided to fire her",
+      "We decide to hire her"
+     ]
+    ]
+   ],
+   "lt": [
+    "Thank you for your email",
+    "I would like to apply for the job"
+   ],
+   "game": "kelimle",
+   "story": {
+    "slug": "the-wrong-email",
+    "title": "The Wrong Email",
+    "title_tr": "Yanlış E-posta",
+    "category": "Kariyer",
+    "summary": "Yeni işindeki ilk haftasında Tuna, yanlış kişiye çok yanlış bir e-posta gönderiyor.",
+    "paragraphs": [
+     [
+      "Tuna started working at a software company in Izmir on Monday. He was nervous but he enjoyed meeting his new colleagues.",
+      "Tuna pazartesi günü İzmir'de bir yazılım şirketinde çalışmaya başladı. Gergindi ama yeni iş arkadaşlarıyla tanışmaktan keyif aldı."
+     ],
+     [
+      "On Thursday, he wanted to send a funny message to his friend Mert: \"The boss talks too much in meetings. I tried to stay awake!\" But he chose the wrong name. The email went to his boss, Mr Aydın.",
+      "Perşembe günü arkadaşı Mert'e komik bir mesaj göndermek istedi: \"Patron toplantılarda çok konuşuyor. Uyanık kalmaya çalıştım!\" Ama yanlış ismi seçti. E-posta patronu Aydın Bey'e gitti."
+     ],
+     [
+      "Tuna couldn't stop thinking about it. He decided to apologise in person. He knocked on the door and said, \"I'm really sorry. I didn't mean to be rude.\"",
+      "Tuna bunu düşünmeden duramadı. Yüz yüze özür dilemeye karar verdi. Kapıyı çaldı ve \"Gerçekten çok özür dilerim. Kaba olmak istemedim,\" dedi."
+     ],
+     [
+      "Mr Aydın laughed. \"Honestly, my wife says the same thing. Thank you for being honest. From now on, I'll try to keep meetings short.\" The next meeting lasted only fifteen minutes.",
+      "Aydın Bey güldü. \"Açıkçası eşim de aynı şeyi söylüyor. Dürüst olduğun için teşekkürler. Bundan sonra toplantıları kısa tutmaya çalışacağım.\" Bir sonraki toplantı sadece on beş dakika sürdü."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "software",
+      "yazılım",
+      "She works for a software company."
+     ],
+     [
+      "stay awake",
+      "uyanık kalmak",
+      "I couldn't stay awake."
+     ],
+     [
+      "apologise",
+      "özür dilemek",
+      "You should apologise."
+     ],
+     [
+      "rude",
+      "kaba",
+      "That was rude."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where does Tuna work?",
+      "options": [
+       "At a bank in Izmir",
+       "At a software company in Izmir",
+       "At a school in Ankara"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "Who received the email?",
+      "options": [
+       "Mert",
+       "Mr Aydın's wife",
+       "Mr Aydın"
+      ],
+      "answer": 2
+     },
+     {
+      "type": "truefalse",
+      "q": "Mr Aydın was very angry.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     }
+    ]
+   },
+   "talk": "job-interview",
+   "checkpoint": true
+  }
+ ]
+}

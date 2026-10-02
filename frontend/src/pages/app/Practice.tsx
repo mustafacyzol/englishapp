@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
@@ -33,8 +33,17 @@ const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; t
 
 export default function Practice() {
   const [tab, setTab] = useState<'games' | 'words'>('games')
-  const [game, setGame] = useState<GameKey | null>(null)
-  if (game) return <GameRun key={game} game={game} onExit={() => setGame(null)} onSwitch={setGame} />
+  const [params, setParams] = useSearchParams()
+  const nav = useNavigate()
+  // a "word game" stop on the learning path opens straight into its game, with that unit's words
+  const lesson = Number(params.get('lesson')) || null
+  const [game, setGame] = useState<GameKey | null>(() => (GAMES.some((g) => g.key === params.get('game')) ? (params.get('game') as GameKey) : null))
+  const exit = () => {
+    if (lesson) return nav('/learn')
+    setGame(null)
+    if (params.get('game')) setParams({}, { replace: true })
+  }
+  if (game) return <GameRun key={`${game}-${lesson}`} game={game} lesson={lesson} onExit={exit} onSwitch={setGame} />
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader kicker="Aralıklı tekrar + oyunlar" title="Kelime pratiği" />
@@ -218,13 +227,13 @@ function Stat({ v, l, c }: { v: number; l: string; c?: string }) {
   )
 }
 
-function GameRun({ game, onExit, onSwitch }: { game: GameKey; onExit: () => void; onSwitch: (g: GameKey) => void }) {
+function GameRun({ game, lesson, onExit, onSwitch }: { game: GameKey; lesson?: number | null; onExit: () => void; onSwitch: (g: GameKey) => void }) {
   const qc = useQueryClient()
   const showReward = useReward()
   const [round, setRound] = useState(0)
   const [started, setStarted] = useState(false)
   const [result, setResult] = useState<{ outcomes: Outcome[]; score?: number; saved: number } | null>(null)
-  const { data, isLoading } = useQuery({ queryKey: ['deck', game, round], queryFn: () => get<{ data: DeckWord[] }>(`/words/deck?n=${game === 'match' ? 24 : 16}`), gcTime: 0, staleTime: Infinity })
+  const { data, isLoading } = useQuery({ queryKey: ['deck', game, round], queryFn: () => get<{ data: DeckWord[] }>(`/words/deck?n=${game === 'match' ? 24 : 16}${lesson ? `&lesson=${lesson}` : ''}`), gcTime: 0, staleTime: Infinity })
   const meta = GAMES.find((g) => g.key === game)!
 
   const submit = useMutation({
@@ -238,7 +247,10 @@ function GameRun({ game, onExit, onSwitch }: { game: GameKey; onExit: () => void
       // Practice also refills hearts (5+ right answers earn one back).
       const correct = outcomes.filter((o) => o.known).length
       if (correct >= 5) await post('/hearts/earn', { correct }).catch(() => null)
-      return { outcomes, score, saved: toSave.length, reward: r?.reward }
+      // played from the path: half the unit's words right completes the stop
+      let path: { reward?: RewardSummary; level_up?: string | null } | null = null
+      if (lesson && outcomes.length && correct / outcomes.length >= 0.5) path = await post<{ reward: RewardSummary; level_up?: string | null }>(`/lessons/${lesson}/complete`, { answers: [] }).catch(() => null)
+      return { outcomes, score, saved: toSave.length, reward: path?.reward ?? r?.reward, pathDone: !!path }
     },
     onSuccess: (r) => {
       setResult(r)
@@ -253,6 +265,7 @@ function GameRun({ game, onExit, onSwitch }: { game: GameKey; onExit: () => void
       if (r.reward?.xp_gained) showReward(r.reward, 'Pratik tamam!')
       qc.invalidateQueries({ queryKey: ['words'] })
       qc.invalidateQueries({ queryKey: ['dashboard'] })
+      if (r.pathDone) qc.invalidateQueries({ queryKey: ['path'] })
     },
   })
   const finish = (outcomes: Outcome[], score?: number) => submit.mutate({ outcomes, score })

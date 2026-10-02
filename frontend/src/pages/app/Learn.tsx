@@ -3,19 +3,19 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowDown, ArrowUp, BookOpen, BookText, Check, ChevronDown, Dumbbell, Flame, Headphones, Lock, MapPin, MessageCircle, Mic, PenLine, Play, Star, Trophy } from 'lucide-react'
+import { ArrowDown, ArrowUp, BookOpen, BookText, Check, ChevronDown, Dumbbell, Flame, Gamepad2, Headphones, Lock, MapPin, MessageCircle, Mic, PenLine, Play, Star, Trophy } from 'lucide-react'
 import { rewardImg, unitImg } from '@/lib/assets'
 import { get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { SKILL_LABEL } from '@/lib/format'
-import { Markdown } from '@/lib/markdown'
 import type { PathLesson, PathUnit, SkillKey } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Modal, SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 import { HomeworkCard } from '@/components/game/Homework'
-import { higoImg } from '@/components/game/Higo'
+import { higoImg, type HigoPose } from '@/components/game/Higo'
+import { Guidebook } from '@/components/game/Guidebook'
 
 type Access = 'review' | 'current' | 'locked'
 interface PathData {
@@ -28,7 +28,10 @@ export interface PlanItem { skill: SkillKey; title: string; detail: string; to: 
 interface Stats { total: number; done: number; pct: number; cur?: { l: PathLesson; u: PathUnit }; unitIndex: number; unitDone: number }
 
 const SKILL_ICON = { reading: BookOpen, listening: Headphones, speaking: Mic, writing: PenLine, vocabulary: Star, grammar: BookText, mixed: Dumbbell }
-const KIND_LABEL: Record<string, string> = { story: 'Hikâye', ai_talk: 'Defne ile konuşma', checkpoint: 'Kontrol noktası' }
+const KIND_LABEL: Record<string, string> = { story: 'Okuma', ai_talk: 'Defne ile konuşma', checkpoint: 'Seviye sınavı', words: 'Kelime oyunu' }
+
+/** Where a path node takes you (the AI talk is started from the node card). */
+export const nodeHref = (l: PathLesson) => (l.kind === 'story' && l.story ? `/stories/${l.story.slug}?lesson=${l.id}` : l.kind === 'words' ? `/practice?game=${l.meta?.game ?? 'match'}&lesson=${l.id}` : l.kind === 'ai_talk' ? null : `/lesson/${l.id}`)
 
 /** Horizontal offset of node i, a gentle S-curve so the path reads as a route. */
 const wave = (i: number) => Math.round(Math.sin(i * 0.95) * 64)
@@ -87,7 +90,6 @@ export default function Learn() {
       <div className="mt-8">
         {data.units.map((unit, ui) => (
           <div key={unit.id}>
-            {ui > 0 && <HigoBreak index={ui} next={unit.title} done={data.units[ui - 1].progress >= 100} />}
             <UnitSection unit={unit} index={ui} photoIndex={courseOffset(data.course.cefr_level) + ui} onGuide={() => setGuide(unit)} openId={openId} setOpenId={setOpenId} currentRef={currentRef} />
           </div>
         ))}
@@ -122,7 +124,7 @@ export default function Learn() {
         <Link to="/placement" className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-paper-2 p-3 text-sm font-extrabold hover:bg-ink/[0.06]">Seviyemi yeniden ölç: seviye testi</Link>
       </Modal>
 
-      <GuidebookModal unit={guide} onClose={() => setGuide(null)} />
+      <Guidebook unit={guide ? { id: guide.id, title: guide.title, color: guide.color ?? undefined, description: guide.description } : null} onClose={() => setGuide(null)} />
     </div>
   )
 }
@@ -136,7 +138,7 @@ function ContinueCard({ data, stats, onJump, onPick, away }: { data: PathData; s
   const unitColor = unit?.color ?? data.course.color
   const R = 15
   const C = 2 * Math.PI * R
-  const go = () => (cur && (cur.l.kind === 'lesson' || cur.l.kind === 'checkpoint') ? nav(`/lesson/${cur.l.id}`) : onJump())
+  const go = () => { const href = cur ? nodeHref(cur.l) : null; if (href) nav(href); else onJump() }
   return (
     <section className="flex items-center gap-3 rounded-2xl border-2 border-line bg-card/95 p-2.5 pr-3 shadow-[0_8px_24px_-16px_rgba(31,36,51,.35)] backdrop-blur sm:gap-4 sm:p-3 sm:pr-4">
       <button onClick={onPick} title="Kurs değiştir" className="flex shrink-0 items-center gap-1 rounded-xl py-1 pl-1 pr-1.5 hover:bg-paper-2">
@@ -186,77 +188,25 @@ function ContinueCard({ data, stats, onJump, onPick, away }: { data: PathData; s
 /* -------------------------------------------------------------------- Path */
 
 /**
- * The unit guidebook as a small book: the admin's markdown is split into pages
- * (by "---" lines, or by "##" headings), and pages turn with a 3D flip. Two
- * facing pages on wide screens, one on phones.
+ * Higo walks the road with you: he sits in the free space beside the trail, on
+ * the side the stop's label doesn't use, in a different pose each time.
  */
-function GuidebookModal({ unit, onClose }: { unit: PathUnit | null; onClose: () => void }) {
-  const { data } = useQuery({ queryKey: ['guide', unit?.id], queryFn: () => get<{ guidebook: string }>(`/units/${unit!.id}/guidebook`), enabled: !!unit })
-  const [page, setPage] = useState(0)
-  const [dir, setDir] = useState(1)
-  useEffect(() => setPage(0), [unit?.id])
-  const wide = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
-  const pages = useMemo(() => {
-    const src = (data?.guidebook ?? '').trim()
-    if (!src) return []
-    const byRule = src.split(/\n-{3,}\n/)
-    if (byRule.length > 1) return byRule.map((x) => x.trim()).filter(Boolean)
-    const parts = src.split(/\n(?=## )/)
-    return parts.map((x) => x.trim()).filter(Boolean)
-  }, [data])
-  const per = wide ? 2 : 1
-  const spreads = Math.max(1, Math.ceil(pages.length / per))
-  const turn = (d: number) => { setDir(d); setPage((p) => Math.min(spreads - 1, Math.max(0, p + d))) }
-  const color = unit?.color ?? '#e8403a'
-  return (
-    <Modal open={!!unit} onClose={onClose} className="sm:!max-w-4xl">
-      <div className="mb-4 flex items-center gap-3">
-        <span className="grid size-11 place-items-center rounded-xl text-white" style={{ background: color }}><BookText className="size-5" /></span>
-        <div className="min-w-0">
-          <p className="text-xs font-black uppercase tracking-widest" style={{ color }}>Ünite rehberi</p>
-          <h2 className="truncate text-2xl leading-tight">{unit?.title}</h2>
-        </div>
-      </div>
-      {!data ? <SkeletonPage variant="path" /> : (
-        <>
-          <div className="relative rounded-[20px] p-2 [perspective:1600px]" style={{ background: `color-mix(in oklab, ${color} 22%, #6b4a2e)` }}>
-            <AnimatePresence mode="wait" custom={dir} initial={false}>
-              <motion.div key={page} custom={dir} initial={{ rotateY: dir * -70, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: dir * 70, opacity: 0 }} transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }} style={{ transformOrigin: dir > 0 ? 'left center' : 'right center' }} className={clsx('grid min-h-[52vh] gap-0 overflow-hidden rounded-[14px] bg-[#fffaf0] text-[#2a2620] shadow-inner', per === 2 && 'md:grid-cols-2')}>
-                {Array.from({ length: per }, (_, k) => {
-                  const n = page * per + k
-                  return (
-                    <div key={k} className={clsx('relative max-h-[62vh] overflow-y-auto px-6 py-7 sm:px-8', per === 2 && k === 0 && 'md:border-r md:border-[#e9dcc4]', per === 2 && k === 0 && 'md:shadow-[inset_-18px_0_24px_-24px_rgba(0,0,0,.35)]')}>
-                      {pages[n] ? <div className="prose-book"><Markdown source={pages[n]} /></div> : <div className="grid h-full place-items-center"><Img src={higoImg('read')} alt="" className="w-28 opacity-80" /></div>}
-                      <span className="absolute bottom-3 right-5 font-mono text-xs text-[#2a2620]/50">{pages[n] ? n + 1 : ''}</span>
-                    </div>
-                  )
-                })}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          <div className="mt-4 flex items-center justify-between gap-3">
-            <Button variant="secondary" disabled={page === 0} onClick={() => turn(-1)}>Önceki sayfa</Button>
-            <span className="text-sm font-bold text-ink-soft">{page + 1} / {spreads}</span>
-            {page < spreads - 1 ? <Button onClick={() => turn(1)}>Sonraki sayfa</Button> : <Button variant="dark" onClick={onClose}>Rehberi kapat</Button>}
-          </div>
-        </>
-      )}
-    </Modal>
-  )
-}
+const SIDE_POSES: HigoPose[] = ['map', 'walk', 'scope', 'read', 'think', 'nap', 'point', 'thumbs']
+const SIDE_LINES: Record<string, string> = { map: 'Rotayı çizdim!', walk: 'Az kaldı, yürü!', scope: 'Sıradakini gördüm', read: 'Rehbere göz at', think: 'Hmm, zor bir konu', nap: 'Mola mı? 5 dk!', point: 'İşte şuradan!', thumbs: 'Harika gidiyorsun' }
 
-/** Between two units Higo takes a break in a new pose, so the road never looks empty. */
-const BREAK_POSES = ['map', 'walk', 'scope', 'nap', 'read', 'think'] as const
-function HigoBreak({ index, next, done }: { index: number; next: string; done: boolean }) {
-  const pose = BREAK_POSES[(index - 1) % BREAK_POSES.length]
-  const line = { map: 'Yol haritasına baktım, sıradaki durak:', walk: 'Hadi, yeni konuya yürüyoruz:', scope: 'Ufukta yeni bir ünite görünüyor:', nap: 'Kısa bir mola, sonra devam:', read: 'Bir sonraki bölümde seni bekleyen:', think: 'Şimdi biraz daha zorlu bir konu:' }[pose]
+function SideHigo({ pose, x, y, side }: { pose: HigoPose; x: number; y: number; side: 'left' | 'right' }) {
   return (
-    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.6 }} className="relative -mt-4 mb-10 flex items-center justify-center gap-3">
-      <motion.img src={higoImg(pose)} alt="" className={clsx('w-24 drop-shadow-lg sm:w-28', !done && 'opacity-90')} animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 3.2, ease: 'easeInOut' }} />
-      <p className="relative max-w-[220px] rounded-2xl rounded-bl-md bg-card px-4 py-2.5 text-sm font-bold shadow-[0_8px_20px_-14px_rgba(31,36,51,.4)] ring-1 ring-line">
-        <span className="block text-xs text-ink-soft">{line}</span>
-        <span className="font-display font-black">{next}</span>
-      </p>
+    <motion.div
+      aria-hidden
+      initial={{ opacity: 0, scale: 0.6, y: 12 }}
+      whileInView={{ opacity: 1, scale: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.6 }}
+      transition={{ type: 'spring', stiffness: 220, damping: 16 }}
+      className="pointer-events-none absolute left-1/2 z-[5] flex w-[68px] flex-col items-center sm:w-24"
+      style={{ top: y, transform: side === 'right' ? `translateX(${x + NODE / 2 + 10}px)` : `translateX(calc(${x - NODE / 2 - 10}px - 100%))` }}
+    >
+      <motion.img src={higoImg(pose)} alt="" className="w-full drop-shadow-[0_10px_12px_rgba(31,36,51,.22)]" animate={{ y: [0, -5, 0], rotate: side === 'right' ? [0, 3, 0] : [0, -3, 0] }} transition={{ repeat: Infinity, duration: 3.4, ease: 'easeInOut' }} />
+      <span className="mt-1 hidden whitespace-nowrap rounded-full bg-card px-2.5 py-1 text-[11px] font-extrabold shadow-[0_6px_14px_-8px_rgba(31,36,51,.4)] ring-1 ring-line sm:block">{SIDE_LINES[pose]}</span>
     </motion.div>
   )
 }
@@ -269,6 +219,10 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
   const pts = unit.lessons.map((_, i) => ({ x: wave(i), y: i * (NODE + GAP) + NODE / 2 }))
   const endY = count * (NODE + GAP) + 30
   const lastDone = unit.lessons.reduce((acc, l, i) => (l.state === 'completed' ? i : acc), -1)
+  // one Higo by a far-swinging stop in the middle of the unit, a second one on long units
+  const swing = pts.map((p, i) => ({ i, d: Math.abs(p.x) })).filter((p) => p.i > 0 && p.i < count - 1 && p.d > 40)
+  const picks = count >= 6 ? [swing.find((p) => p.i >= 1), swing.find((p) => p.i >= 4)] : [swing[0]]
+  const higoSpots = picks.filter((p, k, a): p is { i: number; d: number } => !!p && a.findIndex((q) => q?.i === p.i) === k).map((p, k) => ({ i: p.i, pose: SIDE_POSES[(index * 2 + k) % SIDE_POSES.length] }))
   const seg = (a: { x: number; y: number }, b: { x: number; y: number }) => `M ${a.x} ${a.y} C ${a.x} ${(a.y + b.y) / 2}, ${b.x} ${(a.y + b.y) / 2}, ${b.x} ${b.y}`
 
   return (
@@ -309,6 +263,11 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
           <LessonNode key={l.id} lesson={l} index={i} x={pts[i].x} y={pts[i].y - NODE / 2} color={color} open={openId === l.id} setOpenId={setOpenId} nodeRef={l.state === 'current' ? currentRef : undefined} />
         ))}
 
+        {/* Higo beside the trail: by the stops that swing furthest out, on their free side */}
+        {higoSpots.map(({ i, pose }) => (
+          <SideHigo key={i} pose={pose} x={pts[i].x} y={pts[i].y - NODE / 2 - 8} side={pts[i].x > 0 ? 'right' : 'left'} />
+        ))}
+
         {/* unit trophy, the visible finish line of this unit */}
         <div className="absolute left-1/2 flex -translate-x-1/2 flex-col items-center" style={{ top: endY - 34 }}>
           <span className={clsx('grid size-[68px] place-items-center rounded-full border-4 bg-card', done ? 'border-butter' : 'border-line')}>
@@ -331,7 +290,7 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
   const current = lesson.state === 'current'
   // open: reachable (the start of a topic, or opened by the placement test) but not where you are
   const ajar = lesson.state === 'open'
-  const Icon = lesson.kind === 'story' ? BookOpen : lesson.kind === 'ai_talk' ? MessageCircle : lesson.kind === 'checkpoint' ? Trophy : SKILL_ICON[lesson.skill] ?? Star
+  const Icon = lesson.kind === 'story' ? BookOpen : lesson.kind === 'ai_talk' ? MessageCircle : lesson.kind === 'checkpoint' ? Trophy : lesson.kind === 'words' ? Gamepad2 : SKILL_ICON[lesson.skill] ?? Star
   const size = current ? NODE + 12 : NODE
   // Labels sit on the open side of the curve, so they never collide with the trail.
   const labelLeft = x > 8
@@ -344,10 +303,9 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
   })
   const start = () => {
     if (lesson.premium_locked) return nav('/premium')
-    if (lesson.kind === 'story' && lesson.story) return nav(`/stories/${lesson.story.slug}?lesson=${lesson.id}`)
     if (lesson.kind === 'ai_talk') return startAi.mutate()
-    if (!user?.hearts.unlimited && (user?.hearts.hearts ?? 0) <= 0) return toast('Canın kalmadı! Pratik yaparak ya da mağazadan can kazanabilirsin.', 'error')
-    nav(`/lesson/${lesson.id}`)
+    if ((lesson.kind === 'lesson' || lesson.kind === 'checkpoint') && !user?.hearts.unlimited && (user?.hearts.hearts ?? 0) <= 0) return toast('Canın kalmadı! Pratik yaparak ya da mağazadan can kazanabilirsin.', 'error')
+    nav(nodeHref(lesson)!)
   }
 
   // Keep the opened card in view, it can open near the bottom of the screen.
@@ -365,7 +323,7 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
         <span aria-hidden className="pointer-events-none absolute left-1/2 -translate-x-1/2" style={{ top: -14, width: size + 28, height: size + 28 }}>
           <motion.span className="absolute inset-2 rounded-full" style={{ background: `radial-gradient(circle, color-mix(in oklab, ${color} 30%, transparent) 40%, transparent 72%)` }} animate={{ opacity: [0.55, 1, 0.55], scale: [0.96, 1.04, 0.96] }} transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut' }} />
           <svg viewBox="0 0 100 100" className="absolute inset-0 size-full animate-[spin_14s_linear_infinite]">
-            <circle cx="50" cy="50" r="47" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeDasharray="6 9" opacity=".8" />
+            <circle cx="50" cy="50" r="47" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" pathLength={100} strokeDasharray="2.5 2.5" opacity=".8" />
           </svg>
           <motion.img src={higoImg('wave')} alt="" className="absolute -right-3 -top-5 w-11 drop-shadow-md" animate={{ y: [0, -4, 0], rotate: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
         </span>

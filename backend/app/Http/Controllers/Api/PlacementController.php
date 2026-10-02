@@ -121,19 +121,20 @@ class PlacementController extends Controller
     }
 
     /**
-     * The level is the first band scored below 4 of 6 (67%): passing a band means
-     * you are ready for the next one. Passing all five bands means C2.
+     * The level is the first band scored below 60%: passing a band means you are
+     * ready for the next one. The course goes up to B2, so that is the highest
+     * placement; a strong C1 band only opens more of the B2 path (applyPlacement).
      */
     public static function levelFrom(array $bands): string
     {
-        foreach (['A1', 'A2', 'B1', 'B2', 'C1'] as $band) {
+        foreach (['A1', 'A2', 'B1'] as $band) {
             $b = $bands[$band] ?? ['total' => 1, 'correct' => 0];
             if ($b['correct'] / max(1, $b['total']) < 0.6) {
                 return $band;
             }
         }
 
-        return 'C2';
+        return 'B2';
     }
 
     private function bank(): array

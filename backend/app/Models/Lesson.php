@@ -11,7 +11,7 @@ class Lesson extends Model
 
     protected function casts(): array
     {
-        return ['exercises' => 'array', 'is_premium' => 'boolean'];
+        return ['exercises' => 'array', 'meta' => 'array', 'is_premium' => 'boolean'];
     }
 
     public function unit(): BelongsTo

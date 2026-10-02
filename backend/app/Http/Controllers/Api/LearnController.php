@@ -27,13 +27,13 @@ class LearnController extends Controller
     public function path(Request $request, PathService $paths, ?Course $course = null): JsonResponse
     {
         $user = $request->user();
-        $course ??= $paths->courses()->firstWhere('cefr_level', $user->cefr_level) ?? $paths->courses()->firstOrFail();
-        $course->load(['units.lessons' => fn ($q) => $q->select(['id', 'unit_id', 'title', 'skill', 'kind', 'position', 'xp_reward', 'is_premium', 'story_id', 'scenario_key'])->with('story:id,slug')]);
+        $course ??= $paths->courseFor($user);
+        $course->load(['units.lessons' => fn ($q) => $q->select(['id', 'unit_id', 'title', 'skill', 'kind', 'position', 'xp_reward', 'is_premium', 'story_id', 'scenario_key', 'meta'])->with('story:id,slug')]);
         $states = $paths->states($user, $course);
         $progress = LessonProgress::query()->where('user_id', $user->id)->whereIn('lesson_id', array_keys($states))->get()->keyBy('lesson_id');
 
         $units = $course->units->map(function ($unit) use ($progress, $states, $user) {
-            $lessons = $unit->lessons->map(fn (Lesson $lesson) => $lesson->toArray() + [
+            $lessons = $unit->lessons->map(fn (Lesson $lesson) => ['meta' => $lesson->meta ? ['game' => $lesson->meta['game'] ?? null] : null] + $lesson->toArray() + [
                 'state' => $states[$lesson->id] ?? 'locked',
                 'crowns' => $progress->get($lesson->id)?->crowns ?? 0,
                 'best_score' => $progress->get($lesson->id)?->best_score ?? 0,

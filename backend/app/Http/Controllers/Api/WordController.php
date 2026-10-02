@@ -75,6 +75,18 @@ class WordController extends Controller
     {
         $n = min(30, max(6, (int) $request->query('n', 16)));
         $user = $request->user();
+        // a "words" node on the path plays with that unit's own vocabulary
+        if ($lessonId = (int) $request->query('lesson')) {
+            $lesson = \App\Models\Lesson::query()->findOrFail($lessonId);
+            abort_unless(app(\App\Services\PathService::class)->canOpen($user, $lesson), 403, 'Bu ders henüz kilitli.');
+            $list = collect($lesson->meta['words'] ?? []);
+            $saved = $user->words()->whereIn('word', $list->pluck('word'))->get(['id', 'word', 'translation', 'example', 'interval_days'])->keyBy(fn ($w) => mb_strtolower($w->word));
+            $deck = $list->map(fn ($w) => $saved->has(mb_strtolower($w['word']))
+                ? $saved[mb_strtolower($w['word'])]->only(['id', 'word', 'translation', 'example', 'interval_days'])
+                : ['id' => null, 'word' => $w['word'], 'translation' => $w['translation'], 'example' => $w['example'] ?? null, 'interval_days' => 0]);
+
+            return response()->json(['data' => $deck->shuffle()->take($n)->values(), 'saved' => $saved->count(), 'lesson' => $lesson->only(['id', 'title'])]);
+        }
         $mine = $user->words()->whereNotNull('translation')
             ->orderByRaw('CASE WHEN due_at <= ? THEN 0 ELSE 1 END', [now()])
             ->orderBy('interval_days')->orderBy('due_at')

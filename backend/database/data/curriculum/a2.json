@@ -1,0 +1,2058 @@
+{
+ "slug": "a2-yol-arkadasi",
+ "title": "A2 · Yol Arkadaşı",
+ "cefr_level": "A2",
+ "color": "#2EC4A0",
+ "description": "Geçmişi anlat, planlarını paylaş, karşılaştır ve tavsiye ver. Günlük hayatta rahatça idare et.",
+ "units": [
+  {
+   "title": "Dün",
+   "desc": "was / were ve düzenli geçmiş zaman",
+   "color": "#2EC4A0",
+   "guide": "## Dün neredeydin?\nBu ünitede geçmişi anlatmaya başlıyoruz: **was / were** ve düzenli fiillerin geçmiş hâli.\n\n## was / were\n| Özne | Fiil | Örnek |\n|---|---|---|\n| I / he / she / it | was | I was at home yesterday. |\n| you / we / they | were | They were in Bodrum. |\n\nOlumsuz: *wasn't / weren't*. Soru: *Were you tired? Was it expensive?*\n\n## Düzenli fiiller: -ed\n*work → worked, play → played, watch → watched*\nYazım: *live → lived, study → studied, stop → stopped*\n\n> Higo'nun ipucu: -ed'in üç okunuşu var: **/t/** worked, **/d/** played, **/ɪd/** wanted. Sondaki t ya da d sesinden sonra hece eklenir.\n\n## Geçmiş zaman ifadeleri\n**yesterday** · **last night / week / summer** · **two days ago** · **in 2020**",
+   "vocab": [
+    [
+     "yesterday",
+     "dün"
+    ],
+    [
+     "last week",
+     "geçen hafta"
+    ],
+    [
+     "ago",
+     "önce"
+    ],
+    [
+     "visit",
+     "ziyaret etmek"
+    ],
+    [
+     "stay",
+     "kalmak"
+    ],
+    [
+     "travel",
+     "seyahat etmek"
+    ],
+    [
+     "arrive",
+     "varmak"
+    ],
+    [
+     "tired",
+     "yorgun"
+    ],
+    [
+     "bored",
+     "sıkılmış"
+    ],
+    [
+     "excited",
+     "heyecanlı"
+    ]
+   ],
+   "vs": [
+    [
+     "I visited my grandparents last weekend.",
+     "Geçen hafta sonu büyükanne ve büyükbabamı ziyaret ettim."
+    ],
+    [
+     "We arrived in Ankara two hours ago.",
+     "İki saat önce Ankara'ya vardık."
+    ],
+    [
+     "She was very tired yesterday"
+    ]
+   ],
+   "fill": [
+    [
+     "I ___ at the cinema last night.",
+     [
+      "was",
+      "were",
+      "am"
+     ],
+     0
+    ],
+    [
+     "They ___ very excited about the trip.",
+     [
+      "was",
+      "were",
+      "are"
+     ],
+     1
+    ],
+    [
+     "We ___ football after school yesterday.",
+     [
+      "play",
+      "played",
+      "playing"
+     ],
+     1
+    ],
+    [
+     "___ you at home on Sunday?",
+     [
+      "Was",
+      "Were",
+      "Did"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Dün evdeydim.",
+     "I was at home yesterday",
+     [
+      "were",
+      "in"
+     ],
+     [
+      "Yesterday I was at home"
+     ]
+    ],
+    [
+     "Geçen yaz Bodrum'da kaldık.",
+     "We stayed in Bodrum last summer",
+     [
+      "stay",
+      "at"
+     ],
+     [
+      "Last summer we stayed in Bodrum"
+     ]
+    ]
+   ],
+   "err": [
+    "We was very happy at the party",
+    1,
+    [
+     "were",
+     "are",
+     "is"
+    ],
+    0,
+    "\"We\" ile geçmiş zamanda \"were\" kullanılır. \"Was\" yalnızca I, he, she, it içindir."
+   ],
+   "sp": [
+    [
+     "Where were you last night?",
+     "Dün gece neredeydin?"
+    ],
+    [
+     "I watched a great film yesterday.",
+     "Dün harika bir film izledim."
+    ],
+    [
+     "The weather was lovely.",
+     "Hava çok güzeldi."
+    ]
+   ],
+   "dlg": [
+    "Pazartesi sabahı. İş arkadaşın hafta sonunu soruyor.",
+    null,
+    [
+     {
+      "who": "Jess",
+      "text": "Hi! Where were you on Saturday? I called you."
+     }
+    ],
+    [
+     "Sorry, I was at my cousin's wedding in Sivas.",
+     "I am at wedding Saturday.",
+     "I were at a wedding."
+    ],
+    0,
+    "Geçmişte bulunduğun yer için I was … kalıbı kullanılır."
+   ],
+   "lc": [
+    [
+     "I was really tired",
+     [
+      "I was really tired",
+      "I was really tidy",
+      "I am really tired"
+     ]
+    ],
+    [
+     "They stayed at a hotel",
+     [
+      "They stayed at a hotel",
+      "They stay at a hotel",
+      "They stayed at home"
+     ]
+    ]
+   ],
+   "lt": [
+    "We visited a museum",
+    "It was very cold"
+   ],
+   "game": "match",
+   "story": {
+    "slug": "the-lost-phone",
+    "title": "The Lost Phone",
+    "title_tr": "Kayıp Telefon",
+    "category": "Günlük Hayat",
+    "summary": "Selin telefonunu otobüste unutuyor ve onu bulmak için bütün gün uğraşıyor.",
+    "paragraphs": [
+     [
+      "Yesterday was a terrible day for Selin. She was on the bus to work when she noticed something. Her phone wasn't in her bag!",
+      "Dün Selin için korkunç bir gündü. İşe giden otobüsteyken bir şey fark etti. Telefonu çantasında değildi!"
+     ],
+     [
+      "She was very worried. All her photos and messages were on that phone. She asked the driver, but he was busy and didn't answer.",
+      "Çok endişelendi. Bütün fotoğrafları ve mesajları o telefondaydı. Şoföre sordu ama şoför meşguldü ve cevap vermedi."
+     ],
+     [
+      "At lunch, she called her own number from a colleague's phone. A kind voice answered. \"Hello? I found this phone on the number 12 bus.\"",
+      "Öğle yemeğinde bir iş arkadaşının telefonundan kendi numarasını aradı. Nazik bir ses cevap verdi. \"Alo? Bu telefonu 12 numaralı otobüste buldum.\""
+     ],
+     [
+      "The woman's name was Hatice. She was a retired teacher. They met at a café in the evening, and Selin bought her a cake to say thank you.",
+      "Kadının adı Hatice'ydi. Emekli bir öğretmendi. Akşam bir kafede buluştular ve Selin teşekkür etmek için ona bir pasta aldı."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "terrible",
+      "korkunç",
+      "The weather was terrible."
+     ],
+     [
+      "notice",
+      "fark etmek",
+      "I noticed a small mistake."
+     ],
+     [
+      "worried",
+      "endişeli",
+      "My mum was worried."
+     ],
+     [
+      "retired",
+      "emekli",
+      "My grandfather is retired."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where did Selin lose her phone?",
+      "options": [
+       "At work",
+       "On the bus",
+       "In a café"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "The driver helped Selin.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "What did Selin buy for Hatice?",
+      "options": [
+       "Flowers",
+       "A cake",
+       "A book"
+      ],
+      "answer": 1
+     }
+    ]
+   },
+   "talk": {
+    "key": "lost-property",
+    "title": "Kayıp eşya bürosu",
+    "emoji": "🧳",
+    "category": "travel",
+    "cefr_min": "A2",
+    "description": "Havalimanında çantanı kaybettin. Görevliye ne zaman, nerede olduğunu anlat.",
+    "system_prompt": "You are an officer at the lost property office of Gatwick Airport. Ask the learner when and where they lost their bag, what it looks like, what was in it and their phone number. Use was/were and the past simple, A2 level.",
+    "opening_line": "Good afternoon, lost property. How can I help you?",
+    "goals": [
+     "Çantanın nerede kaybolduğunu söyle",
+     "Çantayı tarif et (renk, boyut)",
+     "İçinde ne olduğunu was / were ile anlat"
+    ]
+   }
+  },
+  {
+   "title": "Hikâye Anlat",
+   "desc": "Düzensiz fiiller ve geçmişte soru",
+   "color": "#22B573",
+   "guide": "## Bir anı anlat\nBu ünitede düzensiz fiilleri ve geçmiş zamanda soru ve olumsuz cümleleri öğreneceksin.\n\n## Düzensiz fiiller\nEzberlenir, en sık kullanılanlarla başla:\n*go → went · see → saw · have → had · eat → ate · buy → bought · take → took · make → made · come → came · get → got · find → found*\n\n## did ile soru ve olumsuz\nOlumsuz ve soruda **did** geçmişi taşır, fiil **yalın** kalır.\n- *I didn't go. (~~didn't went~~)*\n- *Did you see the match? Yes, I did.*\n- *Where did you buy it?*\n\n> Higo'nun ipucu: Bir hikâyeyi sıraya koymak için **first, then, after that, finally** kullan. Dinleyen kişi hikâyeni çok daha kolay takip eder.",
+   "vocab": [
+    [
+     "went",
+     "gitti"
+    ],
+    [
+     "saw",
+     "gördü"
+    ],
+    [
+     "bought",
+     "satın aldı"
+    ],
+    [
+     "ate",
+     "yedi"
+    ],
+    [
+     "took",
+     "aldı, götürdü"
+    ],
+    [
+     "found",
+     "buldu"
+    ],
+    [
+     "first",
+     "önce"
+    ],
+    [
+     "then",
+     "sonra"
+    ],
+    [
+     "after that",
+     "ondan sonra"
+    ],
+    [
+     "finally",
+     "sonunda"
+    ]
+   ],
+   "vs": [
+    [
+     "First we went to the beach, then we ate fish.",
+     "Önce plaja gittik, sonra balık yedik."
+    ],
+    [
+     "I found my keys under the sofa.",
+     "Anahtarlarımı kanepenin altında buldum."
+    ],
+    [
+     "She bought a new phone"
+    ]
+   ],
+   "fill": [
+    [
+     "We ___ a great film yesterday.",
+     [
+      "see",
+      "saw",
+      "seen"
+     ],
+     1
+    ],
+    [
+     "I didn't ___ to the party.",
+     [
+      "go",
+      "went",
+      "gone"
+     ],
+     0
+    ],
+    [
+     "___ you buy that jacket online?",
+     [
+      "Did",
+      "Were",
+      "Do"
+     ],
+     0
+    ],
+    [
+     "He ___ the bus to school this morning.",
+     [
+      "take",
+      "took",
+      "taken"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Geçen yaz İtalya'ya gittik.",
+     "We went to Italy last summer",
+     [
+      "go",
+      "in"
+     ],
+     [
+      "Last summer we went to Italy"
+     ]
+    ],
+    [
+     "Kahvaltıda ne yedin?",
+     "What did you eat for breakfast",
+     [
+      "ate",
+      "do"
+     ],
+     [
+      "What did you have for breakfast"
+     ]
+    ]
+   ],
+   "err": [
+    "Yesterday I didn't went to school",
+    3,
+    [
+     "go",
+     "gone",
+     "going"
+    ],
+    0,
+    "\"didn't\" zaten geçmişi taşır; yanındaki fiil yalın kalır. Doğrusu: I didn't go."
+   ],
+   "sp": [
+    [
+     "I visited my grandparents last weekend.",
+     "Geçen hafta sonu büyükanne ve büyükbabamı ziyaret ettim."
+    ],
+    [
+     "What did you do on your holiday?",
+     "Tatilinde ne yaptın?"
+    ],
+    [
+     "Finally, we got home at midnight.",
+     "Sonunda gece yarısı eve vardık."
+    ]
+   ],
+   "dlg": [
+    "Arkadaşın tatilini soruyor.",
+    null,
+    [
+     {
+      "who": "Mia",
+      "text": "Did you have a good holiday?"
+     }
+    ],
+    [
+     "Yes, I did! We went to Cappadocia and took a balloon ride.",
+     "Yes, I did go Cappadocia.",
+     "Yes, we goed to Cappadocia."
+    ],
+    0,
+    "Kısa cevap \"Yes, I did\" ile başla, sonra geçmiş zamanla bir detay ver."
+   ],
+   "lc": [
+    [
+     "Did you enjoy the concert?",
+     [
+      "Did you enjoy the concert?",
+      "Do you enjoy the concert?",
+      "Did you join the concert?"
+     ]
+    ],
+    [
+     "She bought a new phone",
+     [
+      "She bought a new phone",
+      "She brought a new phone",
+      "She buys a new phone"
+     ]
+    ]
+   ],
+   "lt": [
+    "We went to the cinema",
+    "What did you buy"
+   ],
+   "seq": [
+    "Dün akşamını anlat. Cümleleri olay sırasına diz.",
+    [
+     "I finished work at six.",
+     "I met my friend at the metro station.",
+     "We had dinner at a small restaurant.",
+     "I got home just before midnight."
+    ]
+   ],
+   "game": "choice",
+   "story": "the-cat-who-loved-tea",
+   "talk": "weekend-story"
+  },
+  {
+   "title": "Planlar",
+   "desc": "be going to, gelecek planları ve tatil",
+   "color": "#3A6FF7",
+   "guide": "## Gelecek planların\nBu ünitede plan ve niyetler için **be going to** kalıbını öğreneceksin.\n\n## be going to\n**am / is / are + going to + yalın fiil**\n- *I'm going to visit my aunt in Mersin.*\n- *We aren't going to stay at a hotel.*\n- *Are you going to study tonight?*\n\nKanıt varken tahmin için de kullanılır: *Look at those clouds! It's going to rain.*\n\n## Zaman ifadeleri\n**tonight · tomorrow · next week / month / summer · this weekend · in two days**\n\n> Higo'nun ipucu: Konuşurken \"going to\" çoğu zaman **gonna** gibi duyulur. Dinlerken tanı ama yazıda kullanma.",
+   "vocab": [
+    [
+     "holiday",
+     "tatil"
+    ],
+    [
+     "plan",
+     "plan"
+    ],
+    [
+     "book a ticket",
+     "bilet ayırtmak"
+    ],
+    [
+     "pack",
+     "bavul hazırlamak"
+    ],
+    [
+     "beach",
+     "plaj"
+    ],
+    [
+     "mountain",
+     "dağ"
+    ],
+    [
+     "tent",
+     "çadır"
+    ],
+    [
+     "tomorrow",
+     "yarın"
+    ],
+    [
+     "next week",
+     "gelecek hafta"
+    ],
+    [
+     "abroad",
+     "yurt dışında"
+    ]
+   ],
+   "vs": [
+    [
+     "We're going to book our tickets tonight.",
+     "Biletlerimizi bu akşam ayırtacağız."
+    ],
+    [
+     "She is going to study abroad next year.",
+     "Gelecek yıl yurt dışında okuyacak."
+    ],
+    [
+     "I'm going to pack my bag"
+    ]
+   ],
+   "fill": [
+    [
+     "I'm going ___ my grandparents.",
+     [
+      "visit",
+      "to visit",
+      "visiting"
+     ],
+     1
+    ],
+    [
+     "They ___ going to stay in a tent.",
+     [
+      "is",
+      "are",
+      "am"
+     ],
+     1
+    ],
+    [
+     "Look at the sky! It ___ to rain.",
+     [
+      "'s going",
+      "goes",
+      "'re going"
+     ],
+     0
+    ],
+    [
+     "What ___ you going to do this summer?",
+     [
+      "are",
+      "do",
+      "will"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Yarın erken kalkacağım.",
+     "I'm going to get up early tomorrow",
+     [
+      "will",
+      "at"
+     ],
+     [
+      "I am going to get up early tomorrow"
+     ]
+    ],
+    [
+     "Bu yaz ne yapacaksın?",
+     "What are you going to do this summer",
+     [
+      "do",
+      "will"
+     ],
+     []
+    ]
+   ],
+   "err": [
+    "We're going to visiting Paris next month",
+    3,
+    [
+     "visit",
+     "visited",
+     "visits"
+    ],
+    0,
+    "\"Going to\"dan sonra fiil yalın kalır: We're going to visit Paris."
+   ],
+   "sp": [
+    [
+     "I'm going to travel to Japan one day.",
+     "Bir gün Japonya'ya seyahat edeceğim."
+    ],
+    [
+     "Are you going to come to my party?",
+     "Partime gelecek misin?"
+    ],
+    [
+     "We're going to stay for a week.",
+     "Bir hafta kalacağız."
+    ]
+   ],
+   "dlg": [
+    "Arkadaşın yaz planlarını soruyor.",
+    null,
+    [
+     {
+      "who": "Tom",
+      "text": "Any plans for the summer?"
+     }
+    ],
+    [
+     "Yes! I'm going to work in a café and then go camping.",
+     "Yes, I go work café.",
+     "Yes, I will going to work."
+    ],
+    0,
+    "Önceden kararlaştırılmış planlar için be going to kullanılır."
+   ],
+   "lc": [
+    [
+     "It's going to rain",
+     [
+      "It's going to rain",
+      "It's going to train",
+      "It's going to snow"
+     ]
+    ],
+    [
+     "We're going to book a hotel",
+     [
+      "We're going to book a hotel",
+      "We're going to look at a hotel",
+      "We went to a hotel"
+     ]
+    ]
+   ],
+   "lt": [
+    "I'm going to pack my bag",
+    "Are you going to come"
+   ],
+   "game": "scramble",
+   "story": {
+    "slug": "the-camping-plan",
+    "title": "The Camping Plan",
+    "title_tr": "Kamp Planı",
+    "category": "Seyahat",
+    "summary": "Üç arkadaş Kazdağları'nda kamp yapmayı planlıyor, ama hava durumu başka söylüyor.",
+    "paragraphs": [
+     [
+      "Ozan, Lara and Efe are university students in Çanakkale. The exams are finished and they are going to have a short holiday.",
+      "Ozan, Lara ve Efe Çanakkale'de üniversite öğrencisi. Sınavlar bitti ve kısa bir tatil yapacaklar."
+     ],
+     [
+      "\"I've got an idea,\" says Lara. \"We're going to camp in the Kazdağları mountains. I'm going to bring my tent.\"",
+      "\"Bir fikrim var,\" diyor Lara. \"Kazdağları'nda kamp yapacağız. Ben çadırımı getireceğim.\""
+     ],
+     [
+      "Efe checks the weather on his phone. \"Hmm. It's going to rain on Saturday. A lot.\" Ozan is not worried. \"Then we're going to need a bigger tent!\"",
+      "Efe telefonundan hava durumuna bakıyor. \"Hmm. Cumartesi yağmur yağacak. Hem de çok.\" Ozan endişeli değil. \"O zaman daha büyük bir çadıra ihtiyacımız olacak!\""
+     ],
+     [
+      "In the end, they change the plan. They are going to stay in a small wooden house in a village and go walking on Sunday when the sun comes out.",
+      "Sonunda planı değiştiriyorlar. Bir köyde küçük ahşap bir evde kalacaklar ve güneş çıkınca pazar günü yürüyüşe gidecekler."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "exam",
+      "sınav",
+      "I have an exam tomorrow."
+     ],
+     [
+      "bring",
+      "getirmek",
+      "Bring your notebook."
+     ],
+     [
+      "check",
+      "kontrol etmek",
+      "Check your email."
+     ],
+     [
+      "wooden",
+      "ahşap",
+      "a wooden table"
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Why are they going to have a holiday?",
+      "options": [
+       "The exams are finished",
+       "It is their birthday",
+       "They have a new job"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "truefalse",
+      "q": "The weather is going to be sunny on Saturday.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "Where are they going to stay in the end?",
+      "options": [
+       "In a tent",
+       "In a hotel",
+       "In a wooden house"
+      ],
+      "answer": 2
+     }
+    ]
+   },
+   "talk": {
+    "key": "holiday-plans",
+    "title": "Tatil planı",
+    "emoji": "🏖️",
+    "category": "travel",
+    "cefr_min": "A2",
+    "description": "Bir seyahat acentesiyle yaz tatili planlıyorsun.",
+    "system_prompt": "You are Anna, a friendly travel agent. Help the learner plan a summer holiday: where they are going to go, how long they are going to stay, how they are going to travel and what they are going to do. Use be going to, A2 level. Suggest one or two options.",
+    "opening_line": "Hello! Welcome to Sunny Travel. So, where are you going to go this summer?",
+    "goals": [
+     "Nereye gideceğini söyle",
+     "Ne kadar kalacağını söyle",
+     "Orada ne yapacağını going to ile anlat"
+    ]
+   }
+  },
+  {
+   "title": "Karşılaştır",
+   "desc": "Karşılaştırma ve üstünlük sıfatları",
+   "color": "#FFB400",
+   "guide": "## Hangisi daha iyi?\nBu ünitede şehirleri, insanları ve eşyaları karşılaştırmayı öğreneceksin.\n\n## Karşılaştırma (Comparatives)\n- Kısa sıfat + **-er than**: *Ankara is bigger than Eskişehir.*\n- Uzun sıfat: **more … than**: *Istanbul is more crowded than Bursa.*\n- Düzensiz: *good → better, bad → worse, far → further*\n\n## Üstünlük (Superlatives)\n- **the + -est**: *the biggest, the cheapest*\n- **the most …**: *the most beautiful city*\n- Düzensiz: *the best, the worst*\n\n## as … as\nEşitlik: *My phone is as fast as yours.* Olumsuz: *It isn't as cold as yesterday.*\n\n> Higo'nun ipucu: Türkçedeki \"-den daha\" İngilizcede **than** ile kurulur. \"Benden uzun\" → *taller than me*.",
+   "vocab": [
+    [
+     "bigger",
+     "daha büyük"
+    ],
+    [
+     "smaller",
+     "daha küçük"
+    ],
+    [
+     "cheaper",
+     "daha ucuz"
+    ],
+    [
+     "older",
+     "daha yaşlı / eski"
+    ],
+    [
+     "crowded",
+     "kalabalık"
+    ],
+    [
+     "quiet",
+     "sakin"
+    ],
+    [
+     "modern",
+     "modern"
+    ],
+    [
+     "beautiful",
+     "güzel"
+    ],
+    [
+     "better",
+     "daha iyi"
+    ],
+    [
+     "the best",
+     "en iyi"
+    ]
+   ],
+   "vs": [
+    [
+     "Izmir is quieter than Istanbul.",
+     "İzmir İstanbul'dan daha sakin."
+    ],
+    [
+     "This is the most beautiful beach in Turkey.",
+     "Burası Türkiye'nin en güzel plajı."
+    ],
+    [
+     "My brother is older than me"
+    ]
+   ],
+   "fill": [
+    [
+     "A plane is ___ than a train.",
+     [
+      "fast",
+      "faster",
+      "fastest"
+     ],
+     1
+    ],
+    [
+     "This is the ___ restaurant in town.",
+     [
+      "better",
+      "good",
+      "best"
+     ],
+     2
+    ],
+    [
+     "Istanbul is ___ crowded than Rize.",
+     [
+      "most",
+      "more",
+      "much"
+     ],
+     1
+    ],
+    [
+     "My bag isn't as heavy ___ yours.",
+     [
+      "than",
+      "as",
+      "like"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Bu telefon ötekinden daha ucuz.",
+     "This phone is cheaper than that one",
+     [
+      "more",
+      "then"
+     ],
+     [
+      "This phone is cheaper than the other one"
+     ]
+    ],
+    [
+     "Türkiye'nin en büyük şehri hangisi?",
+     "What is the biggest city in Turkey",
+     [
+      "bigger",
+      "in"
+     ],
+     [
+      "What's the biggest city in Turkey",
+      "Which is the biggest city in Turkey"
+     ]
+    ]
+   ],
+   "err": [
+    "Istanbul is bigger then Ankara",
+    3,
+    [
+     "than",
+     "that",
+     "as"
+    ],
+    0,
+    "Karşılaştırmada \"than\" kullanılır. \"Then\" ise \"sonra\" demektir; yazılışları benzediği için sık karıştırılır."
+   ],
+   "sp": [
+    [
+     "Summer is better than winter.",
+     "Yaz kıştan daha iyidir."
+    ],
+    [
+     "Which city is the most beautiful?",
+     "Hangi şehir en güzeli?"
+    ],
+    [
+     "It isn't as expensive as I thought.",
+     "Düşündüğüm kadar pahalı değil."
+    ]
+   ],
+   "dlg": [
+    "Arkadaşın iki telefon arasında kararsız.",
+    null,
+    [
+     {
+      "who": "Sara",
+      "text": "Which one should I buy, the black phone or the white one?"
+     }
+    ],
+    [
+     "The black one is cheaper, but the white one has a better camera.",
+     "Black one more cheap.",
+     "The white is goodest."
+    ],
+    0,
+    "İki şeyi tartarken comparative kullan: cheaper, better…"
+   ],
+   "lc": [
+    [
+     "Ankara is bigger than Izmir",
+     [
+      "Ankara is bigger than Izmir",
+      "Ankara is bigger then Izmir",
+      "Ankara is big as Izmir"
+     ]
+    ],
+    [
+     "the most expensive hotel",
+     [
+      "the most expensive hotel",
+      "the more expensive hotel",
+      "the most extensive hotel"
+     ]
+    ]
+   ],
+   "lt": [
+    "This is the best day ever",
+    "My sister is taller than me"
+   ],
+   "game": "truefalse",
+   "story": {
+    "slug": "two-cities",
+    "title": "Two Cities",
+    "title_tr": "İki Şehir",
+    "category": "Seyahat",
+    "summary": "İstanbullu Aslı ile Rizeli Yusuf, şehirlerinin hangisinin daha güzel olduğunu tartışıyor.",
+    "paragraphs": [
+     [
+      "Aslı lives in Istanbul and her online friend Yusuf lives in Rize. Every week they have a video call. This week they started a funny argument.",
+      "Aslı İstanbul'da, internetteki arkadaşı Yusuf Rize'de yaşıyor. Her hafta görüntülü konuşuyorlar. Bu hafta komik bir tartışma başlattılar."
+     ],
+     [
+      "\"Istanbul is the most exciting city in the world,\" said Aslı. \"It's bigger, the food is better and there is always something to do.\"",
+      "\"İstanbul dünyanın en heyecanlı şehri,\" dedi Aslı. \"Daha büyük, yemekleri daha iyi ve her zaman yapacak bir şey var.\""
+     ],
+     [
+      "\"Maybe,\" said Yusuf, \"but Rize is greener, quieter and the air is cleaner. And our tea is the best in Turkey!\"",
+      "\"Belki,\" dedi Yusuf, \"ama Rize daha yeşil, daha sakin ve hava daha temiz. Ve çayımız Türkiye'nin en iyisi!\""
+     ],
+     [
+      "They didn't agree, so they made a plan. In August, Aslı is going to visit Rize, and in December, Yusuf is going to visit Istanbul. Then they will decide.",
+      "Anlaşamadılar ve bir plan yaptılar. Ağustosta Aslı Rize'ye, aralıkta Yusuf İstanbul'a gidecek. Sonra karar verecekler."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "argument",
+      "tartışma",
+      "We had a small argument."
+     ],
+     [
+      "exciting",
+      "heyecan verici",
+      "The match was exciting."
+     ],
+     [
+      "clean",
+      "temiz",
+      "The air is clean here."
+     ],
+     [
+      "agree",
+      "aynı fikirde olmak",
+      "I agree with you."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where does Yusuf live?",
+      "options": [
+       "Istanbul",
+       "Rize",
+       "Ankara"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "What does Yusuf say about Rize's tea?",
+      "options": [
+       "It is the best in Turkey",
+       "It is cheaper",
+       "It is new"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "truefalse",
+      "q": "Aslı and Yusuf agreed at the end of the call.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     }
+    ]
+   },
+   "talk": {
+    "key": "compare-cities",
+    "title": "Hangi şehir?",
+    "emoji": "🏙️",
+    "category": "travel",
+    "cefr_min": "A2",
+    "description": "Yabancı bir arkadaşın Türkiye'de hangi şehre taşınacağını soruyor.",
+    "system_prompt": "You are Oliver, an English teacher who is going to move to Turkey and cannot decide between Istanbul, Izmir and Antalya. Ask the learner to compare the cities (cost, weather, people, food) and give a recommendation. Use comparatives and superlatives, A2 level.",
+    "opening_line": "I'm moving to Turkey! Istanbul, Izmir or Antalya? Which city is better for me?",
+    "goals": [
+     "İki şehri -er / more ile karşılaştır",
+     "Bir superlative kullan (the best, the most…)",
+     "Bir şehir öner ve nedenini söyle"
+    ]
+   }
+  },
+  {
+   "title": "Sağlık",
+   "desc": "Vücut, rahatsızlıklar ve should",
+   "color": "#FF5A5F",
+   "guide": "## Kendini nasıl hissediyorsun?\nBu ünitede vücudu, rahatsızlıkları ve tavsiye vermek için **should / shouldn't** kalıbını öğreneceksin.\n\n## Rahatsızlıklar\n*I've got a headache / a stomach ache / a sore throat / a cold / a temperature.*\n*My back hurts. I feel sick.*\n\n## should / shouldn't\nTavsiye vermek için: **should + yalın fiil**\n- *You should drink more water.*\n- *You shouldn't go to school today.*\n- *What should I do?*\n\n> Higo'nun ipucu: Doktora gittiğinde ne zamandır sürdüğünü söylemek için **for** kullan: *I've had a headache for two days.* Bunu B1'de daha detaylı göreceğiz.",
+   "vocab": [
+    [
+     "headache",
+     "baş ağrısı"
+    ],
+    [
+     "stomach ache",
+     "mide ağrısı"
+    ],
+    [
+     "sore throat",
+     "boğaz ağrısı"
+    ],
+    [
+     "cold",
+     "soğuk algınlığı"
+    ],
+    [
+     "temperature",
+     "ateş"
+    ],
+    [
+     "medicine",
+     "ilaç"
+    ],
+    [
+     "rest",
+     "dinlenmek"
+    ],
+    [
+     "hurt",
+     "acımak"
+    ],
+    [
+     "healthy",
+     "sağlıklı"
+    ],
+    [
+     "should",
+     "-meli / -malı"
+    ]
+   ],
+   "vs": [
+    [
+     "I've got a terrible headache.",
+     "Başım çok ağrıyor."
+    ],
+    [
+     "You should rest and drink some tea.",
+     "Dinlenmeli ve biraz çay içmelisin."
+    ],
+    [
+     "My back hurts"
+    ]
+   ],
+   "fill": [
+    [
+     "You ___ see a doctor.",
+     [
+      "should",
+      "shoulds",
+      "should to"
+     ],
+     0
+    ],
+    [
+     "You shouldn't ___ so much coffee.",
+     [
+      "drink",
+      "drinks",
+      "to drink"
+     ],
+     0
+    ],
+    [
+     "I've got a sore ___.",
+     [
+      "head",
+      "throat",
+      "back"
+     ],
+     1
+    ],
+    [
+     "What ___ I do? I can't sleep.",
+     [
+      "should",
+      "do",
+      "am"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Daha çok su içmelisin.",
+     "You should drink more water",
+     [
+      "shoulds",
+      "to"
+     ],
+     []
+    ],
+    [
+     "Ateşim var.",
+     "I've got a temperature",
+     [
+      "have",
+      "fever"
+     ],
+     [
+      "I have a temperature",
+      "I have a fever",
+      "I've got a fever"
+     ]
+    ]
+   ],
+   "err": [
+    "You should eats more vegetables",
+    2,
+    [
+     "eat",
+     "eating",
+     "to eat"
+    ],
+    0,
+    "\"Should\"dan sonra fiil yalın kalır; -s, -ing ya da to almaz: You should eat more vegetables."
+   ],
+   "sp": [
+    [
+     "I don't feel very well.",
+     "Kendimi pek iyi hissetmiyorum."
+    ],
+    [
+     "How long have you had this pain?",
+     "Bu ağrı ne zamandır var?"
+    ],
+    [
+     "You should stay in bed.",
+     "Yatakta kalmalısın."
+    ]
+   ],
+   "dlg": [
+    "Arkadaşın hasta görünüyor.",
+    null,
+    [
+     {
+      "who": "Ella",
+      "text": "I've got a terrible cold and a sore throat."
+     }
+    ],
+    [
+     "Oh no! You should drink hot tea with honey and rest.",
+     "You must should drink tea.",
+     "Drinking tea you."
+    ],
+    0,
+    "Tavsiye için \"You should …\" kullan, sonra yalın fiil."
+   ],
+   "lc": [
+    [
+     "I've got a headache",
+     [
+      "I've got a headache",
+      "I've got a heart ache",
+      "I've got a head cold"
+     ]
+    ],
+    [
+     "You shouldn't run today",
+     [
+      "You shouldn't run today",
+      "You should run today",
+      "You should rest today"
+     ]
+    ]
+   ],
+   "lt": [
+    "You should see a doctor",
+    "My throat hurts"
+   ],
+   "game": "cloze",
+   "story": {
+    "slug": "grandpas-garden",
+    "title": "Grandpa's Garden",
+    "title_tr": "Dedemin Bahçesi",
+    "category": "Günlük Hayat",
+    "summary": "Doktor dedeye yürüyüş öneriyor, ama dede kendi çözümünü buluyor.",
+    "paragraphs": [
+     [
+      "Grandpa Hasan is seventy-two. Last month his back hurt and he felt tired all the time, so he went to the doctor in Kayseri.",
+      "Hasan Dede yetmiş iki yaşında. Geçen ay sırtı ağrıyordu ve sürekli yorgun hissediyordu, bu yüzden Kayseri'de doktora gitti."
+     ],
+     [
+      "\"You should walk every day,\" said the doctor. \"And you shouldn't sit in front of the TV all evening.\"",
+      "\"Her gün yürümelisiniz,\" dedi doktor. \"Ve bütün akşam televizyonun karşısında oturmamalısınız.\""
+     ],
+     [
+      "Grandpa doesn't like walking. \"Walking is boring,\" he told his granddaughter Nil. Nil had an idea. \"Then you should start a garden!\"",
+      "Dede yürümeyi sevmiyor. \"Yürümek sıkıcı,\" dedi torunu Nil'e. Nil'in aklına bir fikir geldi. \"O zaman bir bahçe yapmalısın!\""
+     ],
+     [
+      "Now Grandpa works in his garden every morning. He grows tomatoes and peppers. His back doesn't hurt now and he gives vegetables to all the neighbours.",
+      "Şimdi dede her sabah bahçesinde çalışıyor. Domates ve biber yetiştiriyor. Artık sırtı ağrımıyor ve bütün komşulara sebze veriyor."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "all the time",
+      "sürekli",
+      "He talks all the time."
+     ],
+     [
+      "boring",
+      "sıkıcı",
+      "This film is boring."
+     ],
+     [
+      "grow",
+      "yetiştirmek",
+      "We grow apples."
+     ],
+     [
+      "neighbour",
+      "komşu",
+      "Our neighbours are friendly."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Why did Grandpa go to the doctor?",
+      "options": [
+       "His back hurt",
+       "He broke his arm",
+       "He had a cold"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "truefalse",
+      "q": "Grandpa loves walking.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "What does Grandpa grow?",
+      "options": [
+       "Apples and pears",
+       "Tomatoes and peppers",
+       "Flowers"
+      ],
+      "answer": 1
+     }
+    ]
+   },
+   "talk": "doctor-visit"
+  },
+  {
+   "title": "Yolculuk",
+   "desc": "Ulaşım, will ve anlık kararlar",
+   "color": "#3AB0E6",
+   "guide": "## Yola çıkalım\nBu ünitede ulaşımı, bilet almayı ve **will** ile tahmin ve anlık kararları öğreneceksin.\n\n## will\n**will + yalın fiil**, kısaltması **'ll**, olumsuzu **won't**.\n- Anlık karar: *It's cold. I'll close the window.*\n- Söz ve teklif: *I'll help you with your bag.*\n- Tahmin: *I think it will be a long journey.*\n\n## going to mu, will mi?\n- Önceden yapılmış plan: **going to** → *I'm going to fly to Berlin on Monday.*\n- Konuşma anında karar: **will** → *Oh, the bus is late. I'll take a taxi.*\n\n> Higo'nun ipucu: Bilet alırken **single** tek yön, **return** gidiş-dönüş demektir. Amerikan İngilizcesinde *one-way / round-trip*.",
+   "vocab": [
+    [
+     "ticket",
+     "bilet"
+    ],
+    [
+     "return ticket",
+     "gidiş-dönüş bilet"
+    ],
+    [
+     "platform",
+     "peron"
+    ],
+    [
+     "flight",
+     "uçuş"
+    ],
+    [
+     "passport",
+     "pasaport"
+    ],
+    [
+     "luggage",
+     "bagaj"
+    ],
+    [
+     "delay",
+     "rötar"
+    ],
+    [
+     "departure",
+     "kalkış"
+    ],
+    [
+     "arrival",
+     "varış"
+    ],
+    [
+     "journey",
+     "yolculuk"
+    ]
+   ],
+   "vs": [
+    [
+     "I'll take the next train.",
+     "Bir sonraki trene bineceğim."
+    ],
+    [
+     "Our flight has a two-hour delay.",
+     "Uçuşumuzun iki saat rötarı var."
+    ],
+    [
+     "Can I have a return ticket please"
+    ]
+   ],
+   "fill": [
+    [
+     "The bus is late. I think I ___ walk.",
+     [
+      "'ll",
+      "am",
+      "was"
+     ],
+     0
+    ],
+    [
+     "Don't worry, I ___ tell anyone.",
+     [
+      "won't",
+      "don't",
+      "willn't"
+     ],
+     0
+    ],
+    [
+     "I think it ___ rain tomorrow.",
+     [
+      "will",
+      "is",
+      "does"
+     ],
+     0
+    ],
+    [
+     "Your bag is heavy. I ___ help you.",
+     [
+      "'ll",
+      "'m",
+      "'d to"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Sana yardım edeceğim.",
+     "I'll help you",
+     [
+      "will to",
+      "helps"
+     ],
+     [
+      "I will help you"
+     ]
+    ],
+    [
+     "Tren kaçta kalkıyor?",
+     "What time does the train leave",
+     [
+      "is",
+      "departs"
+     ],
+     [
+      "When does the train leave"
+     ]
+    ]
+   ],
+   "err": [
+    "I will calling you tomorrow",
+    2,
+    [
+     "call",
+     "calls",
+     "called"
+    ],
+    0,
+    "\"Will\"den sonra fiil yalın kalır: I will call you tomorrow."
+   ],
+   "sp": [
+    [
+     "I'd like a return ticket to Ankara, please.",
+     "Ankara'ya gidiş-dönüş bilet istiyorum lütfen."
+    ],
+    [
+     "Which platform does the train leave from?",
+     "Tren hangi perondan kalkıyor?"
+    ],
+    [
+     "Don't worry, I'll be on time.",
+     "Merak etme, zamanında orada olacağım."
+    ]
+   ],
+   "dlg": [
+    "Gişedesin, İzmir treninin kalktığını öğrendin.",
+    null,
+    [
+     {
+      "who": "Clerk",
+      "text": "I'm sorry, the 10:15 train to Izmir just left."
+     }
+    ],
+    [
+     "Oh no. I'll take the next one then. What time is it?",
+     "I am going to take next one yesterday.",
+     "I took the next one."
+    ],
+    0,
+    "Konuşma anında verilen karar için will kullanılır: I'll take the next one."
+   ],
+   "lc": [
+    [
+     "The flight is delayed",
+     [
+      "The flight is delayed",
+      "The flight is delivered",
+      "The fight is delayed"
+     ]
+    ],
+    [
+     "I'll call you later",
+     [
+      "I'll call you later",
+      "I called you later",
+      "I'll call you letter"
+     ]
+    ]
+   ],
+   "lt": [
+    "Where is platform three",
+    "I will carry your bag"
+   ],
+   "game": "listen",
+   "story": {
+    "slug": "the-night-train",
+    "title": "The Night Train",
+    "title_tr": "Gece Treni",
+    "category": "Seyahat",
+    "summary": "Doğu Ekspresi'nde bir gece, beklenmedik bir yol arkadaşlığına dönüşüyor.",
+    "paragraphs": [
+     [
+      "Melis bought a ticket for the Eastern Express from Ankara to Kars. The journey takes more than twenty-four hours, but she wanted to see the snowy mountains.",
+      "Melis Ankara'dan Kars'a Doğu Ekspresi için bilet aldı. Yolculuk yirmi dört saatten fazla sürüyor ama karlı dağları görmek istiyordu."
+     ],
+     [
+      "In her cabin there was an old man with a big bag of oranges. \"Hello,\" he said. \"I'm going to visit my son in Kars. Would you like an orange?\"",
+      "Kompartımanında büyük bir torba portakalı olan yaşlı bir adam vardı. \"Merhaba,\" dedi. \"Kars'taki oğlumu ziyarete gidiyorum. Portakal ister misin?\""
+     ],
+     [
+      "In the middle of the night, the train stopped. \"There is a lot of snow on the tracks,\" said the conductor. \"There will be a long delay.\"",
+      "Gecenin ortasında tren durdu. \"Raylarda çok kar var,\" dedi kondüktör. \"Uzun bir rötar olacak.\""
+     ],
+     [
+      "Melis was worried, but the old man smiled. \"Don't worry. I'll make tea and I'll tell you stories.\" The delay was five hours, but it was the best part of her trip.",
+      "Melis endişelendi ama yaşlı adam gülümsedi. \"Merak etme. Ben çay yaparım, sana hikâyeler anlatırım.\" Rötar beş saat sürdü ama yolculuğunun en güzel kısmıydı."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "cabin",
+      "kompartıman, kabin",
+      "Our cabin was small."
+     ],
+     [
+      "track",
+      "ray",
+      "The train is on track two."
+     ],
+     [
+      "conductor",
+      "kondüktör",
+      "The conductor checked our tickets."
+     ],
+     [
+      "trip",
+      "gezi",
+      "We had a great trip."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where was Melis going?",
+      "options": [
+       "Ankara",
+       "Kars",
+       "Erzurum"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "Why did the train stop?",
+      "options": [
+       "Snow on the tracks",
+       "A broken engine",
+       "A long queue"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "gap",
+      "q": "The delay was ___ hours.",
+      "options": [],
+      "answer": "five",
+      "accept": [
+       "5"
+      ]
+     }
+    ]
+   },
+   "talk": "airport-check-in"
+  },
+  {
+   "title": "Deneyimler",
+   "desc": "Present perfect: ever / never",
+   "color": "#8F7CF8",
+   "guide": "## Hiç … yaptın mı?\nBu ünitede hayat deneyimlerini anlatmak için **present perfect** ile tanışacaksın.\n\n## Present Perfect\n**have / has + fiilin 3. hâli (V3)**\n- *I have been to Rome.*\n- *She has never eaten sushi.*\n- *Have you ever ridden a horse? Yes, I have. / No, I haven't.*\n\n## ever / never\n- **ever**: soruda \"hiç\": *Have you ever …?*\n- **never**: olumlu fiille \"hiç … -medim\": *I've never flown.*\n\n## been mi, gone mı?\n- *He has **been** to Paris.* Gitti ve döndü.\n- *He has **gone** to Paris.* Gitti, şu an orada.\n\n> Higo'nun ipucu: Ne zaman olduğunu söylersen geçmiş zamana geç: *I've been to Rome. I went there in 2022.*",
+   "vocab": [
+    [
+     "ever",
+     "hiç (soruda)"
+    ],
+    [
+     "never",
+     "hiç, asla"
+    ],
+    [
+     "been to",
+     "gitmiş olmak"
+    ],
+    [
+     "tried",
+     "denedi / denemiş"
+    ],
+    [
+     "eaten",
+     "yemiş"
+    ],
+    [
+     "seen",
+     "görmüş"
+    ],
+    [
+     "flown",
+     "uçmuş"
+    ],
+    [
+     "met",
+     "tanışmış"
+    ],
+    [
+     "experience",
+     "deneyim"
+    ],
+    [
+     "once",
+     "bir kez"
+    ]
+   ],
+   "vs": [
+    [
+     "I've never flown in a plane.",
+     "Hiç uçağa binmedim."
+    ],
+    [
+     "Have you ever eaten Japanese food?",
+     "Hiç Japon yemeği yedin mi?"
+    ],
+    [
+     "She has been to London twice"
+    ]
+   ],
+   "fill": [
+    [
+     "Have you ever ___ a famous person?",
+     [
+      "meet",
+      "met",
+      "meeting"
+     ],
+     1
+    ],
+    [
+     "I've ___ been to Africa.",
+     [
+      "ever",
+      "never",
+      "yet"
+     ],
+     1
+    ],
+    [
+     "She ___ visited Paris three times.",
+     [
+      "have",
+      "has",
+      "is"
+     ],
+     1
+    ],
+    [
+     "___ you ever tried rafting?",
+     [
+      "Did",
+      "Have",
+      "Has"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Hiç İstanbul'a gittin mi?",
+     "Have you ever been to Istanbul",
+     [
+      "went",
+      "did"
+     ],
+     []
+    ],
+    [
+     "Bu filmi iki kez izledim.",
+     "I've seen this film twice",
+     [
+      "saw",
+      "watched"
+     ],
+     [
+      "I have seen this film twice",
+      "I've watched this film twice",
+      "I have watched this film twice"
+     ]
+    ]
+   ],
+   "err": [
+    "I have saw that film before",
+    2,
+    [
+     "seen",
+     "see",
+     "seeing"
+    ],
+    0,
+    "Present perfect'te fiilin 3. hâli (V3) kullanılır: see → saw → seen. Doğrusu: I have seen."
+   ],
+   "sp": [
+    [
+     "Have you ever been abroad?",
+     "Hiç yurt dışına çıktın mı?"
+    ],
+    [
+     "I've tried many Turkish dishes.",
+     "Birçok Türk yemeği denedim."
+    ],
+    [
+     "I've never seen snow in Antalya.",
+     "Antalya'da hiç kar görmedim."
+    ]
+   ],
+   "dlg": [
+    "Bir oyunda \"Hiç … yaptın mı?\" soruları soruluyor.",
+    null,
+    [
+     {
+      "who": "Leo",
+      "text": "Have you ever swum in a lake?"
+     }
+    ],
+    [
+     "Yes, I have. I swam in Lake Abant last summer.",
+     "Yes, I did swum.",
+     "Yes, I have swim."
+    ],
+    0,
+    "Kısa cevap present perfect ile, detay (ne zaman) geçmiş zamanla verilir."
+   ],
+   "lc": [
+    [
+     "I've never been to Paris",
+     [
+      "I've never been to Paris",
+      "I've never seen Paris",
+      "I'll never go to Paris"
+     ]
+    ],
+    [
+     "Have you ever met him",
+     [
+      "Have you ever met him",
+      "Have you ever let him",
+      "Did you ever meet him"
+     ]
+    ]
+   ],
+   "lt": [
+    "Have you ever been to Rize",
+    "She has never flown"
+   ],
+   "game": "memory",
+   "story": {
+    "slug": "the-bucket-list",
+    "title": "The Bucket List",
+    "title_tr": "Yapılacaklar Listesi",
+    "category": "Eğlence",
+    "summary": "Yetmiş yaşındaki Nermin Hanım hayatında hiç yapmadığı on şeyin listesini yapıyor.",
+    "paragraphs": [
+     [
+      "Nermin is seventy years old. On her birthday, her grandson Emir asked her a question: \"Grandma, what have you never done?\"",
+      "Nermin yetmiş yaşında. Doğum gününde torunu Emir ona bir soru sordu: \"Babaanne, hiç neler yapmadın?\""
+     ],
+     [
+      "Nermin thought for a long time. Then she wrote a list. \"I've never flown in a plane. I've never seen the sea in winter. I've never eaten sushi.\"",
+      "Nermin uzun süre düşündü. Sonra bir liste yazdı. \"Hiç uçağa binmedim. Kışın denizi hiç görmedim. Hiç suşi yemedim.\""
+     ],
+     [
+      "Emir loved the list. Every month, they did one thing. They have eaten sushi in Istanbul and they have seen the Black Sea in January.",
+      "Emir listeyi çok sevdi. Her ay bir şey yaptılar. İstanbul'da suşi yediler ve ocakta Karadeniz'i gördüler."
+     ],
+     [
+      "Last week Nermin flew for the first time, to Van. \"Have you ever been so happy?\" asked Emir. \"Never,\" she said. \"But the list isn't finished yet!\"",
+      "Geçen hafta Nermin ilk kez uçağa bindi, Van'a. \"Hiç bu kadar mutlu oldun mu?\" diye sordu Emir. \"Hiç,\" dedi. \"Ama liste daha bitmedi!\""
+     ]
+    ],
+    "vocabulary": [
+     [
+      "grandson",
+      "erkek torun",
+      "Her grandson is ten."
+     ],
+     [
+      "list",
+      "liste",
+      "Make a shopping list."
+     ],
+     [
+      "for the first time",
+      "ilk kez",
+      "I saw snow for the first time."
+     ],
+     [
+      "yet",
+      "henüz",
+      "I haven't finished yet."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "How old is Nermin?",
+      "options": [
+       "Sixty",
+       "Seventy",
+       "Eighty"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "Nermin has flown many times.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "Where did Nermin fly last week?",
+      "options": [
+       "Van",
+       "Istanbul",
+       "Izmir"
+      ],
+      "answer": 0
+     }
+    ]
+   },
+   "talk": {
+    "key": "never-have-i-ever",
+    "title": "Hiç … yaptın mı?",
+    "emoji": "🎲",
+    "category": "fun",
+    "cefr_min": "A2",
+    "description": "\"Hiç … yaptın mı?\" oyunu. Deneyimlerini paylaş, Defne'yi şaşırt.",
+    "system_prompt": "You are Defne playing a friendly \"Have you ever…?\" game with the learner. Take turns asking questions with \"Have you ever…?\" and answering with present perfect, then ask one follow-up in the past simple (When? Where? How was it?). A2 level.",
+    "opening_line": "Let's play! I'll start: Have you ever eaten something really strange?",
+    "goals": [
+     "\"Have you ever…?\" ile 2 soru sor",
+     "Present perfect ile bir deneyim anlat",
+     "Geçmiş zamanla bir detay ver (when / where)"
+    ]
+   }
+  },
+  {
+   "title": "Kurallar",
+   "desc": "must / have to ve izinler",
+   "color": "#FF7FB0",
+   "guide": "## Kurallar ve zorunluluklar\nBu ünitede kuralları anlatmayı öğreneceksin: **must, have to, mustn't, don't have to**. A2'nin sonunda **A2 seviye sınavı** var.\n\n## must / have to\n- **must**: konuşanın kendi hissettiği zorunluluk ya da yazılı kural: *I must call my mum. You must wear a seatbelt.*\n- **have to**: dışarıdan gelen zorunluluk: *I have to wear a uniform at school.*\n\n## mustn't ve don't have to\nDikkat, anlamları çok farklı!\n- **mustn't**: yasak: *You mustn't use your phone in the exam.*\n- **don't have to**: gerek yok: *You don't have to come. It's optional.*\n\n> Higo'nun ipucu: Geçmişte **must** yerine **had to** kullanılır: *I had to work late yesterday.*",
+   "vocab": [
+    [
+     "must",
+     "zorunda olmak, -meli"
+    ],
+    [
+     "mustn't",
+     "-memeli (yasak)"
+    ],
+    [
+     "have to",
+     "zorunda olmak"
+    ],
+    [
+     "don't have to",
+     "gerek yok"
+    ],
+    [
+     "rule",
+     "kural"
+    ],
+    [
+     "allowed",
+     "izinli"
+    ],
+    [
+     "uniform",
+     "üniforma"
+    ],
+    [
+     "seatbelt",
+     "emniyet kemeri"
+    ],
+    [
+     "quiet",
+     "sessiz"
+    ],
+    [
+     "on time",
+     "zamanında"
+    ]
+   ],
+   "vs": [
+    [
+     "You must wear a seatbelt in the car.",
+     "Arabada emniyet kemeri takmalısın."
+    ],
+    [
+     "We don't have to wear a uniform on Fridays.",
+     "Cuma günleri üniforma giymek zorunda değiliz."
+    ],
+    [
+     "You mustn't run in the corridor"
+    ]
+   ],
+   "fill": [
+    [
+     "You ___ smoke in the hospital.",
+     [
+      "mustn't",
+      "don't have to",
+      "must"
+     ],
+     0
+    ],
+    [
+     "It's Saturday. I ___ get up early.",
+     [
+      "don't have to",
+      "mustn't",
+      "must"
+     ],
+     0
+    ],
+    [
+     "She ___ wear glasses to read.",
+     [
+      "has to",
+      "have to",
+      "must to"
+     ],
+     0
+    ],
+    [
+     "Yesterday I ___ work until nine.",
+     [
+      "must",
+      "had to",
+      "have to"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Zamanında gelmelisin.",
+     "You must be on time",
+     [
+      "have",
+      "to"
+     ],
+     [
+      "You have to be on time"
+     ]
+    ],
+    [
+     "Burada fotoğraf çekmek yasak.",
+     "You mustn't take photos here",
+     [
+      "don't",
+      "have"
+     ],
+     [
+      "You must not take photos here"
+     ]
+    ]
+   ],
+   "err": [
+    "Yesterday I must work until nine",
+    2,
+    [
+     "had to",
+     "have to",
+     "must to"
+    ],
+    0,
+    "\"Must\"ın geçmiş hâli yoktur; geçmişteki zorunluluk için \"had to\" kullanılır: Yesterday I had to work until nine."
+   ],
+   "sp": [
+    [
+     "Do I have to pay now?",
+     "Şimdi ödemek zorunda mıyım?"
+    ],
+    [
+     "You don't have to bring anything.",
+     "Bir şey getirmek zorunda değilsin."
+    ],
+    [
+     "We must be quiet in the library.",
+     "Kütüphanede sessiz olmalıyız."
+    ]
+   ],
+   "dlg": [
+    "Yeni bir spor salonuna kaydoluyorsun.",
+    null,
+    [
+     {
+      "who": "Receptionist",
+      "text": "Any questions about the gym rules?"
+     }
+    ],
+    [
+     "Do I have to bring my own towel?",
+     "I must to bring towel?",
+     "Have I to bring towel?"
+    ],
+    0,
+    "Bir zorunluluğu sormak için \"Do I have to …?\" kalıbı kullanılır."
+   ],
+   "lc": [
+    [
+     "You mustn't park here",
+     [
+      "You mustn't park here",
+      "You must park here",
+      "You mustn't pack here"
+     ]
+    ],
+    [
+     "We don't have to hurry",
+     [
+      "We don't have to hurry",
+      "We have to hurry",
+      "We don't have to worry"
+     ]
+    ]
+   ],
+   "lt": [
+    "You must wear a seatbelt",
+    "I had to work late"
+   ],
+   "game": "kelimle",
+   "story": "the-interview-at-the-cafe",
+   "talk": {
+    "key": "new-job-rules",
+    "title": "İlk iş günü",
+    "emoji": "🧑‍🍳",
+    "category": "career",
+    "cefr_min": "A2",
+    "description": "Bir otelde yaz işine başladın. Müdürün kuralları anlatıyor, sen de soru soruyorsun.",
+    "system_prompt": "You are Mrs Taylor, the manager of a hotel in Fethiye where the learner starts a summer job. Explain a few rules with must / have to / mustn't / don't have to (uniform, hours, phones, breaks) and answer their questions. Encourage them to ask \"Do I have to…?\". A2 level.",
+    "opening_line": "Welcome to the team! Before you start, let me tell you a few rules. Any questions so far?",
+    "goals": [
+     "\"Do I have to…?\" ile bir soru sor",
+     "mustn't ile bir yasağı tekrar et",
+     "don't have to ile bir şeyin gerekmediğini söyle"
+    ]
+   },
+   "checkpoint": true
+  }
+ ]
+}

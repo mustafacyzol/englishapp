@@ -106,10 +106,11 @@ export interface PathLesson {
   id: number
   title: string
   skill: Skill
-  kind: 'lesson' | 'story' | 'ai_talk' | 'checkpoint'
+  kind: 'lesson' | 'story' | 'ai_talk' | 'checkpoint' | 'words'
   xp_reward: number
   is_premium: boolean
   premium_locked: boolean
+  meta?: { game?: string | null } | null
   story_id: number | null
   story?: { id: number; slug: string } | null
   scenario_key: string | null

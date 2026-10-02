@@ -54,7 +54,7 @@ export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolea
         <div className="flex gap-3 px-4 pb-4">
           <AnimatePresence mode="popLayout">
             <motion.div key={`${avatar}-${frame}`} className="-mt-9 shrink-0" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 380, damping: 22 }}>
-              <UserAvatar name={user.name} avatar={avatar} frame={frame} className="size-[72px] border-4 border-card" rounded="rounded-[24px]" />
+              <UserAvatar name={user.name} avatar={avatar} frame={frame} className="size-[72px] rounded-full drop-shadow-md" rounded="rounded-full" />
             </motion.div>
           </AnimatePresence>
           {/* name and bio sit on the card, below the cover, so any cover stays readable */}

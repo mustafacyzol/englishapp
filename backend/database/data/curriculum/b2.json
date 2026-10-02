@@ -1,0 +1,2080 @@
+{
+ "slug": "b2-ileri",
+ "title": "B2 · Akıcılık",
+ "cefr_level": "B2",
+ "color": "#8F7CF8",
+ "description": "Fikirlerini savun, tahminde bulun, akademik metinleri oku. YDS, YDT ve YÖKDİL için sağlam bir temel.",
+ "units": [
+  {
+   "title": "Keşke Olsaydı",
+   "desc": "Third conditional ve geçmişle ilgili pişmanlıklar",
+   "color": "#8F7CF8",
+   "guide": "## Geçmişi değiştirebilseydik\nBu ünitede geçmişteki gerçekleşmemiş durumları **third conditional**, **wish + past perfect** ve **should have** ile konuşacağız.\n\n## Third conditional\n**If + past perfect, would have + V3**\n*If I had left earlier, I wouldn't have missed the train.* (Erken çıkmadım, treni kaçırdım.)\n\n## Mixed conditional\nGeçmişteki bir koşulun bugünkü sonucu:\n*If I had studied medicine, I would be a doctor now.*\n\n## wish / should have\n- *I wish I had listened to you.* (Keşke seni dinleseydim.)\n- *You should have told me.* (Bana söylemeliydin.)\n- *I shouldn't have eaten so much.*\n\n> Higo'nun ipucu: Konuşmada **would have** çoğu zaman **would've** gibi kısalır, kulağa \"would of\" gibi gelir. Yazıda asla \"of\" yazma.",
+   "vocab": [
+    [
+     "regret",
+     "pişmanlık, pişman olmak"
+    ],
+    [
+     "opportunity",
+     "fırsat"
+    ],
+    [
+     "miss",
+     "kaçırmak"
+    ],
+    [
+     "consequence",
+     "sonuç"
+    ],
+    [
+     "otherwise",
+     "aksi takdirde"
+    ],
+    [
+     "hindsight",
+     "sonradan anlama"
+    ],
+    [
+     "decision",
+     "karar"
+    ],
+    [
+     "blame",
+     "suçlamak"
+    ],
+    [
+     "avoid",
+     "önlemek"
+    ],
+    [
+     "lesson",
+     "ders"
+    ]
+   ],
+   "vs": [
+    [
+     "If I had known, I would have helped you.",
+     "Bilseydim sana yardım ederdim."
+    ],
+    [
+     "I wish I had studied harder at school.",
+     "Keşke okulda daha çok çalışsaydım."
+    ],
+    [
+     "You should have called me earlier"
+    ]
+   ],
+   "fill": [
+    [
+     "If we ___ the map, we wouldn't have got lost.",
+     [
+      "had checked",
+      "checked",
+      "would check"
+     ],
+     0
+    ],
+    [
+     "She would have come if you ___ her.",
+     [
+      "invited",
+      "had invited",
+      "have invited"
+     ],
+     1
+    ],
+    [
+     "I wish I ___ that email.",
+     [
+      "hadn't sent",
+      "didn't send",
+      "wouldn't send"
+     ],
+     0
+    ],
+    [
+     "If I had taken the job, I ___ in London now.",
+     [
+      "would live",
+      "would have lived",
+      "will live"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Daha erken çıksaydık treni kaçırmazdık.",
+     "If we had left earlier, we wouldn't have missed the train",
+     [
+      "would leave",
+      "didn't"
+     ],
+     [
+      "If we had left earlier we wouldn't have missed the train",
+      "If we had left earlier, we would not have missed the train"
+     ]
+    ],
+    [
+     "Bana söylemeliydin.",
+     "You should have told me",
+     [
+      "said",
+      "must"
+     ],
+     [
+      "You should've told me"
+     ]
+    ]
+   ],
+   "err": [
+    "If I knew about the party I would have come",
+    2,
+    [
+     "had known",
+     "would know",
+     "have known"
+    ],
+    0,
+    "Geçmişteki gerçek dışı koşulda \"if\" kısmında past perfect kullanılır: If I had known about the party, I would have come."
+   ],
+   "sp": [
+    [
+     "If I'd known about the party, I would have come.",
+     "Partiyi bilseydim gelirdim."
+    ],
+    [
+     "I shouldn't have said that.",
+     "Bunu söylememeliydim."
+    ],
+    [
+     "What would you have done in my situation?",
+     "Benim yerimde olsan ne yapardın?"
+    ]
+   ],
+   "dlg": [
+    "Arkadaşın sınavı kaçırdı ve çok üzgün.",
+    null,
+    [
+     {
+      "who": "Arda",
+      "text": "I overslept and missed the exam. I can't believe it."
+     }
+    ],
+    [
+     "That's awful. If you had set two alarms, it wouldn't have happened, but you can retake it in June.",
+     "If you set alarm you will not miss.",
+     "You should set alarm yesterday."
+    ],
+    0,
+    "Geçmiş için gerçek dışı koşul: If you had …, it wouldn't have …"
+   ],
+   "lc": [
+    [
+     "If I'd known, I would have come",
+     [
+      "If I'd known, I would have come",
+      "If I know, I will come",
+      "If I'd known, I would come"
+     ]
+    ],
+    [
+     "You should've told me",
+     [
+      "You should've told me",
+      "You should tell me",
+      "You should've sold me"
+     ]
+    ]
+   ],
+   "lt": [
+    "I wish I had listened to you",
+    "It would have been better"
+   ],
+   "game": "cloze",
+   "story": {
+    "slug": "the-missed-flight",
+    "title": "The Missed Flight",
+    "title_tr": "Kaçan Uçuş",
+    "category": "Seyahat",
+    "summary": "Kaçırılan bir uçuş, Arda'nın hayatını beklenmedik şekilde değiştiriyor.",
+    "paragraphs": [
+     [
+      "Five years ago, Arda missed a flight from Istanbul to Amsterdam. If the taxi hadn't got stuck in traffic on the bridge, he would have arrived on time.",
+      "Beş yıl önce Arda İstanbul'dan Amsterdam'a giden bir uçağı kaçırdı. Taksi köprüde trafiğe takılmasaydı zamanında varacaktı."
+     ],
+     [
+      "He was furious. He had an important meeting the next morning, and he blamed himself. \"I should have left an hour earlier,\" he kept saying at the airport.",
+      "Çok sinirlendi. Ertesi sabah önemli bir toplantısı vardı ve kendini suçladı. Havalimanında \"Bir saat erken çıkmalıydım,\" deyip duruyordu."
+     ],
+     [
+      "While he was waiting for the next flight, he started talking to a woman who had also missed the same plane. Her name was Leyla, and she was a landscape architect from Bursa.",
+      "Bir sonraki uçağı beklerken aynı uçağı kaçırmış olan bir kadınla konuşmaya başladı. Adı Leyla'ydı ve Bursalı bir peyzaj mimarıydı."
+     ],
+     [
+      "They talked for six hours. Today, they are married and they have a daughter. \"If that taxi had been faster,\" Arda tells his friends, \"I would never have met her. I wish I could thank that traffic jam.\"",
+      "Altı saat konuştular. Bugün evliler ve bir kızları var. Arda arkadaşlarına \"O taksi daha hızlı olsaydı onunla asla tanışmazdım,\" diyor. \"Keşke o trafik sıkışıklığına teşekkür edebilsem.\""
+     ]
+    ],
+    "vocabulary": [
+     [
+      "get stuck",
+      "takılıp kalmak",
+      "We got stuck in the lift."
+     ],
+     [
+      "furious",
+      "öfkeli",
+      "She was furious with me."
+     ],
+     [
+      "blame",
+      "suçlamak",
+      "Don't blame yourself."
+     ],
+     [
+      "traffic jam",
+      "trafik sıkışıklığı",
+      "There was a huge traffic jam."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Why did Arda miss the flight?",
+      "options": [
+       "He overslept",
+       "His taxi got stuck in traffic",
+       "He lost his passport"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "Leyla had also missed the plane.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 0
+     },
+     {
+      "q": "What does Arda wish?",
+      "options": [
+       "That he had left earlier",
+       "That he could thank the traffic jam",
+       "That he had taken the bus"
+      ],
+      "answer": 1
+     }
+    ]
+   },
+   "talk": {
+    "key": "regrets-and-lessons",
+    "title": "Geçmişe bakış",
+    "emoji": "⏪",
+    "category": "daily",
+    "cefr_min": "B2",
+    "description": "Bir koçla geçmiş kararlarını ve onlardan çıkardığın dersleri konuş.",
+    "is_premium": true,
+    "system_prompt": "You are Laura, a thoughtful life coach. Talk with the learner about a past decision they would change, what would have happened if they had chosen differently, and what they learned. Encourage third and mixed conditionals, wish + past perfect and should have. Stay positive. B2 level.",
+    "opening_line": "Let's look back for a moment. Is there a decision you'd make differently if you could go back in time?",
+    "goals": [
+     "Third conditional ile bir cümle kur",
+     "\"I wish I had…\" kullan",
+     "\"should have\" ile bir çıkarım yap"
+    ]
+   }
+  },
+  {
+   "title": "Tahmin ve Çıkarım",
+   "desc": "Modals of deduction: must, might, can't (have)",
+   "color": "#5B6CF0",
+   "guide": "## Dedektif gibi düşün\nBu ünitede kanıta dayanarak **tahmin ve çıkarım** yapmayı öğreneceksin.\n\n## Şimdi için\n- **must**: neredeyse eminim (olumlu): *She must be tired. She's been working all day.*\n- **might / may / could**: belki: *He might be at the gym.*\n- **can't**: imkânsız: *That can't be Ali. He's in Germany.*\n\n## Geçmiş için: modal + have + V3\n- *They **must have left** already. The lights are off.*\n- *She **might have missed** the bus.*\n- *He **can't have seen** the message. He didn't reply.*\n\n> Higo'nun ipucu: Olumsuz kesin çıkarımda **mustn't** değil **can't** kullanılır. ~~He mustn't be at home~~ → *He can't be at home.*",
+   "vocab": [
+    [
+     "evidence",
+     "kanıt"
+    ],
+    [
+     "clue",
+     "ipucu"
+    ],
+    [
+     "suspect",
+     "şüpheli"
+    ],
+    [
+     "probably",
+     "muhtemelen"
+    ],
+    [
+     "certainly",
+     "kesinlikle"
+    ],
+    [
+     "footprint",
+     "ayak izi"
+    ],
+    [
+     "witness",
+     "tanık"
+    ],
+    [
+     "assume",
+     "varsaymak"
+    ],
+    [
+     "conclusion",
+     "sonuç"
+    ],
+    [
+     "mystery",
+     "gizem"
+    ]
+   ],
+   "vs": [
+    [
+     "She must have forgotten about the meeting.",
+     "Toplantıyı unutmuş olmalı."
+    ],
+    [
+     "That can't be true.",
+     "Bu doğru olamaz."
+    ],
+    [
+     "They might have taken the wrong road"
+    ]
+   ],
+   "fill": [
+    [
+     "The lights are off. They ___ gone to bed.",
+     [
+      "must have",
+      "can't have",
+      "should"
+     ],
+     0
+    ],
+    [
+     "He ___ be at work. It's Sunday.",
+     [
+      "can't",
+      "must",
+      "might have"
+     ],
+     0
+    ],
+    [
+     "I'm not sure where Ece is. She ___ be in the library.",
+     [
+      "might",
+      "must",
+      "can't"
+     ],
+     0
+    ],
+    [
+     "You ___ seen Ali yesterday. He was in Paris.",
+     [
+      "can't have",
+      "must have",
+      "might"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Anahtarlarımı otobüste unutmuş olmalıyım.",
+     "I must have left my keys on the bus",
+     [
+      "should",
+      "forgot"
+     ],
+     [
+      "I must have forgotten my keys on the bus"
+     ]
+    ],
+    [
+     "Bu mesajı görmemiş olabilir.",
+     "He might not have seen this message",
+     [
+      "can't",
+      "saw"
+     ],
+     [
+      "She might not have seen this message",
+      "He may not have seen this message",
+      "She may not have seen this message"
+     ]
+    ]
+   ],
+   "err": [
+    "He mustn't be at home, his car isn't here",
+    1,
+    [
+     "can't",
+     "should",
+     "might"
+    ],
+    0,
+    "Kesin olumsuz çıkarım için \"can't\" kullanılır; \"mustn't\" yasak anlamı taşır: He can't be at home."
+   ],
+   "sp": [
+    [
+     "Someone must have opened the window.",
+     "Biri pencereyi açmış olmalı."
+    ],
+    [
+     "It can't have been easy for her.",
+     "Onun için kolay olmamış olmalı."
+    ],
+    [
+     "They might be stuck in traffic.",
+     "Trafiğe takılmış olabilirler."
+    ]
+   ],
+   "dlg": [
+    "Ofise geldin, kahve makinesinin yanında su birikmiş.",
+    null,
+    [
+     {
+      "who": "Colleague",
+      "text": "What do you think happened here?"
+     }
+    ],
+    [
+     "Someone must have knocked the water bottle over. Look, it's empty.",
+     "Somebody mustn't knock the bottle.",
+     "It can be someone did it."
+    ],
+    0,
+    "Kanıta dayalı geçmiş çıkarım: must have + V3."
+   ],
+   "lc": [
+    [
+     "She must have forgotten",
+     [
+      "She must have forgotten",
+      "She must forget",
+      "She might have forgotten"
+     ]
+    ],
+    [
+     "That can't be true",
+     [
+      "That can't be true",
+      "That can be true",
+      "That can't be through"
+     ]
+    ]
+   ],
+   "lt": [
+    "They must have left early",
+    "He can't have seen us"
+   ],
+   "game": "choice",
+   "story": "the-lighthouse-keepers-letter",
+   "talk": {
+    "key": "mystery-detective",
+    "title": "Dedektif",
+    "emoji": "🔍",
+    "category": "fun",
+    "cefr_min": "B2",
+    "description": "Bir otelde değerli bir tablo kayboldu. İpuçlarıyla suçluyu bul.",
+    "is_premium": true,
+    "system_prompt": "You are Inspector Holloway. A valuable painting has disappeared from a hotel in Kapadokya. Give the learner clues one at a time (a wet umbrella, a broken key card, a guest who left early) and ask them to make deductions. Encourage must / might / can't (have + V3). Reveal the solution only after several good deductions. B2 level.",
+    "opening_line": "Good evening. The painting disappeared between midnight and 6 am. Our first clue: the window was open, but it rained all night and the floor is dry. What does that tell you?",
+    "goals": [
+     "must have + V3 ile bir çıkarım yap",
+     "can't have ile bir ihtimali ele",
+     "might ile bir olasılık öner"
+    ]
+   }
+  },
+  {
+   "title": "Bilim ve Teknoloji",
+   "desc": "İleri passive ve have something done",
+   "color": "#22B5C0",
+   "guide": "## Bilimsel dil\nBilim ve teknoloji metinlerinde edilgen yapı her yerdedir. Bu ünitede **ileri passive** yapılarını ve **have something done** kalıbını göreceksin. Bunlar YDS ve YÖKDİL okuma parçalarında çok sık çıkar.\n\n## Passive + modal\n*The results **can be explained** by… · The data **must be checked**.*\n\n## It is said / believed that…\n*It is believed that the first computer was built in 1945.*\n*The city **is said to be** the oldest in the world.*\n\n## have / get something done\nBir işi başkasına yaptırmak:\n*I had my phone repaired. She's getting her hair cut tomorrow.*\n\n> Higo'nun ipucu: Akademik metinde \"we, I\" yerine passive kullanılır: *The samples were analysed…* Okurken önce **ne yapıldığını** bul, kimin yaptığını sonra düşün.",
+   "vocab": [
+    [
+     "research",
+     "araştırma"
+    ],
+    [
+     "data",
+     "veri"
+    ],
+    [
+     "experiment",
+     "deney"
+    ],
+    [
+     "device",
+     "cihaz"
+    ],
+    [
+     "invention",
+     "icat"
+    ],
+    [
+     "artificial intelligence",
+     "yapay zekâ"
+    ],
+    [
+     "develop",
+     "geliştirmek"
+    ],
+    [
+     "replace",
+     "yerini almak"
+    ],
+    [
+     "reliable",
+     "güvenilir"
+    ],
+    [
+     "significant",
+     "önemli, kayda değer"
+    ]
+   ],
+   "vs": [
+    [
+     "It is believed that the device was invented in China.",
+     "Cihazın Çin'de icat edildiğine inanılıyor."
+    ],
+    [
+     "I need to have my laptop repaired.",
+     "Dizüstü bilgisayarımı tamir ettirmem gerekiyor."
+    ],
+    [
+     "The experiment must be repeated"
+    ]
+   ],
+   "fill": [
+    [
+     "The data ___ before the report is published.",
+     [
+      "must be checked",
+      "must check",
+      "must checked"
+     ],
+     0
+    ],
+    [
+     "It ___ that the virus spread from bats.",
+     [
+      "is thought",
+      "thinks",
+      "is thinking"
+     ],
+     0
+    ],
+    [
+     "I'm having my car ___ tomorrow.",
+     [
+      "service",
+      "serviced",
+      "servicing"
+     ],
+     1
+    ],
+    [
+     "The city is said ___ over 3,000 years old.",
+     [
+      "being",
+      "to be",
+      "be"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Telefonumu tamir ettirdim.",
+     "I had my phone repaired",
+     [
+      "repair",
+      "made"
+     ],
+     [
+      "I got my phone repaired",
+      "I've had my phone repaired"
+     ]
+    ],
+    [
+     "Bu cihazın 2030'a kadar yaygınlaşması bekleniyor.",
+     "This device is expected to become common by 2030",
+     [
+      "expects",
+      "will"
+     ],
+     [
+      "This device is expected to be common by 2030"
+     ]
+    ]
+   ],
+   "err": [
+    "I'm having my car repair tomorrow",
+    4,
+    [
+     "repaired",
+     "repairing",
+     "to repair"
+    ],
+    0,
+    "\"Have something done\" kalıbında fiilin 3. hâli kullanılır: I'm having my car repaired tomorrow. (Arabayı ben tamir etmiyorum, tamir ettiriyorum.)"
+   ],
+   "sp": [
+    [
+     "The results were published in a scientific journal.",
+     "Sonuçlar bilimsel bir dergide yayımlandı."
+    ],
+    [
+     "It is said that robots will replace many jobs.",
+     "Robotların birçok işin yerini alacağı söyleniyor."
+    ],
+    [
+     "I'm getting my eyes tested next week.",
+     "Gelecek hafta gözlerimi test ettireceğim."
+    ]
+   ],
+   "dlg": [
+    "Bir bilim fuarında projeni anlatıyorsun.",
+    null,
+    [
+     {
+      "who": "Judge",
+      "text": "How was the data collected?"
+     }
+    ],
+    [
+     "The data was collected from 200 students and then analysed with a simple program.",
+     "We collect data students and analyse.",
+     "Data collecting by students."
+    ],
+    0,
+    "Yöntem anlatırken passive kullanmak bilimsel ve nesnel durur."
+   ],
+   "lc": [
+    [
+     "It is believed to be safe",
+     [
+      "It is believed to be safe",
+      "It is believing to be safe",
+      "It was believed to be safe"
+     ]
+    ],
+    [
+     "I had my phone repaired",
+     [
+      "I had my phone repaired",
+      "I had my phone replaced",
+      "I have my phone repaired"
+     ]
+    ]
+   ],
+   "lt": [
+    "The results were published last year",
+    "I need to have my car fixed"
+   ],
+   "game": "swipe",
+   "story": "the-algorithm-that-learned-to-wait",
+   "talk": {
+    "key": "tech-ethics",
+    "title": "Teknoloji ve etik",
+    "emoji": "🤖",
+    "category": "fun",
+    "cefr_min": "B2",
+    "description": "Yapay zekânın okullarda kullanılması hakkında bir panelde konuşuyorsun.",
+    "is_premium": true,
+    "system_prompt": "You are Dr Lin, a moderator on a student panel about artificial intelligence in schools. Ask the learner for their opinion, challenge them with counter-arguments (cheating, privacy, jobs) and ask for examples. Encourage advanced passive forms (it is believed that…, should be used…) and precise vocabulary. B2 level.",
+    "opening_line": "Welcome to the panel. Some people say AI should be banned from classrooms. What's your view?",
+    "goals": [
+     "Bir passive + modal kullan (should be…)",
+     "\"It is said / believed that…\" kalıbını kullan",
+     "Bir karşı argümana cevap ver"
+    ]
+   }
+  },
+  {
+   "title": "Çevre",
+   "desc": "Future continuous, future perfect ve kalıp sözler",
+   "color": "#22B573",
+   "guide": "## 2050'de dünya\nBu ünitede çevre konularını konuşurken **future continuous** ve **future perfect** kullanacaksın.\n\n## Future continuous\n**will be + fiil-ing**: gelecekte belli bir anda sürüyor olacak eylem.\n*This time next year, I'll be studying in Ankara.*\n\n## Future perfect\n**will have + V3**: gelecekte belli bir zamana kadar tamamlanmış olacak eylem.\n*By 2030, the city will have planted a million trees.*\n*By the time you arrive, we'll have finished dinner.*\n\n## Çevre kalıpları (collocations)\n**reduce waste** · **renewable energy** · **carbon footprint** · **climate change** · **endangered species** · **take action**\n\n> Higo'nun ipucu: YDS'de **by + zaman** ifadesi gördüğünde future perfect ya da past perfect seçeneğini kontrol et. Çoğu zaman cevap oradadır.",
+   "vocab": [
+    [
+     "climate change",
+     "iklim değişikliği"
+    ],
+    [
+     "pollution",
+     "kirlilik"
+    ],
+    [
+     "renewable",
+     "yenilenebilir"
+    ],
+    [
+     "recycle",
+     "geri dönüştürmek"
+    ],
+    [
+     "waste",
+     "atık"
+    ],
+    [
+     "drought",
+     "kuraklık"
+    ],
+    [
+     "species",
+     "tür"
+    ],
+    [
+     "emission",
+     "salınım"
+    ],
+    [
+     "sustainable",
+     "sürdürülebilir"
+    ],
+    [
+     "reduce",
+     "azaltmak"
+    ]
+   ],
+   "vs": [
+    [
+     "By 2040, many cities will have banned petrol cars.",
+     "2040'a kadar birçok şehir benzinli arabaları yasaklamış olacak."
+    ],
+    [
+     "This time tomorrow, we'll be planting trees in the park.",
+     "Yarın bu saatte parkta ağaç dikiyor olacağız."
+    ],
+    [
+     "We must reduce plastic waste"
+    ]
+   ],
+   "fill": [
+    [
+     "By 2030, the factory ___ its emissions by half.",
+     [
+      "will have reduced",
+      "will reduce",
+      "reduces"
+     ],
+     0
+    ],
+    [
+     "At 10 am tomorrow, I ___ an exam.",
+     [
+      "'ll be taking",
+      "'ll have taken",
+      "take"
+     ],
+     0
+    ],
+    [
+     "By the time you get here, the film ___.",
+     [
+      "will have started",
+      "will start",
+      "starts"
+     ],
+     0
+    ],
+    [
+     "Solar energy is a ___ source of energy.",
+     [
+      "renewable",
+      "renewing",
+      "renew"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "2050'ye kadar dünya nüfusu 10 milyara ulaşmış olacak.",
+     "By 2050, the world population will have reached 10 billion",
+     [
+      "will reach",
+      "until"
+     ],
+     [
+      "By 2050 the world population will have reached 10 billion"
+     ]
+    ],
+    [
+     "Gelecek yıl bu zamanlar Kanada'da çalışıyor olacağım.",
+     "This time next year, I'll be working in Canada",
+     [
+      "will work",
+      "am"
+     ],
+     [
+      "This time next year I will be working in Canada"
+     ]
+    ]
+   ],
+   "err": [
+    "By next year we will finish the project",
+    5,
+    [
+     "have finished",
+     "finished",
+     "be finish"
+    ],
+    0,
+    "\"By next year\" gelecekte bir noktaya kadar tamamlanmayı anlatır; future perfect gerekir: we will have finished the project."
+   ],
+   "sp": [
+    [
+     "We need to switch to renewable energy.",
+     "Yenilenebilir enerjiye geçmemiz gerekiyor."
+    ],
+    [
+     "By 2030, we'll have cut our emissions in half.",
+     "2030'a kadar salınımlarımızı yarıya indirmiş olacağız."
+    ],
+    [
+     "Recycling alone is not enough to stop climate change.",
+     "İklim değişikliğini durdurmak için tek başına geri dönüşüm yeterli değil."
+    ]
+   ],
+   "dlg": [
+    "Belediye toplantısında bir öneri sunuyorsun.",
+    null,
+    [
+     {
+      "who": "Mayor",
+      "text": "What will your plan have achieved in five years?"
+     }
+    ],
+    [
+     "In five years, we will have planted 50,000 trees and reduced plastic waste by 30 percent.",
+     "In five years we plant trees.",
+     "We will planting trees five years."
+    ],
+    0,
+    "Bir hedefin belli bir zamana kadar tamamlanacağını söylerken future perfect kullanılır."
+   ],
+   "lc": [
+    [
+     "By 2030 we'll have reduced emissions",
+     [
+      "By 2030 we'll have reduced emissions",
+      "By 2030 we'll reduce emissions",
+      "By 2030 we reduced emissions"
+     ]
+    ],
+    [
+     "I'll be working late tonight",
+     [
+      "I'll be working late tonight",
+      "I'll have worked late tonight",
+      "I was working late tonight"
+     ]
+    ]
+   ],
+   "lt": [
+    "We should reduce our waste",
+    "By then we will have finished"
+   ],
+   "game": "search",
+   "story": {
+    "slug": "the-last-bee",
+    "title": "The Last Bee",
+    "title_tr": "Son Arı",
+    "category": "Bilim Kurgu",
+    "summary": "2060'ta, arıların yok olduğu bir dünyada genç bir bilim insanı umut arıyor.",
+    "paragraphs": [
+     [
+      "It is the year 2060. Bees have disappeared from most of the world, and farmers pollinate fruit trees by hand. Nisa is a young scientist working in a laboratory near Bolu.",
+      "Yıl 2060. Arılar dünyanın büyük kısmından yok oldu ve çiftçiler meyve ağaçlarını elle tozlaştırıyor. Nisa, Bolu yakınlarındaki bir laboratuvarda çalışan genç bir bilim insanı."
+     ],
+     [
+      "Her grandmother used to keep bees, and Nisa has always believed that some colonies must have survived somewhere. \"By the end of this year,\" she tells her team, \"we will have searched every valley in the Black Sea region.\"",
+      "Babaannesi eskiden arı yetiştirirdi ve Nisa bazı kolonilerin bir yerlerde hayatta kalmış olması gerektiğine hep inandı. Ekibine \"Bu yılın sonuna kadar Karadeniz bölgesindeki her vadiyi aramış olacağız,\" diyor."
+     ],
+     [
+      "In October, an old shepherd in a remote village hears about the project. He sends a short message: \"Come and see my chestnut trees.\"",
+      "Ekimde uzak bir köydeki yaşlı bir çoban projeyi duyuyor. Kısa bir mesaj gönderiyor: \"Gelin, kestane ağaçlarıma bakın.\""
+     ],
+     [
+      "When Nisa arrives, she hears a sound she has only heard in old videos: a quiet, constant buzzing. A small wild colony has been living in a hollow tree for decades. \"This time next year,\" she whispers, \"we'll be bringing bees back to the whole country.\"",
+      "Nisa vardığında yalnızca eski videolarda duyduğu bir ses duyuyor: sessiz, sürekli bir vızıltı. Küçük, yabani bir koloni onlarca yıldır kovuk bir ağaçta yaşıyormuş. \"Gelecek yıl bu zamanlar,\" diye fısıldıyor, \"bütün ülkeye arıları geri getiriyor olacağız.\""
+     ]
+    ],
+    "vocabulary": [
+     [
+      "pollinate",
+      "tozlaşmak, tozlaştırmak",
+      "Bees pollinate flowers."
+     ],
+     [
+      "survive",
+      "hayatta kalmak",
+      "Only a few plants survived."
+     ],
+     [
+      "remote",
+      "uzak, ıssız",
+      "a remote village"
+     ],
+     [
+      "hollow",
+      "kovuk, içi boş",
+      "a hollow tree"
+     ]
+    ],
+    "questions": [
+     {
+      "q": "How do farmers pollinate trees in 2060?",
+      "options": [
+       "With machines",
+       "By hand",
+       "With birds"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "Who helped Nisa find the colony?",
+      "options": [
+       "Her grandmother",
+       "An old shepherd",
+       "Her team leader"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "The colony had been living in a hollow tree for decades.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 0
+     }
+    ]
+   },
+   "talk": {
+    "key": "climate-panel",
+    "title": "İklim paneli",
+    "emoji": "🌍",
+    "category": "fun",
+    "cefr_min": "B2",
+    "description": "Gençlik iklim zirvesinde şehrin için bir eylem planı savunuyorsun.",
+    "is_premium": true,
+    "system_prompt": "You are Marco, a journalist interviewing the learner at a youth climate summit. Ask what their city will have achieved by 2035, what people will be doing differently, and how realistic their plan is. Push for future perfect, future continuous and topic-specific collocations. B2 level.",
+    "opening_line": "Thanks for joining us. Imagine it's 2035. What will your city have changed by then?",
+    "goals": [
+     "Future perfect ile bir hedef söyle",
+     "Future continuous ile bir cümle kur",
+     "En az iki çevre kalıbı kullan (renewable energy, reduce waste…)"
+    ]
+   }
+  },
+  {
+   "title": "Fikir Savun",
+   "desc": "Bağlaçlar: although, despite, whereas, however",
+   "color": "#FF8A3D",
+   "guide": "## İkna edici konuş ve yaz\nBu ünitede fikirlerini bağlamak ve karşı görüşü kabul edip yine de savunmak için **bağlaçları** kullanacaksın. Bu yapılar YDS ve YDT'nin bağlaç sorularının tam kalbidir.\n\n## Zıtlık\n- **although / even though** + cümle: *Although it was raining, we went out.*\n- **despite / in spite of** + isim ya da -ing: *Despite the rain, we went out. Despite being tired, she finished.*\n- **however** (iki cümle arasında): *The plan is cheap. However, it will take time.*\n- **whereas / while** (karşılaştırma): *I love tea, whereas my sister prefers coffee.*\n\n## Sebep ve sonuç\n**because of / due to** + isim · **therefore / as a result** (cümle başında) · **so that** (amaç)\n\n## Fikir bildirme kalıpları\n*In my view… · It could be argued that… · On the other hand… · To sum up…*\n\n> Higo'nun ipucu: **despite** asla \"of\" ya da cümle almaz: ~~despite of~~, ~~despite it was~~. Cümle gelecekse **despite the fact that** kullan.",
+   "vocab": [
+    [
+     "although",
+     "-e rağmen (cümle)"
+    ],
+    [
+     "despite",
+     "-e rağmen (isim)"
+    ],
+    [
+     "however",
+     "ancak"
+    ],
+    [
+     "whereas",
+     "oysa, -iken"
+    ],
+    [
+     "therefore",
+     "bu nedenle"
+    ],
+    [
+     "argue",
+     "savunmak, tartışmak"
+    ],
+    [
+     "convince",
+     "ikna etmek"
+    ],
+    [
+     "point of view",
+     "bakış açısı"
+    ],
+    [
+     "evidence",
+     "kanıt"
+    ],
+    [
+     "moreover",
+     "üstelik"
+    ]
+   ],
+   "vs": [
+    [
+     "Although the test was hard, most students passed.",
+     "Sınav zor olmasına rağmen öğrencilerin çoğu geçti."
+    ],
+    [
+     "Despite the rain, the concert continued.",
+     "Yağmura rağmen konser devam etti."
+    ],
+    [
+     "Some people love cities whereas others prefer villages"
+    ]
+   ],
+   "fill": [
+    [
+     "___ the traffic, we arrived on time.",
+     [
+      "Although",
+      "Despite",
+      "However"
+     ],
+     1
+    ],
+    [
+     "___ he studied hard, he failed the test.",
+     [
+      "Although",
+      "Despite",
+      "Because of"
+     ],
+     0
+    ],
+    [
+     "The flat is small. ___, it is very bright.",
+     [
+      "However",
+      "Although",
+      "Despite"
+     ],
+     0
+    ],
+    [
+     "My brother is quiet, ___ I talk all the time.",
+     [
+      "whereas",
+      "despite",
+      "therefore"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Yorgun olmasına rağmen işini bitirdi.",
+     "Although she was tired, she finished her work",
+     [
+      "despite",
+      "but"
+     ],
+     [
+      "Despite being tired, she finished her work",
+      "Even though she was tired, she finished her work"
+     ]
+    ],
+    [
+     "Kötü hava nedeniyle uçuş iptal edildi.",
+     "The flight was cancelled due to bad weather",
+     [
+      "because",
+      "for"
+     ],
+     [
+      "The flight was cancelled because of bad weather",
+      "The flight was cancelled because of the bad weather"
+     ]
+    ]
+   ],
+   "err": [
+    "Despite it was raining we played football",
+    0,
+    [
+     "Although",
+     "However",
+     "Because of"
+    ],
+    0,
+    "\"Despite\" arkasından cümle almaz, isim ya da -ing alır. Cümle geliyorsa \"Although\" kullan: Although it was raining, we played football. (Ya da: Despite the rain…)"
+   ],
+   "sp": [
+    [
+     "In my view, schools should start later.",
+     "Bence okullar daha geç başlamalı."
+    ],
+    [
+     "It could be argued that social media connects people.",
+     "Sosyal medyanın insanları bir araya getirdiği savunulabilir."
+    ],
+    [
+     "I see your point; however, I don't agree.",
+     "Ne demek istediğini anlıyorum, ancak katılmıyorum."
+    ]
+   ],
+   "dlg": [
+    "Münazarada rakibin bir argüman sundu.",
+    null,
+    [
+     {
+      "who": "Opponent",
+      "text": "Homework is useless. Students learn everything in class."
+     }
+    ],
+    [
+     "I see your point. However, research shows that regular practice at home improves long-term memory.",
+     "No, you are wrong totally.",
+     "Although homework, it is useful despite."
+    ],
+    0,
+    "Önce karşı görüşü kabul et (I see your point), sonra however ile kendi kanıtını sun."
+   ],
+   "lc": [
+    [
+     "Despite the rain, we went out",
+     [
+      "Despite the rain, we went out",
+      "Despite of the rain, we went out",
+      "Because of the rain, we went out"
+     ]
+    ],
+    [
+     "Although it was late, she called",
+     [
+      "Although it was late, she called",
+      "Already it was late, she called",
+      "Although it was late, she cold"
+     ]
+    ]
+   ],
+   "lt": [
+    "However I do not agree",
+    "Despite the traffic we arrived on time"
+   ],
+   "game": "truefalse",
+   "story": {
+    "slug": "the-school-debate",
+    "title": "The School Debate",
+    "title_tr": "Okul Münazarası",
+    "category": "Okul",
+    "summary": "Utangaç Kerem, münazara finalinde en zor argümanı savunmak zorunda kalıyor.",
+    "paragraphs": [
+     [
+      "Kerem had never enjoyed speaking in public. Although he was one of the best students in his school in Trabzon, he always sat at the back and said nothing.",
+      "Kerem topluluk önünde konuşmaktan hiç hoşlanmamıştı. Trabzon'daki okulunun en iyi öğrencilerinden biri olmasına rağmen hep arkada oturur ve hiçbir şey söylemezdi."
+     ],
+     [
+      "Despite his fears, his English teacher put him in the debate team. In the final, his team had to argue that \"Mobile phones should be allowed in classrooms\", which Kerem personally disagreed with.",
+      "Korkularına rağmen İngilizce öğretmeni onu münazara takımına aldı. Finalde takımı \"Cep telefonlarına sınıfta izin verilmeli\" görüşünü savunmak zorundaydı; Kerem ise kişisel olarak buna katılmıyordu."
+     ],
+     [
+      "He prepared carefully. Whereas his teammates focused on freedom, Kerem collected evidence: studies on learning apps, examples of schools that had used phones successfully, and clear rules to prevent cheating.",
+      "Dikkatle hazırlandı. Takım arkadaşları özgürlüğe odaklanırken Kerem kanıt topladı: öğrenme uygulamaları üzerine araştırmalar, telefonları başarıyla kullanmış okul örnekleri ve kopyayı önleyecek açık kurallar."
+     ],
+     [
+      "When he finally spoke, his voice was shaking. However, his arguments were so well organised that the judges gave his team the cup. \"I still don't agree with what I said,\" he told his teacher afterwards, \"but now I know I can convince people.\"",
+      "Sonunda konuştuğunda sesi titriyordu. Ancak argümanları o kadar düzenliydi ki jüri kupayı onun takımına verdi. Sonra öğretmenine \"Söylediklerime hâlâ katılmıyorum,\" dedi, \"ama artık insanları ikna edebildiğimi biliyorum.\""
+     ]
+    ],
+    "vocabulary": [
+     [
+      "in public",
+      "topluluk önünde",
+      "I hate speaking in public."
+     ],
+     [
+      "disagree",
+      "katılmamak",
+      "I disagree with you."
+     ],
+     [
+      "focus on",
+      "odaklanmak",
+      "Focus on the main idea."
+     ],
+     [
+      "shake",
+      "titremek",
+      "My hands were shaking."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Why didn't Kerem like the debate topic?",
+      "options": [
+       "He personally disagreed with it",
+       "It was too easy",
+       "It was about sport"
+      ],
+      "answer": 0
+     },
+     {
+      "q": "What did Kerem focus on?",
+      "options": [
+       "Freedom",
+       "Evidence",
+       "Jokes"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "Kerem's team won the cup.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 0
+     }
+    ]
+   },
+   "talk": "debate-club"
+  },
+  {
+   "title": "Toplum ve Şehir",
+   "desc": "Kibar ifadeler, would rather ve it's time",
+   "color": "#3A6FF7",
+   "guide": "## Toplumu ve şehrini konuş\nBu ünitede toplumsal konuları tartışırken tercih ve öneri bildiren ileri yapıları kullanacaksın.\n\n## would rather / had better\n- **would rather + yalın fiil**: *I'd rather take the metro than drive.*\n- Başkası için: **would rather + kişi + past simple**: *I'd rather you didn't smoke here.*\n- **had better** (uyarı): *You'd better leave now or you'll miss the bus.*\n\n## It's (high) time + past simple\nBir şeyin artık yapılması gerektiğini vurgular:\n*It's time the city built more cycle lanes.*\n\n## Kibar ve dolaylı ifadeler\n- *Could you tell me where the town hall is?* (soru düzeni bozulur)\n- *I was wondering if you could help me.*\n- *Would you mind explaining that again?*\n\n> Higo'nun ipucu: Dolaylı sorularda yardımcı fiil öne gelmez: ~~Could you tell me where is the station?~~ → *where the station is*.",
+   "vocab": [
+    [
+     "community",
+     "topluluk"
+    ],
+    [
+     "public transport",
+     "toplu taşıma"
+    ],
+    [
+     "council",
+     "belediye meclisi"
+    ],
+    [
+     "resident",
+     "sakin"
+    ],
+    [
+     "volunteer",
+     "gönüllü"
+    ],
+    [
+     "inequality",
+     "eşitsizlik"
+    ],
+    [
+     "affordable",
+     "uygun fiyatlı"
+    ],
+    [
+     "housing",
+     "konut"
+    ],
+    [
+     "crowded",
+     "kalabalık"
+    ],
+    [
+     "improve",
+     "iyileştirmek"
+    ]
+   ],
+   "vs": [
+    [
+     "I'd rather walk than take a crowded bus.",
+     "Kalabalık bir otobüse binmektense yürümeyi tercih ederim."
+    ],
+    [
+     "It's time the council built more parks.",
+     "Belediyenin daha fazla park yapmasının zamanı geldi."
+    ],
+    [
+     "Could you tell me where the town hall is"
+    ]
+   ],
+   "fill": [
+    [
+     "I'd rather ___ at home tonight.",
+     [
+      "stay",
+      "to stay",
+      "staying"
+     ],
+     0
+    ],
+    [
+     "It's time we ___ something about the traffic.",
+     [
+      "do",
+      "did",
+      "will do"
+     ],
+     1
+    ],
+    [
+     "You'd better ___ an umbrella.",
+     [
+      "take",
+      "to take",
+      "taking"
+     ],
+     0
+    ],
+    [
+     "Could you tell me where the station ___?",
+     [
+      "is",
+      "does",
+      "be"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Bence şehrin daha fazla bisiklet yoluna ihtiyacı var.",
+     "In my opinion, the city needs more cycle lanes",
+     [
+      "need",
+      "much"
+     ],
+     [
+      "I think the city needs more cycle lanes",
+      "In my opinion the city needs more cycle lanes"
+     ]
+    ],
+    [
+     "Bana yardım edebilir misiniz diye merak ediyordum.",
+     "I was wondering if you could help me",
+     [
+      "can",
+      "whether"
+     ],
+     [
+      "I was wondering whether you could help me"
+     ]
+    ]
+   ],
+   "err": [
+    "It's time we go home",
+    3,
+    [
+     "went",
+     "going",
+     "will go"
+    ],
+    0,
+    "\"It's time\" kalıbından sonra past simple kullanılır, ama anlam şimdiki zamandır: It's time we went home."
+   ],
+   "sp": [
+    [
+     "I'd rather live in a small town than a big city.",
+     "Büyük şehirdense küçük bir kasabada yaşamayı tercih ederim."
+    ],
+    [
+     "It's high time we did something about pollution.",
+     "Kirlilik hakkında bir şeyler yapmamızın vakti çoktan geldi."
+    ],
+    [
+     "I was wondering if you could give me some advice.",
+     "Bana biraz tavsiye verebilir misiniz diye merak ediyordum."
+    ]
+   ],
+   "dlg": [
+    "Belediyeye kibar bir talepte bulunuyorsun.",
+    null,
+    [
+     {
+      "who": "Officer",
+      "text": "Good morning. How can I help you?"
+     }
+    ],
+    [
+     "Good morning. I was wondering if you could tell me how to apply for a volunteer position.",
+     "Tell me volunteer job where.",
+     "I want volunteer, give form."
+    ],
+    0,
+    "Resmî ortamda dolaylı sorular kibar ve profesyonel durur: I was wondering if…"
+   ],
+   "lc": [
+    [
+     "I'd rather stay at home",
+     [
+      "I'd rather stay at home",
+      "I'd rather stayed at home",
+      "I'd better stay at home"
+     ]
+    ],
+    [
+     "It's time we left",
+     [
+      "It's time we left",
+      "It's time we leave",
+      "It's time to leave"
+     ]
+    ]
+   ],
+   "lt": [
+    "It is time we went home",
+    "I'd rather take the train"
+   ],
+   "game": "memory",
+   "story": {
+    "slug": "the-community-garden",
+    "title": "The Community Garden",
+    "title_tr": "Mahalle Bahçesi",
+    "category": "Günlük Hayat",
+    "summary": "Terk edilmiş bir otopark, bir mahallenin birlikte kurduğu bahçeye dönüşüyor.",
+    "paragraphs": [
+     [
+      "For years, the empty car park behind Selim's building in Kadıköy was full of rubbish. \"It's high time somebody did something about it,\" the residents kept saying, but nobody did.",
+      "Yıllarca Selim'in Kadıköy'deki binasının arkasındaki boş otopark çöple doluydu. Sakinler \"Birinin bu konuda bir şey yapmasının vakti çoktan geldi,\" deyip duruyordu ama kimse bir şey yapmıyordu."
+     ],
+     [
+      "One spring morning, Selim, a retired engineer, wrote a polite letter to the council: \"I was wondering whether the residents could use the area as a community garden.\" To everyone's surprise, they agreed.",
+      "Bir bahar sabahı emekli mühendis Selim belediyeye kibar bir mektup yazdı: \"Sakinlerin alanı bir mahalle bahçesi olarak kullanıp kullanamayacağını merak ediyordum.\" Herkesi şaşırtarak kabul ettiler."
+     ],
+     [
+      "At first, only a few volunteers came. Some neighbours said they would rather pay someone to do the work. But when the first tomatoes appeared, more people joined: students, a Syrian family from the third floor, even the grumpy man from number 12.",
+      "Başta sadece birkaç gönüllü geldi. Bazı komşular işi yapması için birine para ödemeyi tercih edeceklerini söyledi. Ama ilk domatesler belirince daha çok insan katıldı: öğrenciler, üçüncü kattaki Suriyeli bir aile, hatta 12 numaradaki huysuz adam bile."
+     ],
+     [
+      "Today the garden has forty members, a small library and a long table where neighbours eat together every Sunday. \"We didn't just grow vegetables,\" Selim says. \"We grew a community.\"",
+      "Bugün bahçenin kırk üyesi, küçük bir kütüphanesi ve komşuların her pazar birlikte yemek yediği uzun bir masası var. \"Sadece sebze yetiştirmedik,\" diyor Selim. \"Bir topluluk yetiştirdik.\""
+     ]
+    ],
+    "vocabulary": [
+     [
+      "rubbish",
+      "çöp",
+      "Don't leave rubbish here."
+     ],
+     [
+      "polite",
+      "kibar",
+      "He wrote a polite email."
+     ],
+     [
+      "grumpy",
+      "huysuz",
+      "My neighbour is grumpy in the morning."
+     ],
+     [
+      "member",
+      "üye",
+      "She is a member of the club."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "What was the car park full of?",
+      "options": [
+       "Cars",
+       "Rubbish",
+       "Trees"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "What did Selim do first?",
+      "options": [
+       "He wrote to the council",
+       "He paid a gardener",
+       "He sold the land"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "gap",
+      "q": "Today the garden has ___ members.",
+      "options": [],
+      "answer": "forty",
+      "accept": [
+       "40"
+      ]
+     }
+    ]
+   },
+   "talk": {
+    "key": "city-council",
+    "title": "Belediye toplantısı",
+    "emoji": "🏛️",
+    "category": "career",
+    "cefr_min": "B2",
+    "description": "Mahallen için bir öneriyi belediye meclisinde savunuyorsun.",
+    "is_premium": true,
+    "system_prompt": "You are Councillor Evans at a public city council meeting. The learner is a resident proposing a change for their neighbourhood (cycle lanes, a park, cheaper public transport). Ask about cost, who will benefit and possible problems, and be politely sceptical. Encourage would rather, it's time + past, had better and indirect questions. B2 level.",
+    "opening_line": "Thank you for coming tonight. You've asked to speak about your neighbourhood. What exactly are you proposing?",
+    "goals": [
+     "\"It's time…\" ile bir öneri yap",
+     "would rather ile bir tercih belirt",
+     "Kibar bir dolaylı soru sor"
+    ]
+   }
+  },
+  {
+   "title": "Akademik İngilizce",
+   "desc": "Akademik okuma, YDS / YÖKDİL kalıpları",
+   "color": "#2F7CF6",
+   "guide": "## Sınav metinlerini çöz\nBu ünite YDS, YDT ve YÖKDİL'deki okuma ve paragraf sorularına hazırlar. Akademik metnin yapısını, sık kelimeleri ve soru tiplerini göreceksin.\n\n## Akademik metnin yapısı\n1. **Topic sentence**: paragrafın ana fikri, çoğunlukla ilk cümle.\n2. **Supporting sentences**: örnek, veri, açıklama.\n3. **Concluding sentence**: özet ya da geçiş.\n\n## Sinyal kelimeleri\n- Ekleme: **furthermore, moreover, in addition**\n- Zıtlık: **however, nevertheless, on the contrary**\n- Sonuç: **consequently, thus, hence**\n- Örnek: **for instance, such as, namely**\n\n## Soru tipleri\n- **Ana fikir**: \"The passage is mainly about…\"\n- **Paragraf tamamlama**: boşluktan önceki ve sonraki cümlenin bağlacına bak.\n- **Anlamca en yakın cümle**: zaman ve olumsuzluğu kontrol et.\n\n> Higo'nun ipucu: Bilmediğin kelimede durma. Önce cümlenin öznesini ve fiilini bul, sonra sinyal kelimesine bak. Anlamın çoğu oradadır.",
+   "vocab": [
+    [
+     "significant",
+     "önemli, anlamlı"
+    ],
+    [
+     "consequently",
+     "sonuç olarak"
+    ],
+    [
+     "furthermore",
+     "ayrıca"
+    ],
+    [
+     "nevertheless",
+     "yine de"
+    ],
+    [
+     "indicate",
+     "göstermek, işaret etmek"
+    ],
+    [
+     "approximately",
+     "yaklaşık olarak"
+    ],
+    [
+     "crucial",
+     "çok önemli"
+    ],
+    [
+     "decline",
+     "azalmak, düşüş"
+    ],
+    [
+     "enhance",
+     "artırmak, geliştirmek"
+    ],
+    [
+     "assess",
+     "değerlendirmek"
+    ]
+   ],
+   "vs": [
+    [
+     "The results indicate a significant decline in reading habits.",
+     "Sonuçlar okuma alışkanlıklarında önemli bir düşüşe işaret ediyor."
+    ],
+    [
+     "Consequently, further research is needed.",
+     "Sonuç olarak daha fazla araştırmaya ihtiyaç var."
+    ],
+    [
+     "Approximately half of the participants agreed"
+    ]
+   ],
+   "fill": [
+    [
+     "The study was small; ___, its results are important.",
+     [
+      "nevertheless",
+      "consequently",
+      "for instance"
+     ],
+     0
+    ],
+    [
+     "Many species, ___ the Anatolian leopard, are now extinct.",
+     [
+      "such as",
+      "whereas",
+      "therefore"
+     ],
+     0
+    ],
+    [
+     "Sleep is ___ for memory and learning.",
+     [
+      "crucial",
+      "approximately",
+      "decline"
+     ],
+     0
+    ],
+    [
+     "The prices rose sharply. ___, sales fell.",
+     [
+      "Consequently",
+      "Moreover",
+      "For example"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Bulgular, düzenli egzersizin hafızayı güçlendirdiğini gösteriyor.",
+     "The findings indicate that regular exercise improves memory",
+     [
+      "shows",
+      "strong"
+     ],
+     [
+      "The findings show that regular exercise improves memory",
+      "The findings indicate that regular exercise enhances memory"
+     ]
+    ],
+    [
+     "Katılımcıların yaklaşık yüzde altmışı soruyu yanıtladı.",
+     "Approximately sixty percent of the participants answered the question",
+     [
+      "about",
+      "persons"
+     ],
+     [
+      "About sixty percent of the participants answered the question",
+      "Approximately 60 percent of the participants answered the question"
+     ]
+    ]
+   ],
+   "err": [
+    "The research shows that sleep effects memory",
+    5,
+    [
+     "affects",
+     "affect",
+     "effect"
+    ],
+    0,
+    "\"Effect\" isimdir (etki), \"affect\" fiildir (etkilemek). Burada fiil gerekiyor: sleep affects memory."
+   ],
+   "sp": [
+    [
+     "The data suggests that the number of readers is declining.",
+     "Veriler okur sayısının azaldığını gösteriyor."
+    ],
+    [
+     "Furthermore, the cost of the project was underestimated.",
+     "Ayrıca projenin maliyeti olduğundan düşük tahmin edildi."
+    ],
+    [
+     "It is crucial to assess the long-term effects.",
+     "Uzun vadeli etkileri değerlendirmek çok önemli."
+    ]
+   ],
+   "dlg": [
+    "Bir paragraf tamamlama sorusundasın. Boşluğa en uygun cümleyi seç.",
+    null,
+    [
+     {
+      "who": "Paragraf",
+      "text": "Bilingual children often switch between languages with ease. ___ For instance, they can focus on a task while ignoring distractions more effectively than monolingual children."
+     }
+    ],
+    [
+     "Research suggests that this ability may also improve their attention skills.",
+     "Many adults find learning languages difficult.",
+     "However, bilingual children are rare in Turkey."
+    ],
+    0,
+    "Boşluktan sonra \"For instance\" ile bir örnek geliyor; boşluk bu örneğin desteklediği genel iddiayı içermeli: dikkat becerileri."
+   ],
+   "lc": [
+    [
+     "The results indicate a significant decline",
+     [
+      "The results indicate a significant decline",
+      "The results indicate a significant design",
+      "The result indicates a slight decline"
+     ]
+    ],
+    [
+     "Consequently, further research is needed",
+     [
+      "Consequently, further research is needed",
+      "Consequently, further research isn't needed",
+      "Conversely, further research is needed"
+     ]
+    ]
+   ],
+   "lt": [
+    "Further research is needed",
+    "The findings were significant"
+   ],
+   "game": "cloze",
+   "story": {
+    "slug": "the-power-of-sleep",
+    "title": "The Power of Sleep",
+    "title_tr": "Uykunun Gücü",
+    "category": "Bilim",
+    "summary": "Akademik dilde yazılmış kısa bir metin: uyku, öğrenme ve sınav başarısı arasındaki ilişki.",
+    "paragraphs": [
+     [
+      "Sleep has long been considered a passive state in which the brain simply rests. However, recent research indicates that sleep plays a crucial role in learning and memory.",
+      "Uyku uzun zamandır beynin sadece dinlendiği pasif bir durum olarak görüldü. Ancak son araştırmalar uykunun öğrenme ve hafızada çok önemli bir rol oynadığını gösteriyor."
+     ],
+     [
+      "During deep sleep, information learned during the day is transferred from short-term to long-term memory. Consequently, students who sleep well after studying tend to remember more than those who stay up all night.",
+      "Derin uyku sırasında gün içinde öğrenilen bilgiler kısa süreli hafızadan uzun süreli hafızaya aktarılır. Sonuç olarak, çalıştıktan sonra iyi uyuyan öğrenciler bütün gece uyanık kalanlardan daha fazlasını hatırlama eğilimindedir."
+     ],
+     [
+      "In one study, approximately two hundred university students were divided into two groups. Both groups learned the same list of words; nevertheless, the group that slept eight hours scored about thirty percent higher the next day.",
+      "Bir çalışmada yaklaşık iki yüz üniversite öğrencisi iki gruba ayrıldı. İki grup da aynı kelime listesini öğrendi; yine de sekiz saat uyuyan grup ertesi gün yaklaşık yüzde otuz daha yüksek puan aldı."
+     ],
+     [
+      "These findings have significant implications for exam preparation. Rather than sacrificing sleep before an exam such as the YDS, learners would benefit more from short, regular study sessions followed by a full night's rest.",
+      "Bu bulguların sınav hazırlığı açısından önemli sonuçları var. Öğrenciler, YDS gibi bir sınav öncesinde uykudan feragat etmek yerine, kısa ve düzenli çalışma seanslarının ardından tam bir gece dinlenmekten daha çok fayda görür."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "passive",
+      "edilgen, pasif",
+      "a passive state"
+     ],
+     [
+      "transfer",
+      "aktarmak",
+      "The data was transferred."
+     ],
+     [
+      "implication",
+      "sonuç, çıkarım",
+      "The study has important implications."
+     ],
+     [
+      "sacrifice",
+      "feda etmek",
+      "Don't sacrifice your health."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "What is the passage mainly about?",
+      "options": [
+       "The role of sleep in learning",
+       "How to study all night",
+       "Problems of university students"
+      ],
+      "answer": 0
+     },
+     {
+      "q": "How much higher did the sleeping group score?",
+      "options": [
+       "About eight percent",
+       "About thirty percent",
+       "About two hundred percent"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "The writer recommends staying up late before an exam.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     }
+    ]
+   },
+   "talk": "ielts-speaking"
+  },
+  {
+   "title": "Kültür ve Medya",
+   "desc": "Phrasal verbs, deyimler ve doğal İngilizce",
+   "color": "#FF7FB0",
+   "guide": "## Doğal İngilizce\nB2'nin son ünitesinde dizilerde, şarkılarda ve günlük konuşmada sık geçen **phrasal verbs** ve **deyimleri** öğreneceksin. Ünite sonunda **B2 seviye sınavı** var.\n\n## Phrasal verbs\nFiil + edat birleşip yeni bir anlam kazanır:\n- **look after**: bakmak (çocuğa, eve)\n- **give up**: vazgeçmek, bırakmak\n- **turn down**: reddetmek; sesini kısmak\n- **come up with**: (fikir) bulmak\n- **put off**: ertelemek\n- **find out**: öğrenmek, keşfetmek\n\nAyrılabilen fiillerde zamir ortaya girer: *Turn it down.* (~~Turn down it~~)\n\n## Sık deyimler\n- **break the ice**: buzları kırmak\n- **a piece of cake**: çocuk oyuncağı\n- **once in a blue moon**: kırk yılda bir\n- **hit the books**: sıkı çalışmak\n\n> Higo'nun ipucu: Phrasal verb'leri listeden ezberleme. Bir dizi izlerken ya da hikâye okurken gördüğünde Kelime defterine kaydet; aralıklı tekrar gerisini halleder.",
+   "vocab": [
+    [
+     "give up",
+     "vazgeçmek, bırakmak"
+    ],
+    [
+     "look after",
+     "bakmak"
+    ],
+    [
+     "turn down",
+     "reddetmek"
+    ],
+    [
+     "come up with",
+     "(fikir) bulmak"
+    ],
+    [
+     "put off",
+     "ertelemek"
+    ],
+    [
+     "find out",
+     "öğrenmek"
+    ],
+    [
+     "break the ice",
+     "buzları kırmak"
+    ],
+    [
+     "a piece of cake",
+     "çok kolay"
+    ],
+    [
+     "once in a blue moon",
+     "kırk yılda bir"
+    ],
+    [
+     "binge-watch",
+     "art arda izlemek"
+    ]
+   ],
+   "vs": [
+    [
+     "She turned down the job offer.",
+     "İş teklifini reddetti."
+    ],
+    [
+     "Don't put off your homework until Sunday.",
+     "Ödevini pazara kadar erteleme."
+    ],
+    [
+     "We came up with a brilliant idea"
+    ]
+   ],
+   "fill": [
+    [
+     "I'm trying to ___ sugar. (bırakmak)",
+     [
+      "give up",
+      "give in",
+      "give out"
+     ],
+     0
+    ],
+    [
+     "Can you ___ my cat while I'm away?",
+     [
+      "look for",
+      "look after",
+      "look up"
+     ],
+     1
+    ],
+    [
+     "We need to ___ a better plan.",
+     [
+      "come up with",
+      "come across",
+      "come down"
+     ],
+     0
+    ],
+    [
+     "The music is too loud. Please turn it ___.",
+     [
+      "up",
+      "down",
+      "off"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Toplantıyı gelecek haftaya erteledik.",
+     "We put off the meeting until next week",
+     [
+      "put on",
+      "to"
+     ],
+     [
+      "We put the meeting off until next week",
+      "We postponed the meeting until next week"
+     ]
+    ],
+    [
+     "Bu sınav çocuk oyuncağıydı.",
+     "This exam was a piece of cake",
+     [
+      "an",
+      "child"
+     ],
+     [
+      "The exam was a piece of cake"
+     ]
+    ]
+   ],
+   "err": [
+    "I gave in smoking two years ago",
+    2,
+    [
+     "up",
+     "out",
+     "off"
+    ],
+    0,
+    "\"Give up\" bırakmak demektir: I gave up smoking. \"Give in\" ise pes etmek, boyun eğmek anlamına gelir."
+   ],
+   "sp": [
+    [
+     "I only see my cousins once in a blue moon.",
+     "Kuzenlerimi kırk yılda bir görüyorum."
+    ],
+    [
+     "Let me tell a joke to break the ice.",
+     "Buzları kırmak için bir fıkra anlatayım."
+    ],
+    [
+     "I can't believe you turned down that offer!",
+     "O teklifi reddettiğine inanamıyorum!"
+    ]
+   ],
+   "dlg": [
+    "Arkadaşın yeni bir diziyi öneriyor.",
+    null,
+    [
+     {
+      "who": "Mia",
+      "text": "Have you started the new series yet? I binge-watched the whole thing this weekend!"
+     }
+    ],
+    [
+     "Not yet, I keep putting it off because of exams. No spoilers, please!",
+     "I am not start it, I postpone it off.",
+     "Not yet, I keep putting off it."
+    ],
+    0,
+    "\"Put off\" ertelemek demektir; \"keep putting it off\" sürekli ertelemeyi anlatır."
+   ],
+   "lc": [
+    [
+     "She turned down the offer",
+     [
+      "She turned down the offer",
+      "She turned up the offer",
+      "She turned down the officer"
+     ]
+    ],
+    [
+     "I've given up sugar",
+     [
+      "I've given up sugar",
+      "I've given in sugar",
+      "I've given up sugar and salt"
+     ]
+    ]
+   ],
+   "lt": [
+    "We need to find out the truth",
+    "Do not give up"
+   ],
+   "game": "kelimle",
+   "story": {
+    "slug": "the-film-club",
+    "title": "The Film Club",
+    "title_tr": "Film Kulübü",
+    "category": "Eğlence",
+    "summary": "Bir üniversite film kulübü, unutulmuş bir Türk filmini yeniden keşfediyor.",
+    "paragraphs": [
+     [
+      "Every Thursday, the film club at Ege University watches a classic film and discusses it in English. This term, the members were running out of ideas, and attendance was going down.",
+      "Ege Üniversitesi'ndeki film kulübü her perşembe klasik bir film izliyor ve İngilizce tartışıyor. Bu dönem üyelerin fikirleri tükeniyordu ve katılım düşüyordu."
+     ],
+     [
+      "Then Deniz came up with an unusual plan. Her grandfather had looked after an old cinema in Tire for forty years, and she had found out that a lost Turkish film from 1962 was still in his basement.",
+      "Sonra Deniz alışılmadık bir plan buldu. Dedesi kırk yıl boyunca Tire'deki eski bir sinemaya bakmıştı ve Deniz 1962 yapımı kayıp bir Türk filminin hâlâ dedesinin bodrumunda olduğunu öğrenmişti."
+     ],
+     [
+      "Restoring the film wasn't a piece of cake. The club had to put off their screenings for two months, and some members nearly gave up. A professor turned down their first request for equipment, but a local business finally agreed to help.",
+      "Filmi restore etmek çocuk oyuncağı değildi. Kulüp gösterimlerini iki ay ertelemek zorunda kaldı ve bazı üyeler neredeyse vazgeçiyordu. Bir profesör ekipman için ilk taleplerini reddetti ama sonunda yerel bir işletme yardım etmeyi kabul etti."
+     ],
+     [
+      "On the night of the screening, the hall was full. Deniz's grandfather sat in the front row, and when the first black-and-white scene appeared, he broke the ice with a joke: \"I was much more handsome back then.\" Everyone laughed, and then the room fell silent for the next ninety minutes.",
+      "Gösterim gecesi salon doluydu. Deniz'in dedesi ön sırada oturuyordu ve ilk siyah beyaz sahne belirince bir şakayla buzları kırdı: \"O zamanlar çok daha yakışıklıydım.\" Herkes güldü, ardından salon doksan dakika boyunca sessizliğe gömüldü."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "run out of",
+      "tükenmek",
+      "We've run out of milk."
+     ],
+     [
+      "attendance",
+      "katılım",
+      "Attendance was low."
+     ],
+     [
+      "basement",
+      "bodrum",
+      "The boxes are in the basement."
+     ],
+     [
+      "screening",
+      "gösterim",
+      "The screening starts at eight."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Why was the club in trouble?",
+      "options": [
+       "Attendance was going down",
+       "The cinema closed",
+       "The professor left"
+      ],
+      "answer": 0
+     },
+     {
+      "q": "Where was the lost film?",
+      "options": [
+       "In a university library",
+       "In her grandfather's basement",
+       "In a cinema in Istanbul"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "The professor immediately agreed to give them equipment.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     }
+    ]
+   },
+   "talk": {
+    "key": "film-club",
+    "title": "Film kulübü",
+    "emoji": "🎬",
+    "category": "fun",
+    "cefr_min": "B2",
+    "description": "Bir film kulübünde en son izlediğin film ya da diziyi anlat ve öner.",
+    "is_premium": true,
+    "system_prompt": "You are Jamie, a passionate member of an English-speaking film club. Ask the learner about a film or series they recently watched: plot (without spoilers), characters, what they liked or disliked, and whether they would recommend it. Use and encourage phrasal verbs and idioms naturally, and react to the learner's choices. B2 level.",
+    "opening_line": "Welcome to film club! So, what have you been watching lately? Anything you couldn't stop watching?",
+    "goals": [
+     "En az iki phrasal verb kullan",
+     "Bir deyim kullan",
+     "Filmi ya da diziyi neden önerdiğini açıkla"
+    ]
+   },
+   "checkpoint": true
+  }
+ ]
+}

@@ -36,7 +36,7 @@ class LearningLoopTest extends TestCase
 
     public function test_completing_a_perfect_lesson_awards_xp_streak_quests_and_badges(): void
     {
-        $lesson = Lesson::query()->where('title', 'Ben kimim? (am / is / are)')->firstOrFail();
+        $lesson = $this->node('A1', 0, 1);
         $answers = collect($lesson->exercises)->map(fn ($ex) => $this->correctAnswer($ex))->all();
         // a later lesson opens once the one before it is done (or the level is above A1)
         $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertForbidden();
@@ -49,6 +49,14 @@ class LearningLoopTest extends TestCase
         $this->assertSame(1, $res->json('reward.streak'));
         $this->assertContains('lessons_1', collect($res->json('reward.achievements'))->pluck('key')->all());
         $this->assertContains('perfect_1', collect($res->json('reward.achievements'))->pluck('key')->all());
+    }
+
+    /** A path node by level, unit and position (content titles change, positions don't). */
+    private function node(string $level, int $unit, int $pos): Lesson
+    {
+        return \App\Models\Course::query()->where('cefr_level', $level)->firstOrFail()
+            ->units()->where('position', $unit)->firstOrFail()
+            ->lessons()->where('position', $pos)->firstOrFail();
     }
 
     /** The answer the client would submit for a correct attempt, per exercise type. */
@@ -65,7 +73,7 @@ class LearningLoopTest extends TestCase
 
     public function test_wrong_answers_cost_hearts(): void
     {
-        $lesson = Lesson::query()->where('title', 'Selamlaşma')->firstOrFail();
+        $lesson = $this->node('A1', 0, 0);
         $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => []])->assertOk();
         $this->assertLessThan(5, $this->user->fresh()->hearts);
     }
@@ -147,7 +155,7 @@ class LearningLoopTest extends TestCase
 
     public function test_league_standings_and_weekly_close(): void
     {
-        $lesson = Lesson::query()->where('title', 'Selamlaşma')->firstOrFail();
+        $lesson = $this->node('A1', 0, 0);
         $answers = collect($lesson->exercises)->map(fn ($ex) => $this->correctAnswer($ex))->all();
         $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertOk();
 
@@ -195,14 +203,14 @@ class LearningLoopTest extends TestCase
         $answers = collect($bank)->map(fn ($q) => $q['level'] !== 'C1' ? (($q['type'] ?? 'choice') === 'choice' ? $q['answer'] : $q['answer'][0]) : 0)->all();
         app('auth')->forgetGuards();
         $token = $this->withHeaders(['Authorization' => ''])->postJson('/api/v1/placement', ['answers' => $answers])->assertCreated()->json('token');
-        $this->assertDatabaseHas('placement_results', ['token' => $token, 'user_id' => null, 'level' => 'C1']);
+        $this->assertDatabaseHas('placement_results', ['token' => $token, 'user_id' => null, 'level' => 'B2']);
 
         $this->postJson('/api/v1/auth/register', [
             'name' => 'Deniz', 'email' => 'deniz.test@example.com', 'password' => 'secret123', 'password_confirmation' => 'secret123',
             'accept_terms' => true, 'placement_token' => $token,
         ])->assertCreated();
         $u = User::query()->where('email', 'deniz.test@example.com')->first();
-        $this->assertSame('C1', $u->cefr_level);
+        $this->assertSame('B2', $u->cefr_level);
         $this->assertDatabaseHas('placement_results', ['token' => $token, 'user_id' => $u->id]);
     }
 

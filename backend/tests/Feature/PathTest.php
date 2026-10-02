@@ -52,4 +52,43 @@ class PathTest extends TestCase
         $a1 = Course::query()->where('cefr_level', 'A1')->first();
         $this->assertArrayHasKey((string) $a1->id, $u->fresh()->path_unlocks);
     }
+
+    public function test_word_game_node_plays_the_units_words(): void
+    {
+        $u = $this->learner();
+        $lesson = Course::query()->where('cefr_level', 'A1')->first()->units()->orderBy('position')->first()->lessons()->where('kind', 'words')->first();
+        $this->actingAs($u)->getJson("/api/v1/words/deck?lesson={$lesson->id}")->assertForbidden(); // not reached yet
+
+        // finish the two lessons before it
+        foreach ($lesson->unit->lessons()->where('position', '<', $lesson->position)->get() as $prev) {
+            \App\Models\LessonProgress::query()->create(['user_id' => $u->id, 'lesson_id' => $prev->id, 'completed_at' => now(), 'best_score' => 100, 'crowns' => 1, 'attempts' => 1]);
+        }
+        $deck = $this->getJson("/api/v1/words/deck?lesson={$lesson->id}")->assertOk()->json('data');
+        $this->assertCount(10, $deck);
+        $this->assertEqualsCanonicalizing(collect($lesson->meta['words'])->pluck('word')->all(), collect($deck)->pluck('word')->all());
+    }
+
+    public function test_premium_nodes_never_block_a_free_learner(): void
+    {
+        $u = $this->learner('B1');
+        $unit = Course::query()->where('cefr_level', 'B1')->first()->units()->orderBy('position')->first();
+        $talk = $unit->lessons()->where('kind', 'ai_talk')->first();
+        $this->assertTrue($talk->is_premium);
+        foreach ($unit->lessons()->where('position', '<', $talk->position)->get() as $prev) {
+            \App\Models\LessonProgress::query()->create(['user_id' => $u->id, 'lesson_id' => $prev->id, 'completed_at' => now(), 'best_score' => 100, 'crowns' => 1, 'attempts' => 1]);
+        }
+        $states = app(PathService::class)->states($u, $unit->course);
+        // the premium talk is skipped: "current" moves on to the first stop of the next unit
+        $this->assertNotSame('current', $states[$talk->id]);
+        $next = $unit->course->units()->where('position', 1)->first()->lessons()->orderBy('position')->first();
+        $this->assertSame('current', $states[$next->id]);
+    }
+
+    public function test_placement_tops_out_at_b2(): void
+    {
+        $all = ['A1' => ['correct' => 8, 'total' => 8], 'A2' => ['correct' => 8, 'total' => 8], 'B1' => ['correct' => 8, 'total' => 8], 'B2' => ['correct' => 8, 'total' => 8], 'C1' => ['correct' => 8, 'total' => 8]];
+        $this->assertSame('B2', \App\Http\Controllers\Api\PlacementController::levelFrom($all));
+        $u = $this->learner('C1');
+        $this->actingAs($u)->getJson('/api/v1/path')->assertOk()->assertJsonPath('course.cefr_level', 'B2');
+    }
 }

@@ -36,7 +36,7 @@ export function ProfileBanner({ banner, className }: { banner?: string | null; c
   return (
     <div aria-hidden className={clsx('relative overflow-hidden', className)} style={{ background: b.bg }}>
       {b.url ? (
-        <img src={b.url} alt="" loading="lazy" decoding="async" className="absolute inset-0 size-full object-cover" style={{ objectPosition: b.pos }} />
+        <img src={b.url} alt="" decoding="async" className="absolute inset-0 size-full object-cover" style={{ objectPosition: b.pos }} />
       ) : (
         <svg className="absolute inset-0 size-full opacity-60" preserveAspectRatio="none">
           {Array.from({ length: 14 }, (_, i) => <circle key={i} cx={`${(i * 29) % 100}%`} cy={`${(i * 41) % 100}%`} r={3 + (i % 4) * 2} fill="#fff" opacity=".5" />)}

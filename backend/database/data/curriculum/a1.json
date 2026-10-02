@@ -1,0 +1,2346 @@
+{
+ "slug": "a1-baslangic",
+ "title": "A1 · İlk Adımlar",
+ "cefr_level": "A1",
+ "color": "#FF5A36",
+ "description": "Kendini tanıt, aileni ve gününü anlat, şehirde yolunu bul. İngilizcede ilk gerçek cümlelerin.",
+ "units": [
+  {
+   "title": "Merhaba!",
+   "desc": "Selamlaşma, tanışma ve \"to be\"",
+   "color": "#FF5A36",
+   "guide": "## Merhaba, ben Higo!\nBu ünitede kendini tanıtmayı, birini selamlamayı ve **to be** fiilini öğreneceksin. Türkçede \"-im, -sin, -dir\" eklerinin yaptığı işi İngilizcede **am / is / are** yapar.\n\n> Higo'nun ipucu: İngilizcede cümlenin bir fiili olmak zorunda. \"Ben öğrenci\" demek yetmez, **I am a student** demelisin.\n\n## am / is / are\n| Özne | Fiil | Örnek |\n|---|---|---|\n| I | am | I am Elif. |\n| he / she / it | is | She is my friend. |\n| you / we / they | are | We are from Turkey. |\n\nKonuşurken kısaltırız: **I'm, he's, she's, it's, you're, we're, they're**.\n\n## Olumsuz ve soru\n- Olumsuz: fiilden sonra **not**: *I'm not tired. She isn't here.*\n- Soru: fiil başa geçer: *Are you a student? Is he from Izmir?*\n- Kısa cevap: *Yes, I am. / No, she isn't.*\n\n## Selamlaşma kalıpları\n- **Hello / Hi**: merhaba\n- **Good morning / afternoon / evening**: günaydın / iyi günler / iyi akşamlar\n- **Nice to meet you.** Tanıştığıma memnun oldum.\n- **How are you? I'm fine, thanks.** Nasılsın? İyiyim, teşekkürler.\n\n> Higo'nun ipucu: \"Good night\" bir selam değil, vedalaşmadır. Akşam birine merhaba derken **Good evening** de.",
+   "vocab": [
+    [
+     "hello",
+     "merhaba"
+    ],
+    [
+     "goodbye",
+     "hoşça kal"
+    ],
+    [
+     "name",
+     "isim"
+    ],
+    [
+     "friend",
+     "arkadaş"
+    ],
+    [
+     "student",
+     "öğrenci"
+    ],
+    [
+     "teacher",
+     "öğretmen"
+    ],
+    [
+     "country",
+     "ülke"
+    ],
+    [
+     "city",
+     "şehir"
+    ],
+    [
+     "happy",
+     "mutlu"
+    ],
+    [
+     "tired",
+     "yorgun"
+    ]
+   ],
+   "vs": [
+    [
+     "My name is Deniz and I am a student.",
+     "Benim adım Deniz ve ben bir öğrenciyim."
+    ],
+    [
+     "Nice to meet you, Mr Brown.",
+     "Tanıştığımıza memnun oldum, Bay Brown."
+    ],
+    [
+     "She is my best friend"
+    ]
+   ],
+   "fill": [
+    [
+     "I ___ from Antalya.",
+     [
+      "am",
+      "is",
+      "are"
+     ],
+     0,
+     "I → am"
+    ],
+    [
+     "My teacher ___ very kind.",
+     [
+      "am",
+      "is",
+      "are"
+     ],
+     1
+    ],
+    [
+     "We ___ in the same class.",
+     [
+      "am",
+      "is",
+      "are"
+     ],
+     2
+    ],
+    [
+     "___ you a student?",
+     [
+      "Am",
+      "Is",
+      "Are"
+     ],
+     2
+    ]
+   ],
+   "tr": [
+    [
+     "O benim arkadaşım.",
+     "She is my friend",
+     [
+      "are",
+      "am"
+     ],
+     [
+      "She's my friend",
+      "He is my friend",
+      "He's my friend"
+     ]
+    ],
+    [
+     "Biz İzmirliyiz.",
+     "We are from Izmir",
+     [
+      "is",
+      "in"
+     ],
+     [
+      "We're from Izmir"
+     ]
+    ]
+   ],
+   "err": [
+    "My sister are a doctor",
+    2,
+    [
+     "is",
+     "am",
+     "be"
+    ],
+    0,
+    "\"My sister\" tekil (o) olduğu için \"is\" kullanılır. \"Are\" you, we, they içindir. Doğrusu: My sister is a doctor."
+   ],
+   "sp": [
+    [
+     "I'm happy to meet you.",
+     "Seninle tanıştığıma mutluyum."
+    ],
+    [
+     "Hi, I'm Can. I'm from Bursa.",
+     "Merhaba, ben Can. Bursalıyım."
+    ],
+    [
+     "Where are you from?",
+     "Nerelisin?"
+    ]
+   ],
+   "dlg": [
+    "Okulun ilk günü. Yeni bir sınıf arkadaşı yanına geliyor.",
+    null,
+    [
+     {
+      "who": "Emma",
+      "text": "Hi! I'm Emma. What's your name?"
+     }
+    ],
+    [
+     "My name is Ali. Nice to meet you!",
+     "I am name Ali.",
+     "Name me Ali."
+    ],
+    0,
+    "İsmini söylerken \"My name is …\" ya da kısaca \"I'm …\" dersin. \"Nice to meet you\" ile bitirmek çok doğal durur."
+   ],
+   "lc": [
+    [
+     "Nice to meet you",
+     [
+      "Nice to meet you",
+      "Nice to see you",
+      "Night to meet you"
+     ]
+    ],
+    [
+     "We're friends",
+     [
+      "We're friends",
+      "Where friends",
+      "Were friends"
+     ]
+    ]
+   ],
+   "lt": [
+    "How are you",
+    "I am from Turkey"
+   ],
+   "game": "match",
+   "story": {
+    "slug": "a-new-friend-at-school",
+    "title": "A New Friend",
+    "title_tr": "Yeni Bir Arkadaş",
+    "category": "Okul",
+    "summary": "Zeynep okulun ilk gününde Londra'dan gelen Tom ile tanışıyor.",
+    "paragraphs": [
+     [
+      "It is Monday. Zeynep is at her new school in Izmir. She is a little nervous.",
+      "Pazartesi. Zeynep İzmir'deki yeni okulunda. Biraz gergin."
+     ],
+     [
+      "A boy is next to her. He is tall and he has a big blue bag. \"Hi, I'm Tom,\" he says. \"I'm new here.\"",
+      "Yanında bir çocuk var. Uzun boylu ve büyük mavi bir çantası var. \"Merhaba, ben Tom,\" diyor. \"Ben burada yeniyim.\""
+     ],
+     [
+      "\"Hello, I'm Zeynep. Nice to meet you! Where are you from?\" \"I'm from London, but my mum is from Izmir.\"",
+      "\"Merhaba, ben Zeynep. Tanıştığıma memnun oldum! Nerelisin?\" \"Londralıyım ama annem İzmirli.\""
+     ],
+     [
+      "The teacher comes in. \"Good morning, class!\" Zeynep smiles. She is not nervous now. She has a new friend.",
+      "Öğretmen içeri giriyor. \"Günaydın sınıf!\" Zeynep gülümsüyor. Artık gergin değil. Yeni bir arkadaşı var."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "nervous",
+      "gergin",
+      "I am nervous before exams."
+     ],
+     [
+      "next to",
+      "yanında",
+      "The bank is next to the café."
+     ],
+     [
+      "new",
+      "yeni",
+      "This is my new phone."
+     ],
+     [
+      "smile",
+      "gülümsemek",
+      "She smiles at me."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where is Zeynep's new school?",
+      "options": [
+       "London",
+       "Izmir",
+       "Ankara"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "Tom is from London.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "gap",
+      "q": "At the end, Zeynep is not ___.",
+      "options": [],
+      "answer": "nervous",
+      "accept": []
+     }
+    ]
+   },
+   "talk": "meet-a-new-friend"
+  },
+  {
+   "title": "Ailem",
+   "desc": "Aile, have got ve iyelik sıfatları",
+   "color": "#FF8A3D",
+   "guide": "## Aileni tanıt\nBu ünitede aileni anlatacaksın: **mother, father, brother, sister, grandmother…** Ve sahip olduklarımızı söylemek için **have got / has got** kullanacağız.\n\n## have got / has got\n| Özne | Fiil | Örnek |\n|---|---|---|\n| I / you / we / they | have got ('ve got) | I've got two brothers. |\n| he / she / it | has got ('s got) | She's got a cat. |\n\nOlumsuz: *I haven't got a sister. He hasn't got a car.*\nSoru: *Have you got a pet? Has she got a bike?*\n\n> Higo'nun ipucu: Amerikan İngilizcesinde sadece **have / has** da çok kullanılır: *I have two brothers.* İkisi de doğru.\n\n## Kimin? İyelik sıfatları\n**my** (benim) · **your** (senin) · **his** (onun, erkek) · **her** (onun, kadın) · **its** (onun, eşya/hayvan) · **our** (bizim) · **their** (onların)\n\n*This is my sister. Her name is Ayşe.*\n\n## 's ile sahiplik\nİsimden sonra **'s**: *Ali's car* (Ali'nin arabası), *my mother's phone* (annemin telefonu).",
+   "vocab": [
+    [
+     "mother",
+     "anne"
+    ],
+    [
+     "father",
+     "baba"
+    ],
+    [
+     "brother",
+     "erkek kardeş"
+    ],
+    [
+     "sister",
+     "kız kardeş"
+    ],
+    [
+     "grandmother",
+     "büyükanne"
+    ],
+    [
+     "grandfather",
+     "büyükbaba"
+    ],
+    [
+     "uncle",
+     "amca / dayı"
+    ],
+    [
+     "aunt",
+     "teyze / hala"
+    ],
+    [
+     "cousin",
+     "kuzen"
+    ],
+    [
+     "parents",
+     "ebeveynler"
+    ]
+   ],
+   "vs": [
+    [
+     "My grandmother lives in Trabzon.",
+     "Büyükannem Trabzon'da yaşıyor."
+    ],
+    [
+     "I have got two cousins in Ankara.",
+     "Ankara'da iki kuzenim var."
+    ],
+    [
+     "His sister is a doctor"
+    ]
+   ],
+   "fill": [
+    [
+     "I ___ got a little brother.",
+     [
+      "have",
+      "has",
+      "am"
+     ],
+     0
+    ],
+    [
+     "My father ___ got a blue car.",
+     [
+      "have",
+      "has",
+      "is"
+     ],
+     1
+    ],
+    [
+     "This is Ece. ___ brother is ten.",
+     [
+      "His",
+      "Her",
+      "Their"
+     ],
+     1
+    ],
+    [
+     "My parents love ___ garden.",
+     [
+      "his",
+      "its",
+      "their"
+     ],
+     2
+    ]
+   ],
+   "tr": [
+    [
+     "Kız kardeşimin bir kedisi var.",
+     "My sister has got a cat",
+     [
+      "have",
+      "her"
+     ],
+     [
+      "My sister has a cat",
+      "My sister's got a cat"
+     ]
+    ],
+    [
+     "Onların adı ne?",
+     "What are their names",
+     [
+      "is",
+      "they"
+     ],
+     [
+      "What's their name",
+      "What is their name"
+     ]
+    ]
+   ],
+   "err": [
+    "She have got two sisters",
+    1,
+    [
+     "has",
+     "is",
+     "having"
+    ],
+    0,
+    "He / she / it ile \"has got\" kullanılır. \"Have\" I, you, we, they içindir. Doğrusu: She has got two sisters."
+   ],
+   "sp": [
+    [
+     "This is my family.",
+     "Bu benim ailem."
+    ],
+    [
+     "I've got one brother and one sister.",
+     "Bir erkek, bir kız kardeşim var."
+    ],
+    [
+     "My mother is a teacher.",
+     "Annem öğretmen."
+    ]
+   ],
+   "dlg": [
+    "Arkadaşın telefonundaki aile fotoğrafını soruyor.",
+    null,
+    [
+     {
+      "who": "Lily",
+      "text": "Who is the man in this photo?"
+     }
+    ],
+    [
+     "He's my uncle. He lives in Germany.",
+     "He my uncle is.",
+     "His is uncle."
+    ],
+    0,
+    "Bir kişiyi tanıtırken \"He's my …\" ya da \"This is my …\" kalıbı en doğalıdır."
+   ],
+   "lc": [
+    [
+     "She's got a brother",
+     [
+      "She's got a brother",
+      "She's got a mother",
+      "She got a brother"
+     ]
+    ],
+    [
+     "Their house is big",
+     [
+      "Their house is big",
+      "They're house is big",
+      "There house is big"
+     ]
+    ]
+   ],
+   "lt": [
+    "I have got two cousins",
+    "His name is Murat"
+   ],
+   "game": "memory",
+   "story": {
+    "slug": "the-family-photo",
+    "title": "The Family Photo",
+    "title_tr": "Aile Fotoğrafı",
+    "category": "Aile",
+    "summary": "Kerem büyükannesinin evinde eski bir fotoğraf buluyor.",
+    "paragraphs": [
+     [
+      "Kerem is at his grandmother's house in Konya. It is Sunday and the whole family is there.",
+      "Kerem, Konya'daki büyükannesinin evinde. Pazar günü ve bütün aile orada."
+     ],
+     [
+      "In a drawer, Kerem finds an old photo. There are five children in it. \"Who are they, Grandma?\" he asks.",
+      "Kerem bir çekmecede eski bir fotoğraf buluyor. Fotoğrafta beş çocuk var. \"Bunlar kim, babaanne?\" diye soruyor."
+     ],
+     [
+      "\"That is me, and those are my brothers and sisters,\" she says. \"This boy is your grandfather's best friend.\"",
+      "\"Bu benim, şunlar da kardeşlerim,\" diyor. \"Bu çocuk da deden en iyi arkadaşı.\""
+     ],
+     [
+      "Kerem laughs. \"Grandma, your hair is very long!\" \"Yes,\" she says, \"and your father has got the same smile as me.\"",
+      "Kerem gülüyor. \"Babaanne, saçların çok uzun!\" \"Evet,\" diyor, \"baban da benimle aynı gülümsemeye sahip.\""
+     ]
+    ],
+    "vocabulary": [
+     [
+      "whole",
+      "bütün",
+      "The whole class is here."
+     ],
+     [
+      "drawer",
+      "çekmece",
+      "The keys are in the drawer."
+     ],
+     [
+      "find",
+      "bulmak",
+      "I can't find my phone."
+     ],
+     [
+      "same",
+      "aynı",
+      "We have the same bag."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where is Kerem?",
+      "options": [
+       "At school",
+       "At his grandmother's house",
+       "In a park"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "How many children are in the photo?",
+      "options": [
+       "Three",
+       "Four",
+       "Five"
+      ],
+      "answer": 2
+     },
+     {
+      "type": "truefalse",
+      "q": "Kerem's father has got the same smile as his grandmother.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 0
+     }
+    ]
+   },
+   "talk": {
+    "key": "family-photo",
+    "title": "Aile fotoğrafı",
+    "emoji": "👨‍👩‍👧",
+    "category": "daily",
+    "cefr_min": "A1",
+    "description": "Yeni arkadaşın aile fotoğrafını görmek istiyor. Aileni anlat.",
+    "system_prompt": "You are Lily, a kind pen pal from Manchester. Ask the learner about their family: who they live with, brothers and sisters, names, jobs and ages. Use very simple A1 English and the verbs \"have got\" and \"be\". Share a little about your own family.",
+    "opening_line": "Hi! I love family photos. Tell me about your family. Have you got any brothers or sisters?",
+    "goals": [
+     "Ailende kaç kişi olduğunu söyle",
+     "Bir aile üyesinin adını ve mesleğini söyle",
+     "Lily'ye ailesiyle ilgili bir soru sor"
+    ]
+   }
+  },
+  {
+   "title": "Okulda",
+   "desc": "Sınıf eşyaları, this/that ve emir cümleleri",
+   "color": "#FFB400",
+   "guide": "## Sınıfta neler var?\nBu ünitede okul eşyalarını, **this / that / these / those** ile bir şeyi göstermeyi ve sınıfta duyacağın emir cümlelerini öğreneceksin.\n\n## this · that · these · those\n| | Yakın | Uzak |\n|---|---|---|\n| Tekil | **this** pen | **that** board |\n| Çoğul | **these** books | **those** chairs |\n\n> Higo'nun ipucu: Çoğul isimlerin çoğu **-s** alır: *book → books*. Bazıları düzensizdir: *child → children, person → people*.\n\n## Emir cümleleri (Imperatives)\nFiil yalın hâliyle başta: **Open your books. Sit down. Listen!**\nOlumsuz: **Don't** + fiil: *Don't talk. Don't run in the corridor.*\nKibar olmak için sona **please** ekle: *Close the door, please.*\n\n## a / an\nSessiz harfle başlayan sözcükten önce **a**: *a pen, a desk*.\nSesli harf **sesiyle** başlayan sözcükten önce **an**: *an eraser, an apple, an hour*.",
+   "vocab": [
+    [
+     "book",
+     "kitap"
+    ],
+    [
+     "pen",
+     "tükenmez kalem"
+    ],
+    [
+     "pencil",
+     "kurşun kalem"
+    ],
+    [
+     "notebook",
+     "defter"
+    ],
+    [
+     "desk",
+     "sıra"
+    ],
+    [
+     "board",
+     "tahta"
+    ],
+    [
+     "bag",
+     "çanta"
+    ],
+    [
+     "eraser",
+     "silgi"
+    ],
+    [
+     "classroom",
+     "sınıf"
+    ],
+    [
+     "homework",
+     "ödev"
+    ]
+   ],
+   "vs": [
+    [
+     "These books are on my desk.",
+     "Bu kitaplar sıramın üstünde."
+    ],
+    [
+     "Open your notebook, please.",
+     "Defterini aç lütfen."
+    ],
+    [
+     "That is my bag"
+    ]
+   ],
+   "fill": [
+    [
+     "___ pen is mine. (elimde)",
+     [
+      "This",
+      "These",
+      "Those"
+     ],
+     0
+    ],
+    [
+     "Look at ___ birds in the sky!",
+     [
+      "this",
+      "that",
+      "those"
+     ],
+     2
+    ],
+    [
+     "I need ___ eraser.",
+     [
+      "a",
+      "an",
+      "the"
+     ],
+     1
+    ],
+    [
+     "___ talk in the library!",
+     [
+      "No",
+      "Don't",
+      "Not"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Kitaplarınızı açın.",
+     "Open your books",
+     [
+      "open",
+      "the"
+     ],
+     [
+      "Open your books please"
+     ]
+    ],
+    [
+     "Şu çanta senin mi?",
+     "Is that your bag",
+     [
+      "this",
+      "are"
+     ],
+     [
+      "Is that bag yours"
+     ]
+    ]
+   ],
+   "err": [
+    "These books is very interesting",
+    2,
+    [
+     "are",
+     "am",
+     "be"
+    ],
+    0,
+    "\"These books\" çoğul olduğu için fiil de çoğul olmalı: These books are very interesting."
+   ],
+   "sp": [
+    [
+     "Can I borrow your pencil?",
+     "Kurşun kalemini ödünç alabilir miyim?"
+    ],
+    [
+     "Sorry, I don't understand.",
+     "Özür dilerim, anlamıyorum."
+    ],
+    [
+     "Can you repeat that, please?",
+     "Tekrar eder misiniz lütfen?"
+    ]
+   ],
+   "dlg": [
+    "Derste öğretmen bir soru sordu ama anlamadın.",
+    null,
+    [
+     {
+      "who": "Mr Green",
+      "text": "What is the answer to number five?"
+     }
+    ],
+    [
+     "Sorry, can you repeat the question, please?",
+     "What? Again!",
+     "I not understand."
+    ],
+    0,
+    "Anlamadığında kibarca tekrar istemek: \"Can you repeat that, please?\" ya da \"Sorry, I don't understand.\""
+   ],
+   "lc": [
+    [
+     "Open your books",
+     [
+      "Open your books",
+      "Open your box",
+      "Opens your books"
+     ]
+    ],
+    [
+     "Those are my pencils",
+     [
+      "Those are my pencils",
+      "These are my pencils",
+      "Those are my pencil"
+     ]
+    ]
+   ],
+   "lt": [
+    "Close the door please",
+    "Where is my notebook"
+   ],
+   "game": "choice",
+   "story": {
+    "slug": "the-missing-homework",
+    "title": "The Missing Homework",
+    "title_tr": "Kayıp Ödev",
+    "category": "Okul",
+    "summary": "Mert ödevini bulamıyor ve ders başlamak üzere.",
+    "paragraphs": [
+     [
+      "It is eight o'clock. Mert is in the classroom. \"Open your notebooks, please,\" says Ms Kaya. \"Homework time!\"",
+      "Saat sekiz. Mert sınıfta. \"Defterlerinizi açın lütfen,\" diyor Kaya Hanım. \"Ödev zamanı!\""
+     ],
+     [
+      "Mert opens his bag. He sees a pencil case, two books and an apple. But his homework is not there!",
+      "Mert çantasını açıyor. Bir kalem kutusu, iki kitap ve bir elma görüyor. Ama ödevi orada değil!"
+     ],
+     [
+      "\"Is this your notebook?\" asks his friend Selin. She has a red notebook in her hand. \"It was under my desk.\"",
+      "\"Bu senin defterin mi?\" diye soruyor arkadaşı Selin. Elinde kırmızı bir defter var. \"Sıramın altındaydı.\""
+     ],
+     [
+      "\"Yes! Thank you, Selin!\" Mert gives his homework to Ms Kaya. She reads it and smiles. \"Very good, Mert.\"",
+      "\"Evet! Teşekkürler Selin!\" Mert ödevini Kaya Hanım'a veriyor. O da okuyup gülümsüyor. \"Çok güzel, Mert.\""
+     ]
+    ],
+    "vocabulary": [
+     [
+      "pencil case",
+      "kalem kutusu",
+      "My pencil case is blue."
+     ],
+     [
+      "under",
+      "altında",
+      "The cat is under the table."
+     ],
+     [
+      "give",
+      "vermek",
+      "Give me the book, please."
+     ],
+     [
+      "read",
+      "okumak",
+      "I read every night."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "What is not in Mert's bag?",
+      "options": [
+       "An apple",
+       "His homework",
+       "Two books"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "Where was the notebook?",
+      "options": [
+       "Under Selin's desk",
+       "In the teacher's bag",
+       "At home"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "order",
+      "q": "Cümleyi sırala",
+      "options": [
+       "Mert",
+       "gives",
+       "his",
+       "homework",
+       "to",
+       "Ms Kaya"
+      ],
+      "answer": ""
+     }
+    ]
+   },
+   "talk": {
+    "key": "first-day-at-school",
+    "title": "Okulda ilk gün",
+    "emoji": "🏫",
+    "category": "daily",
+    "cefr_min": "A1",
+    "description": "Yabancı bir öğrenci okulunuza yeni geldi. Ona okulu tanıt.",
+    "system_prompt": "You are Ben, a 13-year-old new student from Australia in a Turkish school. You do not know anything about the school. Ask the learner simple questions: where the library is, what lesson is next, who the English teacher is, what you need for the lesson. Use very simple A1 English.",
+    "opening_line": "Hi! I'm Ben. It's my first day here. Can you help me? What lesson is next?",
+    "goals": [
+     "Sıradaki dersi söyle",
+     "Bir sınıf eşyasını göster (this / that)",
+     "Ben'e kibar bir emir cümlesiyle yol göster"
+    ]
+   }
+  },
+  {
+   "title": "Günüm",
+   "desc": "Geniş zaman, saatler ve sıklık zarfları",
+   "color": "#2EC4A0",
+   "guide": "## Bir günün İngilizcesi\nBu ünitede rutinlerini anlatacaksın. Her gün, her hafta tekrar eden şeyler için **Present Simple** (geniş zaman) kullanılır.\n\n## Present Simple\n*I get up at seven. We go to school by bus.*\n\n**he / she / it** ile fiile **-s** gelir: *She works. He watches TV. It goes.*\n\n> Higo'nun ipucu: -s, -sh, -ch, -x, -o ile biten fiiller **-es** alır: *watch → watches, go → goes*. Ünsüz + y ise **-ies**: *study → studies*.\n\n## Olumsuz ve soru\n- **don't / doesn't** + yalın fiil: *I don't drink coffee. She doesn't like fish.*\n- **Do / Does** + özne + yalın fiil: *Do you play football? Does he live here?*\n\n## Ne sıklıkla?\n**always** (her zaman) · **usually** (genellikle) · **often** (sık sık) · **sometimes** (bazen) · **never** (asla)\nFiilden önce, **be**'den sonra gelir: *I usually walk. She is never late.*\n\n## Saat\n*It's seven o'clock. It's half past three (3:30). It's quarter to nine (8:45).*",
+   "vocab": [
+    [
+     "get up",
+     "kalkmak"
+    ],
+    [
+     "have breakfast",
+     "kahvaltı yapmak"
+    ],
+    [
+     "go to school",
+     "okula gitmek"
+    ],
+    [
+     "come home",
+     "eve gelmek"
+    ],
+    [
+     "do homework",
+     "ödev yapmak"
+    ],
+    [
+     "watch TV",
+     "televizyon izlemek"
+    ],
+    [
+     "go to bed",
+     "yatmak"
+    ],
+    [
+     "always",
+     "her zaman"
+    ],
+    [
+     "sometimes",
+     "bazen"
+    ],
+    [
+     "never",
+     "asla"
+    ]
+   ],
+   "vs": [
+    [
+     "I usually get up at seven.",
+     "Genellikle yedide kalkarım."
+    ],
+    [
+     "She always has breakfast with her family.",
+     "O her zaman ailesiyle kahvaltı yapar."
+    ],
+    [
+     "We never watch TV in the morning"
+    ]
+   ],
+   "fill": [
+    [
+     "He ___ to work by bus.",
+     [
+      "go",
+      "goes",
+      "going"
+     ],
+     1
+    ],
+    [
+     "She ___ like coffee.",
+     [
+      "don't",
+      "doesn't",
+      "isn't"
+     ],
+     1
+    ],
+    [
+     "___ you play basketball?",
+     [
+      "Do",
+      "Does",
+      "Are"
+     ],
+     0
+    ],
+    [
+     "My brother ___ his homework after dinner.",
+     [
+      "do",
+      "does",
+      "doing"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Her sabah çay içerim.",
+     "I drink tea every morning",
+     [
+      "drinks",
+      "the"
+     ],
+     []
+    ],
+    [
+     "O asla geç kalmaz.",
+     "She is never late",
+     [
+      "never",
+      "does"
+     ],
+     [
+      "She's never late",
+      "He is never late",
+      "He's never late"
+     ]
+    ]
+   ],
+   "err": [
+    "She don't like fish",
+    1,
+    [
+     "doesn't",
+     "not",
+     "isn't"
+    ],
+    0,
+    "He / she / it ile olumsuzda \"doesn't\" kullanılır; \"don't\" I, you, we, they içindir. Doğrusu: She doesn't like fish."
+   ],
+   "sp": [
+    [
+     "I have breakfast at eight.",
+     "Sekizde kahvaltı yaparım."
+    ],
+    [
+     "What time do you go to bed?",
+     "Saat kaçta yatarsın?"
+    ],
+    [
+     "It's half past seven.",
+     "Saat yedi buçuk."
+    ]
+   ],
+   "dlg": [
+    "Bir arkadaşın hafta içi programını soruyor.",
+    null,
+    [
+     {
+      "who": "Sam",
+      "text": "What do you usually do after school?"
+     }
+    ],
+    [
+     "I usually do my homework and then I play football.",
+     "I am usually do homework.",
+     "Usually I doing homework."
+    ],
+    0,
+    "Rutinler için geniş zaman: \"I usually do …\". Sıklık zarfı fiilden önce gelir."
+   ],
+   "lc": [
+    [
+     "It's half past three",
+     [
+      "It's half past three",
+      "It's quarter past three",
+      "It's half past two"
+     ]
+    ],
+    [
+     "He takes a shower",
+     [
+      "He takes a shower",
+      "He takes a flower",
+      "He takes the car"
+     ]
+    ]
+   ],
+   "lt": [
+    "She works in a bank",
+    "I go to bed at ten"
+   ],
+   "game": "truefalse",
+   "story": "the-red-umbrella",
+   "talk": {
+    "key": "daily-routine",
+    "title": "Günün nasıl geçiyor?",
+    "emoji": "⏰",
+    "category": "daily",
+    "cefr_min": "A1",
+    "description": "Bir radyo programı için günlük rutinini anlatıyorsun.",
+    "system_prompt": "You are Maya, a cheerful radio host making a show called \"A Day in Your Life\". Ask the learner what time they get up, how they go to school or work, what they eat and what they do in the evening. Use A1 English, the present simple and adverbs of frequency.",
+    "opening_line": "Good morning and welcome to A Day in Your Life! So, what time do you usually get up?",
+    "goals": [
+     "Kaçta kalktığını söyle",
+     "Sıklık zarfıyla bir cümle kur (always, usually…)",
+     "Akşam ne yaptığını anlat"
+    ]
+   }
+  },
+  {
+   "title": "Evim",
+   "desc": "Ev, odalar, there is/are ve yer edatları",
+   "color": "#3A6FF7",
+   "guide": "## Evini anlat\nBu ünitede odaları ve eşyaları öğreneceksin. Bir yerde bir şeyin **var** olduğunu söylemek için **there is / there are** kullanılır.\n\n## There is / There are\n- Tekil: **There is** a sofa in the living room.\n- Çoğul: **There are** two bedrooms.\n- Olumsuz: *There isn't a garden. There aren't any chairs.*\n- Soru: *Is there a balcony? Are there any windows?*\n\n> Higo'nun ipucu: Türkçedeki \"var / yok\" çoğu zaman **there is / there are** ile karşılanır. \"Evimde balkon var\" → *There is a balcony in my house.*\n\n## Nerede? Yer edatları\n**in** (içinde) · **on** (üstünde) · **under** (altında) · **next to** (yanında) · **between** (arasında) · **behind** (arkasında) · **in front of** (önünde) · **opposite** (karşısında)\n\n*The cat is under the bed. The lamp is between the sofa and the window.*",
+   "vocab": [
+    [
+     "kitchen",
+     "mutfak"
+    ],
+    [
+     "bedroom",
+     "yatak odası"
+    ],
+    [
+     "bathroom",
+     "banyo"
+    ],
+    [
+     "living room",
+     "oturma odası"
+    ],
+    [
+     "sofa",
+     "kanepe"
+    ],
+    [
+     "table",
+     "masa"
+    ],
+    [
+     "chair",
+     "sandalye"
+    ],
+    [
+     "window",
+     "pencere"
+    ],
+    [
+     "under",
+     "altında"
+    ],
+    [
+     "next to",
+     "yanında"
+    ]
+   ],
+   "vs": [
+    [
+     "There is a big sofa in the living room.",
+     "Oturma odasında büyük bir kanepe var."
+    ],
+    [
+     "My bag is under the table.",
+     "Çantam masanın altında."
+    ],
+    [
+     "The lamp is next to the bed"
+    ]
+   ],
+   "fill": [
+    [
+     "There ___ a balcony in my flat.",
+     [
+      "is",
+      "are",
+      "be"
+     ],
+     0
+    ],
+    [
+     "There ___ three chairs in the kitchen.",
+     [
+      "is",
+      "are",
+      "am"
+     ],
+     1
+    ],
+    [
+     "The cat is sleeping ___ the sofa.",
+     [
+      "on",
+      "at",
+      "to"
+     ],
+     0
+    ],
+    [
+     "___ there a bathroom upstairs?",
+     [
+      "Are",
+      "Is",
+      "Does"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Mutfakta bir masa var.",
+     "There is a table in the kitchen",
+     [
+      "are",
+      "on"
+     ],
+     [
+      "There's a table in the kitchen"
+     ]
+    ],
+    [
+     "Kitaplar yatağın altında.",
+     "The books are under the bed",
+     [
+      "is",
+      "on"
+     ],
+     []
+    ]
+   ],
+   "err": [
+    "There are a big window in my room",
+    1,
+    [
+     "is",
+     "be",
+     "have"
+    ],
+    0,
+    "\"A big window\" tekil olduğu için \"there is\" kullanılır. Doğrusu: There is a big window in my room."
+   ],
+   "sp": [
+    [
+     "My bedroom is small but nice.",
+     "Yatak odam küçük ama güzel."
+    ],
+    [
+     "There are two windows in the living room.",
+     "Oturma odasında iki pencere var."
+    ],
+    [
+     "The bathroom is next to the kitchen.",
+     "Banyo mutfağın yanında."
+    ]
+   ],
+   "dlg": [
+    "Kiralık ev bakıyorsun. Emlakçı soruyor.",
+    null,
+    [
+     {
+      "who": "Agent",
+      "text": "Is there anything you need in the flat?"
+     }
+    ],
+    [
+     "Is there a balcony? I'd like a place for plants.",
+     "Have balcony?",
+     "There balcony is?"
+    ],
+    0,
+    "Bir şeyin var olup olmadığını sormak için \"Is there …?\" kalıbı kullanılır."
+   ],
+   "lc": [
+    [
+     "There are two bedrooms",
+     [
+      "There are two bedrooms",
+      "There are two bathrooms",
+      "There is a bedroom"
+     ]
+    ],
+    [
+     "The keys are on the table",
+     [
+      "The keys are on the table",
+      "The keys are under the table",
+      "The kids are on the table"
+     ]
+    ]
+   ],
+   "lt": [
+    "There is a cat in the garden",
+    "My room is next to the bathroom"
+   ],
+   "game": "scramble",
+   "story": {
+    "slug": "a-room-for-two",
+    "title": "A Room for Two",
+    "title_tr": "İki Kişilik Oda",
+    "category": "Günlük Hayat",
+    "summary": "Defne ve kardeşi yeni evde aynı odayı paylaşmak zorunda.",
+    "paragraphs": [
+     [
+      "Defne's family has got a new flat in Eskişehir. It is near the river. There are three bedrooms, a kitchen and a big living room.",
+      "Defne'nin ailesinin Eskişehir'de yeni bir dairesi var. Nehre yakın. Üç yatak odası, bir mutfak ve büyük bir oturma odası var."
+     ],
+     [
+      "But there is a problem. Grandma is coming to live with them, so Defne and her little brother Arda have one room.",
+      "Ama bir sorun var. Babaanne onlarla yaşamaya geliyor, bu yüzden Defne ve küçük kardeşi Arda'nın bir odası var."
+     ],
+     [
+      "\"My bed is next to the window!\" says Arda. \"No, my desk is there,\" says Defne. They are not happy.",
+      "\"Benim yatağım pencerenin yanında!\" diyor Arda. \"Hayır, benim masam orada,\" diyor Defne. Mutlu değiller."
+     ],
+     [
+      "Then Dad has an idea. He puts a big bookcase between the two beds. Now there are two small rooms in one. Arda and Defne laugh.",
+      "Sonra babanın aklına bir fikir geliyor. İki yatağın arasına büyük bir kitaplık koyuyor. Artık bir odada iki küçük oda var. Arda ve Defne gülüyor."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "flat",
+      "daire",
+      "We live in a flat."
+     ],
+     [
+      "near",
+      "yakın",
+      "My school is near my house."
+     ],
+     [
+      "between",
+      "arasında",
+      "The bank is between the shops."
+     ],
+     [
+      "idea",
+      "fikir",
+      "That is a good idea!"
+     ]
+    ],
+    "questions": [
+     {
+      "q": "How many bedrooms are there?",
+      "options": [
+       "Two",
+       "Three",
+       "Four"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "Who is coming to live with them?",
+      "options": [
+       "Grandma",
+       "An uncle",
+       "A cousin"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "gap",
+      "q": "Dad puts a big ___ between the beds.",
+      "options": [],
+      "answer": "bookcase",
+      "accept": [
+       "book case"
+      ]
+     }
+    ]
+   },
+   "talk": {
+    "key": "room-tour",
+    "title": "Odanı tanıt",
+    "emoji": "🛋️",
+    "category": "daily",
+    "cefr_min": "A1",
+    "description": "Görüntülü aramada yurt dışındaki arkadaşın evini merak ediyor.",
+    "system_prompt": "You are Noah, a pen pal from Dublin on a video call. Ask the learner to describe their home and their room: how many rooms, what is in their room, where things are. Use there is / there are and prepositions of place, A1 level.",
+    "opening_line": "Hey! Show me your room! What's in it?",
+    "goals": [
+     "There is / there are ile 2 cümle kur",
+     "Bir eşyanın yerini söyle (on, under, next to)",
+     "Noah'ya evi hakkında soru sor"
+    ]
+   }
+  },
+  {
+   "title": "Yemek ve Alışveriş",
+   "desc": "Yiyecekler, some/any ve fiyat sormak",
+   "color": "#22B573",
+   "guide": "## Mutfakta ve markette\nBu ünitede yiyecekleri, **sayılabilen / sayılamayan** isimleri ve alışverişte fiyat sormayı öğreneceksin.\n\n## Sayılabilen ve sayılamayan\n- Sayılabilen: *an apple, two eggs, three tomatoes*\n- Sayılamayan: *water, milk, bread, cheese, rice*. Bunlar **a / an** ya da **-s** almaz.\nSayılamayanı ölçmek için: *a glass of water, a bottle of milk, a piece of cake, a kilo of rice*.\n\n## some / any\n- Olumlu cümlede **some**: *There is some milk.*\n- Olumsuz ve soruda **any**: *There isn't any bread. Have we got any eggs?*\n- Bir şey teklif ederken **some**: *Would you like some tea?*\n\n## How much / How many\n- Sayılamayan: **How much** water? / Fiyat: **How much is it?**\n- Sayılabilen: **How many** eggs?\n\n> Higo'nun ipucu: Siparişte \"I want\" sert durur. Kibar hâli **I'd like …, please** ya da **Can I have …?**",
+   "vocab": [
+    [
+     "bread",
+     "ekmek"
+    ],
+    [
+     "cheese",
+     "peynir"
+    ],
+    [
+     "egg",
+     "yumurta"
+    ],
+    [
+     "milk",
+     "süt"
+    ],
+    [
+     "water",
+     "su"
+    ],
+    [
+     "apple",
+     "elma"
+    ],
+    [
+     "tomato",
+     "domates"
+    ],
+    [
+     "cheap",
+     "ucuz"
+    ],
+    [
+     "expensive",
+     "pahalı"
+    ],
+    [
+     "bottle",
+     "şişe"
+    ]
+   ],
+   "vs": [
+    [
+     "Can I have a bottle of water, please?",
+     "Bir şişe su alabilir miyim lütfen?"
+    ],
+    [
+     "Tomatoes are cheap today.",
+     "Domatesler bugün ucuz."
+    ],
+    [
+     "We need some bread and cheese"
+    ]
+   ],
+   "fill": [
+    [
+     "Is there ___ milk in the fridge?",
+     [
+      "some",
+      "any",
+      "a"
+     ],
+     1
+    ],
+    [
+     "I would ___ a sandwich, please.",
+     [
+      "like",
+      "likes",
+      "liking"
+     ],
+     0
+    ],
+    [
+     "How ___ apples do you want?",
+     [
+      "much",
+      "many",
+      "any"
+     ],
+     1
+    ],
+    [
+     "There is ___ cheese on the table.",
+     [
+      "some",
+      "any",
+      "an"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Bir kahve lütfen.",
+     "A coffee please",
+     [
+      "the",
+      "is"
+     ],
+     [
+      "A coffee, please",
+      "One coffee please",
+      "One coffee, please"
+     ]
+    ],
+    [
+     "Bu ne kadar?",
+     "How much is this",
+     [
+      "many",
+      "are"
+     ],
+     [
+      "How much is it",
+      "How much's this"
+     ]
+    ]
+   ],
+   "err": [
+    "I want two breads please",
+    3,
+    [
+     "loaves of bread",
+     "bread",
+     "breads"
+    ],
+    0,
+    "\"Bread\" sayılamayan bir isimdir, çoğul -s almaz. \"İki ekmek\" için \"two loaves of bread\" ya da \"two pieces of bread\" denir."
+   ],
+   "sp": [
+    [
+     "Can I have the bill, please?",
+     "Hesabı alabilir miyim?"
+    ],
+    [
+     "I'd like a cheese sandwich, please.",
+     "Peynirli sandviç istiyorum lütfen."
+    ],
+    [
+     "How much are the apples?",
+     "Elmalar ne kadar?"
+    ]
+   ],
+   "dlg": [
+    "Londra'da bir kafedesin. Sıra sende.",
+    "scenarios/order-at-a-cafe",
+    [
+     {
+      "who": "Barista",
+      "text": "Hi there! What can I get for you today?"
+     }
+    ],
+    [
+     "Give me one coffee.",
+     "I'd like a coffee, please.",
+     "I want coffee now."
+    ],
+    1,
+    "Siparişte \"I want\" biraz sert durur, \"Give me\" ise emir gibidir. Kibar hâli: I’d like … , please."
+   ],
+   "lc": [
+    [
+     "A glass of water, please",
+     [
+      "A glass of water, please",
+      "A class of water, please",
+      "A glass of wine, please"
+     ]
+    ],
+    [
+     "fifteen",
+     [
+      "fifty",
+      "fifteen",
+      "five"
+     ]
+    ]
+   ],
+   "lt": [
+    "How much is the cheese",
+    "I would like some eggs"
+   ],
+   "game": "cloze",
+   "story": {
+    "slug": "the-big-market-day",
+    "title": "Market Day",
+    "title_tr": "Pazar Günü",
+    "category": "Günlük Hayat",
+    "summary": "Emma, Türkiye'deki ilk semt pazarında alışveriş yapmaya çalışıyor.",
+    "paragraphs": [
+     [
+      "Emma is from Canada. She lives in Antalya now. Today is Wednesday, and Wednesday is market day.",
+      "Emma Kanadalı. Şimdi Antalya'da yaşıyor. Bugün çarşamba ve çarşamba pazar günü."
+     ],
+     [
+      "The market is very busy. There are tomatoes, oranges, cheese and olives everywhere. People are shouting prices.",
+      "Pazar çok kalabalık. Her yerde domates, portakal, peynir ve zeytin var. İnsanlar fiyatları bağırıyor."
+     ],
+     [
+      "Emma wants some oranges. \"How much are they?\" she asks. The man smiles. \"Thirty lira a kilo. Here, try one!\"",
+      "Emma biraz portakal istiyor. \"Ne kadar?\" diye soruyor. Adam gülümsüyor. \"Kilosu otuz lira. Buyrun, bir tane deneyin!\""
+     ],
+     [
+      "The orange is sweet. Emma buys two kilos and some white cheese. She says \"Teşekkürler!\" and the man is very happy.",
+      "Portakal tatlı. Emma iki kilo ve biraz beyaz peynir alıyor. \"Teşekkürler!\" diyor ve adam çok mutlu oluyor."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "busy",
+      "kalabalık, yoğun",
+      "The street is busy today."
+     ],
+     [
+      "price",
+      "fiyat",
+      "What is the price?"
+     ],
+     [
+      "try",
+      "denemek",
+      "Can I try this?"
+     ],
+     [
+      "sweet",
+      "tatlı",
+      "This cake is very sweet."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "What day is market day?",
+      "options": [
+       "Monday",
+       "Wednesday",
+       "Sunday"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "How much are the oranges?",
+      "options": [
+       "Thirty lira a kilo",
+       "Thirteen lira",
+       "Three lira"
+      ],
+      "answer": 0
+     },
+     {
+      "type": "truefalse",
+      "q": "Emma doesn't like the orange.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     }
+    ]
+   },
+   "talk": "order-at-a-cafe"
+  },
+  {
+   "title": "Şehirde",
+   "desc": "Yol tarifi, yerler ve can / can't",
+   "color": "#3AB0E6",
+   "guide": "## Şehirde kaybolma!\nBu ünitede şehirdeki yerleri, yol tarifini ve **can / can't** ile yetenek ve izin bildirmeyi öğreneceksin.\n\n## Yol tarifi\n- **Go straight on.** Düz git.\n- **Turn left / right.** Sola / sağa dön.\n- **Take the second street on the left.** Soldan ikinci sokağa gir.\n- **It's on your right / opposite the bank.** Sağında / bankanın karşısında.\n\nSormak için: *Excuse me, how can I get to the station? / Where is the nearest pharmacy?*\n\n> Higo'nun ipucu: İngilizcede yol tarifi hareket sırasına göre anlatılır, hedef en sona bırakılır.\n\n## can / can't\n- Yetenek: *I can swim. She can't drive.*\n- İzin ve rica: *Can I park here? Can you help me?*\n**can**'den sonra fiil yalın kalır: *He can speak English* (~~can speaks~~).",
+   "vocab": [
+    [
+     "station",
+     "istasyon"
+    ],
+    [
+     "pharmacy",
+     "eczane"
+    ],
+    [
+     "hospital",
+     "hastane"
+    ],
+    [
+     "bank",
+     "banka"
+    ],
+    [
+     "museum",
+     "müze"
+    ],
+    [
+     "street",
+     "sokak"
+    ],
+    [
+     "turn left",
+     "sola dön"
+    ],
+    [
+     "turn right",
+     "sağa dön"
+    ],
+    [
+     "go straight",
+     "düz git"
+    ],
+    [
+     "opposite",
+     "karşısında"
+    ]
+   ],
+   "vs": [
+    [
+     "The pharmacy is opposite the bank.",
+     "Eczane bankanın karşısında."
+    ],
+    [
+     "Go straight and turn left at the lights.",
+     "Düz git ve ışıklardan sola dön."
+    ],
+    [
+     "Where is the museum"
+    ]
+   ],
+   "fill": [
+    [
+     "She ___ speak three languages.",
+     [
+      "can",
+      "cans",
+      "is"
+     ],
+     0
+    ],
+    [
+     "I can ___ a bike.",
+     [
+      "ride",
+      "rides",
+      "riding"
+     ],
+     0
+    ],
+    [
+     "___ I sit here?",
+     [
+      "Can",
+      "Do",
+      "Am"
+     ],
+     0
+    ],
+    [
+     "Sorry, I ___ swim.",
+     [
+      "can't",
+      "don't can",
+      "not can"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Müze nerede?",
+     "Where is the museum",
+     [
+      "are",
+      "a"
+     ],
+     [
+      "Where's the museum"
+     ]
+    ],
+    [
+     "Bana yardım edebilir misin?",
+     "Can you help me",
+     [
+      "helps",
+      "to"
+     ],
+     [
+      "Could you help me"
+     ]
+    ]
+   ],
+   "err": [
+    "He can speaks English very well",
+    2,
+    [
+     "speak",
+     "speaking",
+     "to speak"
+    ],
+    0,
+    "\"Can\" kendisinden sonra yalın fiil ister; fiile -s eklenmez. Doğrusu: He can speak English very well."
+   ],
+   "sp": [
+    [
+     "Excuse me, how can I get to the station?",
+     "Affedersiniz, istasyona nasıl gidebilirim?"
+    ],
+    [
+     "It's on your right.",
+     "Sağ tarafınızda."
+    ],
+    [
+     "Is it far from here?",
+     "Buradan uzak mı?"
+    ]
+   ],
+   "dlg": [
+    "Bir turist sana yol soruyor.",
+    null,
+    [
+     {
+      "who": "Tourist",
+      "text": "Excuse me, where is the nearest pharmacy?"
+     }
+    ],
+    [
+     "Go straight on and turn right. It's opposite the bank.",
+     "Pharmacy there is.",
+     "You go pharmacy right."
+    ],
+    0,
+    "Yol tarifinde emir cümleleri kullanılır: Go straight on, turn right… Hedefi en sona bırak."
+   ],
+   "lc": [
+    [
+     "Turn left at the bank",
+     [
+      "Turn left at the bank",
+      "Turn right at the bank",
+      "Turn left at the park"
+     ]
+    ],
+    [
+     "Where is the bus stop",
+     [
+      "Where is the bus stop",
+      "Where is the bookshop",
+      "When is the bus"
+     ]
+    ]
+   ],
+   "lt": [
+    "Go straight on",
+    "The station is on your right"
+   ],
+   "game": "search",
+   "story": "mias-first-day-in-london",
+   "talk": {
+    "key": "ask-for-directions",
+    "title": "Yol tarifi",
+    "emoji": "🗺️",
+    "category": "travel",
+    "cefr_min": "A1",
+    "description": "İstanbul'da kaybolmuş bir turiste yol tarif et.",
+    "system_prompt": "You are Clara, a lost tourist from Spain in Istanbul near Sultanahmet. Ask the learner how to get to places: the tram stop, a pharmacy, the museum. Ask them to repeat if a direction is unclear. Use very simple A1 English with imperatives and \"can\".",
+    "opening_line": "Excuse me! Can you help me? I'm looking for the tram stop.",
+    "goals": [
+     "Düz git / sağa dön gibi 2 yön ver",
+     "Bir yer edatı kullan (opposite, next to)",
+     "Clara'ya \"can\" ile bir soru sor"
+    ]
+   }
+  },
+  {
+   "title": "Şu An",
+   "desc": "Şimdiki zaman, kıyafetler ve hava durumu",
+   "color": "#8F7CF8",
+   "guide": "## Şu anda ne oluyor?\nBu ünitede **Present Continuous** (şimdiki zaman), kıyafetler ve hava durumunu öğreneceksin.\n\n## Present Continuous\n**am / is / are + fiil-ing**: konuşma anında olan şeyler.\n*I am reading. She is wearing a red coat. They are playing football.*\n\nOlumsuz: *I'm not sleeping.* Soru: *Are you listening? What is he doing?*\n\n> Higo'nun ipucu: Geniş zaman alışkanlık, şimdiki zaman şu anı anlatır. *I usually wear jeans, but today I'm wearing a dress.*\n\n## -ing yazımı\n- *make → making* (sondaki e düşer)\n- *run → running, sit → sitting* (kısa fiillerde son harf ikilenir)\n\n## Hava durumu\n*It's sunny / rainy / cloudy / windy / snowing / hot / cold.*\n*What's the weather like? It's raining in Rize again!*",
+   "vocab": [
+    [
+     "coat",
+     "mont"
+    ],
+    [
+     "jacket",
+     "ceket"
+    ],
+    [
+     "shoes",
+     "ayakkabı"
+    ],
+    [
+     "dress",
+     "elbise"
+    ],
+    [
+     "T-shirt",
+     "tişört"
+    ],
+    [
+     "sunny",
+     "güneşli"
+    ],
+    [
+     "rainy",
+     "yağmurlu"
+    ],
+    [
+     "cold",
+     "soğuk"
+    ],
+    [
+     "wear",
+     "giymek"
+    ],
+    [
+     "weather",
+     "hava durumu"
+    ]
+   ],
+   "vs": [
+    [
+     "It's raining, so I'm wearing my coat.",
+     "Yağmur yağıyor, o yüzden montumu giyiyorum."
+    ],
+    [
+     "What is the weather like today?",
+     "Bugün hava nasıl?"
+    ],
+    [
+     "She is wearing a blue dress"
+    ]
+   ],
+   "fill": [
+    [
+     "Look! It ___ snowing.",
+     [
+      "is",
+      "are",
+      "am"
+     ],
+     0
+    ],
+    [
+     "They are ___ football in the park.",
+     [
+      "play",
+      "playing",
+      "plays"
+     ],
+     1
+    ],
+    [
+     "What ___ you doing now?",
+     [
+      "is",
+      "are",
+      "do"
+     ],
+     1
+    ],
+    [
+     "I ___ sleeping, I'm reading.",
+     [
+      "am not",
+      "not",
+      "don't"
+     ],
+     0
+    ]
+   ],
+   "tr": [
+    [
+     "Şu an yağmur yağıyor.",
+     "It is raining now",
+     [
+      "rains",
+      "are"
+     ],
+     [
+      "It's raining now"
+     ]
+    ],
+    [
+     "Ne yapıyorsun?",
+     "What are you doing",
+     [
+      "do",
+      "is"
+     ],
+     []
+    ]
+   ],
+   "err": [
+    "Listen! The baby cry",
+    3,
+    [
+     "is crying",
+     "cries",
+     "crying"
+    ],
+    0,
+    "\"Listen!\" konuşma anını gösterir, bu yüzden şimdiki zaman gerekir: The baby is crying."
+   ],
+   "sp": [
+    [
+     "It's very cold today.",
+     "Bugün hava çok soğuk."
+    ],
+    [
+     "I'm wearing my new shoes.",
+     "Yeni ayakkabılarımı giyiyorum."
+    ],
+    [
+     "What are you doing right now?",
+     "Şu anda ne yapıyorsun?"
+    ]
+   ],
+   "dlg": [
+    "Annen telefonla arıyor.",
+    null,
+    [
+     {
+      "who": "Mum",
+      "text": "Hi love! What are you doing?"
+     }
+    ],
+    [
+     "I'm studying English in my room.",
+     "I study English now my room.",
+     "I am study English."
+    ],
+    0,
+    "Konuşma anında yaptığın şey için \"I'm + fiil-ing\" kullanılır."
+   ],
+   "lc": [
+    [
+     "It's raining again",
+     [
+      "It's raining again",
+      "It's training again",
+      "It rains again"
+     ]
+    ],
+    [
+     "She is wearing a jacket",
+     [
+      "She is wearing a jacket",
+      "She is washing a jacket",
+      "She was wearing a jacket"
+     ]
+    ]
+   ],
+   "lt": [
+    "It is very sunny today",
+    "They are watching a film"
+   ],
+   "game": "listen",
+   "story": {
+    "slug": "snow-in-erzurum",
+    "title": "Snow in Erzurum",
+    "title_tr": "Erzurum'da Kar",
+    "category": "Seyahat",
+    "summary": "Antalyalı Burak hayatında ilk kez kar görüyor.",
+    "paragraphs": [
+     [
+      "Burak is from Antalya. It is always warm there. Today he is visiting his cousin Elif in Erzurum. It is January.",
+      "Burak Antalyalı. Orada hava hep sıcak. Bugün Erzurum'daki kuzeni Elif'i ziyaret ediyor. Ocak ayı."
+     ],
+     [
+      "Burak is looking out of the window. Everything is white. \"Elif! It's snowing!\" he shouts.",
+      "Burak pencereden dışarı bakıyor. Her yer bembeyaz. \"Elif! Kar yağıyor!\" diye bağırıyor."
+     ],
+     [
+      "\"Of course it's snowing,\" laughs Elif. \"It's Erzurum! Put on your coat, your hat and your boots. We're going outside.\"",
+      "\"Tabii ki kar yağıyor,\" diye gülüyor Elif. \"Burası Erzurum! Montunu, bereni ve botlarını giy. Dışarı çıkıyoruz.\""
+     ],
+     [
+      "Now they are making a snowman in the garden. Burak's hands are cold, but he is very happy. He is sending photos to his friends in Antalya.",
+      "Şimdi bahçede kardan adam yapıyorlar. Burak'ın elleri üşüyor ama çok mutlu. Antalya'daki arkadaşlarına fotoğraf gönderiyor."
+     ]
+    ],
+    "vocabulary": [
+     [
+      "warm",
+      "ılık, sıcak",
+      "The sea is warm in August."
+     ],
+     [
+      "shout",
+      "bağırmak",
+      "Don't shout, please."
+     ],
+     [
+      "put on",
+      "giymek, takmak",
+      "Put on your coat."
+     ],
+     [
+      "snowman",
+      "kardan adam",
+      "The children are making a snowman."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where is Burak from?",
+      "options": [
+       "Erzurum",
+       "Antalya",
+       "Rize"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "What are they making?",
+      "options": [
+       "A cake",
+       "A snowman",
+       "A video"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "truefalse",
+      "q": "Burak is unhappy because his hands are cold.",
+      "options": [
+       "Doğru",
+       "Yanlış"
+      ],
+      "answer": 1
+     }
+    ]
+   },
+   "talk": {
+    "key": "video-call-now",
+    "title": "Şu an neredesin?",
+    "emoji": "📱",
+    "category": "daily",
+    "cefr_min": "A1",
+    "description": "Arkadaşın görüntülü arıyor: nerede olduğunu, ne giydiğini, havayı anlat.",
+    "system_prompt": "You are Zoe, a friend from New York on a video call. Ask the learner where they are, what they are doing right now, what they are wearing and what the weather is like there. Compare with the weather in New York. Use the present continuous, A1 level.",
+    "opening_line": "Hi! I can see you! Where are you right now? What are you doing?",
+    "goals": [
+     "Şu an ne yaptığını söyle",
+     "Ne giydiğini anlat",
+     "Havanın nasıl olduğunu söyle"
+    ]
+   }
+  },
+  {
+   "title": "Hafta Sonum",
+   "desc": "Hobiler, like + -ing ve A1 tekrarı",
+   "color": "#FF7FB0",
+   "guide": "## Boş zamanında ne yaparsın?\nSon ünitede hobileri, sevdiklerini anlatmayı öğrenecek ve A1'in tamamını tekrar edeceksin. Ünite sonunda **A1 seviye sınavı** var.\n\n## like / love / hate + -ing\n*I like reading. She loves dancing. They hate waking up early.*\n**enjoy** ve **don't mind** da -ing alır: *I enjoy cooking. I don't mind walking.*\n\n## Sorular için soru kelimeleri\n**What** (ne) · **Where** (nerede) · **When** (ne zaman) · **Who** (kim) · **Why** (neden) · **How** (nasıl) · **How often** (ne sıklıkla)\n\n*What do you do at the weekend? How often do you go swimming?*\n\n> Higo'nun ipucu: Sınavdan önce Kelime defterindeki kelimelerini bir kez tekrar et. Unuttuğun kelimeler kendiliğinden öne gelir.\n\n## A1'de neler öğrendin?\nto be · have got · this/that · present simple · there is/are · some/any · can · present continuous · like + -ing",
+   "vocab": [
+    [
+     "hobby",
+     "hobi"
+    ],
+    [
+     "swimming",
+     "yüzme"
+    ],
+    [
+     "dancing",
+     "dans etmek"
+    ],
+    [
+     "cooking",
+     "yemek yapmak"
+    ],
+    [
+     "reading",
+     "okumak"
+    ],
+    [
+     "playing games",
+     "oyun oynamak"
+    ],
+    [
+     "weekend",
+     "hafta sonu"
+    ],
+    [
+     "enjoy",
+     "keyif almak"
+    ],
+    [
+     "hate",
+     "nefret etmek"
+    ],
+    [
+     "free time",
+     "boş zaman"
+    ]
+   ],
+   "vs": [
+    [
+     "I love reading in my free time.",
+     "Boş zamanımda okumayı çok severim."
+    ],
+    [
+     "We enjoy cooking at the weekend.",
+     "Hafta sonu yemek yapmaktan keyif alırız."
+    ],
+    [
+     "My brother hates waking up early"
+    ]
+   ],
+   "fill": [
+    [
+     "I like ___ to music.",
+     [
+      "listen",
+      "listening",
+      "listens"
+     ],
+     1
+    ],
+    [
+     "She ___ swimming in the sea.",
+     [
+      "love",
+      "loves",
+      "loving"
+     ],
+     1
+    ],
+    [
+     "___ do you go to the cinema? Once a month.",
+     [
+      "How often",
+      "How much",
+      "What"
+     ],
+     0
+    ],
+    [
+     "They enjoy ___ games online.",
+     [
+      "play",
+      "playing",
+      "to playing"
+     ],
+     1
+    ]
+   ],
+   "tr": [
+    [
+     "Hafta sonu yemek yapmayı severim.",
+     "I like cooking at the weekend",
+     [
+      "cook",
+      "in"
+     ],
+     [
+      "I like to cook at the weekend",
+      "I love cooking at the weekend"
+     ]
+    ],
+    [
+     "Boş zamanında ne yaparsın?",
+     "What do you do in your free time",
+     [
+      "are",
+      "does"
+     ],
+     []
+    ]
+   ],
+   "err": [
+    "I enjoy swim in summer",
+    2,
+    [
+     "swimming",
+     "swims",
+     "to swimming"
+    ],
+    0,
+    "\"Enjoy\" kendisinden sonra -ing ister: I enjoy swimming in summer."
+   ],
+   "sp": [
+    [
+     "At the weekend I usually meet my friends.",
+     "Hafta sonları genellikle arkadaşlarımla buluşurum."
+    ],
+    [
+     "My favourite hobby is drawing.",
+     "En sevdiğim hobi resim çizmek."
+    ],
+    [
+     "I don't like getting up early.",
+     "Erken kalkmayı sevmem."
+    ]
+   ],
+   "dlg": [
+    "Yeni tanıştığın biri hobilerini soruyor.",
+    null,
+    [
+     {
+      "who": "Leo",
+      "text": "So, what do you like doing in your free time?"
+     }
+    ],
+    [
+     "I love playing basketball and I enjoy reading comics.",
+     "I like play basketball.",
+     "I am liking basketball play."
+    ],
+    0,
+    "\"Like / love / enjoy\" + fiil-ing en doğal kalıptır: I love playing …"
+   ],
+   "lc": [
+    [
+     "She loves dancing",
+     [
+      "She loves dancing",
+      "She loves dance",
+      "She loved dancing"
+     ]
+    ],
+    [
+     "How often do you swim",
+     [
+      "How often do you swim",
+      "How often do you sing",
+      "How old are you"
+     ]
+    ]
+   ],
+   "lt": [
+    "I like reading books",
+    "What do you do at the weekend"
+   ],
+   "game": "kelimle",
+   "story": {
+    "slug": "the-saturday-club",
+    "title": "The Saturday Club",
+    "title_tr": "Cumartesi Kulübü",
+    "category": "Eğlence",
+    "summary": "Dört arkadaş her cumartesi farklı bir hobi deniyor.",
+    "paragraphs": [
+     [
+      "Every Saturday, four friends meet at the park in Bursa: Ece, Can, Melis and Kaan. They call it \"The Saturday Club\".",
+      "Her cumartesi dört arkadaş Bursa'daki parkta buluşuyor: Ece, Can, Melis ve Kaan. Buna \"Cumartesi Kulübü\" diyorlar."
+     ],
+     [
+      "The rule is simple: every week, one person chooses a hobby and the others try it. Last week it was Can's turn. They played chess.",
+      "Kural basit: her hafta bir kişi bir hobi seçiyor, diğerleri de deniyor. Geçen hafta sıra Can'daydı. Satranç oynadılar."
+     ],
+     [
+      "This week it is Melis's turn. She loves dancing, but Kaan hates it. \"I can't dance!\" he says. \"You can learn,\" says Melis.",
+      "Bu hafta sıra Melis'te. Melis dans etmeyi çok seviyor ama Kaan nefret ediyor. \"Ben dans edemem!\" diyor. \"Öğrenebilirsin,\" diyor Melis."
+     ],
+     [
+      "At the end of the day, Kaan is the best dancer. \"Okay,\" he says, \"I don't hate dancing now. But next week we are cooking. My turn!\"",
+      "Günün sonunda en iyi dansçı Kaan. \"Tamam,\" diyor, \"artık danstan nefret etmiyorum. Ama gelecek hafta yemek yapıyoruz. Sıra bende!\""
+     ]
+    ],
+    "vocabulary": [
+     [
+      "meet",
+      "buluşmak",
+      "Let's meet at five."
+     ],
+     [
+      "rule",
+      "kural",
+      "What are the rules?"
+     ],
+     [
+      "choose",
+      "seçmek",
+      "Choose a colour."
+     ],
+     [
+      "turn",
+      "sıra",
+      "It's your turn."
+     ]
+    ],
+    "questions": [
+     {
+      "q": "Where do the friends meet?",
+      "options": [
+       "At school",
+       "At the park",
+       "At Kaan's house"
+      ],
+      "answer": 1
+     },
+     {
+      "q": "What did they do last week?",
+      "options": [
+       "They danced",
+       "They played chess",
+       "They cooked"
+      ],
+      "answer": 1
+     },
+     {
+      "type": "gap",
+      "q": "Next week they are ___.",
+      "options": [],
+      "answer": "cooking",
+      "accept": []
+     }
+    ]
+   },
+   "talk": {
+    "key": "weekend-plans-chat",
+    "title": "Hafta sonu ne yapalım?",
+    "emoji": "🎳",
+    "category": "fun",
+    "cefr_min": "A1",
+    "description": "Arkadaşınla hafta sonu için bir etkinlik seçiyorsunuz.",
+    "system_prompt": "You are Max, a fun friend planning the weekend. Ask the learner what they like and don't like doing, suggest activities (cinema, bowling, a picnic) and agree on one. Use like/love/hate + -ing and simple questions, A1 level.",
+    "opening_line": "It's Friday! What do you like doing at the weekend? I'm bored!",
+    "goals": [
+     "Sevdiğin bir şeyi -ing ile söyle",
+     "Sevmediğin bir şeyi söyle",
+     "Bir etkinlikte anlaşın"
+    ]
+   },
+   "checkpoint": true
+  }
+ ]
+}

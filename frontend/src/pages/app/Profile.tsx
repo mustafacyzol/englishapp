@@ -21,7 +21,8 @@ import { BRAND } from '@/lib/brand'
 
 /** Kept for other screens: the profile picture at the large profile size. */
 export function Avatar({ name, avatar, frame, size = 'size-24' }: { name: string; avatar?: string | null; frame?: string | null; size?: string }) {
-  return <UserAvatar name={name} avatar={avatar} frame={frame} className={clsx('border-4 border-card text-4xl shadow-lg', size)} rounded="rounded-[28px]" />
+  // framed: the ring is the edge; plain: a soft shadow only (no white outline around the photo)
+  return <UserAvatar name={name} avatar={avatar} frame={frame} className={clsx(frame ? 'drop-shadow-[0_10px_18px_rgba(31,36,51,.28)]' : 'shadow-[0_10px_24px_-8px_rgba(31,36,51,.45)]', 'rounded-full', size)} rounded="rounded-full" />
 }
 
 export default function Profile() {
@@ -50,7 +51,7 @@ export default function Profile() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <section className="ink-card relative mb-6 overflow-hidden">
+      <section className={clsx('ink-card relative mb-6 overflow-hidden', user.premium.active && 'premium-edge')}>
         {/* the cover is only a picture: nothing sits on it except a small "change cover" chip */}
         <div className="relative">
           <ProfileBanner banner={user.banner} className="h-32 sm:h-40" />
@@ -60,7 +61,7 @@ export default function Profile() {
         </div>
         <div className="px-5 pb-6 sm:px-6">
           <div className="-mt-12 flex items-end gap-4">
-            <button onClick={() => setPicker('avatar')} className="group relative shrink-0 rounded-[28px] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/30" aria-label="Avatarını değiştir">
+            <button onClick={() => setPicker('avatar')} className="group relative shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/30" aria-label="Avatarını değiştir">
               <Avatar name={user.name} avatar={user.avatar} frame={user.frame} />
               <span className="absolute -bottom-1 -right-1 grid size-9 place-items-center rounded-full border-4 border-card bg-ink text-paper transition group-hover:scale-110"><Pencil className="size-3.5" /></span>
             </button>
@@ -68,7 +69,10 @@ export default function Profile() {
 
           <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div className="min-w-0">
-              <h1 className="text-3xl font-extrabold leading-tight">{user.name}</h1>
+              <h1 className="flex items-center gap-2 text-3xl font-extrabold leading-tight">
+                <span className={clsx('min-w-0 truncate', user.premium.active && 'premium-name')}>{user.name}</span>
+                {user.premium.active && <Img src={img('rewards/crown.webp')} alt="Premium" className="size-7 shrink-0 drop-shadow" />}
+              </h1>
               <p className="font-semibold text-ink-soft">@{user.username} · {dateTR(user.created_at)} tarihinden beri</p>
             </div>
             {/* one primary action, two quiet ones, all below the cover */}
@@ -84,7 +88,7 @@ export default function Profile() {
           <div className="mt-3 flex flex-wrap gap-2">
             <span className="ink-chip py-0.5">{user.cefr_level}</span>
             <span className="ink-chip py-0.5">Seviye {user.stats.level}</span>
-            {user.premium.active && <span className="ink-chip bg-butter/30 py-0.5 text-ink"><Img src={img('rewards/crown.webp')} alt="" className="size-4" /> Premium</span>}
+            {user.premium.active && <span className="inline-flex items-center gap-1.5 rounded-full bg-[linear-gradient(135deg,#1f2433,#3a3226)] px-3 py-1 text-xs font-black uppercase tracking-[0.18em] text-[#f7d774] shadow-[inset_0_0_0_1px_rgba(247,215,116,.45)]">★ Premium</span>}
           </div>
           <div className="mt-5">
             <div className="mb-1 flex justify-between text-xs font-bold text-ink-soft"><span>Seviye {user.stats.level}</span><span>{num(user.stats.xp_total)} / {num(user.stats.level_ceil)} XP</span></div>
