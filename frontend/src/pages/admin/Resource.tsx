@@ -164,6 +164,30 @@ const CONFIG: Record<string, Cfg> = {
     fields: [{ key: 'status', label: 'Durum', type: 'select', options: ['new', 'replied', 'closed'] }, { key: 'admin_note', label: 'İç not', type: 'textarea', full: true }],
     defaults: { status: 'new' },
   },
+  'school-applications': {
+    title: 'Okul başvuruları',
+    noCreate: true,
+    intro: <p className="mb-5 max-w-2xl text-sm text-ink-soft">"Okullar için" sayfasındaki formdan gelen başvurular. Arayınca durumu güncelle; anlaşma olunca <b>Okul, kurs ve şirketler</b> bölümünden okulu aç.</p>,
+    cols: [
+      { key: 'school_name', label: 'Okul' },
+      { key: 'city', label: 'Şehir' },
+      { key: 'students', label: 'Öğrenci' },
+      { key: 'contact_name', label: 'Yetkili' },
+      { key: 'created_at', label: 'Tarih', render: (r) => String(r.created_at ?? '').slice(0, 10) },
+      { key: 'status', label: 'Durum', render: (r) => <Pill tone={r.status === 'new' ? 'warn' : r.status === 'won' ? 'good' : undefined}>{({ new: 'yeni', contacted: 'arandı', demo: 'demo', won: 'anlaşıldı', lost: 'olmadı' } as Record<string, string>)[String(r.status)] ?? String(r.status)}</Pill> },
+    ],
+    preview: (r) => (
+      <div className="mb-5 grid gap-1 rounded-2xl bg-paper-2 p-4 text-sm">
+        <p className="font-bold">{String(r.school_name)} · {String(r.city)}{r.district ? ` / ${r.district}` : ''} · {String(r.school_type)} · {String(r.students)} öğrenci</p>
+        <p>{String(r.contact_name)} ({String(r.contact_role)}) · <a className="text-sky underline" href={`mailto:${r.email}`}>{String(r.email)}</a> · <a className="text-sky underline" href={`tel:${r.phone}`}>{String(r.phone)}</a></p>
+        {Array.isArray(r.grades) && r.grades.length > 0 && <p>Sınıflar: {(r.grades as number[]).join(', ')}</p>}
+        {Array.isArray(r.interests) && r.interests.length > 0 && <p>İlgi: {(r.interests as string[]).join(', ')}</p>}
+        {!!r.message && <p className="mt-2 whitespace-pre-line">{String(r.message)}</p>}
+      </div>
+    ),
+    fields: [{ key: 'status', label: 'Durum', type: 'select', options: ['new', 'contacted', 'demo', 'won', 'lost'] }, { key: 'admin_note', label: 'İç not', type: 'textarea', full: true }],
+    defaults: { status: 'new' },
+  },
   institutions: {
     title: 'Kurumlar',
     intro: (

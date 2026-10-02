@@ -116,21 +116,22 @@ function MobileBanner({ slides }: { slides: Slide[] }) {
   )
 }
 
-export function AuthShell({ title, subtitle, children, footer, wide, slides = LOGIN_SLIDES, aside, banner = true, lead }: { lead?: ReactNode; title: ReactNode; subtitle?: ReactNode; children: ReactNode; footer?: ReactNode; wide?: boolean; slides?: Slide[]; aside?: ReactNode; banner?: boolean }) {
+export function AuthShell({ title, subtitle, children, footer, wide, slides = LOGIN_SLIDES, aside, banner = true, lead, enter }: { lead?: ReactNode; title: ReactNode; subtitle?: ReactNode; children: ReactNode; footer?: ReactNode; wide?: boolean; slides?: Slide[]; aside?: ReactNode; banner?: boolean; enter?: boolean }) {
   return (
     <div className="grid min-h-dvh bg-card lg:h-dvh lg:grid-cols-[1fr_1fr] xl:grid-cols-[1.1fr_1fr]">
-      {aside ?? <Showcase slides={slides} />}
-      <main className="flex flex-col px-5 py-6 sm:px-10 lg:overflow-y-auto">
+      {/* after the full-screen hello, the left panel grows in from the left and the form slides in from the right */}
+      {enter ? <motion.div className="contents lg:flex lg:min-h-0 lg:flex-col lg:[&>*]:flex-1" initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}>{aside ?? <Showcase slides={slides} />}</motion.div> : aside ?? <Showcase slides={slides} />}
+      <main className="flex flex-col px-5 py-3 sm:px-10 sm:py-6 lg:overflow-y-auto">
         <div className="flex items-center justify-between">
           <Link to="/" className="lg:invisible"><Logo small /></Link>
           <LangSelect />
         </div>
-        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className={`mx-auto my-auto w-full py-8 ${wide ? 'max-w-xl' : 'max-w-md'}`}>
+        <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }} className={`mx-auto my-auto w-full py-4 sm:py-8 [@media(max-height:680px)]:py-2 ${wide ? 'max-w-xl' : 'max-w-md'}`}>
           {banner && <MobileBanner slides={slides} />}
           {lead}
-          <h1 className="text-3xl sm:text-4xl">{title}</h1>
-          {subtitle && <p className="mt-2 text-lg text-ink-soft">{subtitle}</p>}
-          <div className="mt-8">{children}</div>
+          <h1 className="text-[26px] leading-tight sm:text-4xl [@media(max-height:680px)]:text-[22px]">{title}</h1>
+          {subtitle && <p className="mt-2 text-[15px] text-ink-soft sm:text-lg [@media(max-height:700px)]:hidden">{subtitle}</p>}
+          <div className="mt-5 sm:mt-8 [@media(max-height:680px)]:mt-3">{children}</div>
           {footer && <div className="mt-8 text-center font-semibold text-ink-soft">{footer}</div>}
         </motion.div>
       </main>

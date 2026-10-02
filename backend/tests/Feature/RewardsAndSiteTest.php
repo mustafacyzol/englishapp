@@ -64,4 +64,20 @@ class RewardsAndSiteTest extends TestCase
             ->assertCreated();
         $this->assertSame(1, ContactMessage::query()->count());
     }
+
+    public function test_school_application_is_stored_and_sales_hear_about_it(): void
+    {
+        Mail::fake();
+        $form = ['school_name' => 'Atatürk Ortaokulu', 'city' => 'İzmir', 'school_type' => 'ortaokul', 'students' => 420, 'grades' => [5, 6, 7, 8],
+            'contact_name' => 'Ayşe Yılmaz', 'contact_role' => 'mudur', 'email' => 'Ayse@Okul.k12.tr', 'phone' => '0532 000 00 00', 'interests' => ['lgs', 'odev']];
+        $this->postJson('/api/v1/schools/apply', $form)->assertStatus(422)->assertJsonValidationErrors('kvkk');
+        $this->postJson('/api/v1/schools/apply', ['kvkk' => true, 'interests' => ['hack']] + $form)->assertStatus(422);
+        $this->postJson('/api/v1/schools/apply', ['kvkk' => true, 'website' => 'x'] + $form)->assertStatus(422);
+        $this->postJson('/api/v1/schools/apply', $form + ['kvkk' => true])->assertCreated();
+        $app = \App\Models\SchoolApplication::query()->sole();
+        $this->assertSame('ayse@okul.k12.tr', $app->email);
+        $this->assertSame([5, 6, 7, 8], $app->grades);
+        $this->assertSame('new', $app->status);
+        Mail::assertQueued(\App\Mail\NoticeMail::class);
+    }
 }

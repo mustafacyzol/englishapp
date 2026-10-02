@@ -55,7 +55,7 @@ class Settings
         'corporate.note' => 'Öğrenci sayısına göre fiyatlandırılır',
         'corporate.features' => "Müdür ve öğretmen panelleri\nSınıflar, ödev verme ve takip\nLGS ve YKS-YDT hazırlığı\nTüm öğrencilere Premium özellikler\nOkulunuzun logosu ve rengi",
         'corporate.cta' => 'Okulunuz için teklif alın',
-        'corporate.url' => '/okullar',
+        'corporate.url' => '/okullar#basvuru',
         // Economy
         'gamification.daily_chest' => true,
         'auth.remember_days' => 'dilgo.security.token_ttl_days',

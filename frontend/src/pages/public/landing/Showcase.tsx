@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 
 import { animate, AnimatePresence, motion, useInView, useMotionValue, useReducedMotion, useScroll, useSpring, useTime, useTransform, useVelocity, type MotionValue } from 'motion/react'
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Building2, Check, Crown, Sparkles } from 'lucide-react'
+import { ArrowRight, Check, Crown } from 'lucide-react'
 import { useSiteConfig } from '@/lib/site'
 import { rewardImg, img, PHOTO } from '@/lib/assets'
 import { tl } from '@/lib/format'
@@ -591,25 +591,32 @@ export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, ha
 function CorporateCard({ c }: { c: NonNullable<NonNullable<ReturnType<typeof useSiteConfig>['data']>['site']>['corporate'] & object }) {
   const features = (c.features ?? '').split('\n').map((f) => f.trim()).filter(Boolean)
   const external = /^https?:/.test(c.url ?? '')
-  const btn = 'press inline-flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-ink px-6 font-display font-extrabold uppercase tracking-wide text-paper shadow-hard-sm lg:w-auto'
+  const btn = 'press inline-flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-ink px-7 font-display font-extrabold uppercase tracking-wide text-paper shadow-[0_4px_0_0_#000] lg:w-auto'
+  // Same family as the plan cards: one border, the card colour, plain checks. A real
+  // teacher and Higo instead of icons, a class strip instead of decoration.
   return (
-    <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.5, ease }} className="relative mt-5 overflow-hidden rounded-[28px] border-2 border-line bg-card">
-      <span aria-hidden className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-sage to-mint" />
-      <div className="grid items-center gap-6 p-6 pl-8 lg:grid-cols-[1fr_1.5fr_auto] lg:gap-10">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="grid size-9 place-items-center rounded-xl bg-sage/15 text-sage-deep dark:text-sage"><Building2 className="size-5" /></span>
-            <p className="font-display text-xl font-black">{c.name}</p>
-            <span className="rounded-full bg-sage/15 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-sage-deep dark:text-sage">Okul paneli</span>
+    <motion.div initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.5, ease }} className="relative mt-6 rounded-[28px] bg-line p-[2px]">
+      <div className="grid items-center gap-7 rounded-[26px] bg-card p-6 sm:p-7 lg:grid-cols-[auto_1fr_auto] lg:gap-10">
+        <div className="flex items-center gap-4 lg:flex-col lg:items-start">
+          <div className="relative shrink-0">
+            <img src={img('schools/teacher.webp')} alt="" className="size-20 rounded-[22px] object-cover" />
+            <img src={higoImg('point')} alt="" className="absolute -bottom-3 -right-5 w-12 drop-shadow-[0_6px_8px_rgba(160,40,10,.25)]" />
           </div>
-          {c.tagline && <p className="mt-2 text-sm text-ink-soft">{c.tagline}</p>}
-          <p className="mt-3 font-display text-3xl font-black tracking-tight">{c.price}</p>
-          {c.note && <p className="text-sm font-bold text-ink-soft">{c.note}</p>}
+          <div>
+            <p className="font-display text-xl font-black">{c.name}</p>
+            {c.tagline && <p className="max-w-[240px] text-sm text-ink-soft">{c.tagline}</p>}
+          </div>
         </div>
-        <ul className="grid gap-2.5 sm:grid-cols-2">
-          {features.map((f) => <li key={f} className="flex gap-2.5 text-[14px]"><span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-sage/15 text-sage-deep dark:text-sage"><Check className="size-3" strokeWidth={3.5} /></span>{f}</li>)}
-        </ul>
-        {external ? <a href={c.url!} target="_blank" rel="noopener" className={btn}>{c.cta || 'Teklif al'} <ArrowRight className="size-4" /></a> : <Link to={c.url || '/contact?konu=corporate'} className={btn}>{c.cta || 'Teklif al'} <ArrowRight className="size-4" /></Link>}
+        <div>
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <p className="font-display text-[2rem] font-black leading-none tracking-tight">{c.price}</p>
+            {c.note && <p className="text-sm font-bold text-ink-soft">{c.note}</p>}
+          </div>
+          <ul className="mt-4 grid gap-2.5 sm:grid-cols-2">
+            {features.map((f) => <li key={f} className="flex gap-2.5 text-[14px]"><span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-paper-2 text-ink"><Check className="size-3" strokeWidth={3.5} /></span>{f}</li>)}
+          </ul>
+        </div>
+        {external ? <a href={c.url!} target="_blank" rel="noopener" className={btn}>{c.cta || 'Teklif alın'} <ArrowRight className="size-4" /></a> : <Link to={c.url || '/okullar#basvuru'} className={btn}>{c.cta || 'Teklif alın'} <ArrowRight className="size-4" /></Link>}
       </div>
     </motion.div>
   )
@@ -635,7 +642,7 @@ function PriceCard({ name, tagline, price, was, note, badge, features, cta, feat
         <p className="mt-1.5 text-sm font-bold text-ink-soft">{note}</p>
         <ul className="mt-5 flex-1 space-y-2.5">
           {features.map((f) => (
-            <li key={f} className="flex gap-2.5 text-[14px]"><span className={clsx('mt-0.5 grid size-5 shrink-0 place-items-center rounded-full', featured ? 'bg-flame text-white' : 'bg-paper-2 text-ink')}>{featured ? <Sparkles className="size-3" /> : <Check className="size-3" strokeWidth={3.5} />}</span>{f}</li>
+            <li key={f} className="flex gap-2.5 text-[14px]"><span className={clsx('mt-0.5 grid size-5 shrink-0 place-items-center rounded-full', featured ? 'bg-flame text-white' : 'bg-paper-2 text-ink')}><Check className="size-3" strokeWidth={3.5} /></span>{f}</li>
           ))}
         </ul>
         <div className="mt-7">{cta}</div>

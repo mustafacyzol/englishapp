@@ -54,6 +54,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
   ] },
   { title: 'Kurumlar', items: [
     { to: '/admin/r/institutions', label: 'Okul, kurs ve şirketler', icon: Building2, perm: 'institutions' },
+    { to: '/admin/r/school-applications', label: 'Okul başvuruları', icon: Send, perm: 'institutions' },
   ] },
   { title: 'Pazarlama ve iletişim', items: [
     { to: '/admin/r/newsletter-subscribers', label: 'Bülten', icon: Send, perm: 'marketing' },

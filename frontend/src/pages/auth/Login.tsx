@@ -51,7 +51,7 @@ export default function Login() {
 
   return (
     <div className="auth-backdrop relative flex min-h-dvh flex-col overflow-hidden">
-      <header className="relative z-10 flex items-center justify-between px-5 py-3 sm:px-8">
+      <header className="relative z-10 flex items-center justify-between px-4 py-2.5 sm:px-8 sm:py-3">
         <Link to="/" aria-label={`${BRAND} ana sayfa`}><Logo small /></Link>
         <div className="flex items-center gap-3">
           <span className="hidden text-sm font-bold text-ink-soft sm:inline">{t('Hesabın yok mu?')}</span>
@@ -61,36 +61,38 @@ export default function Login() {
         </div>
       </header>
 
-      <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-6 pt-2">
+      <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-4 pt-1">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[420px]">
-          <div className="rounded-[28px] border-2 border-line bg-card p-5 shadow-soft sm:p-7">
-            {/* Higo and his greeting sit inside the card, as one tidy header */}
-            <div className="mb-6 flex items-center gap-3 rounded-2xl bg-paper-2/70 p-3 pr-4">
-              <motion.img
-                src={higoImg('wave')}
-                alt=""
-                aria-hidden
-                className="size-16 shrink-0 object-contain"
-                initial={{ scale: 0.6, rotate: -10, opacity: 0 }}
-                animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                transition={{ type: 'spring', stiffness: 320, damping: 16 }}
-              />
-              <div className="min-w-0">
-                <p className="text-xs font-black uppercase tracking-[0.16em] text-flame">{t('Seni özledim!')}</p>
-                <h1 className="font-display text-[24px] font-black leading-tight">{t('Tekrar hoş geldin')}</h1>
-                <p className="text-sm text-ink-soft">{t('Hesabına giriş yap ve kaldığın yerden devam et.')}</p>
+          <div className="rounded-[28px] border-2 border-line bg-card p-5 shadow-soft sm:p-7 [@media(max-height:680px)]:py-4">
+            {/* Higo with a small speech bubble, then one short heading: fits any phone */}
+            <div className="mb-5 flex flex-col items-center text-center [@media(max-height:680px)]:mb-3">
+              <div className="relative [@media(max-height:680px)]:hidden">
+                <motion.img
+                  src={higoImg('wave')}
+                  alt=""
+                  aria-hidden
+                  className="size-16 object-contain"
+                  initial={{ scale: 0.6, rotate: -10, opacity: 0 }}
+                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                  transition={{ type: 'spring', stiffness: 320, damping: 16 }}
+                />
+                <motion.span initial={{ opacity: 0, scale: 0.6, x: -6 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ delay: 0.25, type: 'spring', stiffness: 380, damping: 18 }}
+                  className="absolute -right-2 top-0 translate-x-full whitespace-nowrap rounded-2xl rounded-bl-md bg-flame px-2.5 py-1 text-xs font-black text-white">
+                  {t('Seni özledim!')}
+                </motion.span>
               </div>
+              <h1 className="mt-1 font-display text-[26px] font-black leading-tight">{t('Tekrar hoş geldin')}</h1>
             </div>
 
             <SocialButtons onDone={done} remember={remember} compact />
 
-            <div className="my-5 flex items-center gap-3 text-xs font-black uppercase tracking-widest text-ink-soft">
+            <div className="my-4 flex items-center gap-3 text-xs font-black uppercase tracking-widest text-ink-soft">
               <span className="h-0.5 flex-1 rounded bg-line" />
               {t('veya e-posta ile')}
               <span className="h-0.5 flex-1 rounded bg-line" />
             </div>
 
-            <form onSubmit={submit} className="space-y-3.5">
+            <form onSubmit={submit} className="space-y-3">
               {err && <Alert tone="error">{err.first()}</Alert>}
               <Input label={t('E-posta veya kullanıcı adı')} autoComplete="username" value={login} onChange={(e) => setLogin(e.target.value)} required autoFocus />
               <Input label={t('Şifre')} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />
@@ -107,7 +109,7 @@ export default function Login() {
               <Turnstile onToken={setCaptcha} />
               <Button type="submit" block size="lg" loading={m.isPending}>{t('Giriş yap')}</Button>
             </form>
-            <p className="mt-4 text-center text-xs leading-relaxed text-ink-soft">
+            <p className="mt-3 text-center text-[11px] leading-relaxed text-ink-soft">
               {BRAND}'da oturum açarak <Link to="/terms" className="font-bold text-ink underline underline-offset-2">Koşullarımızı</Link> ve <Link to="/privacy" className="font-bold text-ink underline underline-offset-2">Gizlilik Politikamızı</Link> kabul etmiş olursun.
             </p>
           </div>

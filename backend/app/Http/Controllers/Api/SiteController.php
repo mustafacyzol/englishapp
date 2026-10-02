@@ -76,6 +76,71 @@ class SiteController extends Controller
     }
 
     /**
+     * "Okulunuz için teklif alın": a school applies from the Schools page. The
+     * application is stored for the sales team and they get an e-mail at once.
+     */
+    public function schoolApply(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'school_name' => ['required', 'string', 'min:3', 'max:160'],
+            'city' => ['required', 'string', 'min:2', 'max:60'],
+            'district' => ['nullable', 'string', 'max:60'],
+            'school_type' => ['required', 'in:ilkokul,ortaokul,lise,kurs,diger'],
+            'students' => ['required', 'integer', 'min:1', 'max:100000'],
+            'grades' => ['nullable', 'array', 'max:12'],
+            'grades.*' => ['integer', 'between:1,12'],
+            'contact_name' => ['required', 'string', 'min:2', 'max:80'],
+            'contact_role' => ['required', 'in:mudur,mudur_yrd,ogretmen,diger'],
+            'email' => ['required', 'email', 'max:190'],
+            'phone' => ['required', 'string', 'min:10', 'max:30', 'regex:/^[0-9 +()-]+$/'],
+            'interests' => ['nullable', 'array', 'max:6'],
+            'interests.*' => ['in:lgs,ydt,konusma,odev,rapor,premium'],
+            'message' => ['nullable', 'string', 'max:2000'],
+            'kvkk' => ['accepted'],
+            'captcha' => ['nullable', 'string'],
+            'website' => ['prohibited'],
+        ], [
+            'kvkk.accepted' => 'Aydınlatma metnini onaylamalısınız.',
+            'phone.regex' => 'Telefon numarası yalnızca rakam içermeli.',
+        ]);
+
+        if (! Turnstile::verify($data['captcha'] ?? null, $request->ip())) {
+            throw ValidationException::withMessages(['captcha' => 'Robot doğrulaması başarısız.']);
+        }
+
+        $app = \App\Models\SchoolApplication::query()->create([
+            'school_name' => strip_tags($data['school_name']),
+            'city' => strip_tags($data['city']),
+            'district' => isset($data['district']) ? strip_tags($data['district']) : null,
+            'school_type' => $data['school_type'],
+            'students' => $data['students'],
+            'grades' => $data['grades'] ?? null,
+            'contact_name' => strip_tags($data['contact_name']),
+            'contact_role' => $data['contact_role'],
+            'email' => strtolower($data['email']),
+            'phone' => $data['phone'],
+            'interests' => $data['interests'] ?? null,
+            'message' => isset($data['message']) ? strip_tags($data['message']) : null,
+            'ip' => $request->ip(),
+        ]);
+
+        Mail::to(config('dilgo.brand.support_email'))->queue(new NoticeMail(
+            'Yeni okul başvurusu: '.$app->school_name,
+            'Okullar sayfasından başvuru',
+            [
+                "{$app->school_name} ({$app->city}".($app->district ? " / {$app->district}" : '').") · {$app->school_type} · {$app->students} öğrenci",
+                "İletişim: {$app->contact_name} ({$app->contact_role}) <{$app->email}> {$app->phone}",
+                'İlgi: '.implode(', ', $app->interests ?? []),
+                (string) $app->message,
+            ],
+            'Yönetim panelinde aç',
+            config('dilgo.brand.frontend_url').'/admin/r/school-applications'
+        ));
+
+        return response()->json(['ok' => true, 'message' => 'Başvurunuz bize ulaştı. Okul ekibimiz en geç 1 iş günü içinde sizi arayacak.'], 201);
+    }
+
+    /**
      * Tips and updates by e-mail, double opt-in: the address only starts receiving
      * mail after the link in the confirmation e-mail is opened. The answer is the same
      * whether or not the address was already on the list, so it leaks nothing.

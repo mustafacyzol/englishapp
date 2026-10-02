@@ -226,7 +226,7 @@ function ForInstitutions() {
           </div>
           <div className="mt-8 flex flex-wrap gap-3">
             <LinkButton to="/okullar" size="lg">Okullar için</LinkButton>
-            <LinkButton to="/contact?konu=okul" size="lg" variant="secondary">Teklif alın</LinkButton>
+            <LinkButton to="/okullar#basvuru" size="lg" variant="secondary">Teklif alın</LinkButton>
           </div>
         </Reveal>
         <Reveal delay={0.1}>

@@ -33,6 +33,7 @@ Route::prefix('v1')->group(function () {
     Route::get('blog', [SiteController::class, 'blog']);
     Route::get('blog/{slug}', [SiteController::class, 'post']);
     Route::post('contact', [SiteController::class, 'contact'])->middleware('throttle:5,10');
+    Route::post('schools/apply', [SiteController::class, 'schoolApply'])->middleware('throttle:5,10');
     Route::post('newsletter', [SiteController::class, 'subscribe'])->middleware('throttle:5,10');
     Route::post('newsletter/confirm/{token}', [SiteController::class, 'confirmSubscription'])->middleware('throttle:20,1');
     Route::post('newsletter/unsubscribe/{token}', [SiteController::class, 'unsubscribe'])->middleware('throttle:20,1');

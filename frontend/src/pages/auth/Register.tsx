@@ -61,6 +61,7 @@ export default function Register() {
   const [placementToken, setPlacementToken] = useState<string | null>(null)
   const [form, setForm] = useState({ email: '', password: '', password_confirmation: '', referral_code: '', accept_terms: false, marketing_opt_in: false, parent_consent: false })
   const [captcha, setCaptcha] = useState('')
+  const [withEmail, setWithEmail] = useState(false)
   const inv = useQuery({ queryKey: ['invite', invite], queryFn: () => get<{ institution: { name: string }; email: string }>(`/invites/${invite}`), enabled: !!invite, retry: false })
   const up = (patch: Partial<Draft>) => setD((x) => ({ ...x, ...patch }))
 
@@ -170,16 +171,20 @@ export default function Register() {
   }
   const canNext: Record<StepKey, boolean> = { hello: true, name: d.name.trim().length >= 2, age: !!d.stage && (!(STAGES.find((x) => x.key === d.stage)?.grades.length) || !!d.grade), goal: !!d.motivation, exam: !!d.exam, interests: d.interests.length > 0, focus: !!d.focus, level: true, time: !!d.time, account: true }
 
+  // The first screen is Higo alone, full screen; "Hadi tanışalım" splits it into the two panels.
+  if (key === 'hello') return <HelloScreen onGo={next} />
+
   return (
     <AuthShell
       wide
+      enter
       banner={false}
       title={Q[key].title}
       subtitle={Q[key].sub}
       aside={<PassPanel name={d.name.trim()} age={d.age || undefined} mot={mot} exam={exam} interests={d.interests} focus={d.focus || null} level={d.level} slot={slot} pace={pace} weeks={weeks} step={key} />}
-      footer={<>Zaten hesabın var mı? <Link to="/login" className="font-extrabold text-flame">Giriş yap</Link></>}
+      footer={<span className="hidden sm:inline">Zaten hesabın var mı? <Link to="/login" className="font-extrabold text-flame">Giriş yap</Link></span>}
       lead={
-        <div className="mb-7 flex items-center gap-3">
+        <div className="mb-4 flex items-center gap-3 sm:mb-7 [@media(max-height:680px)]:mb-2">
           <button onClick={() => go(step - 1)} aria-label="Geri" className={clsx('grid size-9 shrink-0 place-items-center rounded-xl text-ink-soft hover:bg-paper-2', step === 0 && 'invisible')}>
             <ArrowLeft className="size-4" />
           </button>
@@ -216,8 +221,8 @@ export default function Register() {
           )}
 
           {key === 'age' && (
-            <div className="space-y-4">
-              <div className="grid gap-2.5 sm:grid-cols-2">
+            <div className="space-y-4 [@media(max-height:680px)]:space-y-2.5">
+              <div className="grid gap-2 sm:grid-cols-2 sm:gap-2.5 [@media(max-height:680px)]:gap-1.5">
                 {STAGES.map((a, i) => {
                   const on = d.stage === a.key
                   return (
@@ -232,12 +237,12 @@ export default function Register() {
                         up({ stage: a.key, grade, age, ...(age === 'kid' ? { examOpt: false, ...(d.motivation === 'exam' ? { motivation: '' } : {}) } : {}), ...(a.exams[0] ? { exam: d.exam || a.exams[0] } : {}) })
                       }}
                       aria-pressed={on}
-                      className={clsx('group relative flex items-center gap-3.5 rounded-2xl border-2 p-2.5 pr-3 text-left transition', on ? 'border-flame shadow-[0_0_0_4px_rgba(255,90,54,.14)]' : 'border-line hover:border-ink/25', i === STAGES.length - 1 && 'sm:col-span-2')}
+                      className={clsx('group relative flex min-w-0 items-center gap-3 rounded-2xl border-2 p-1.5 pr-3 text-left transition sm:gap-3.5 sm:p-2.5', on ? 'border-flame shadow-[0_0_0_4px_rgba(255,90,54,.14)]' : 'border-line hover:border-ink/25', i === STAGES.length - 1 && 'sm:col-span-2')}
                     >
-                      <span className={clsx('size-14 shrink-0 overflow-hidden rounded-xl', a.tint)}><img src={img(`avatars/${a.art}.webp`)} alt="" className="size-full object-cover" /></span>
+                      <span className={clsx('size-10 shrink-0 overflow-hidden rounded-xl sm:size-14 [@media(max-height:680px)]:size-8', a.tint)}><img src={img(`avatars/${a.art}.webp`)} alt="" className="size-full object-cover" /></span>
                       <span className="min-w-0 flex-1">
-                        <span className="flex items-baseline gap-2"><span className="font-display text-lg font-black">{a.label}</span><span className="text-xs font-bold text-ink-soft">{a.range}</span></span>
-                        <span className="block truncate text-[13px] text-ink-soft">{a.points.join(' · ')}</span>
+                        <span className="flex flex-wrap items-baseline gap-x-2"><span className="font-display text-base font-black sm:text-lg">{a.label}</span><span className="text-xs font-bold text-ink-soft">{a.range}</span></span>
+                        <span className="hidden truncate text-[13px] text-ink-soft sm:block">{a.points.join(' · ')}</span>
                       </span>
                       {on && <Tick />}
                     </motion.button>
@@ -248,15 +253,15 @@ export default function Register() {
                 {!!STAGES.find((x) => x.key === d.stage)?.grades.length && (
                   <motion.div key={d.stage} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
                     <p className="mb-2 text-sm font-bold">Kaçıncı sınıftasın?</p>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-4 gap-2">
                       {STAGES.find((x) => x.key === d.stage)!.grades.map((g) => (
-                        <button key={g} onClick={() => up({ grade: g, age: ageFromStage(d.stage, g) })} aria-pressed={d.grade === g} className={clsx('h-11 min-w-14 rounded-xl border-2 px-3 font-display font-black transition', d.grade === g ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink/30')}>{g}. sınıf</button>
+                        <button key={g} onClick={() => up({ grade: g, age: ageFromStage(d.stage, g) })} aria-pressed={d.grade === g} className={clsx('h-11 rounded-xl border-2 px-1 font-display text-sm font-black transition sm:text-base', d.grade === g ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink/30')}>{g}. sınıf</button>
                       ))}
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
-              <p className="text-center text-xs text-ink-soft">İlkokul ve 5-6. sınıf hesapları veli onayıyla açılır. Bunu sonradan Ayarlar’dan değiştirebilirsin.</p>
+              <p className="hidden text-center text-xs text-ink-soft sm:block">İlkokul ve 5-6. sınıf hesapları veli onayıyla açılır.</p>
               {nextBtn(canNext.age)}
             </div>
           )}
@@ -296,7 +301,7 @@ export default function Register() {
 
           {key === 'interests' && (
             <div className="space-y-5">
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
                 {INTERESTS.map((o) => {
                   const on = d.interests.includes(o.key)
                   return <PhotoCard key={o.key} photo={o.photo} title={o.label} selected={on} compact multi onClick={() => up({ interests: on ? d.interests.filter((x) => x !== o.key) : [...d.interests, o.key] })} />
@@ -307,22 +312,22 @@ export default function Register() {
           )}
 
           {key === 'focus' && (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
               {SKILLS.map((k) => {
                 const S = SKILL[k]
                 const on = d.focus === k
                 return (
-                  <button key={k} onClick={pick({ focus: k })} aria-pressed={on} className={clsx('press group relative overflow-hidden rounded-3xl border-2 text-left transition', on ? 'border-ink shadow-[0_4px_0_0_var(--ink)]' : 'border-line shadow-hard hover:border-ink/25')}>
-                    <div className="relative h-28 overflow-hidden">
+                  <button key={k} onClick={pick({ focus: k })} aria-pressed={on} className={clsx('press group relative overflow-hidden rounded-2xl border-2 text-left transition sm:rounded-3xl', on ? 'border-ink shadow-[0_4px_0_0_var(--ink)]' : 'border-line shadow-hard hover:border-ink/25')}>
+                    <div className="relative h-20 overflow-hidden sm:h-28 [@media(max-height:680px)]:h-16">
                       <Img src={S.photo} alt="" className="photo transition duration-500 group-hover:scale-105" />
-                      <span className={clsx('absolute left-3 top-3 flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-black text-white', S.bg)}><S.icon className="size-3.5" /> {S.label}</span>
+                      <span className={clsx('absolute left-2 top-2 flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-black text-white sm:left-3 sm:top-3 sm:px-2.5 sm:py-1 sm:text-xs', S.bg)}><S.icon className="size-3.5" /> {S.label}</span>
                     </div>
-                    <p className="p-4 font-bold leading-snug">{FOCUS_TEXT[k]}</p>
-                    {on && <Tick />}
+                    <p className="p-2.5 text-[13px] font-bold leading-snug sm:p-4 sm:text-base">{FOCUS_TEXT[k]}</p>
+                    {on && <Tick small />}
                   </button>
                 )
               })}
-              <div className="sm:col-span-2">{nextBtn(canNext.focus)}</div>
+              <div className="col-span-2">{nextBtn(canNext.focus)}</div>
             </div>
           )}
 
@@ -346,26 +351,9 @@ export default function Register() {
             </div>
           )}
 
-          {key === 'hello' && (
-            <div className="space-y-5">
-              <div className="relative mx-auto w-56 sm:w-64">
-                <span aria-hidden className="absolute inset-[12%] rounded-full bg-flame/10" />
-                <HigoMotion className="relative w-full" />
-              </div>
-              <ul className="space-y-2.5">
-                {['Her gün birkaç dakikalık, sana özel bir plan', 'Takıldığında Türkçe açıklama, azar yok', 'Hikâyeler, oyunlar ve Defne ile gerçek konuşmalar'].map((t, k) => (
-                  <motion.li key={t} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + k * 0.12 }} className="flex items-center gap-3 rounded-2xl bg-paper-2 px-4 py-3 font-bold">
-                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-mint text-white"><Check className="size-4" strokeWidth={3} /></span>{t}
-                  </motion.li>
-                ))}
-              </ul>
-              {nextBtn(true, 'Hadi tanışalım')}
-            </div>
-          )}
-
           {key === 'time' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-3 xl:grid-cols-4">
+              <div className="grid grid-cols-4 gap-2 sm:gap-3 lg:grid-cols-3 xl:grid-cols-4">
                 {STUDY_TIMES.map((o) => <PhotoCard key={o.key} photo={o.photo} title={o.label} text={o.text} selected={d.time === o.key} compact onClick={() => up({ time: o.key })} />)}
               </div>
               <div>
@@ -389,34 +377,39 @@ export default function Register() {
           )}
 
           {key === 'account' && (
-            <div className="space-y-5">
-              <MobilePass name={d.name.trim()} mot={mot?.label} exam={exam?.name} focus={d.focus || null} level={d.level} slot={slot?.label} minutes={pace.minutes} weeks={weeks} />
-              {d.age === 'kid' && (
-                <label className="flex gap-3 rounded-2xl bg-butter/15 p-3 text-sm">
-                  <input type="checkbox" checked={form.parent_consent} onChange={set('parent_consent')} className="mt-0.5 size-5 accent-[#e8403a]" required />
-                  <span><b>Veli onayı:</b> Ben bu çocuğun velisiyim, kaydını ben oluşturuyorum ve e-posta adresi bana ait.</span>
-                </label>
-              )}
-              <SocialButtons onDone={finish} extra={payload()} />
-              <div className="flex items-center gap-3 text-xs font-black uppercase tracking-widest text-ink-soft">
-                <span className="h-0.5 flex-1 rounded bg-line" /> veya e-posta ile <span className="h-0.5 flex-1 rounded bg-line" />
+            <div className="space-y-4 sm:space-y-5">
+              {/* phones: plan + one-tap sign-up first; the e-mail form is its own short screen */}
+              <div className={clsx('space-y-4 sm:space-y-5', withEmail && 'hidden sm:block')}>
+                <MobilePass name={d.name.trim()} mot={mot?.label} exam={exam?.name} focus={d.focus || null} level={d.level} slot={slot?.label} minutes={pace.minutes} weeks={weeks} />
+                {d.age === 'kid' && (
+                  <label className="flex gap-3 rounded-2xl bg-butter/15 p-3 text-sm">
+                    <input type="checkbox" checked={form.parent_consent} onChange={set('parent_consent')} className="mt-0.5 size-5 accent-[#e8403a]" required />
+                    <span><b>Veli onayı:</b> Ben bu çocuğun velisiyim, kaydını ben oluşturuyorum ve e-posta adresi bana ait.</span>
+                  </label>
+                )}
+                <SocialButtons onDone={finish} extra={payload()} />
+                <Button block size="lg" variant="secondary" className="sm:hidden" onClick={() => setWithEmail(true)}>E-posta ile kayıt ol</Button>
+                <div className="hidden items-center gap-3 text-xs font-black uppercase tracking-widest text-ink-soft sm:flex">
+                  <span className="h-0.5 flex-1 rounded bg-line" /> veya e-posta ile <span className="h-0.5 flex-1 rounded bg-line" />
+                </div>
               </div>
-              <form onSubmit={submit} className="space-y-4">
+              <form onSubmit={submit} className={clsx('space-y-3 sm:block sm:space-y-4', !withEmail && 'hidden')}>
+                {withEmail && <button type="button" onClick={() => setWithEmail(false)} className="flex items-center gap-1.5 text-sm font-bold text-ink-soft sm:hidden"><ArrowLeft className="size-4" /> Google veya Apple ile kayıt</button>}
                 {err && <Alert tone="error">{err.first()}</Alert>}
                 <Input label="E-posta" type="email" autoComplete="email" value={form.email} onChange={set('email')} required error={err?.errors.email?.[0] ?? err?.errors.name?.[0]} />
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Input label="Şifre" type="password" autoComplete="new-password" value={form.password} onChange={set('password')} required hint="En az 8 karakter, harf ve rakam." error={err?.errors.password?.[0]} />
+                <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                  <Input label="Şifre" type="password" autoComplete="new-password" value={form.password} onChange={set('password')} required hint={<span className="[@media(max-height:680px)]:hidden">En az 8 karakter, harf ve rakam.</span>} error={err?.errors.password?.[0]} />
                   <Input label="Şifre (tekrar)" type="password" autoComplete="new-password" value={form.password_confirmation} onChange={set('password_confirmation')} required />
                 </div>
-                {!invite && <Input label="Davet kodu (isteğe bağlı)" value={form.referral_code} onChange={set('referral_code')} />}
+                {!invite && <Input label="Davet kodu (isteğe bağlı)" value={form.referral_code} onChange={set('referral_code')} className="hidden sm:block" />}
                 <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
                 <label className="flex gap-3 text-sm">
-                  <input type="checkbox" checked={form.accept_terms} onChange={set('accept_terms')} className="mt-0.5 size-5 accent-[#e8403a]" required />
+                  <input type="checkbox" checked={form.accept_terms} onChange={set('accept_terms')} className="mt-0.5 size-5 shrink-0 accent-[#e8403a]" required />
                   <span><Link to="/terms" className="font-bold underline">Kullanım koşullarını</Link> ve <Link to="/privacy" className="font-bold underline">KVKK aydınlatma metnini</Link> okudum, kabul ediyorum.</span>
                 </label>
                 <label className="flex gap-3 text-sm">
-                  <input type="checkbox" checked={form.marketing_opt_in} onChange={set('marketing_opt_in')} className="mt-0.5 size-5 accent-[#e8403a]" />
-                  <span>Öğrenme ipuçlarını ve kampanyaları e-postayla almak istiyorum.</span>
+                  <input type="checkbox" checked={form.marketing_opt_in} onChange={set('marketing_opt_in')} className="mt-0.5 size-5 shrink-0 accent-[#e8403a]" />
+                  <span>İpuçları ve kampanyalar e-postayla gelsin.</span>
                 </label>
                 <Turnstile onToken={setCaptcha} />
                 <Button type="submit" block size="lg" loading={m.isPending}>{firstName ? `Hadi başlayalım, ${firstName}!` : 'Hesabımı oluştur'}</Button>
@@ -429,8 +422,8 @@ export default function Register() {
   )
 }
 
-function Tick() {
-  return <span className="absolute right-3 top-3 grid size-7 place-items-center rounded-full bg-ink text-paper shadow-soft"><Check className="size-4" strokeWidth={3} /></span>
+function Tick({ small }: { small?: boolean }) {
+  return <span className={clsx('absolute grid place-items-center rounded-full bg-ink text-paper shadow-soft', small ? 'right-1.5 top-1.5 size-5 sm:right-3 sm:top-3 sm:size-7' : 'right-3 top-3 size-7')}><Check className={small ? 'size-3 sm:size-4' : 'size-4'} strokeWidth={3} /></span>
 }
 
 function PhotoCard({ photo, title, text, selected, onClick, compact, multi }: { photo: string; title: string; text?: string; selected: boolean; onClick: () => void; compact?: boolean; multi?: boolean }) {
@@ -438,18 +431,68 @@ function PhotoCard({ photo, title, text, selected, onClick, compact, multi }: { 
     <button
       onClick={onClick}
       aria-pressed={selected}
-      className={clsx('press group relative overflow-hidden rounded-3xl border-2 text-left transition', selected ? 'border-ink shadow-[0_4px_0_0_var(--ink)]' : 'border-line shadow-hard hover:border-ink/25')}
+      className={clsx('press group relative overflow-hidden border-2 text-left transition', compact ? 'rounded-2xl sm:rounded-3xl' : 'rounded-3xl', selected ? 'border-ink shadow-[0_4px_0_0_var(--ink)]' : 'border-line shadow-hard hover:border-ink/25')}
     >
-      <div className={clsx('relative overflow-hidden', compact ? 'aspect-square' : 'aspect-[4/3]')}>
+      <div className={clsx('relative overflow-hidden', compact ? 'aspect-square' : 'aspect-[16/10] sm:aspect-[4/3]')}>
         <Img src={photo} alt="" className={clsx('photo transition duration-500 group-hover:scale-105', multi && !selected && 'saturate-[.85]')} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
-        <div className="absolute inset-x-3 bottom-2.5 text-white">
-          <p className="font-display font-black leading-tight">{title}</p>
+        <div className={clsx('absolute text-white', compact ? 'inset-x-1.5 bottom-1.5 sm:inset-x-3 sm:bottom-2.5' : 'inset-x-3 bottom-2.5')}>
+          <p className={clsx('font-display font-black leading-tight', compact && 'text-[11px] sm:text-base')}>{title}</p>
           {text && <p className={clsx('text-xs text-white/80', compact && 'hidden sm:block')}>{text}</p>}
         </div>
       </div>
-      {selected && <Tick />}
+      {selected && <Tick small={compact} />}
     </button>
+  )
+}
+
+/**
+ * The very first screen: no panels, just Higo. He drops in, words in both
+ * languages float round him, three promises appear, and "Hadi tanışalım" opens
+ * the curtain: the screen slides into the left panel and the questions come in.
+ */
+function HelloScreen({ onGo }: { onGo: () => void }) {
+  const [leaving, setLeaving] = useState(false)
+  const words = [['Hello!', 'left-[8%] top-[18%]', 'bg-sky'], ['Merhaba!', 'right-[9%] top-[14%]', 'bg-flame'], ["Let's go!", 'left-[12%] bottom-[24%]', 'bg-mint'], ['Hadi!', 'right-[12%] bottom-[28%]', 'bg-butter !text-[#1f2433]']] as const
+  return (
+    <div className="fixed inset-0 z-50 overflow-hidden bg-paper">
+      <motion.div
+        initial={false}
+        animate={leaving ? { clipPath: 'inset(0 50% 0 0 round 0px)', opacity: 0.0 } : { clipPath: 'inset(0 0% 0 0 round 0px)', opacity: 1 }}
+        transition={{ duration: 0.65, ease: [0.65, 0, 0.35, 1] }}
+        onAnimationComplete={() => leaving && onGo()}
+        className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(60rem_40rem_at_50%_40%,color-mix(in_oklab,var(--color-flame)_16%,var(--paper)),var(--paper)_70%)] px-6 text-center"
+      >
+        {words.map(([w, pos, c], i) => (
+          <motion.span key={w} aria-hidden initial={{ opacity: 0, scale: 0.4, y: 20 }} animate={{ opacity: 1, scale: 1, y: [0, -10, 0] }} transition={{ opacity: { delay: 0.9 + i * 0.15 }, scale: { delay: 0.9 + i * 0.15, type: 'spring', stiffness: 300, damping: 14 }, y: { delay: 1.2 + i * 0.2, duration: 3 + i * 0.4, repeat: Infinity, ease: 'easeInOut' } }}
+            className={clsx('absolute hidden rounded-2xl px-4 py-2 font-display text-lg font-black text-white shadow-lg sm:block', pos, c)}>{w}</motion.span>
+        ))}
+        <motion.div
+          initial={{ opacity: 0, y: '-60vh', scaleY: 1.15, scaleX: 0.9 }}
+          animate={{ opacity: 1, y: ['-60vh', '2%', '-1%', '0%'], scaleY: [1.15, 0.86, 1.04, 1], scaleX: [0.9, 1.12, 0.97, 1] }}
+          transition={{ duration: 1.1, times: [0, 0.55, 0.8, 1], ease: ['easeIn', 'easeOut', 'easeInOut'], opacity: { duration: 0.2 } }}
+          className="relative w-[min(62vw,300px)] origin-bottom [@media(max-height:640px)]:w-[min(44vw,200px)]"
+        >
+          <span aria-hidden className="absolute inset-[14%] rounded-full bg-flame/15 blur-2xl" />
+          <HigoMotion className="relative w-full" />
+        </motion.div>
+        <motion.span aria-hidden initial={{ opacity: 0, scale: 0.3 }} animate={{ opacity: [0, 0.7, 0], scale: [0.3, 1.5, 2] }} transition={{ delay: 0.6, duration: 0.8 }} className="-mt-6 h-6 w-48 rounded-[50%] border-2 border-flame/40" />
+        <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05, duration: 0.5 }} className="mt-2 font-display text-[clamp(2rem,6vw,3.4rem)] font-black leading-tight">Merhaba, ben Higo!</motion.h1>
+        <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 0.5 }} className="mt-2 max-w-sm text-lg text-ink-soft">Seni biraz tanıyalım, planını birlikte kuralım. Bir dakika sürer.</motion.p>
+        <div className="mt-5 flex max-w-md flex-wrap justify-center gap-2">
+          {['Sana özel plan', 'Türkçe açıklama', 'Hikâyeler ve oyunlar'].map((t, k) => (
+            <motion.span key={t} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.35 + k * 0.1 }} className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-sm font-bold shadow-sm ring-1 ring-line">
+              <Check className="size-4 text-mint-deep" strokeWidth={3} />{t}
+            </motion.span>
+          ))}
+        </div>
+        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.6 }} className="mt-7 w-full max-w-xs">
+          <Button block size="lg" onClick={() => setLeaving(true)} icon={<ArrowRight className="size-5" />}>Hadi tanışalım</Button>
+          <p className="mt-4 text-sm font-semibold text-ink-soft">Zaten hesabın var mı? <Link to="/login" className="font-extrabold text-flame">Giriş yap</Link></p>
+        </motion.div>
+      </motion.div>
+      <Link to="/" aria-label="Ana sayfa" className="absolute left-5 top-4 z-10 font-display text-xl font-black">dil<span className="text-flame">go</span></Link>
+    </div>
   )
 }
 

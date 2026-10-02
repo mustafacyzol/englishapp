@@ -311,6 +311,13 @@ class ResourceController extends Controller
                     'admin_note' => ['nullable', 'string', 'max:2000'],
                 ],
             ],
+            'school-applications' => [
+                'model' => Models\SchoolApplication::class, 'search' => ['school_name', 'city', 'contact_name', 'email', 'phone'], 'order' => '-id', 'filters' => ['status', 'school_type'], 'perm' => 'institutions',
+                'rules' => [
+                    'status' => ['required', 'in:new,contacted,demo,won,lost'],
+                    'admin_note' => ['nullable', 'string', 'max:2000'],
+                ],
+            ],
             'coupons' => [
                 'model' => Models\Coupon::class, 'search' => ['code', 'description'], 'order' => '-id', 'filters' => ['is_active'], 'perm' => 'sales',
                 'rules' => [
