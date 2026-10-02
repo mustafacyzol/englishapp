@@ -48,7 +48,7 @@ interface Draft {
 /** The exam step only appears for teens and adults who want it: exam as the goal, or ticked as an extra. */
 // With a finished placement test the level step is skipped: the test result becomes the level.
 const flowFor = (d: Pick<Draft, 'motivation' | 'examOpt' | 'age'>, placed = false): StepKey[] => ['hello', 'name', 'age', 'goal', ...(d.age !== 'kid' && (d.motivation === 'exam' || d.examOpt) ? (['exam'] as const) : []), 'interests', 'focus', ...(placed ? [] : (['level'] as const)), 'time', 'account']
-const EMPTY: Draft = { step: 'name', name: '', age: '', stage: '', grade: null, motivation: '', exam: '', examDate: '', interests: [], focus: '', level: 'A1', time: '', daily: 20, examOpt: false }
+const EMPTY: Draft = { step: 'hello', name: '', age: '', stage: '', grade: null, motivation: '', exam: '', examDate: '', interests: [], focus: '', level: 'A1', time: '', daily: 20, examOpt: false }
 
 export default function Register() {
   const { code } = useParams()
@@ -94,7 +94,9 @@ export default function Register() {
   }, [inv.data])
 
   const flow = useMemo(() => flowFor(d, !!placementToken), [d.motivation, d.examOpt, d.age, placementToken]) // eslint-disable-line react-hooks/exhaustive-deps
-  const step = Math.max(0, flow.indexOf(d.step))
+  // back from the level test the level step leaves the flow: carry on right after it
+  const at = flow.indexOf(d.step)
+  const step = at >= 0 ? at : d.step === 'level' ? Math.max(0, flow.indexOf('time')) : 0
   const key = flow[step]
   const total = flow.length
 
