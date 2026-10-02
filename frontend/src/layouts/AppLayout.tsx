@@ -153,7 +153,7 @@ export default function AppLayout() {
               <span className="hidden sm:inline"><Logo small /></span>
             </Link>
             <p className="hidden min-w-0 truncate text-sm font-bold text-ink-soft lg:block">
-              {data?.announcement && <span className="rounded-lg bg-butter/20 px-2 py-1 text-ink">📣 {data.announcement}</span>}
+              {data?.announcement ? <span className="rounded-lg bg-butter/20 px-2 py-1 text-ink">📣 {data.announcement}</span> : withRail && <Greeting name={user.name} />}
             </p>
             <div className="flex min-w-0 items-center gap-0.5 sm:gap-1">
               <span data-tour="stats" className="flex min-w-0"><StatChips user={user} /></span>
@@ -328,4 +328,11 @@ function MoreSheet({ open, onClose, staff, manager, exam }: { open: boolean; onC
       )}
     </AnimatePresence>
   )
+}
+
+/** The one friendly line of the app, beside the stats on the path screen only. */
+function Greeting({ name }: { name: string }) {
+  const h = new Date().getHours()
+  const hello = h < 6 ? 'İyi geceler' : h < 12 ? 'Günaydın' : h < 18 ? 'Merhaba' : 'İyi akşamlar'
+  return <>{hello}, <span className="text-ink">{name.split(' ')[0]}</span>! Bugün de biraz İngilizce?</>
 }

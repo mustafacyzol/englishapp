@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
+import { PageFallback } from '@/components/motion/Page'
 import { Link, NavLink, Navigate, Outlet, useLocation, useOutletContext } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
@@ -111,7 +112,7 @@ export default function InstitutionLayout() {
           <span aria-hidden className="block h-[3px] w-full" style={{ background: accent }} />
         </header>
         <main className="flex-1 px-4 py-6 sm:px-8 sm:py-8">
-          {error ? <p className="text-ink-soft">{(error as ApiError).message}</p> : data ? <Outlet context={{ data }} /> : <SkeletonPage variant="cards" />}
+          {error ? <p className="text-ink-soft">{(error as ApiError).message}</p> : data ? <Suspense fallback={<PageFallback />}><Outlet context={{ data }} /></Suspense> : <SkeletonPage variant="cards" />}
         </main>
       </div>
     </div>

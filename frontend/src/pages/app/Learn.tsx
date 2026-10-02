@@ -32,19 +32,6 @@ const NODE = 72
 const GAP = 44
 const courseOffset = (lvl: string) => ({ A1: 0, A2: 3, B1: 5 } as Record<string, number>)[lvl] ?? 0
 
-/** The one friendly line of the app, shown on the path only so other pages stay calm. */
-function Greeting() {
-  const { user } = useAuth()
-  if (!user) return null
-  const h = new Date().getHours()
-  const hello = h < 6 ? 'İyi geceler' : h < 12 ? 'Günaydın' : h < 18 ? 'Merhaba' : 'İyi akşamlar'
-  return (
-    <p className="px-1 text-sm font-bold text-ink-soft">
-      {hello}, <span className="text-ink">{user.name.split(' ')[0]}</span>! Bugün de biraz İngilizce?
-    </p>
-  )
-}
-
 export default function Learn() {
   const [courseId, setCourseId] = useState<number | null>(null)
   const { data, isLoading } = useQuery({ queryKey: ['path', courseId], queryFn: () => get<PathData>(`/path${courseId ? `/${courseId}` : ''}`) })
@@ -85,7 +72,6 @@ export default function Learn() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <Greeting />
       {/* The "where you left off" bar stays pinned under the header instead of popping in:
           when your stop scrolls away it simply shows which way it is. */}
       <div className="sticky top-[66px] z-[25] -mx-1 px-1 pb-2 pt-2">

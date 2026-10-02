@@ -80,9 +80,31 @@ function Guard({ children, verified = true, guest }: { children: ReactNode; veri
   return <>{children}</>
 }
 
+/**
+ * Every page is its own chunk; once the first screen is up, the rest are fetched
+ * quietly in the background so later navigation is instant (no loading flash).
+ */
+const PAGES = import.meta.glob(['./pages/app/*.tsx', './pages/public/*.tsx', './pages/auth/*.tsx', './layouts/*.tsx'])
+const ADMIN_PAGES = import.meta.glob(['./pages/admin/*.tsx', './pages/institution/*.tsx'])
+function usePreloadPages(staff: boolean) {
+  useEffect(() => {
+    const run = () => {
+      const all = [...Object.values(PAGES), ...(staff ? Object.values(ADMIN_PAGES) : [])]
+      // a few at a time, so the first screen keeps the network to itself
+      let i = 0
+      const next = () => { const batch = all.slice(i, (i += 4)); if (batch.length) Promise.allSettled(batch.map((f) => f())).then(next) }
+      next()
+    }
+    const w = window as Window & { requestIdleCallback?: (cb: () => void) => number }
+    const t = w.requestIdleCallback ? w.requestIdleCallback(run) : window.setTimeout(run, 1500)
+    return () => { if (!w.requestIdleCallback) clearTimeout(t) }
+  }, [staff])
+}
+
 export default function App() {
   const { user } = useAuth()
   useEffect(() => setMuted(user?.preferences?.sound === false), [user?.preferences?.sound])
+  usePreloadPages(!!user?.is_staff || user?.institution_role === 'manager')
 
   return (
     <Suspense fallback={<Spinner className="min-h-[60vh]" />}>

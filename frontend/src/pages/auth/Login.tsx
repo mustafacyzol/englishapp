@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { motion } from 'motion/react'
-import { Check } from 'lucide-react'
+import { ArrowRight, Check } from 'lucide-react'
 import clsx from 'clsx'
 import { Capacitor } from '@capacitor/core'
 import { ApiError, post } from '@/lib/api'
@@ -52,31 +52,33 @@ export default function Login() {
     <div className="auth-backdrop relative flex min-h-dvh flex-col overflow-hidden">
       <header className="relative z-10 flex items-center justify-between px-5 py-3 sm:px-8">
         <Link to="/" aria-label="DilGO ana sayfa"><Logo small /></Link>
-        <Link to="/register" className="press flex h-10 items-center gap-1.5 rounded-xl border-2 border-line bg-card px-3.5 text-sm font-extrabold shadow-hard-sm hover:border-ink/30">
-          <span className="hidden text-ink-soft sm:inline">{t('Hesabın yok mu?')}</span> <span className="text-flame">{t('Kayıt ol')}</span>
-        </Link>
+        <div className="flex items-center gap-3">
+          <span className="hidden text-sm font-bold text-ink-soft sm:inline">{t('Hesabın yok mu?')}</span>
+          <Link to="/register" className="press flex h-11 items-center gap-1.5 rounded-xl bg-flame px-4 font-display text-sm font-extrabold uppercase tracking-wide text-white shadow-[0_3px_0_0_var(--color-flame-deep)] transition hover:brightness-105">
+            {t('Kayıt ol')} <ArrowRight className="size-4" />
+          </Link>
+        </div>
       </header>
 
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-6 pt-2">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[420px]">
-          <div className="relative mt-10 rounded-[28px] border-2 border-line bg-card p-5 pt-9 shadow-soft sm:p-7 sm:pt-10">
-            {/* Higo peeks over the card edge and waves, taking no room from the form */}
-            <div aria-hidden className="absolute -top-12 left-1/2 flex -translate-x-1/2 items-end">
+          <div className="rounded-[28px] border-2 border-line bg-card p-5 shadow-soft sm:p-7">
+            {/* Higo and his greeting sit inside the card, as one tidy header */}
+            <div className="mb-6 flex items-center gap-3 rounded-2xl bg-paper-2/70 p-3 pr-4">
               <motion.img
                 src={higoImg('wave')}
                 alt=""
-                className="size-[76px] object-contain drop-shadow-[0_8px_10px_rgba(160,40,10,.18)]"
-                initial={{ y: 30, opacity: 0, rotate: -8 }}
-                animate={{ y: [0, -4, 0], opacity: 1, rotate: [0, -4, 0] }}
-                transition={{ y: { repeat: Infinity, duration: 2.6, ease: 'easeInOut', delay: 0.6 }, rotate: { repeat: Infinity, duration: 2.6, ease: 'easeInOut', delay: 0.6 }, opacity: { duration: 0.3 } }}
+                aria-hidden
+                className="size-16 shrink-0 object-contain"
+                initial={{ scale: 0.6, rotate: -10, opacity: 0 }}
+                animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                transition={{ type: 'spring', stiffness: 320, damping: 16 }}
               />
-              <motion.span initial={{ opacity: 0, scale: 0.6, x: -6 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ delay: 0.5, type: 'spring', stiffness: 380, damping: 18 }} className="mb-9 -ml-1 whitespace-nowrap rounded-2xl rounded-bl-md bg-ink px-2.5 py-1 text-xs font-extrabold text-paper">
-                {t('Seni özledim!')}
-              </motion.span>
-            </div>
-            <div className="mb-5 flex flex-col items-center text-center">
-              <h1 className="text-[26px] leading-tight">{t('Tekrar hoş geldin')}</h1>
-              <p className="mt-1 text-[15px] text-ink-soft">{t('Hesabına giriş yap ve kaldığın yerden devam et.')}</p>
+              <div className="min-w-0">
+                <p className="text-xs font-black uppercase tracking-[0.16em] text-flame">{t('Seni özledim!')}</p>
+                <h1 className="font-display text-[24px] font-black leading-tight">{t('Tekrar hoş geldin')}</h1>
+                <p className="text-sm text-ink-soft">{t('Hesabına giriş yap ve kaldığın yerden devam et.')}</p>
+              </div>
             </div>
 
             <SocialButtons onDone={done} remember={remember} compact />

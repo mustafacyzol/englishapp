@@ -1,21 +1,29 @@
-import { type ReactNode } from 'react'
+import { Suspense, type ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 
 /**
- * Route transition: an enter-only fade + lift, keyed by the parent on pathname.
- * No exit/"wait" phase on purpose, fast tab switching could otherwise leave the
- * previous page stuck on screen while its exit animation was interrupted.
+ * Route transition: a short, calm cross-fade keyed by the parent on pathname (no
+ * slide, so nothing ever seems to rise from the bottom). Each page sits in its own
+ * Suspense boundary inside the layout, so opening a page that is still loading
+ * keeps the header, menu and background in place instead of blanking the screen.
  */
 export function PageTransition({ children }: { children: ReactNode }) {
   const reduced = useReducedMotion()
   return (
-    <motion.div
-      initial={reduced ? false : { opacity: 0, y: 14 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
-    >
-      {children}
+    <motion.div initial={reduced ? false : { opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.16, ease: 'easeOut' }}>
+      <Suspense fallback={<PageFallback />}>{children}</Suspense>
     </motion.div>
+  )
+}
+
+/** What a page shows for the split second its code is still arriving: quiet bars, never a blank screen. */
+export function PageFallback() {
+  return (
+    <div aria-busy="true" aria-label="Yükleniyor" className="mx-auto w-full max-w-3xl animate-pulse space-y-4 py-4">
+      <div className="h-8 w-2/5 rounded-xl bg-paper-2" />
+      <div className="h-40 rounded-3xl bg-paper-2" />
+      <div className="grid grid-cols-2 gap-4"><div className="h-28 rounded-3xl bg-paper-2" /><div className="h-28 rounded-3xl bg-paper-2" /></div>
+    </div>
   )
 }
 

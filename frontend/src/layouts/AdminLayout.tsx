@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
+import { PageFallback } from '@/components/motion/Page'
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
@@ -192,7 +193,7 @@ export default function AdminLayout() {
           <span className="hidden text-sm font-bold sm:inline">{user.name} · <span className="text-flame">{roleLabel(user.role)}</span></span>
         </header>
         <main className="p-4 sm:p-8">
-          {allowed ? <Outlet /> : (
+          {allowed ? <Suspense fallback={<PageFallback />}><Outlet /></Suspense> : (
             <div className="mx-auto mt-10 max-w-md rounded-3xl border-2 border-line bg-card p-8 text-center">
               <ShieldCheck className="mx-auto size-10 text-ink-soft" />
               <h1 className="mt-3 text-2xl font-extrabold">Bu bölüme erişimin yok</h1>

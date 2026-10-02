@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useOutlet } from 'react-router-dom'
-import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
+import { AnimatePresence, motion, useScroll, useSpring, useTransform } from 'motion/react'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { ArrowRight, ArrowUp, ArrowUpRight, Check, Mail, Menu, X } from 'lucide-react'
@@ -234,9 +234,9 @@ const SOCIAL_ICON: Record<string, (p: { className?: string }) => React.JSX.Eleme
 }
 
 const COLS: { title: string; links: [string, string][] }[] = [
-  { title: 'Ürün', links: [['/#nasil', 'Nasıl çalışır'], ['/#paketler', 'Paketler'], ['/placement', 'Seviye testi'], ['/#kurumlar', 'Kurumlar için']] },
+  { title: 'Ürün', links: [['/#nasil', 'Nasıl çalışır'], ['/#paketler', 'Paketler'], ['/placement', 'Seviye testi'], ['/okullar', 'Okullar için']] },
   { title: 'Şirket', links: [['/about', 'Hakkımızda'], ['/blog', 'Blog'], ['/contact?konu=partnership', 'İş birliği'], ['/contact', 'İletişim']] },
-  { title: 'Destek', links: [['/#sss', 'Sık sorulanlar'], ['/contact?konu=support', 'Teknik destek'], ['/contact?konu=course', 'Kurs bilgisi'], ['/contact?konu=corporate', 'Kurumsal eğitim']] },
+  { title: 'Destek', links: [['/#sss', 'Sık sorulanlar'], ['/contact?konu=support', 'Teknik destek'], ['/contact?konu=course', 'Kurs bilgisi'], ['/okullar', 'Okul paneli']] },
   { title: 'Yasal', links: [['/terms', 'Kullanım koşulları'], ['/privacy', 'Gizlilik ve KVKK'], ['/distance-sales', 'Mesafeli satış'], ['/refund', 'İptal ve iade']] },
 ]
 
@@ -252,22 +252,22 @@ function Newsletter() {
   const err = sub.error as ApiError | null
   return (
     <div id="bulten" className="mt-6 max-w-sm scroll-mt-24">
-      <p className="mb-2 text-sm font-extrabold">Haftada bir İngilizce ipucu</p>
+      <p className="mb-2 text-sm font-extrabold text-white">Haftada bir İngilizce ipucu</p>
       {sub.isSuccess ? (
-        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 rounded-2xl bg-mint/12 px-3 py-3 text-sm font-bold text-mint-deep">
+        <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 rounded-2xl bg-mint/15 px-3 py-3 text-sm font-bold text-mint">
           <Check className="size-4 shrink-0" strokeWidth={3} /> {sub.data?.message ?? 'Onay bağlantısını e-postana gönderdik.'}
         </motion.p>
       ) : (
         <form onSubmit={(e) => { e.preventDefault(); sub.mutate() }}>
-          <div className="flex gap-1.5 rounded-2xl border-2 border-line bg-card p-1 transition focus-within:border-flame/60">
+          <div className="flex gap-1.5 rounded-2xl bg-white/[0.06] p-1 ring-1 ring-white/10 transition focus-within:ring-flame/70">
             <label htmlFor="nl-email" className="sr-only">E-posta adresin</label>
-            <input id="nl-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@eposta.com" className="h-10 min-w-0 flex-1 bg-transparent px-3 text-sm font-semibold placeholder:text-ink-soft/60 focus:outline-none" />
+            <input id="nl-email" type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@eposta.com" className="h-10 min-w-0 flex-1 bg-transparent px-3 text-sm font-semibold text-white placeholder:text-white/35 focus:outline-none" />
             <input tabIndex={-1} aria-hidden value={trap} onChange={(e) => setTrap(e.target.value)} className="hidden" name="website" />
-            <button type="submit" disabled={sub.isPending} aria-label="Abone ol" className="press grid h-10 shrink-0 place-items-center rounded-xl bg-ink px-4 text-paper disabled:opacity-60">
-              {sub.isPending ? <span className="size-4 animate-spin rounded-full border-2 border-paper border-t-transparent" /> : <ArrowRight className="size-4" />}
+            <button type="submit" disabled={sub.isPending} aria-label="Abone ol" className="press grid h-10 shrink-0 place-items-center rounded-xl bg-flame px-4 text-white disabled:opacity-60">
+              {sub.isPending ? <span className="size-4 animate-spin rounded-full border-2 border-white border-t-transparent" /> : <ArrowRight className="size-4" />}
             </button>
           </div>
-          <p className={clsx('mt-1.5 px-1 text-[11px]', err ? 'font-bold text-berry' : 'text-ink-soft')}>{err ? err.first() : <>Sıfır spam, tek tıkla çık. <Link to="/privacy" className="underline underline-offset-2">Gizlilik</Link></>}</p>
+          <p className={clsx('mt-1.5 px-1 text-[11px]', err ? 'font-bold text-berry' : 'text-white/40')}>{err ? err.first() : <>Sıfır spam, tek tıkla çık. <Link to="/privacy" className="underline underline-offset-2 hover:text-white">Gizlilik</Link></>}</p>
         </form>
       )}
     </div>
@@ -275,9 +275,8 @@ function Newsletter() {
 }
 
 /**
- * A calm, compact footer: brand, contact and a one-line newsletter, four short
- * link columns, then a thin bar with socials, legal links and "back to top".
- * It sits on the page colour with a hairline accent, so the page ends quietly.
+ * A corporate footer: brand, contact and newsletter, four short link columns, the
+ * big "dilgo" wordmark rising as the page ends, then a thin legal bar.
  */
 function Footer() {
   const { data } = useSiteConfig()
@@ -285,51 +284,66 @@ function Footer() {
   // Social links are filled in from the admin panel (Yönetim > Site ayarları).
   const social = (data?.site?.social ?? {}) as Record<string, string | null>
   const SOCIAL = SOCIAL_ORDER.filter((k) => !!social[k]).map((k) => ({ label: SOCIAL_NAME[k], href: social[k] as string, icon: SOCIAL_ICON[k] }))
+  const ref = useRef<HTMLDivElement>(null)
+  const { scrollYProgress } = useScroll({ target: ref, offset: ['start end', 'end end'] })
+  const wordY = useTransform(scrollYProgress, [0, 1], ['35%', '0%'])
+  const wordO = useTransform(scrollYProgress, [0, 0.7, 1], [0, 0.5, 1])
 
   return (
-    <footer className="relative border-t-2 border-line bg-paper-2/50">
-      <span aria-hidden className="absolute inset-x-0 -top-[2px] mx-auto h-[2px] max-w-3xl bg-gradient-to-r from-transparent via-flame to-transparent" />
-      <div className="mx-auto max-w-6xl px-5 pt-12">
+    <footer className="relative overflow-hidden bg-[#0e1119] text-white">
+      <span aria-hidden className="absolute inset-x-0 top-0 mx-auto h-[2px] max-w-4xl bg-gradient-to-r from-transparent via-flame to-transparent" />
+      <div aria-hidden className="absolute inset-0 opacity-[0.06] [background-image:linear-gradient(#fff_1px,transparent_1px),linear-gradient(90deg,#fff_1px,transparent_1px)] [background-size:56px_56px] [mask-image:linear-gradient(to_bottom,#000,transparent_65%)]" />
+      <div className="relative mx-auto max-w-6xl px-5 pt-14">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.9fr]">
           <div>
             <Link to="/" aria-label="DilGO ana sayfa" className="inline-flex items-center gap-2">
               <img src={higoImg('wave')} alt="" className="size-9" />
               <span className="font-display text-2xl font-black tracking-tight">dil<span className="text-flame">go</span></span>
             </Link>
-            <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink-soft">Bayrak Dil Okulları’nın İngilizce uygulaması. Her gün birkaç dakika, her yaşa uygun.</p>
-            <a href={`mailto:${email}`} className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-ink-soft transition hover:text-ink"><Mail className="size-4 text-flame" />{email}</a>
+            <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/60">Bayrak Dil Okulları’nın İngilizce platformu. İlkokuldan üniversiteye, LGS’den YDS’ye; bireyler ve okullar için.</p>
+            <a href={`mailto:${email}`} className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-white/70 transition hover:text-white"><Mail className="size-4 text-flame" />{email}</a>
             <Newsletter />
           </div>
 
           <nav aria-label="Alt bilgi" className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
             {COLS.map((c) => (
               <div key={c.title}>
-                <p className="mb-3 text-[11px] font-black uppercase tracking-[0.16em] text-ink-soft/80">{c.title}</p>
+                <p className="mb-3 text-[11px] font-black uppercase tracking-[0.16em] text-white/40">{c.title}</p>
                 <ul className="space-y-2">
                   {c.links.map(([to, l]) => (
-                    <li key={to + l}><Link to={to} className="text-[14px] font-semibold text-ink/75 transition hover:text-flame">{l}</Link></li>
+                    <li key={to + l}><Link to={to} className="text-[14px] font-semibold text-white/70 transition hover:text-white">{l}</Link></li>
                   ))}
                 </ul>
               </div>
             ))}
           </nav>
         </div>
+      </div>
 
-        <div className="safe-bottom mt-10 flex flex-col-reverse items-center justify-between gap-3 border-t-2 border-line/70 py-5 text-[13px] font-semibold text-ink-soft sm:flex-row">
-          <p>© {new Date().getFullYear()} Bayrak Dil Okulları</p>
+      {/* the closing wordmark rises into view as the page ends, Higo waving beside it */}
+      <div ref={ref} className="relative mx-auto mt-10 flex max-w-6xl select-none items-end justify-center gap-4 px-5" aria-hidden>
+        <motion.p style={{ y: wordY, opacity: wordO, backgroundImage: 'linear-gradient(180deg, rgba(255,255,255,.3), rgba(255,255,255,.03))', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }} className="font-display text-[clamp(4.5rem,17vw,13rem)] font-black leading-[1.02] tracking-[-0.04em]">
+          dilgo
+        </motion.p>
+        <motion.img style={{ y: wordY, opacity: wordO }} src={higoImg('wave')} alt="" className="mb-[3%] w-[clamp(44px,7vw,84px)] shrink-0" />
+      </div>
+
+      <div className="safe-bottom relative border-t border-white/10">
+        <div className="mx-auto flex max-w-6xl flex-col-reverse items-center justify-between gap-3 px-5 py-5 text-[13px] font-semibold text-white/50 sm:flex-row">
+          <p>© {new Date().getFullYear()} Bayrak Dil Okulları · Tüm hakları saklıdır.</p>
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             {SOCIAL.length > 0 && (
               <div className="flex gap-0.5">
                 {SOCIAL.map((s) => (
-                  <a key={s.label} href={s.href} aria-label={s.label} title={s.label} target="_blank" rel="noreferrer" className="grid size-9 place-items-center rounded-xl transition hover:bg-card hover:text-flame">
+                  <a key={s.label} href={s.href} aria-label={s.label} title={s.label} target="_blank" rel="noreferrer" className="grid size-9 place-items-center rounded-xl transition hover:bg-white/10 hover:text-white">
                     <s.icon className="size-[18px]" />
                   </a>
                 ))}
               </div>
             )}
-            <Link to="/privacy" className="hover:text-ink">Gizlilik</Link>
-            <Link to="/cookies" className="hover:text-ink">Çerezler</Link>
-            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-1 font-bold hover:text-ink">Başa dön <ArrowUp className="size-3.5" /></button>
+            <Link to="/privacy" className="hover:text-white">Gizlilik</Link>
+            <Link to="/cookies" className="hover:text-white">Çerezler</Link>
+            <button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })} className="flex items-center gap-1 font-bold hover:text-white">Başa dön <ArrowUp className="size-3.5" /></button>
           </div>
         </div>
       </div>

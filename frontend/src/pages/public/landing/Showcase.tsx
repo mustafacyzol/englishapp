@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 
 import { AnimatePresence, motion, useInView, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTime, useTransform } from 'motion/react'
 import clsx from 'clsx'
 import { Link } from 'react-router-dom'
-import { ArrowRight, Building2, Check, Crown, Flame, Sparkles } from 'lucide-react'
+import { ArrowRight, Building2, Check, Crown, Sparkles } from 'lucide-react'
 import { useSiteConfig } from '@/lib/site'
 import { rewardImg, img, PHOTO } from '@/lib/assets'
 import { tl } from '@/lib/format'
@@ -11,7 +11,7 @@ import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
 import { Defne } from '@/components/game/Defne'
 import { higoImg } from '@/components/game/Higo'
-import { HIGO_SEQ, HigoMotion } from '@/components/game/HigoMotion'
+import { FrameSequence, HIGO_DAY, HigoMotion } from '@/components/game/HigoMotion'
 import { DefneMock, DuelMock, ExamMock, PathMock, Phone, SwipeMock } from './Mocks'
 
 const ease = [0.22, 1, 0.36, 1] as const
@@ -84,28 +84,6 @@ function OrbitChip({ word, phase }: { word: (typeof ORBIT)[number]; phase: numbe
   )
 }
 
-const LINES = ['Hi, I’m Higo!', 'Merhaba!', 'Ready to talk?', 'Hadi başlayalım!']
-
-/** Higo’s speech bubble: a new line every few seconds, typed in. */
-function SpeechBubble() {
-  const reduced = useReducedMotion()
-  const [k, setK] = useState(0)
-  useEffect(() => {
-    if (reduced) return
-    const id = setInterval(() => setK((x) => (x + 1) % LINES.length), 3200)
-    return () => clearInterval(id)
-  }, [reduced])
-  return (
-    <div className="absolute left-[56%] top-[4%] z-30 sm:left-[60%]">
-      <AnimatePresence mode="wait">
-        <motion.p key={k} initial={{ opacity: 0, scale: 0.6, y: 10, rotate: -6 }} animate={{ opacity: 1, scale: 1, y: 0, rotate: 0 }} exit={{ opacity: 0, scale: 0.8, y: -6 }} transition={{ type: 'spring', stiffness: 420, damping: 22 }} className="relative origin-bottom-left whitespace-nowrap rounded-2xl rounded-bl-md bg-ink px-3.5 py-2 font-display text-sm font-black text-paper shadow-[0_14px_28px_-14px_rgba(31,36,51,.5)] sm:text-base">
-          {LINES[k]}
-        </motion.p>
-      </AnimatePresence>
-    </div>
-  )
-}
-
 export function HeroPro() {
   const reduced = useReducedMotion()
   const mx = useMotionValue(0)
@@ -114,7 +92,6 @@ export function HeroPro() {
   const sy = useSpring(my, { stiffness: 70, damping: 18 })
   const near = (d: number) => ({ x: useTransform(sx, (v) => v * d), y: useTransform(sy, (v) => v * d) }) // eslint-disable-line react-hooks/rules-of-hooks
   const a = near(0.6)
-  const c = near(0.9)
   const ph = near(0.3)
   const move = (e: React.PointerEvent) => {
     if (reduced) return
@@ -172,15 +149,10 @@ export function HeroPro() {
             <HigoMotion className="size-full object-contain drop-shadow-[0_24px_24px_rgba(200,60,20,.22)]" />
           </motion.div>
           <span aria-hidden className="absolute bottom-[9%] left-1/2 z-0 h-[5%] w-[34%] -translate-x-1/2 rounded-[50%] bg-ink/15 blur-md" />
-          <SpeechBubble />
 
           <motion.div style={a} initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.9, type: 'spring', stiffness: 140, damping: 16 }} className="absolute -left-4 bottom-[6%] z-30 hidden w-[200px] rounded-2xl bg-card p-3 shadow-[0_20px_40px_-18px_rgba(31,36,51,.35)] ring-1 ring-line sm:block lg:-left-16">
             <div className="mb-1.5 flex items-center gap-2"><Defne className="size-7" /><p className="text-sm font-black">Defne</p><span className="ml-auto rounded-full bg-mint/12 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-mint-deep">Düzeltme</span></div>
             <p className="text-sm"><s className="text-berry">I am agree</s> → <b className="text-mint-deep">I agree</b></p>
-          </motion.div>
-          <motion.div style={c} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.1, type: 'spring', stiffness: 140, damping: 16 }} className="absolute -right-2 top-[12%] z-30 flex items-center gap-2.5 rounded-2xl bg-[#141926] px-3.5 py-2.5 text-white shadow-[0_20px_40px_-18px_rgba(0,0,0,.5)] lg:-right-10">
-            <Flame className="size-5 fill-flame text-flame" />
-            <span><span className="block font-display text-base font-black leading-none">21 gün</span><span className="text-[11px] font-bold text-white/60">seri</span></span>
           </motion.div>
         </div>
       </div>
@@ -288,57 +260,19 @@ const beatAt = (p: number) => BEATS.reduce((acc, b, k) => (p >= b.from ? k : acc
 
 /**
  * Meet Higo, scroll-driven: the page scrubs through a real animation of Higo
- * (wave, read, think, cheer), frame by frame on a canvas, so he transforms
- * smoothly as you scroll. Each beat brings its colour, a line of text and the
- * real piece of the app it is about. With reduced motion it is a simple list.
+ * (wave, read, think, cheer) frame by frame, so he transforms smoothly as you
+ * scroll. Kept light on purpose: one canvas, a short scroll distance, and colour
+ * changes done with CSS transitions per beat rather than repainting the screen
+ * on every scroll frame. With reduced motion it is a simple list.
  */
 export function MeetHigoPro() {
   const ref = useRef<HTMLElement>(null)
-  const canvas = useRef<HTMLCanvasElement>(null)
-  const frames = useRef<HTMLImageElement[]>([])
   const reduced = useReducedMotion()
   const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
-  const smooth = useSpring(scrollYProgress, { stiffness: 180, damping: 32, restDelta: 0.0005 })
+  // a light spring only to round off wheel steps; it settles within ~150 ms
+  const smooth = useSpring(scrollYProgress, { stiffness: 420, damping: 48, mass: 0.4, restDelta: 0.0005 })
   const [i, setI] = useState(0)
-  const tint = useTransform(smooth, BEATS.map((b) => b.from + 0.04), BEATS.map((b) => b.tint))
-  const blobR = useTransform(smooth, [0, 0.25, 0.5, 0.75, 1], ['46% 54% 52% 48%', '58% 42% 45% 55%', '42% 58% 60% 40%', '55% 45% 40% 60%', '50% 50% 50% 50%'])
-  const rot = useTransform(smooth, [0, 1], [-8, 28])
-  const rotBack = useTransform(rot, (r) => -r * 1.6)
-  const wash = useTransform(tint, (c) => `radial-gradient(60rem 40rem at 30% 55%, ${c}, transparent 70%)`)
-
-  const draw = (p: number) => {
-    const c = canvas.current
-    const list = frames.current
-    if (!c || !list.length) return
-    const want = Math.round(Math.min(1, Math.max(0, p)) * (HIGO_SEQ.count - 1))
-    // the nearest frame that has loaded, so a slow network never shows a gap
-    let f = want
-    for (let d = 0; d < HIGO_SEQ.count; d++) {
-      if (list[want - d]?.complete && list[want - d].naturalWidth) { f = want - d; break }
-      if (list[want + d]?.complete && list[want + d].naturalWidth) { f = want + d; break }
-    }
-    const im = list[f]
-    if (!im?.complete) return
-    const ctx = c.getContext('2d')
-    if (!ctx) return
-    ctx.clearRect(0, 0, c.width, c.height)
-    ctx.drawImage(im, 0, 0, c.width, c.height)
-  }
-
-  useEffect(() => {
-    if (reduced) return
-    const list = Array.from({ length: HIGO_SEQ.count }, (_, n) => {
-      const im = new Image()
-      im.decoding = 'async'
-      im.src = HIGO_SEQ.src(n)
-      if (n === 0) im.onload = () => draw(smooth.get())
-      return im
-    })
-    frames.current = list
-  }, [reduced]) // eslint-disable-line react-hooks/exhaustive-deps
-
-  useMotionValueEvent(smooth, 'change', (v) => {
-    draw(v)
+  useMotionValueEvent(scrollYProgress, 'change', (v) => {
     const k = beatAt(v)
     if (k !== i) setI(k)
   })
@@ -360,22 +294,22 @@ export function MeetHigoPro() {
   }
 
   return (
-    <section ref={ref} className="relative" style={{ height: '480vh' }} aria-label="Higo ile tanış">
+    <section ref={ref} className="relative" style={{ height: '320vh' }} aria-label="Higo ile tanış">
       <div className="sticky top-0 flex h-dvh items-center overflow-hidden">
-        {/* a soft wash of the beat's colour, never a hard panel */}
-        <motion.div aria-hidden className="absolute inset-0 opacity-[0.10]" style={{ background: wash }} />
+        {/* one soft wash per beat, cross-faded by CSS */}
+        {BEATS.map((b, k) => <div key={b.title} aria-hidden className="absolute inset-0 transition-opacity duration-500" style={{ opacity: k === i ? 0.12 : 0, background: `radial-gradient(56rem 38rem at 30% 55%, ${b.tint}, transparent 70%)` }} />)}
 
         <div className="relative mx-auto grid w-full max-w-6xl items-center gap-4 px-5 pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pt-0">
           {/* Higo on his stage */}
-          <div className="relative mx-auto aspect-[560/515] w-[min(78vw,44vh)] lg:w-[min(100%,62vh)]">
-            <motion.span aria-hidden className="absolute inset-[10%] opacity-25 blur-2xl" style={{ backgroundColor: tint, borderRadius: blobR, rotate: rot }} />
-            <motion.span aria-hidden className="absolute inset-[16%] border-[3px] border-dashed opacity-40" style={{ borderColor: tint, borderRadius: blobR, rotate: rotBack }} />
-            <canvas ref={canvas} width={HIGO_SEQ.w} height={HIGO_SEQ.h} className="relative size-full drop-shadow-[0_24px_24px_rgba(160,50,20,.18)]" role="img" aria-label="Higo animasyonu" />
-            <span aria-hidden className="absolute bottom-[4%] left-1/2 h-[5%] w-[32%] -translate-x-1/2 rounded-[50%] bg-ink/15 blur-md" />
+          <div className="relative mx-auto w-[min(76vw,42vh)] lg:w-[min(100%,60vh)]">
+            <span aria-hidden className="absolute inset-[12%] rounded-full transition-colors duration-500" style={{ backgroundColor: `color-mix(in oklab, ${cur.tint} 18%, transparent)` }} />
+            <span aria-hidden className="absolute inset-[18%] rounded-full border-[3px] border-dashed transition-colors duration-500" style={{ borderColor: `color-mix(in oklab, ${cur.tint} 45%, transparent)` }} />
+            <FrameSequence seq={HIGO_DAY} progress={smooth} label="Higo animasyonu" className="relative w-full [filter:drop-shadow(0_22px_18px_rgba(160,50,20,.16))]" />
+            <span aria-hidden className="absolute bottom-[3%] left-1/2 h-[5%] w-[32%] -translate-x-1/2 rounded-[50%] bg-ink/12 blur-md" />
             {/* the real bit of the app for this beat, popping in beside him */}
             <div className="absolute -bottom-8 right-[-8%] w-[58%] sm:w-[50%] lg:-bottom-2 lg:right-[-6%] lg:w-[50%]">
               <AnimatePresence mode="popLayout" initial={false}>
-                <motion.div key={i} initial={{ opacity: 0, scale: 0.7, y: 24, rotate: 6 }} animate={{ opacity: 1, scale: 1, y: 0, rotate: -2 }} exit={{ opacity: 0, scale: 0.85, y: -16, rotate: -8 }} transition={{ type: 'spring', stiffness: 320, damping: 22 }} className="origin-bottom-left [&>div]:max-w-none [&>div]:p-3.5 sm:[&>div]:p-4">
+                <motion.div key={i} initial={{ opacity: 0, scale: 0.85, y: 18 }} animate={{ opacity: 1, scale: 1, y: 0, rotate: -2 }} exit={{ opacity: 0, scale: 0.9, y: -10 }} transition={{ type: 'spring', stiffness: 420, damping: 30 }} className="origin-bottom-left [&>div]:max-w-none [&>div]:p-3.5 sm:[&>div]:p-4">
                   <cur.Scene />
                 </motion.div>
               </AnimatePresence>
@@ -387,13 +321,11 @@ export function MeetHigoPro() {
             <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Tanış: Higo</p>
             <div className="relative mt-3 min-h-[190px] sm:min-h-[210px]">
               <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={i} initial="hide" animate="show" exit="out" variants={{ show: { transition: { staggerChildren: 0.05 } } }}>
+                <motion.div key={i} initial="hide" animate="show" exit="out" variants={{ show: { transition: { staggerChildren: 0.04 } } }}>
                   <motion.p variants={WORD_V} className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em]" style={{ color: cur.tint }}>
                     <span className="font-mono">0{i + 1}</span><span className="h-px w-6 bg-current" />{cur.kicker}
                   </motion.p>
-                  <h2 className="mt-2 font-display text-[clamp(1.8rem,4vw,3rem)] font-black leading-[1.05] tracking-tight">
-                    {cur.title.split(' ').map((w, k) => <motion.span key={k} variants={WORD_V} className="mr-[0.25em] inline-block">{w}</motion.span>)}
-                  </h2>
+                  <motion.h2 variants={WORD_V} className="mt-2 font-display text-[clamp(1.8rem,4vw,3rem)] font-black leading-[1.05] tracking-tight">{cur.title}</motion.h2>
                   <motion.p variants={WORD_V} className="mt-3 max-w-md text-[17px] leading-relaxed text-ink-soft">{cur.text}</motion.p>
                 </motion.div>
               </AnimatePresence>
@@ -401,7 +333,7 @@ export function MeetHigoPro() {
             {/* chapter rail: shows where you are, and jumps */}
             <div className="mt-6 flex items-center gap-2">
               {BEATS.map((b, k) => (
-                <button key={b.title} onClick={() => go(k)} aria-label={b.title} className="group relative h-2.5 overflow-hidden rounded-full bg-line transition-all duration-300" style={{ width: k === i ? 48 : 14 }}>
+                <button key={b.title} onClick={() => go(k)} aria-label={b.title} className="relative h-2.5 overflow-hidden rounded-full bg-line transition-[width] duration-300" style={{ width: k === i ? 48 : 14 }}>
                   <span className="absolute inset-0 rounded-full transition-opacity" style={{ background: b.tint, opacity: k <= i ? 1 : 0 }} />
                 </button>
               ))}
@@ -415,9 +347,9 @@ export function MeetHigoPro() {
 }
 
 const WORD_V = {
-  hide: { opacity: 0, y: 18, filter: 'blur(6px)' },
-  show: { opacity: 1, y: 0, filter: 'blur(0px)', transition: { type: 'spring' as const, stiffness: 380, damping: 28 } },
-  out: { opacity: 0, y: -10, transition: { duration: 0.15 } },
+  hide: { opacity: 0, y: 14 },
+  show: { opacity: 1, y: 0, transition: { type: 'spring' as const, stiffness: 420, damping: 32 } },
+  out: { opacity: 0, y: -8, transition: { duration: 0.12 } },
 }
 
 /* small scenes, each a real piece of the app */
