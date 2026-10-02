@@ -59,7 +59,7 @@ class IyzicoGateway implements PaymentGateway
             ],
             'basketItems' => [[
                 'id' => 'plan-'.$order->plan_id,
-                'name' => $order->plan?->name ?? 'DilGO Premium',
+                'name' => $order->plan?->name ?? config('dilgo.brand.name').' Premium',
                 'category1' => 'Education',
                 'itemType' => 'VIRTUAL',
                 // iyzico requires basket total == price; discount is reflected in paidPrice.

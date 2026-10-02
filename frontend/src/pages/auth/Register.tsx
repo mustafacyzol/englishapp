@@ -22,6 +22,7 @@ import { SocialButtons } from '@/components/auth/SocialButtons'
 import { MobilePass, PassPanel } from './PlanPanel'
 import { higoImg } from '@/components/game/Higo'
 import { img } from '@/lib/assets'
+import { BRAND } from '@/lib/brand'
 
 type StepKey = 'hello' | 'name' | 'age' | 'goal' | 'exam' | 'interests' | 'focus' | 'level' | 'time' | 'account'
 const DRAFT = 'dilgo.onboarding'
@@ -205,7 +206,7 @@ export default function Register() {
               {/* on phones Higo greets here; on desktop he speaks from the side panel */}
               <div className="flex items-center gap-4 rounded-3xl bg-paper-2/70 p-4 lg:hidden">
                 <img src={higoImg('wave')} alt="Higo" className="size-16 shrink-0 object-contain" />
-                <p className="font-semibold text-ink-soft">“Ben Higo, DilGO rehberin. Adını yaz, planını sana özel kuralım.”</p>
+                <p className="font-semibold text-ink-soft">“Ben Higo, {BRAND} rehberin. Adını yaz, planını sana özel kuralım.”</p>
               </div>
               <Input label="Adın" autoComplete="given-name" value={d.name} onChange={(e) => up({ name: e.target.value })} autoFocus placeholder="ör. Deniz" maxLength={60} />
               <Button type="submit" block size="lg" disabled={!canNext.name} icon={<ArrowRight className="size-5" />}>Devam</Button>

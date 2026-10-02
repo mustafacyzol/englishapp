@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Reveal } from '@/components/motion/Page'
+import { BRAND } from '@/lib/brand'
 
 export type LegalKind = 'terms' | 'privacy' | 'cookies' | 'distance' | 'refund'
 
@@ -8,9 +9,9 @@ interface Doc { title: string; intro: string; body: [string, string][] }
 const TEXT: Record<LegalKind, Doc> = {
   terms: {
     title: 'Kullanım Koşulları',
-    intro: 'DilGO’yu kullanırken geçerli olan kurallar ve karşılıklı sorumluluklar.',
+    intro: `${BRAND}’yu kullanırken geçerli olan kurallar ve karşılıklı sorumluluklar.`,
     body: [
-      ['Hizmet', 'DilGO, Bayrak Dil Okulları tarafından sunulan çevrim içi İngilizce öğrenme platformudur. Hesap oluşturarak bu koşulları kabul etmiş olursun.'],
+      ['Hizmet', `${BRAND}, Bayrak Dil Okulları tarafından sunulan çevrim içi İngilizce öğrenme platformudur. Hesap oluşturarak bu koşulları kabul etmiş olursun.`],
       ['Hesap güvenliği', 'Hesabının ve şifrenin güvenliğinden sen sorumlusun. Şüpheli bir durum fark edersen şifreni değiştir ve bize bildir. Hesabını başkasıyla paylaşman hâlinde oluşacak kayıplardan sorumlu değiliz.'],
       ['Premium üyelik', 'Premium paketler seçilen süre boyunca geçerlidir ve otomatik yenilenmez. Süre bitiminde hesabın ücretsiz sürüme döner; ilerlemen ve kelime defterin silinmez.'],
       ['Ödüller ve kuponlar', 'Oyun içi elmas, kart ve kuponların nakit karşılığı yoktur, devredilemez ve satılamaz. Canlı ders kuponları üzerinde belirtilen süre içinde kullanılmalıdır.'],
@@ -50,7 +51,7 @@ const TEXT: Record<LegalKind, Doc> = {
     intro: 'Premium paket satın alırken kurulan sözleşmenin esasları.',
     body: [
       ['Taraflar', 'Satıcı: Bayrak Dil Okulları. Alıcı: uygulama üzerinden Premium paket satın alan kullanıcı.'],
-      ['Sözleşme konusu', 'Sözleşmenin konusu, DilGO uygulamasında seçilen süreli dijital Premium üyelik hizmetidir. Paketin süresi, bedeli ve içeriği ödeme ekranında gösterilir.'],
+      ['Sözleşme konusu', `Sözleşmenin konusu, ${BRAND} uygulamasında seçilen süreli dijital Premium üyelik hizmetidir. Paketin süresi, bedeli ve içeriği ödeme ekranında gösterilir.`],
       ['Ödeme', 'Ödemeler iyzico altyapısı üzerinden 3D Secure ile alınır. Kart bilgilerin satıcıya iletilmez ve saklanmaz.'],
       ['Teslim', 'Hizmet dijitaldir; ödeme onaylandığı anda hesabına tanımlanır. Ayrı bir teslimat süresi ve kargo bedeli yoktur.'],
       ['Cayma hakkı', 'Mesafeli Sözleşmeler Yönetmeliği uyarınca elektronik ortamda anında ifa edilen hizmetlerde cayma hakkı bulunmamakla birlikte, ilk 14 gün içinde hizmeti hiç kullanmadıysan iade talebinde bulunabilirsin.'],

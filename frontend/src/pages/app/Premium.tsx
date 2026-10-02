@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert, Modal, PageHeader, SkeletonPage } from '@/components/ui/Misc'
 import { PricingPro } from '../public/landing/Showcase'
+import { BRAND } from '@/lib/brand'
 
 interface Quote { amount: number; discount: number; total: number; currency: string; coupon: { code: string; description: string | null } | null }
 interface StartResp { order: { uuid: string; status: string }; checkout: { payment_page_url?: string; checkout_form_content?: string } | null }
@@ -57,7 +58,7 @@ export default function Premium() {
   if (isLoading || !data) return <SkeletonPage variant="cards" />
   return (
     <div className="mx-auto max-w-5xl">
-      {user?.premium.active && <PageHeader kicker="DilGO Premium" title="Premium üyesisin" />}
+      {user?.premium.active && <PageHeader kicker={`${BRAND} Premium`} title="Premium üyesisin" />}
       {user?.premium.active && <div className="mb-6"><Alert tone="success">Premium üyeliğin {dateTR(user.premium.until)} tarihine kadar aktif. Yeni paket alırsan süren üzerine eklenir.</Alert></div>}
 
       <PricingPro embedded plans={data.data} title="Sınırsız pratik, tek dokunuşla." sub="Sınırsız can, tüm hikâyeler, daha fazla Defne pratiği ve canlı ders kuponları." cta={(p) => <Button block variant={p.is_featured ? 'primary' : 'dark'} onClick={() => choose(p)}>{p.is_featured ? 'Premium’a geç' : 'Seç'}</Button>} />

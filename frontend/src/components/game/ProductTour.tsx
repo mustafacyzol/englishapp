@@ -13,6 +13,7 @@ import type { Me } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
 import { DefnePose } from './Defne'
+import { BRAND } from '@/lib/brand'
 
 interface Slide { kicker: string; title: string; text: string; art: React.ReactNode; tone: string }
 
@@ -73,7 +74,7 @@ export function ProductTour() {
       tone: 'bg-sage/15',
     },
     {
-      kicker: 'Sadece DilGO’da',
+      kicker: `Sadece ${BRAND}’da`,
       title: 'Gölge Düellosu',
       text: 'Başka bir öğrencinin gölgesine karşı dört turda yarış, kupa topla, rütbe atla. Sen yokken senin gölgen de kupalarını savunur.',
       art: <div className="grid size-full place-items-center rounded-[28px] bg-[#151922]"><Img src={leagueImg(6)} alt="" className="h-40 w-40 object-contain drop-shadow-xl sm:h-48 sm:w-48" /></div>,

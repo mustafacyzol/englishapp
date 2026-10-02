@@ -11,6 +11,7 @@ import { SkeletonPage } from '@/components/ui/Misc'
 import { LinkButton } from '@/components/ui/Button'
 import { Reveal } from '@/components/motion/Page'
 import { Img } from '@/components/ui/Img'
+import { BRAND } from '@/lib/brand'
 
 interface Post { id: number; slug: string; title: string; excerpt: string | null; cover_image: string | null; category: string | null; author_name: string; reading_minutes: number; published_at: string; body?: string }
 
@@ -73,7 +74,7 @@ export function BlogPost() {
       <div className="prose-dilgo text-lg leading-relaxed"><Markdown source={p.body ?? ''} /></div>
       <div className="mt-12 rounded-3xl bg-flame/8 p-8 text-center">
         <h2 className="text-2xl">Okuduklarını pratiğe dök</h2>
-        <p className="mt-2 text-ink-soft">DilGO'da hikayelerle oku, Defne ile konuş. Ücretsiz.</p>
+        <p className="mt-2 text-ink-soft">{BRAND}'da hikayelerle oku, Defne ile konuş. Ücretsiz.</p>
         <LinkButton to="/register" className="mt-5">Ücretsiz başla</LinkButton>
       </div>
       {!!data.related.length && (

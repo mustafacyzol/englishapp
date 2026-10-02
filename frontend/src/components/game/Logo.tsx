@@ -1,4 +1,5 @@
 import clsx from 'clsx'
+import { WORDMARK } from '@/lib/brand'
 
 export function LogoMark({ className }: { className?: string }) {
   return (
@@ -15,7 +16,7 @@ export function Logo({ className, small }: { className?: string; small?: boolean
     <span className={clsx('inline-flex items-center gap-2', className)}>
       <LogoMark className={small ? 'size-8' : 'size-9'} />
       <span className={clsx('font-display font-black leading-none tracking-tight', small ? 'text-[22px]' : 'text-2xl')}>
-        dil<span className="text-flame">go</span>
+        {WORDMARK[0]}<span className="text-flame">{WORDMARK[1]}</span>
       </span>
     </span>
   )

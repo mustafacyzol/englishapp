@@ -11,29 +11,29 @@
     <meta name="theme-color" content="#f7f8fa" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#11141c" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
-    <title>DilGO · İngilizceyi kendi hızında öğren | Defne AI ile konuş</title>
-    <meta name="description" content="DilGO ile İngilizceyi ilkokuldan üniversiteye, günde birkaç dakikada öğren: LGS, YDT, YDS ve YÖKDİL hazırlığı, kısa dersler, hikâyeler, oyunlar ve seninle konuşan yapay zekâ öğretmen Defne. Okullar için öğretmen ve müdür paneli. Ücretsiz başla." />
+    <title>%VITE_APP_NAME% · İngilizceyi kendi hızında öğren | Defne AI ile konuş</title>
+    <meta name="description" content="%VITE_APP_NAME% ile İngilizceyi ilkokuldan üniversiteye, günde birkaç dakikada öğren: LGS, YDT, YDS ve YÖKDİL hazırlığı, kısa dersler, hikâyeler, oyunlar ve seninle konuşan yapay zekâ öğretmen Defne. Okullar için öğretmen ve müdür paneli. Ücretsiz başla." />
     <meta name="keywords" content="İngilizce öğren, İngilizce uygulaması, LGS İngilizce, YDT hazırlık, YKS Dil, YDS, YÖKDİL, hazırlık muafiyet, ortaokul İngilizce, lise İngilizce, okullar için İngilizce platformu, yapay zeka İngilizce öğretmeni, İngilizce konuşma pratiği, Bayrak Dil Okulları" />
     <meta name="author" content="Bayrak Dil Okulları" />
     <meta name="robots" content="index, follow, max-image-preview:large" />
     <link rel="canonical" href="%VITE_SITE_URL%/" />
-    <meta name="application-name" content="DilGO" />
-    <meta name="apple-mobile-web-app-title" content="DilGO" />
+    <meta name="application-name" content="%VITE_APP_NAME%" />
+    <meta name="apple-mobile-web-app-title" content="%VITE_APP_NAME%" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="format-detection" content="telephone=no" />
 
-    <meta property="og:site_name" content="DilGO" />
+    <meta property="og:site_name" content="%VITE_APP_NAME%" />
     <meta property="og:type" content="website" />
     <meta property="og:locale" content="tr_TR" />
     <meta property="og:url" content="%VITE_SITE_URL%/" />
-    <meta property="og:title" content="DilGO · İngilizceyi kendi hızında öğren" />
+    <meta property="og:title" content="%VITE_APP_NAME% · İngilizceyi kendi hızında öğren" />
     <meta property="og:description" content="Kısa dersler, hikâyeler, oyunlar ve seninle konuşan yapay zekâ öğretmen Defne. Ücretsiz başla." />
     <meta property="og:image" content="%VITE_SITE_URL%/og-image.jpg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="DilGO maskotu Higo telefondan fırlıyor" />
+    <meta property="og:image:alt" content="%VITE_APP_NAME% maskotu Higo telefondan fırlıyor" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="DilGO · İngilizceyi kendi hızında öğren" />
+    <meta name="twitter:title" content="%VITE_APP_NAME% · İngilizceyi kendi hızında öğren" />
     <meta name="twitter:description" content="Kısa dersler, hikâyeler, oyunlar ve yapay zekâ öğretmen Defne." />
     <meta name="twitter:image" content="%VITE_SITE_URL%/og-image.jpg" />
 
@@ -42,8 +42,8 @@
         "@context": "https://schema.org",
         "@graph": [
           { "@type": "Organization", "name": "Bayrak Dil Okulları", "url": "%VITE_SITE_URL%/", "logo": "%VITE_SITE_URL%/icon-512.png" },
-          { "@type": "WebSite", "name": "DilGO", "url": "%VITE_SITE_URL%/", "inLanguage": "tr-TR" },
-          { "@type": "SoftwareApplication", "name": "DilGO", "applicationCategory": "EducationalApplication", "operatingSystem": "Web, Android, iOS", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" } }
+          { "@type": "WebSite", "name": "%VITE_APP_NAME%", "url": "%VITE_SITE_URL%/", "inLanguage": "tr-TR" },
+          { "@type": "SoftwareApplication", "name": "%VITE_APP_NAME%", "applicationCategory": "EducationalApplication", "operatingSystem": "Web, Android, iOS", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" } }
         ]
       }
     </script>
@@ -59,7 +59,7 @@
     <div id="root"></div>
 
     <!-- Boot splash: paints before the bundle parses, removed once React mounts. -->
-    <div id="boot" aria-label="DilGO yükleniyor">
+    <div id="boot" aria-label="%VITE_APP_NAME% yükleniyor">
       <div class="boot-mark">
         <svg viewBox="0 0 48 48" width="40" height="40" aria-hidden>
           <rect width="48" height="48" rx="14" fill="#E8403A" />

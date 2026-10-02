@@ -10,6 +10,7 @@ import { Logo } from '@/components/game/Logo'
 import { Img } from '@/components/ui/Img'
 import { LangSelect } from '@/components/ui/LangSelect'
 import type { Review } from '../public/Landing'
+import { BRAND } from '@/lib/brand'
 
 export interface Slide { src: string; caption: string }
 
@@ -145,7 +146,7 @@ export function AuthCard({ title, subtitle, children, footer, pose = 'think' }: 
   return (
     <div className="auth-backdrop relative flex min-h-dvh flex-col overflow-hidden">
       <header className="relative z-10 flex items-center justify-between px-5 py-3 sm:px-8">
-        <Link to="/" aria-label="DilGO ana sayfa"><Logo small /></Link>
+        <Link to="/" aria-label={`${BRAND} ana sayfa`}><Logo small /></Link>
         <LangSelect />
       </header>
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-8 pt-2">

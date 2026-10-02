@@ -21,9 +21,9 @@ class InstitutionInvite extends Notification
         $url = rtrim((string) config('dilgo.brand.frontend_url'), '/').'/davet/'.$this->member->invite_token;
 
         return (new MailMessage)
-            ->subject("{$this->institution->name} seni DilGO'ya davet etti")
+            ->subject("{$this->institution->name} seni ".config('dilgo.brand.name')."'ya davet etti")
             ->greeting('Merhaba'.($this->member->name ? " {$this->member->name}" : '').'!')
-            ->line("{$this->institution->name}, İngilizce çalışman için sana bir DilGO Premium koltuğu ayırdı.")
+            ->line("{$this->institution->name}, İngilizce çalışman için sana bir ".config('dilgo.brand.name')." Premium koltuğu ayırdı.")
             ->line('Okuma, dinleme, konuşma ve yazma, dört beceri tek uygulamada, yapay zekâ koçun Defne ile.')
             ->action('Daveti kabul et', $url)
             ->line('Bu daveti beklemiyorsan e-postayı yok sayabilirsin.');

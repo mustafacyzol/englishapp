@@ -10,6 +10,7 @@ import { examName, examOn, PLACEMENT_TOKEN } from '@/lib/onboarding'
 import { storage } from '@/lib/storage'
 import { HigoMotion } from './HigoMotion'
 import { higoImg } from './Higo'
+import { BRAND } from '@/lib/brand'
 
 interface Mark {
   /** data-tour value(s) to spotlight, first visible one wins */
@@ -131,7 +132,7 @@ export function CoachMarks() {
       <div className="fixed inset-0 z-[70] grid place-items-center bg-[rgba(10,12,18,.55)] p-4 backdrop-blur-[2px]" role="dialog" aria-modal="true" aria-label="Hoş geldin">
         <motion.div initial={{ opacity: 0, y: 30, scale: 0.94 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 22 }} className="relative w-full max-w-sm overflow-hidden rounded-[28px] border-2 border-line bg-card p-6 pt-2 text-center shadow-soft">
           <HigoMotion className="mx-auto -mb-2 size-44 object-contain" label="Higo el sallıyor" />
-          <p className="text-xs font-black uppercase tracking-[0.2em] text-flame">DilGO’ya hoş geldin</p>
+          <p className="text-xs font-black uppercase tracking-[0.2em] text-flame">{BRAND}’ya hoş geldin</p>
           <h2 className="mt-1 font-display text-2xl font-black leading-tight">Merhaba {user.name.split(' ')[0]}, ben Higo!</h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">Seni 30 saniyede gezdireyim: yolun, serin, kelime pratiği, Defne ve Arena. Sonra doğrudan ilk dersine geçersin.</p>
           <div className="mt-4 flex flex-wrap justify-center gap-1.5">

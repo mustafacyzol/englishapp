@@ -16,6 +16,7 @@ import { Logo } from '@/components/game/Logo'
 import { SocialButtons } from '@/components/auth/SocialButtons'
 import { Turnstile } from './Turnstile'
 import { higoImg } from '@/components/game/Higo'
+import { BRAND } from '@/lib/brand'
 
 /**
  * Sign-in is deliberately quiet: one centred card, the fastest options first
@@ -51,7 +52,7 @@ export default function Login() {
   return (
     <div className="auth-backdrop relative flex min-h-dvh flex-col overflow-hidden">
       <header className="relative z-10 flex items-center justify-between px-5 py-3 sm:px-8">
-        <Link to="/" aria-label="DilGO ana sayfa"><Logo small /></Link>
+        <Link to="/" aria-label={`${BRAND} ana sayfa`}><Logo small /></Link>
         <div className="flex items-center gap-3">
           <span className="hidden text-sm font-bold text-ink-soft sm:inline">{t('Hesabın yok mu?')}</span>
           <Link to="/register" className="press flex h-11 items-center gap-1.5 rounded-xl bg-flame px-4 font-display text-sm font-extrabold uppercase tracking-wide text-white shadow-[0_3px_0_0_var(--color-flame-deep)] transition hover:brightness-105">
@@ -107,7 +108,7 @@ export default function Login() {
               <Button type="submit" block size="lg" loading={m.isPending}>{t('Giriş yap')}</Button>
             </form>
             <p className="mt-4 text-center text-xs leading-relaxed text-ink-soft">
-              DilGO'da oturum açarak <Link to="/terms" className="font-bold text-ink underline underline-offset-2">Koşullarımızı</Link> ve <Link to="/privacy" className="font-bold text-ink underline underline-offset-2">Gizlilik Politikamızı</Link> kabul etmiş olursun.
+              {BRAND}'da oturum açarak <Link to="/terms" className="font-bold text-ink underline underline-offset-2">Koşullarımızı</Link> ve <Link to="/privacy" className="font-bold text-ink underline underline-offset-2">Gizlilik Politikamızı</Link> kabul etmiş olursun.
             </p>
           </div>
 

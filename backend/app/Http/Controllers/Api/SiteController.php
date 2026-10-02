@@ -94,9 +94,9 @@ class SiteController extends Controller
             $sub->fill(['source' => $data['source'] ?? 'footer', 'token' => Str::random(48), 'unsubscribed_at' => null, 'ip' => $request->ip()])->save();
             $base = config('dilgo.brand.frontend_url');
             Mail::to($email)->queue(new NoticeMail(
-                'DilGO bültenine kaydını onayla',
+                config('dilgo.brand.name').' bültenine kaydını onayla',
                 'Bir tık kaldı',
-                ['Haftalık İngilizce ipuçları ve DilGO yeniliklerini almak için adresini onayla.', 'Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin.'],
+                ['Haftalık İngilizce ipuçları ve '.config('dilgo.brand.name').' yeniliklerini almak için adresini onayla.', 'Bu isteği sen yapmadıysan bu e-postayı yok sayabilirsin.'],
                 'Kaydımı onayla',
                 $base.'/newsletter/confirm/'.$sub->token,
             ));

@@ -7,6 +7,7 @@ import type { Me } from '@/lib/types'
 import { Button, LinkButton } from '@/components/ui/Button'
 import { Alert, Spinner } from '@/components/ui/Misc'
 import { AuthShell, REGISTER_SLIDES } from '../auth/AuthShell'
+import { BRAND } from '@/lib/brand'
 
 /** Landing for an institution invite link (/davet/:token), from the e-mail a school sends. */
 export default function Invite() {
@@ -30,7 +31,7 @@ export default function Invite() {
   const inv = q.data
   const manager = inv.role === 'manager'
   return (
-    <AuthShell slides={REGISTER_SLIDES} title={`${inv.institution.name} seni bekliyor`} subtitle={manager ? 'Kurum panelinden öğrencilerinin gelişimini takip edeceksin.' : 'Okulun sana bir DilGO Premium koltuğu ayırdı.'}>
+    <AuthShell slides={REGISTER_SLIDES} title={`${inv.institution.name} seni bekliyor`} subtitle={manager ? 'Kurum panelinden öğrencilerinin gelişimini takip edeceksin.' : `Okulun sana bir ${BRAND} Premium koltuğu ayırdı.`}>
       <div className="mb-6 flex items-center gap-4 rounded-3xl border-2 border-line p-4">
         <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-sage text-white"><Building2 className="size-6" /></span>
         <div className="min-w-0">
@@ -54,7 +55,7 @@ export default function Invite() {
           <LinkButton to={`/login?next=${encodeURIComponent(`/davet/${token}`)}`} block size="lg" variant="secondary">Hesabım var, giriş yap</LinkButton>
         </div>
       )}
-      <p className="mt-6 text-center text-sm text-ink-soft"><Link to="/about" className="font-bold underline">DilGO nedir?</Link></p>
+      <p className="mt-6 text-center text-sm text-ink-soft"><Link to="/about" className="font-bold underline">{BRAND} nedir?</Link></p>
     </AuthShell>
   )
 }

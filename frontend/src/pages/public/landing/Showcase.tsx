@@ -12,6 +12,7 @@ import { Img } from '@/components/ui/Img'
 import { higoImg } from '@/components/game/Higo'
 import { FrameSequence, HIGO_DAY, HigoMotion } from '@/components/game/HigoMotion'
 import { DefneMock, DuelMock, ExamMock, PathMock, Phone, SwipeMock } from './Mocks'
+import { BRAND } from '@/lib/brand'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -226,7 +227,7 @@ const AUDIENCES = [
   { key: 'kid', tab: 'İlkokul ve ortaokul', age: '2-8. sınıf', photo: img('photos/aud-kid.webp'), title: 'Oyun gibi, güvenli ve okulla uyumlu', points: ['Kısa cümleler, bol teşvik, yaşına uygun konular', 'Sınıfına göre kelime ve dilbilgisi', 'Yalnızca yaşıtlarıyla düello, veli onaylı hesap'], cta: 'Çocuğum için başla', to: '/register', tone: 'text-mint-deep bg-mint/12' },
   { key: 'teen', tab: 'Lise ve üniversite', age: '9. sınıftan hazırlığa', photo: img('photos/aud-teen.webp'), title: 'Okul, hazırlık ve özgüven', points: ['Okuma, yazma ve konuşmayı birlikte geliştiren yol', 'İstersen sınav modu: hedefini sen seçersin', 'Arkadaşlarınla lig ve Gölge Düellosu'], cta: 'Hemen başla', to: '/register', tone: 'text-sky bg-sky/12' },
   { key: 'adult', tab: 'Yetişkinler', age: '18 yaş ve üzeri', photo: PHOTO.hero, title: 'İş, seyahat, özgüven', points: ['Toplantı, mülakat ve seyahat senaryoları', 'Defne ile sesli konuşma provası', 'Günde 5-20 dakikalık esnek plan'], cta: 'Ücretsiz dene', to: '/register', tone: 'text-flame bg-flame/10' },
-  { key: 'org', tab: 'Okullar', age: 'Müdür · öğretmen · öğrenci', photo: PHOTO.classroom, title: 'Okulunuzun tüm İngilizcesi tek yerde', points: ['Müdür ve öğretmen panelleri, sınıf yönetimi', 'Ödev verme, takip ve dört beceri raporu', 'Öğrenciler kodla katılır, veliler ilerlemeyi görür'], cta: 'Okullar için', to: '/okullar', tone: 'text-sage-deep bg-sage/15' },
+  { key: 'org', tab: 'Okullar', age: 'Müdür ve öğretmen', photo: PHOTO.classroom, title: 'Okulunuzun tüm İngilizcesi tek yerde', points: ['Müdür ve öğretmen panelleri, sınıf yönetimi', 'Ödev verme, takip ve dört beceri raporu', 'Öğrenciler kodla katılır, veliler ilerlemeyi görür'], cta: 'Okullar için', to: '/okullar', tone: 'text-sage-deep bg-sage/15' },
 ] as const
 
 /**
@@ -250,13 +251,13 @@ export function AudiencesPro() {
 
       <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
         {/* tabs */}
-        <motion.div role="tablist" initial="hide" whileInView="show" viewport={{ once: true, amount: 0.4 }} variants={{ show: { transition: { staggerChildren: 0.06 } } }} className="no-scrollbar -mx-5 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:flex-col lg:overflow-visible lg:px-0">
+        <motion.div role="tablist" initial="hide" whileInView="show" viewport={{ once: true, amount: 0.4 }} variants={{ show: { transition: { staggerChildren: 0.06 } } }} className="grid grid-cols-2 gap-2 sm:grid-cols-4 lg:flex lg:flex-col">
           {AUDIENCES.map((x, k) => {
             const on = k === i
             return (
-              <motion.button variants={{ hide: { opacity: 0, y: 24, scale: 0.9 }, show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 420, damping: 24 } } }} key={x.key} role="tab" aria-selected={on} onClick={() => pick(k)} className={clsx('relative shrink-0 overflow-hidden rounded-2xl border-2 px-4 py-3 text-left transition-colors lg:py-4', on ? 'border-ink bg-card' : 'border-line bg-card/60 hover:border-ink/25')}>
-                <span className="block font-display text-[15px] font-black lg:text-lg">{x.tab}</span>
-                <span className="hidden text-xs font-bold text-ink-soft lg:block">{x.age}</span>
+              <motion.button variants={{ hide: { opacity: 0, y: 24, scale: 0.9 }, show: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 420, damping: 24 } } }} key={x.key} role="tab" aria-selected={on} onClick={() => pick(k)} className={clsx('relative min-w-0 overflow-hidden rounded-2xl border-2 px-3.5 py-3 text-left transition-colors sm:px-4 lg:py-4', on ? 'border-ink bg-card' : 'border-line bg-card/60 hover:border-ink/25')}>
+                <span className="block font-display text-[15px] font-black leading-tight lg:text-lg">{x.tab}</span>
+                <span className="block truncate text-[11px] font-bold text-ink-soft sm:text-xs">{x.age}</span>
                 <span className="absolute inset-x-0 bottom-0 h-[3px] bg-line/60">
                   <span className="block h-full bg-flame" style={{ width: on ? `${progress * 100}%` : k < i ? '100%' : '0%', opacity: k < i ? 0.25 : 1 }} />
                 </span>
@@ -421,7 +422,7 @@ function Notif() {
     <Card className="p-4">
       <div className="flex items-center gap-3">
         <img src={higoImg('wave')} alt="" className="size-11" />
-        <div className="min-w-0 flex-1"><p className="text-xs font-bold text-[#676d7c]">DilGO · şimdi</p><p className="font-extrabold">5 dakikan var mı? Serin 12. gününde!</p></div>
+        <div className="min-w-0 flex-1"><p className="text-xs font-bold text-[#676d7c]">{BRAND} · şimdi</p><p className="font-extrabold">5 dakikan var mı? Serin 12. gününde!</p></div>
       </div>
       <div className="mt-3 flex gap-2"><span className="flex-1 rounded-xl bg-[#ff5a36] py-2 text-center text-sm font-extrabold text-white">Başla</span><span className="flex-1 rounded-xl bg-[#f3efe9] py-2 text-center text-sm font-extrabold">Sonra</span></div>
     </Card>

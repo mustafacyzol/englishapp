@@ -28,7 +28,7 @@ class AiTutorService
 {
     private const PERSONA = <<<'TXT'
 You are Defne, a warm, witty English teacher working for Bayrak Dil Okulları, a Turkish language school.
-You teach Turkish-speaking learners through the DilGO app.
+You teach Turkish-speaking learners through the {BRAND} app.
 
 Teaching principles:
 - Speak English at the learner's CEFR level: short sentences and common words for A1-A2, richer language for B2+.
@@ -174,7 +174,7 @@ TXT;
     public function checkWriting(User $user, string $text, ?string $task = null, array $targetWords = []): array
     {
         $this->assertCanUse($user);
-        $system = self::PERSONA."\n\nYou are now grading a piece of writing. Learner level: {$user->cefr_level}. "
+        $system = str_replace('{BRAND}', (string) config('dilgo.brand.name'), self::PERSONA)."\n\nYou are now grading a piece of writing. Learner level: {$user->cefr_level}. "
             .'List at most 8 of the most useful mistakes. Keep corrected_text as close to the original as possible.'
             .(($age = self::ageBrief($user->age_group)) ? "\n{$age}" : '')
             .(($exam = Exams::tutorBrief($user->exam_target)) ? "\n{$exam} Grade with that exam's writing criteria in mind." : '');
@@ -209,7 +209,7 @@ TXT;
         $interests = collect($user->interests ?? [])->map(fn ($i) => $interestLabels[$i] ?? null)->filter()->implode(', ');
         $focus = ['reading' => 'reading', 'listening' => 'listening', 'speaking' => 'speaking', 'writing' => 'writing'][$user->focus_skill] ?? null;
 
-        $prompt = self::PERSONA."\n\nLearner profile:\n- Name: {$user->name}\n- CEFR level: {$user->cefr_level}\n- Goal: {$goalLabel}\n- Recently saved words: ".($words ?: 'none yet')
+        $prompt = str_replace('{BRAND}', (string) config('dilgo.brand.name'), self::PERSONA)."\n\nLearner profile:\n- Name: {$user->name}\n- CEFR level: {$user->cefr_level}\n- Goal: {$goalLabel}\n- Recently saved words: ".($words ?: 'none yet')
             .($interests ? "\n- Interests: {$interests} (pick examples and small-talk topics from these)" : '')
             .($focus ? "\n- Wants to improve most: {$focus}" : '')
             .(($exam = Exams::tutorBrief($user->exam_target)) ? "\n- Exam goal: {$exam}" : '')

@@ -18,6 +18,7 @@ import { XpGuide } from '@/components/game/XpGuide'
 import { Empty, PageHeader, Progress, SkeletonPage, Tabs } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
+import { BRAND, WORDMARK } from '@/lib/brand'
 
 /**
  * Four plain tabs: what do I have (cards and chests), how do I earn more, a gift
@@ -270,7 +271,7 @@ function Redeem() {
         <span aria-hidden className="absolute inset-y-0 right-16 w-6 bg-gradient-to-b from-butter to-flame opacity-90" />
         <span aria-hidden className="absolute inset-x-0 top-1/2 h-6 -translate-y-1/2 bg-gradient-to-r from-butter to-flame opacity-90" />
         <Img src={rewardImg('voucher')} alt="" className="absolute right-6 top-1/2 size-20 -translate-y-1/2 object-contain drop-shadow-xl" />
-        <p className="relative font-display text-2xl font-black italic">dilgo</p>
+        <p className="relative font-display text-2xl font-black italic">{WORDMARK.join('')}</p>
         <p className="relative text-xs font-bold uppercase tracking-[0.2em] text-white/60">Hediye kartı</p>
         <p className="absolute bottom-5 left-6 font-mono text-lg font-bold tracking-[0.18em] text-white/90">{code || 'DG-XXXX-XXXX'}</p>
       </div>
@@ -297,7 +298,7 @@ function Invite() {
   if (isLoading || !data) return <SkeletonPage variant="cards" />
   const share = async () => {
     try {
-      if (navigator.share) await navigator.share({ title: 'DilGO', text: `DilGO ile İngilizce öğreniyorum! Bu bağlantıyla katıl, ${data.rewards.referee_gems} elmas kazan:`, url: data.link })
+      if (navigator.share) await navigator.share({ title: BRAND, text: `${BRAND} ile İngilizce öğreniyorum! Bu bağlantıyla katıl, ${data.rewards.referee_gems} elmas kazan:`, url: data.link })
       else {
         await navigator.clipboard.writeText(data.link)
         toast('Bağlantı kopyalandı!', 'success')

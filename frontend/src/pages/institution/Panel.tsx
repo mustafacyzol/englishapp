@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/Toast'
 import { InviteModal, Kpi, Report, ago, type InstitutionReport, type InviteRow, type Member } from '@/components/institution/Report'
 import { InstitutionMark, useInstitution } from '@/layouts/InstitutionLayout'
 import { SchoolClassManager } from './School'
+import { BRAND } from '@/lib/brand'
 
 function useActions() {
   const qc = useQueryClient()
@@ -235,7 +236,7 @@ export function InstitutionSettings() {
           <div className="rounded-3xl border-2 border-line bg-card p-4 text-sm">
             <p className="font-black">Sözleşme</p>
             <p className="mt-1 text-ink-soft">{inst.seats} koltuk · {inst.starts_at ? dateTR(inst.starts_at) : '-'} ile {inst.ends_at ? dateTR(inst.ends_at) : 'süresiz'} arası</p>
-            <p className="mt-2 text-xs text-ink-soft">Koltuk ve süre değişiklikleri için DilGO kurumsal ekibiyle iletişime geç.</p>
+            <p className="mt-2 text-xs text-ink-soft">Koltuk ve süre değişiklikleri için {BRAND} kurumsal ekibiyle iletişime geç.</p>
           </div>
           <div className="rounded-3xl border-2 border-line bg-card p-4 text-sm">
             <p className="font-black">Erişim</p>

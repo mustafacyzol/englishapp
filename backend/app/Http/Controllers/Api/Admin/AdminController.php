@@ -201,9 +201,9 @@ class AdminController extends Controller
         if ($data['send_welcome'] ?? true) {
             $base = config('dilgo.brand.frontend_url');
             \Illuminate\Support\Facades\Mail::to($user->email)->queue(new \App\Mail\NoticeMail(
-                'DilGO hesabın hazır',
+                config('dilgo.brand.name').' hesabın hazır',
                 'Hoş geldin, '.$user->name.'!',
-                ['Senin için bir DilGO hesabı açıldı. Giriş e-postan: '.$user->email, empty($data['password']) ? 'İlk girişten önce "Şifremi unuttum" ile kendi şifreni belirle.' : 'Şifreni hesabı açan kişiden alabilir, ilk girişte değiştirebilirsin.'],
+                ['Senin için bir '.config('dilgo.brand.name').' hesabı açıldı. Giriş e-postan: '.$user->email, empty($data['password']) ? 'İlk girişten önce "Şifremi unuttum" ile kendi şifreni belirle.' : 'Şifreni hesabı açan kişiden alabilir, ilk girişte değiştirebilirsin.'],
                 empty($data['password']) ? 'Şifremi belirle' : 'Giriş yap',
                 $base.(empty($data['password']) ? '/forgot-password' : '/login'),
             ));
@@ -521,7 +521,7 @@ class AdminController extends Controller
         $lines = array_values(array_filter(array_map('trim', preg_split('/\n{2,}/', strip_tags($data['body'])))));
         $base = config('dilgo.brand.frontend_url');
         $send = function (string $email, ?string $token) use ($data, $lines, $base) {
-            $footer = $token ? 'Bu e-postayı DilGO bültenine abone olduğun için aldın. Çıkmak için: '.$base.'/newsletter/unsubscribe/'.$token : '(Deneme gönderimi)';
+            $footer = $token ? 'Bu e-postayı '.config('dilgo.brand.name').' bültenine abone olduğun için aldın. Çıkmak için: '.$base.'/newsletter/unsubscribe/'.$token : '(Deneme gönderimi)';
             \Illuminate\Support\Facades\Mail::to($email)->queue(new \App\Mail\NoticeMail($data['subject'], $data['subject'], [...$lines, $footer], $data['cta_label'] ?? null, $data['cta_url'] ?? null));
         };
         if (! empty($data['test_email'])) {

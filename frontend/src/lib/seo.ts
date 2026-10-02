@@ -1,9 +1,9 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { BRAND } from '@/lib/brand'
 
 const SITE = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
-const BRAND = 'DilGO'
-const DEFAULT_DESC = 'DilGO ile İngilizceyi ilkokuldan üniversiteye, günde birkaç dakikada öğren: LGS, YDT, YDS ve YÖKDİL hazırlığı, kısa dersler, hikâyeler, oyunlar ve yapay zekâ öğretmen Defne.'
+const DEFAULT_DESC = `${BRAND} ile İngilizceyi ilkokuldan üniversiteye, günde birkaç dakikada öğren: LGS, YDT, YDS ve YÖKDİL hazırlığı, kısa dersler, hikâyeler, oyunlar ve yapay zekâ öğretmen Defne.`
 
 function meta(attr: 'name' | 'property', key: string, value: string) {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`)
@@ -46,7 +46,7 @@ export function useSeo({ title, description, image, noindex }: { title?: string;
 /** Titles for every route that has no page-specific data; app pages stay out of search. */
 const ROUTES: [RegExp, string, string?][] = [
   [/^\/$/, '', ''],
-  [/^\/about/, 'Hakkımızda', 'Bayrak Dil Okulları’nın dijital İngilizce platformu DilGO’nun hikâyesi ve ekibi.'],
+  [/^\/about/, 'Hakkımızda', `Bayrak Dil Okulları’nın dijital İngilizce platformu ${BRAND}’nun hikâyesi ve ekibi.`],
   [/^\/contact/, 'İletişim', 'Sorular, kurumsal teklifler ve destek için bize yazın.'],
   [/^\/blog$/, 'Blog', 'İngilizce öğrenme ipuçları, sınav rehberleri ve kelime listeleri.'],
   [/^\/okullar/, 'Okullar için', 'Okulunuzun bütün İngilizcesi tek yerde: müdür ve öğretmen panelleri, ödev, sınıf karnesi, LGS ve YDT hazırlığı.'],

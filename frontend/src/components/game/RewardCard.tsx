@@ -8,6 +8,7 @@ import type { UserItem } from '@/lib/types'
 import { rewardImg } from '@/lib/assets'
 import { dateTR } from '@/lib/format'
 import { Img } from '@/components/ui/Img'
+import { BRAND } from '@/lib/brand'
 
 export const RARITY = {
   common: { bg: 'bg-card', glow: 'from-mint/15', text: 'text-mint-deep', label: 'Sıradan' },
@@ -20,7 +21,7 @@ export const RARITY = {
 export const SOURCE: Record<string, string> = {
   shop: 'Mağazadan aldın', chest: 'Sandıktan çıktı', bundle: 'Paketten çıktı', streak: 'Seri ödülü', quest: 'Görev ödülü',
   achievement: 'Rozet ödülü', league: 'Lig ödülü', level: 'Seviye ödülü', duel: 'Arena ödülü', redeem: 'Kodla geldi',
-  referral: 'Davet ödülü', purchase: 'Satın alma hediyesi', admin: 'DilGO hediyesi', reward: 'Ödül',
+  referral: 'Davet ödülü', purchase: 'Satın alma hediyesi', admin: `${BRAND} hediyesi`, reward: 'Ödül',
 }
 
 const STATUS = { available: 'Hazır', active: 'Aktif', used: 'Kullanıldı', expired: 'Süresi doldu' }

@@ -42,7 +42,7 @@ class InstitutionService
                 continue;
             }
             if ($role === 'student' && $inst->seatsLeft() <= 0) {
-                throw ValidationException::withMessages(['emails' => "Koltuk kotası doldu ({$inst->seats}). Daha fazla öğrenci için DilGO ile iletişime geçin."]);
+                throw ValidationException::withMessages(['emails' => "Koltuk kotası doldu ({$inst->seats}). Daha fazla öğrenci için ".config('dilgo.brand.name')." ile iletişime geçin."]);
             }
             $member = $existing ?? new InstitutionMember(['institution_id' => $inst->id, 'email' => $email]);
             $member->fill([

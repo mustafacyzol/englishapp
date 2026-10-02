@@ -13,6 +13,7 @@ import { useLang } from '@/lib/i18n'
 import { useSiteConfig } from '@/lib/site'
 import { LinkButton } from '@/components/ui/Button'
 import { PageTransition } from '@/components/motion/Page'
+import { BRAND, SUPPORT_EMAIL, WORDMARK } from '@/lib/brand'
 
 /** A short main menu: who we are, who it's for, what it costs, and the blog. */
 const LINKS = [
@@ -93,7 +94,7 @@ function SiteHeader({ onMenu }: { onMenu: () => void }) {
           scrolled ? 'border border-line bg-card/85 shadow-[0_10px_40px_-12px_rgba(31,36,51,.25)] backdrop-blur-xl' : 'border border-transparent',
         )}
       >
-        <Link to="/" aria-label="DilGO ana sayfa" className="shrink-0"><Logo /></Link>
+        <Link to="/" aria-label={`${BRAND} ana sayfa`} className="shrink-0"><Logo /></Link>
 
         <nav aria-label="Ana menü" className="mx-auto hidden items-center lg:flex" onMouseLeave={() => setHover(null)}>
           {LINKS.map((l) => {
@@ -167,7 +168,7 @@ function MenuSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
         >
           <div className="safe-top px-3 pt-2 sm:px-4">
             <div className="mx-auto flex h-16 max-w-6xl items-center justify-between pl-3 pr-2 sm:pl-4">
-              <Link to="/" onClick={onClose} aria-label="DilGO ana sayfa"><Logo /></Link>
+              <Link to="/" onClick={onClose} aria-label={`${BRAND} ana sayfa`}><Logo /></Link>
               <button onClick={onClose} aria-label="Menüyü kapat" className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card shadow-hard-sm">
                 <X className="size-5" />
               </button>
@@ -280,7 +281,7 @@ function Newsletter() {
  */
 function Footer() {
   const { data } = useSiteConfig()
-  const email = data?.site?.contact?.email ?? data?.support_email ?? 'destek@dilgo.app'
+  const email = data?.site?.contact?.email ?? data?.support_email ?? SUPPORT_EMAIL
   // Social links are filled in from the admin panel (Yönetim > Site ayarları).
   const social = (data?.site?.social ?? {}) as Record<string, string | null>
   const SOCIAL = SOCIAL_ORDER.filter((k) => !!social[k]).map((k) => ({ label: SOCIAL_NAME[k], href: social[k] as string, icon: SOCIAL_ICON[k] }))
@@ -294,7 +295,7 @@ function Footer() {
       <div className="relative mx-auto max-w-6xl px-5 pt-14">
         <div className="grid gap-10 lg:grid-cols-[1fr_1.9fr]">
           <div>
-            <Link to="/" aria-label="DilGO ana sayfa" className="inline-flex items-center gap-2">
+            <Link to="/" aria-label={`${BRAND} ana sayfa`} className="inline-flex items-center gap-2">
               <img src={higoImg('wave')} alt="" className="size-9" />
               <span className="font-display text-2xl font-black tracking-tight">dil<span className="text-flame">go</span></span>
             </Link>
@@ -339,7 +340,7 @@ function Footer() {
       {/* the closing wordmark: hidden while you read the links, it rises as the page ends */}
       <div ref={ref} className="safe-bottom relative mx-auto flex h-[clamp(7rem,19vw,15rem)] max-w-6xl select-none items-end justify-center gap-3 overflow-hidden px-5" aria-hidden>
         <motion.p initial={false} animate={atEnd ? { y: '0%', opacity: 1 } : { y: '70%', opacity: 0 }} transition={{ type: 'spring', stiffness: 120, damping: 20 }} style={{ backgroundImage: 'linear-gradient(180deg, var(--ink) 0%, color-mix(in oklab, var(--ink) 25%, transparent) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }} className="font-display text-[clamp(4.5rem,17vw,13rem)] font-black leading-[0.95] tracking-[-0.04em]">
-          dilgo
+          {WORDMARK.join('')}
         </motion.p>
         <motion.img initial={false} animate={atEnd ? { y: '0%', rotate: 0 } : { y: '130%', rotate: -20 }} transition={{ type: 'spring', stiffness: 160, damping: 14, delay: atEnd ? 0.2 : 0 }} src={higoImg('wave')} alt="" className="mb-[2%] w-[clamp(44px,7vw,84px)] shrink-0" />
       </div>

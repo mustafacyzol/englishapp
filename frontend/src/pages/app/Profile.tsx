@@ -17,6 +17,7 @@ import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 import { UserAvatar } from '@/components/game/UserAvatar'
 import { AvatarPicker } from '@/components/game/AvatarPicker'
+import { BRAND } from '@/lib/brand'
 
 /** Kept for other screens: the profile picture at the large profile size. */
 export function Avatar({ name, avatar, frame, size = 'size-24' }: { name: string; avatar?: string | null; frame?: string | null; size?: string }) {
@@ -37,7 +38,7 @@ export default function Profile() {
   const share = async () => {
     const url = `${location.origin}/r/${user.referral_code}`
     try {
-      if (navigator.share) await navigator.share({ title: 'DilGO', text: `${user.stats.streak} günlük İngilizce serim var! Sen de katıl:`, url })
+      if (navigator.share) await navigator.share({ title: BRAND, text: `${user.stats.streak} günlük İngilizce serim var! Sen de katıl:`, url })
       else {
         await navigator.clipboard.writeText(url)
         toast('Davet bağlantın kopyalandı!', 'success')

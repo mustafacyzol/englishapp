@@ -98,6 +98,17 @@ php artisan config:cache && php artisan route:cache && php artisan view:cache
 chmod -R 775 storage bootstrap/cache
 ```
 
+### Ödeme, Defne'nin sesi ve AI anahtarları: panelden
+
+Bu anahtarları .env'e yazmak zorunda değilsiniz. **Yönetim → Sistem → Entegrasyonlar** sayfasında süper yönetici:
+
+- **Ödeme:** "Test ödemesi" ↔ "iyzico" seçer, ortamı (Sandbox / Canlı) belirler, API anahtarı ve gizli anahtarı girer. Canlıya geçmeden önce sandbox anahtarlarıyla bir deneme satın alma yapın (https://sandbox-merchant.iyzipay.com). Geri dönüş adresi otomatiktir: `https://API_ALAN_ADI/api/v1/payments/iyzico/callback`.
+- **Defne'nin sesi:** ElevenLabs anahtarı, ses kimliği (voice ID), model, kararlılık ve benzerlik.
+- **Dudak senkronu:** aç / kapat, ağız açıklığı (1 ila 8) ve konuşma hızı (0.80x ila 1.15x). "Kayıtlı ayarlarla dinle" düğmesiyle hemen denenir.
+- **Yapay zekâ:** Anthropic API anahtarı ve model adı.
+
+Panelde girilen değer .env'deki değerin önüne geçer. Anahtarlar `APP_KEY` ile şifrelenmiş olarak `settings` tablosunda saklanır ve panelde yalnızca son 4 karakteri görünür. **`APP_KEY` değişirse kayıtlı anahtarlar okunamaz, panelden yeniden girilmelidir.** Ürün adını değiştirme adımları için `docs/RENAME.md`, kullanıcıyı tutma ilkeleri için `docs/RETENTION.md`.
+
 ## 5) Yönetici hesabı
 
 ```bash

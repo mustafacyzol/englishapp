@@ -13,6 +13,7 @@ import { useToast } from '@/components/ui/Toast'
 import { Turnstile } from '../auth/Turnstile'
 import { Img } from '@/components/ui/Img'
 import { useLocation } from 'react-router-dom'
+import { SUPPORT_EMAIL } from '@/lib/brand'
 
 const TOPICS = ['general', 'course', 'okul', 'corporate', 'support', 'partnership']
 
@@ -29,7 +30,7 @@ export default function Contact() {
   const err = m.error as ApiError | null
   const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setF((s) => ({ ...s, [k]: e.target.type === 'checkbox' ? (e.target as HTMLInputElement).checked : e.target.value }))
-  const email = cfg.data?.support_email ?? 'destek@dilgo.app'
+  const email = cfg.data?.support_email ?? SUPPORT_EMAIL
 
   const copy = async () => {
     try {

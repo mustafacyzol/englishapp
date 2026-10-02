@@ -14,6 +14,7 @@ import { SKILL, SKILLS as SKILL_KEYS } from '@/lib/skills'
 import { Bento, TryIt } from './landing/Sections'
 import { FinalCta3D, TrustBar } from './landing/Story'
 import { AudiencesPro, HeroPro, MeetHigoPro, PricingPro, Strengths, TurkeyLadder } from './landing/Showcase'
+import { BRAND } from '@/lib/brand'
 
 export interface Review {
   id: number
@@ -157,7 +158,7 @@ const QS: [string, string][] = [
   ['Gerçekten ücretsiz mi?', 'Evet. Tüm ders yolu, seçili hikâyeler, kelime tekrarları ve günde 10 AI mesajı ücretsizdir. Premium; sınırsız can, tüm hikâyeler, daha fazla AI pratiği ve canlı ders kuponları ekler.'],
   ['Seviyemi bilmiyorum, nereden başlamalıyım?', '3 dakikalık seviye testiyle seviyeni bul; ders yolun otomatik olarak sana göre ayarlanır. İstersen sonradan Ayarlar’dan değiştirebilirsin.'],
   ['Canlı ders kuponu nasıl çalışır?', 'Kuponu Ödüller sayfasında açtığında sana özel bir kod oluşur. Bu kodla Bayrak Dil Okulları’nda online ya da şubede ücretsiz ders alırsın.'],
-  ['Telefonumda kullanabilir miyim?', 'Evet. DilGO tarayıcıda çalışır; iOS ve Android uygulamaları da aynı hesabı kullanır. İlerlemen her cihazda aynıdır.'],
+  ['Telefonumda kullanabilir miyim?', `Evet. ${BRAND} tarayıcıda çalışır; iOS ve Android uygulamaları da aynı hesabı kullanır. İlerlemen her cihazda aynıdır.`],
   ['Verilerim güvende mi?', 'Şifreler şifrelenerek saklanır, hesabın e-posta kodlarıyla korunur ve KVKK kapsamında hesabını istediğin an silebilirsin.'],
 ]
 

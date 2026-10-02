@@ -7,6 +7,7 @@ import { img } from '@/lib/assets'
 import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
 import { higoImg } from '@/components/game/Higo'
+import { BRAND } from '@/lib/brand'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -55,7 +56,7 @@ export default function About() {
             ))}
           </h1>
           <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-            DilGO, Bayrak Dil Okulları’nın yıllardır sınıfta kullandığı yöntemlerin dijital hali. Öğretmenlerimizin hazırladığı müfredatı hikâyeler, sesli pratik ve yapay zekâ ile her gün birkaç dakikada uygulanabilir hale getirdik.
+            {BRAND}, Bayrak Dil Okulları’nın yıllardır sınıfta kullandığı yöntemlerin dijital hali. Öğretmenlerimizin hazırladığı müfredatı hikâyeler, sesli pratik ve yapay zekâ ile her gün birkaç dakikada uygulanabilir hale getirdik.
           </motion.p>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="mt-8 flex flex-wrap gap-3">
             <LinkButton to="/register" size="lg" className="gap-2">Ücretsiz başla <ArrowRight className="size-5" /></LinkButton>
@@ -82,7 +83,7 @@ export default function About() {
       <section className="border-y-2 border-line bg-card">
         <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-5 py-10 md:grid-cols-4">
           {[
-            [data?.learners ? data.learners.toLocaleString('tr-TR') : '·', 'öğrenci DilGO ile çalışıyor'],
+            [data?.learners ? data.learners.toLocaleString('tr-TR') : '·', `öğrenci ${BRAND} ile çalışıyor`],
             [data?.stories ?? '·', 'seviyeli hikâye'],
             ['4', 'beceri: okuma, dinleme, konuşma, yazma'],
             ['A1 → C1', 'tek yolda, kendi hızında'],

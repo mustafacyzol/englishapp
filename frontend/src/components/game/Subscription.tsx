@@ -13,6 +13,7 @@ import { Textarea } from '@/components/ui/Field'
 import { Modal } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
+import { BRAND } from '@/lib/brand'
 
 interface Sub {
   premium: { active: boolean; until: string | null }
@@ -24,7 +25,7 @@ interface Sub {
   history: { id: number; plan: string | null; source: string; status: string; starts_at: string; ends_at: string; cancelled_at: string | null }[]
 }
 
-const SOURCE: Record<string, string> = { purchase: 'Satın alma', redeem: 'Hediye kodu', reward: 'Ödül kartı', admin: 'DilGO hediyesi', referral: 'Davet ödülü', institution: 'Okul' }
+const SOURCE: Record<string, string> = { purchase: 'Satın alma', redeem: 'Hediye kodu', reward: 'Ödül kartı', admin: `${BRAND} hediyesi`, referral: 'Davet ödülü', institution: 'Okul' }
 
 /**
  * Profile > Aboneliğim. Packages are paid once and never renew, so the card says
@@ -150,7 +151,7 @@ function CancelFlow({ open, onClose, sub, onDone }: { open: boolean; onClose: ()
         {step === 1 ? (
           <>
             <h3 className="mt-1 text-2xl">Neden ayrılmak istiyorsun?</h3>
-            <p className="mt-1 text-sm text-ink-soft">Cevabın DilGO’yu geliştirmemize yardım eder.</p>
+            <p className="mt-1 text-sm text-ink-soft">Cevabın {BRAND}’yu geliştirmemize yardım eder.</p>
             <div className="mt-4 grid gap-2" role="radiogroup">
               {Object.entries(sub.reasons).map(([k, v]) => (
                 <button key={k} role="radio" aria-checked={reason === k} onClick={() => setReason(k)} className={clsx('flex items-center justify-between rounded-2xl border-2 px-4 py-3 text-left font-bold transition', reason === k ? 'border-ink bg-paper-2' : 'border-line hover:border-ink/30')}>
