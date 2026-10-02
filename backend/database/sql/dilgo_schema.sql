@@ -1,6 +1,6 @@
 -- DilGO: yalnızca tablo yapısı (veri yok). Referans ve inceleme için.
 SET NAMES utf8mb4;
-
+/*M!999999\- enable the sandbox mode */ 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -33,7 +33,7 @@ CREATE TABLE `achievements` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `achievements_key_unique` (`key`)
-) ENGINE=InnoDB AUTO_INCREMENT=46 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `ai_conversations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -90,7 +90,7 @@ CREATE TABLE `ai_scenarios` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `ai_scenarios_key_unique` (`key`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `arena_presence`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -181,7 +181,7 @@ CREATE TABLE `avatars` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `avatars_key_unique` (`key`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `blog_posts`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -209,7 +209,7 @@ CREATE TABLE `blog_posts` (
   KEY `blog_posts_category_index` (`category`),
   KEY `blog_posts_is_published_index` (`is_published`),
   KEY `blog_posts_published_at_index` (`published_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `cache`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -297,7 +297,7 @@ CREATE TABLE `coupons` (
   UNIQUE KEY `coupons_code_unique` (`code`),
   KEY `coupons_owner_user_id_foreign` (`owner_user_id`),
   CONSTRAINT `coupons_owner_user_id_foreign` FOREIGN KEY (`owner_user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `courses`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -316,7 +316,7 @@ CREATE TABLE `courses` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `courses_slug_unique` (`slug`),
   KEY `courses_cefr_level_index` (`cefr_level`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `daily_activities`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -436,7 +436,7 @@ CREATE TABLE `exam_questions` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `exam_questions_section_index` (`section`)
-) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `failed_jobs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -476,7 +476,7 @@ CREATE TABLE `institution_members` (
   KEY `institution_members_user_id_status_index` (`user_id`,`status`),
   CONSTRAINT `institution_members_institution_id_foreign` FOREIGN KEY (`institution_id`) REFERENCES `institutions` (`id`) ON DELETE CASCADE,
   CONSTRAINT `institution_members_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `institutions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -503,7 +503,7 @@ CREATE TABLE `institutions` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `institutions_slug_unique` (`slug`),
   UNIQUE KEY `institutions_join_code_unique` (`join_code`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `job_batches`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -611,7 +611,7 @@ CREATE TABLE `lessons` (
   PRIMARY KEY (`id`),
   KEY `lessons_unit_id_foreign` (`unit_id`),
   CONSTRAINT `lessons_unit_id_foreign` FOREIGN KEY (`unit_id`) REFERENCES `units` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `migrations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -621,7 +621,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `newsletter_subscribers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -714,7 +714,7 @@ CREATE TABLE `partner_offers` (
   PRIMARY KEY (`id`),
   KEY `partner_offers_partner_id_foreign` (`partner_id`),
   CONSTRAINT `partner_offers_partner_id_foreign` FOREIGN KEY (`partner_id`) REFERENCES `partners` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `partners`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -733,7 +733,7 @@ CREATE TABLE `partners` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `partners_slug_unique` (`slug`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `password_reset_tokens`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -811,7 +811,7 @@ CREATE TABLE `plans` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `plans_slug_unique` (`slug`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `quests`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -831,7 +831,7 @@ CREATE TABLE `quests` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `quests_key_unique` (`key`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `redeem_code_uses`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -924,7 +924,7 @@ CREATE TABLE `reward_items` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `reward_items_key_unique` (`key`)
-) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `school_classes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -999,7 +999,7 @@ CREATE TABLE `stories` (
   KEY `stories_cefr_level_index` (`cefr_level`),
   KEY `stories_category_index` (`category`),
   KEY `stories_is_published_index` (`is_published`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `story_reads`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -1067,7 +1067,7 @@ CREATE TABLE `testimonials` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `testimonials_is_published_index` (`is_published`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `units`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -1085,7 +1085,7 @@ CREATE TABLE `units` (
   PRIMARY KEY (`id`),
   KEY `units_course_id_foreign` (`course_id`),
   CONSTRAINT `units_course_id_foreign` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `user_achievements`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -1190,6 +1190,7 @@ CREATE TABLE `users` (
   `locale` varchar(5) NOT NULL DEFAULT 'tr',
   `timezone` varchar(64) NOT NULL DEFAULT 'Europe/Istanbul',
   `cefr_level` varchar(2) NOT NULL DEFAULT 'A1',
+  `path_unlocks` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`path_unlocks`)),
   `learning_goal` varchar(30) DEFAULT NULL,
   `daily_goal_xp` smallint(5) unsigned NOT NULL DEFAULT 30,
   `onboarded` tinyint(1) NOT NULL DEFAULT 0,
@@ -1247,7 +1248,7 @@ CREATE TABLE `users` (
   KEY `users_duel_trophies_index` (`duel_trophies`),
   CONSTRAINT `users_institution_id_foreign` FOREIGN KEY (`institution_id`) REFERENCES `institutions` (`id`) ON DELETE SET NULL,
   CONSTRAINT `users_referred_by_id_foreign` FOREIGN KEY (`referred_by_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `xp_events`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
