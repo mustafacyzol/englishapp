@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom'
 
 const SITE = (import.meta.env.VITE_SITE_URL as string | undefined)?.replace(/\/$/, '') ?? ''
 const BRAND = 'DilGO'
-const DEFAULT_DESC = 'DilGO ile İngilizceyi her yaşta, günde birkaç dakikada öğren: kısa dersler, hikâyeler, kelime oyunları, ligler ve yapay zekâ öğretmen Defne.'
+const DEFAULT_DESC = 'DilGO ile İngilizceyi ilkokuldan üniversiteye, günde birkaç dakikada öğren: LGS, YDT, YDS ve YÖKDİL hazırlığı, kısa dersler, hikâyeler, oyunlar ve yapay zekâ öğretmen Defne.'
 
 function meta(attr: 'name' | 'property', key: string, value: string) {
   let el = document.head.querySelector<HTMLMetaElement>(`meta[${attr}="${key}"]`)

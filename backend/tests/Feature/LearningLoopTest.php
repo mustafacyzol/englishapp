@@ -167,12 +167,18 @@ class LearningLoopTest extends TestCase
     public function test_placement_is_applied_without_revealing_the_level(): void
     {
         $bank = json_decode(file_get_contents(database_path('data/placement.json')), true);
-        $answers = collect($bank)->map(fn ($q) => in_array($q['level'], ['A1', 'A2'], true) ? $q['answer'] : -1)->all();
+        // typed tasks are graded loosely: case, spaces and punctuation do not matter
+        $right = fn ($q) => ($q['type'] ?? 'choice') === 'choice' ? $q['answer'] : '  '.strtoupper($q['answer'][0]).'!';
+        $answers = collect($bank)->map(fn ($q) => in_array($q['level'], ['A1', 'A2'], true) ? $right($q) : -1)->all();
 
         // signed in: the level is applied at once, but the response only carries a token
         $res = $this->postJson('/api/v1/placement', ['answers' => $answers])->assertCreated()->assertJsonMissingPath('level');
         $this->assertSame('B1', $this->user->fresh()->cefr_level);
-        $this->postJson('/api/v1/placement/claim', ['token' => $res->json('token')])->assertOk()->assertJsonPath('result.level', 'B1');
+        $this->postJson('/api/v1/placement/claim', ['token' => $res->json('token')])->assertOk()->assertJsonPath('result.level', 'B1')
+            ->assertJsonPath('result.activities.order.total', 5)
+            ->assertJsonPath('result.activities.order.correct', 2);
+        $this->assertSame('order', collect($this->getJson('/api/v1/placement')->json('data'))->firstWhere('type', 'order')['type']);
+        $this->assertArrayNotHasKey('answer', $this->getJson('/api/v1/placement')->json('data.0'));
 
         // someone else cannot take a result that already belongs to this learner
         $other = User::factory()->create();
@@ -183,7 +189,7 @@ class LearningLoopTest extends TestCase
     public function test_guest_placement_is_applied_on_sign_up(): void
     {
         $bank = json_decode(file_get_contents(database_path('data/placement.json')), true);
-        $answers = collect($bank)->map(fn ($q) => $q['level'] !== 'C1' ? $q['answer'] : 0)->all();
+        $answers = collect($bank)->map(fn ($q) => $q['level'] !== 'C1' ? (($q['type'] ?? 'choice') === 'choice' ? $q['answer'] : $q['answer'][0]) : 0)->all();
         app('auth')->forgetGuards();
         $token = $this->withHeaders(['Authorization' => ''])->postJson('/api/v1/placement', ['answers' => $answers])->assertCreated()->json('token');
         $this->assertDatabaseHas('placement_results', ['token' => $token, 'user_id' => null, 'level' => 'C1']);

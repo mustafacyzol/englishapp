@@ -4,6 +4,7 @@ use App\Http\Middleware\EnsureActiveAccount;
 use App\Http\Middleware\EnsureFeature;
 use App\Http\Middleware\EnsureRole;
 use App\Http\Middleware\EnsureVerified;
+use App\Http\Middleware\Firewall;
 use App\Http\Middleware\ForceJson;
 use App\Http\Middleware\MaintenanceGate;
 use App\Http\Middleware\SecurityHeaders;
@@ -22,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         // Hostinger / Cloudflare sit in front of PHP: trust their forwarded headers for real client IPs.
         $middleware->trustProxies(at: '*');
+        $middleware->prepend(Firewall::class);
         $middleware->append(SecurityHeaders::class);
         $middleware->api(prepend: [ForceJson::class], append: [MaintenanceGate::class]);
         $middleware->alias([

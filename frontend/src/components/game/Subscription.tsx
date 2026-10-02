@@ -144,8 +144,8 @@ function CancelFlow({ open, onClose, sub, onDone }: { open: boolean; onClose: ()
     onError: (e: ApiError) => toast(e.first(), 'error'),
   })
   return (
-    <Modal open={open} onClose={onClose} className="max-w-lg">
-      <div className="p-6">
+    <Modal open={open} onClose={onClose}>
+      <div>
         <p className="text-xs font-black uppercase tracking-widest text-ink-soft">Adım {step}/2</p>
         {step === 1 ? (
           <>
@@ -180,7 +180,7 @@ function CancelFlow({ open, onClose, sub, onDone }: { open: boolean; onClose: ()
             <p className="mt-3 text-xs text-ink-soft">Premium’a özel içerikleri kullandıysan iade, <Link to="/refund" className="font-bold underline">iade politikamıza</Link> göre değerlendirilir.</p>
             <div className="mt-5 flex justify-between gap-2">
               <Button variant="secondary" onClick={() => setStep(1)}>Geri</Button>
-              <Button variant="danger" loading={m.isPending} onClick={() => m.mutate()}>{refund ? 'İade talebi gönder' : 'Aboneliği iptal et'}</Button>
+              <Button variant="danger" loading={m.isPending} onClick={() => m.mutate()}>{refund ? 'İade iste' : 'İptal et'}</Button>
             </div>
           </>
         )}

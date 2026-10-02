@@ -82,6 +82,8 @@ class AdminAccessTest extends TestCase
 
     public function test_hostile_query_input_is_harmless(): void
     {
+        // the firewall would refuse this first; switch it off to prove the app layer is safe on its own
+        config(['dilgo.waf.enabled' => false]);
         $this->staff('admin');
         $this->getJson("/api/v1/admin/users?q=' OR 1=1 --")->assertOk()->assertJsonPath('total', 0);
         $this->getJson('/api/v1/admin/stories?q[]=x&is_published[]=1&per_page=-5')->assertOk();

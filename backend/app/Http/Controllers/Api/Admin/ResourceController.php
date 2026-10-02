@@ -295,6 +295,11 @@ class ResourceController extends Controller
                     'unsubscribed_at' => ['nullable', 'date'],
                 ],
             ],
+            // Placement tests as they were taken: read-only, so a result is never edited after the fact.
+            'placement-results' => [
+                'model' => Models\PlacementResult::class, 'search' => ['level'], 'order' => '-id', 'filters' => ['level'], 'with' => ['user:id,name,email,username'], 'perm' => 'content',
+                'readonly' => true, 'rules' => [],
+            ],
             'contact-messages' => [
                 'model' => Models\ContactMessage::class, 'search' => ['name', 'email', 'message'], 'order' => '-id', 'filters' => ['status', 'topic'], 'perm' => 'marketing',
                 'rules' => [
@@ -403,6 +408,7 @@ class ResourceController extends Controller
     public function store(Request $request, string $resource): JsonResponse
     {
         $cfg = $this->config($resource);
+        abort_if($cfg['readonly'] ?? false, 405, 'Bu kayıtlar yalnızca görüntülenebilir.');
         $data = $request->validate($cfg['rules']);
         $data = isset($cfg['before']) ? $cfg['before']($data) : $data;
         $record = $cfg['model']::query()->create($data);
@@ -414,6 +420,7 @@ class ResourceController extends Controller
     public function update(Request $request, string $resource, int $id): JsonResponse
     {
         $cfg = $this->config($resource, $id);
+        abort_if($cfg['readonly'] ?? false, 405, 'Bu kayıtlar yalnızca görüntülenebilir.');
         $record = $cfg['model']::query()->findOrFail($id);
         $rules = collect($cfg['rules'])->map(fn ($r) => array_merge(['sometimes'], $r))->all();
         $data = $request->validate($rules);

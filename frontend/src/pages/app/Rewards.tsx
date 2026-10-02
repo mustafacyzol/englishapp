@@ -265,7 +265,7 @@ function Redeem() {
   return (
     <div className="mx-auto grid max-w-4xl items-center gap-8 md:grid-cols-[1fr_1.1fr]">
       {/* a gift card, so the page says what it is before reading a word */}
-      <div className="relative mx-auto aspect-[1.6] w-full max-w-sm rotate-[-4deg] overflow-hidden rounded-[26px] bg-gradient-to-br from-[#1f2433] via-[#2b3350] to-[#3b2a5c] p-6 text-white shadow-[0_30px_50px_-25px_rgba(31,36,51,.8)]">
+      <div className="relative mx-auto aspect-[1.6] w-full max-w-[300px] rotate-[-4deg] sm:max-w-sm overflow-hidden rounded-[26px] bg-gradient-to-br from-[#1f2433] via-[#2b3350] to-[#3b2a5c] p-6 text-white shadow-[0_30px_50px_-25px_rgba(31,36,51,.8)]">
         <span aria-hidden className="absolute -right-10 -top-12 size-44 rounded-full bg-butter/25 blur-2xl" />
         <span aria-hidden className="absolute inset-y-0 right-16 w-6 bg-gradient-to-b from-butter to-flame opacity-90" />
         <span aria-hidden className="absolute inset-x-0 top-1/2 h-6 -translate-y-1/2 bg-gradient-to-r from-butter to-flame opacity-90" />
@@ -319,7 +319,7 @@ function Invite() {
       <section className="relative overflow-hidden rounded-[28px] bg-flame p-6 text-white sm:p-8">
         <span aria-hidden className="absolute -right-16 -top-16 size-56 rounded-full bg-white/10" />
         <span aria-hidden className="absolute -bottom-20 right-24 size-40 rounded-full bg-butter/30" />
-        <div className="relative grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-end">
+        <div className="relative grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-end [&>*]:min-w-0">
           <div>
             <h2 className="text-3xl leading-tight sm:text-4xl">Arkadaşını getir,<br />birlikte kazanın</h2>
             <div className="mt-5 flex items-center gap-2 rounded-2xl bg-card p-2 text-ink">

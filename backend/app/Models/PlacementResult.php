@@ -9,9 +9,12 @@ class PlacementResult extends Model
 {
     protected $guarded = ['id'];
 
+    /** The token is the claim secret: never shown, not even to admins. */
+    protected $hidden = ['token'];
+
     protected function casts(): array
     {
-        return ['bands' => 'array', 'skills' => 'array', 'claimed_at' => 'datetime'];
+        return ['bands' => 'array', 'skills' => 'array', 'activities' => 'array', 'claimed_at' => 'datetime'];
     }
 
     public function user(): BelongsTo
@@ -41,6 +44,6 @@ class PlacementResult extends Model
 
     public function present(): array
     {
-        return ['level' => $this->level, 'score' => $this->score, 'bands' => $this->bands, 'skills' => $this->skills, 'answered' => $this->answered];
+        return ['level' => $this->level, 'score' => $this->score, 'bands' => $this->bands, 'skills' => $this->skills, 'activities' => $this->activities, 'answered' => $this->answered];
     }
 }

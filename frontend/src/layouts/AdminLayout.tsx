@@ -36,6 +36,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
     { to: '/admin/r/lessons', label: 'Dersler', icon: ClipboardList, perm: 'content' },
     { to: '/admin/r/stories', label: 'Hikâyeler', icon: BookOpen, perm: 'content' },
     { to: '/admin/r/exam-questions', label: 'Sınav soruları', icon: FileQuestion, perm: 'content' },
+    { to: '/admin/r/placement-results', label: 'Seviye tespit sonuçları', icon: Gauge, perm: 'content' },
     { to: '/admin/r/scenarios', label: 'AI senaryoları', icon: MessagesSquare, perm: 'content' },
   ] },
   { title: 'Blog ve site', items: [

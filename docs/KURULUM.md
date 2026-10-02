@@ -54,9 +54,9 @@ php artisan db:seed --force
 - phpMyAdmin: veritabanını seçin, *İçe aktar* sekmesi, dosyayı seçin, karakter seti `utf8mb4`, *Git*.
 - Komut satırı: `mysql -u dilgo -p dilgo < backend/database/sql/dilgo_install.sql`
 
-Dosya; 57 tablonun tamamını, kursları ve dersleri, hikâyeleri, rozetleri, görevleri, mağaza ürünlerini, Premium paketlerini, sınav sorularını, avatarları ve migration kayıtlarını içerir. **Hiçbir kullanıcı hesabı içermez.** Migration kayıtları dahil olduğu için sonradan `php artisan migrate` çalıştırırsanız yalnızca yeni sürümlerde eklenen değişiklikler uygulanır.
+Dosya; 60 tablonun tamamını, kursları ve dersleri, hikâyeleri, rozetleri, görevleri, mağaza ürünlerini, Premium paketlerini, sınav sorularını, avatarları ve migration kayıtlarını içerir. **Hiçbir kullanıcı hesabı içermez.** Migration kayıtları dahil olduğu için sonradan `php artisan migrate` çalıştırırsanız yalnızca yeni sürümlerde eklenen değişiklikler uygulanır.
 
-> Bu SQL dosyası gerçek bir MariaDB üzerinde tüm migration'lar çalıştırılarak üretildi ve geri içe aktarılarak doğrulandı. Test takımı (58 test) hem SQLite hem MySQL üzerinde geçiyor.
+> Bu SQL dosyası gerçek bir MariaDB üzerinde tüm migration'lar çalıştırılarak üretildi ve geri içe aktarılarak doğrulandı. Test takımı (66 test) hem SQLite hem MySQL üzerinde geçiyor.
 
 ## 4) Backend ayarları (`backend/.env`)
 
@@ -143,7 +143,8 @@ Kodda hazır olanlar:
 - **Kimlik doğrulama:** Sanctum token'ları (çerez yok, dolayısıyla CSRF yüzeyi yok), süreli token'lar, aynı anda en fazla 3 oturum, başarısız girişte kilitlenme, yönetim paneli için ek e-posta/TOTP doğrulaması, bölüm bazında yetkiler.
 - **İstek sınırlama:** giriş, OTP, kayıt, satın alma, kod kullanma, yükleme ve bülten uçlarında throttle.
 - **Dosya yükleme:** yalnızca PNG/JPG/WebP, içerikten tür denetimi, boyut ve piksel sınırı, rastgele dosya adı, SVG kabul edilmez.
-- **Güvenlik başlıkları:** `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, HTTPS'te HSTS.
+- **Güvenlik başlıkları:** `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, HTTPS'te HSTS; web tarafında ayrıca sıkı bir Content-Security-Policy.
+- **Uygulama güvenlik duvarı (WAF):** tarayıcı yolları, saldırı desenleri, tarama araçları ve büyük gövdeler daha uygulamaya ulaşmadan engellenir; tekrar eden IP'ler geçici olarak yasaklanır. Ayrıntılar ve Cloudflare WAF kurulumu: [`docs/SECURITY.md`](SECURITY.md).
 - **Toplu atama:** tüm yazma uçları doğrulanmış alanlarla çalışır; rol ve yetki gibi alanlar yalnızca süper yönetici tarafından değiştirilebilir.
 
 Sizin yapmanız gerekenler:
@@ -153,6 +154,7 @@ Sizin yapmanız gerekenler:
 - [ ] Veritabanı kullanıcısı yalnızca kendi veritabanında yetkili, güçlü şifre
 - [ ] `storage/` ve `.env` web'den erişilemez (API'nin kökü `backend/public` olmalı)
 - [ ] Cloudflare Turnstile anahtarı (bot kayıtlarına karşı), isteğe bağlı ama önerilir
+- [ ] Cloudflare WAF ve rate limiting kuralları ([`docs/SECURITY.md`](SECURITY.md))
 - [ ] Düzenli veritabanı yedeği (hPanel otomatik yedek ya da günlük `mysqldump`)
 
 ## 10) SEO kontrol listesi
@@ -170,7 +172,7 @@ Sizin yapmanız gerekenler:
 ```bash
 cd backend
 php artisan migrate:status        # hepsi "Ran" olmalı
-php artisan test                  # geliştirme ortamında: 58 test geçmeli
+php artisan test                  # geliştirme ortamında: 66 test geçmeli
 curl https://api.dilgo.app/up     # 200 dönmeli
 curl https://api.dilgo.app/api/v1/config
 curl https://api.dilgo.app/sitemap.xml

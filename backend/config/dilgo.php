@@ -38,6 +38,22 @@ return [
     ],
 
     /*
+    | Application firewall (a small WAF in front of every route). It refuses
+    | scanner paths, known attack patterns in the URL, scanner user agents and
+    | oversized bodies, and bans an IP for a while after repeated hits. It is a
+    | second line behind Cloudflare's WAF (see docs/SECURITY.md), not a substitute.
+    */
+    'waf' => [
+        'enabled' => (bool) env('WAF_ENABLED', true),
+        'max_body_kb' => (int) env('WAF_MAX_BODY_KB', 1024),
+        'max_upload_kb' => (int) env('WAF_MAX_UPLOAD_KB', 8192),
+        'strikes' => (int) env('WAF_STRIKES', 8),
+        'strike_window_minutes' => (int) env('WAF_STRIKE_WINDOW', 10),
+        'ban_minutes' => (int) env('WAF_BAN_MINUTES', 60),
+        'allow_ips' => array_filter(explode(',', (string) env('WAF_ALLOW_IPS', ''))),
+    ],
+
+    /*
     | Economy. One table for every XP amount, the daily XP caps per activity and
     | the gem faucets, so nothing is granted "by feel". Sources are grouped; once a
     | group reaches its daily cap, more of that activity still counts for quests and

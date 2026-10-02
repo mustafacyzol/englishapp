@@ -1,36 +1,544 @@
 [
-  {"level": "A1", "skill": "grammar", "prompt": "I ___ a student.", "options": ["am", "is", "are", "be"], "answer": 0},
-  {"level": "A1", "skill": "grammar", "prompt": "They ___ from Izmir.", "options": ["is", "are", "am", "be"], "answer": 1},
-  {"level": "A1", "skill": "vocabulary", "prompt": "Which one is a colour?", "options": ["Table", "Green", "Chair", "Water"], "answer": 1},
-  {"level": "A1", "skill": "vocabulary", "prompt": "“Kitchen” is a room where you ___.", "options": ["sleep", "cook", "drive", "swim"], "answer": 1},
-  {"level": "A1", "skill": "reading", "passage": "Hi! I'm Sara. I live in Ankara with my mother and my brother. I have a cat. Her name is Minnoş.", "prompt": "Who is Minnoş?", "options": ["Sara's brother", "Sara's mother", "Sara's cat", "Sara's friend"], "answer": 2},
-  {"level": "A1", "skill": "listening", "say": "The bus leaves at seven o'clock.", "prompt": "When does the bus leave?", "options": ["At 7:00", "At 11:00", "At 6:00", "At 7:30"], "answer": 0},
-
-  {"level": "A2", "skill": "grammar", "prompt": "Yesterday we ___ to the cinema.", "options": ["go", "goes", "went", "going"], "answer": 2},
-  {"level": "A2", "skill": "grammar", "prompt": "There isn't ___ milk in the fridge.", "options": ["some", "any", "many", "a"], "answer": 1},
-  {"level": "A2", "skill": "vocabulary", "prompt": "I'm hungry. Let's order ___.", "options": ["a meal", "a ticket", "a key", "a coat"], "answer": 0},
-  {"level": "A2", "skill": "vocabulary", "prompt": "The opposite of “cheap” is ___.", "options": ["easy", "expensive", "empty", "early"], "answer": 1},
-  {"level": "A2", "skill": "reading", "passage": "The museum is open every day except Monday, from 9 am to 5 pm. Tickets are free for children under 12.", "prompt": "Which sentence is true?", "options": ["You can visit on Monday.", "It closes at 9 pm.", "A 10-year-old doesn't pay.", "Tickets are free for everyone."], "answer": 2},
-  {"level": "A2", "skill": "listening", "say": "Sorry, I can't come on Friday. How about Saturday morning?", "prompt": "What does the speaker suggest?", "options": ["Friday evening", "Saturday morning", "Sunday morning", "Not meeting at all"], "answer": 1},
-
-  {"level": "B1", "skill": "grammar", "prompt": "I have lived here ___ 2015.", "options": ["for", "since", "from", "during"], "answer": 1},
-  {"level": "B1", "skill": "grammar", "prompt": "If it rains tomorrow, we ___ at home.", "options": ["stay", "stayed", "will stay", "would stay"], "answer": 2},
-  {"level": "B1", "skill": "vocabulary", "prompt": "She was so ___ that she couldn't stop smiling.", "options": ["delighted", "exhausted", "confused", "furious"], "answer": 0},
-  {"level": "B1", "skill": "vocabulary", "prompt": "Could you ___ me up at the station at six?", "options": ["take", "pick", "get", "bring"], "answer": 1},
-  {"level": "B1", "skill": "reading", "passage": "Many people think working from home saves time, but a recent survey found that remote workers often work longer hours because they find it hard to switch off in the evening.", "prompt": "What did the survey find?", "options": ["Remote workers save a lot of time.", "Remote workers often work more hours.", "People prefer working in an office.", "Evenings are the most productive time."], "answer": 1},
-  {"level": "B1", "skill": "listening", "say": "I'd love to join the trip, but I've already promised to help my sister move house that weekend.", "prompt": "Why can't the speaker join the trip?", "options": ["The speaker doesn't like trips.", "The speaker has to work.", "The speaker promised to help a sister.", "The speaker is moving house."], "answer": 2},
-
-  {"level": "B2", "skill": "grammar", "prompt": "By the time we arrived, the film ___.", "options": ["already started", "has already started", "had already started", "was already starting"], "answer": 2},
-  {"level": "B2", "skill": "grammar", "prompt": "I wish I ___ more time to travel last year.", "options": ["have", "had", "had had", "would have"], "answer": 2},
-  {"level": "B2", "skill": "vocabulary", "prompt": "The new policy had a significant ___ on small businesses.", "options": ["affect", "impact", "effort", "result"], "answer": 1},
-  {"level": "B2", "skill": "vocabulary", "prompt": "Despite the setbacks, the team managed to ___ the deadline.", "options": ["meet", "reach up", "catch", "win"], "answer": 0},
-  {"level": "B2", "skill": "reading", "passage": "While the app attracted millions of downloads in its first month, fewer than one in ten users were still active a year later, prompting the company to rethink how it keeps people engaged.", "prompt": "What problem did the company face?", "options": ["Too few downloads", "Users stopped using the app", "The app was too expensive", "Competitors copied the app"], "answer": 1},
-  {"level": "B2", "skill": "listening", "say": "Frankly, the proposal looks great on paper, but I'm not convinced we have the budget to pull it off this year.", "prompt": "What is the speaker's main concern?", "options": ["The design of the proposal", "The lack of money", "The deadline next year", "The team's experience"], "answer": 1},
-
-  {"level": "C1", "skill": "grammar", "prompt": "Not only ___ late, but he also forgot the documents.", "options": ["he arrived", "did he arrive", "he did arrive", "arrived he"], "answer": 1},
-  {"level": "C1", "skill": "grammar", "prompt": "Had I known about the traffic, I ___ earlier.", "options": ["would leave", "left", "would have left", "had left"], "answer": 2},
-  {"level": "C1", "skill": "vocabulary", "prompt": "Her argument was so ___ that nobody could find a flaw in it.", "options": ["compelling", "tedious", "ambiguous", "reluctant"], "answer": 0},
-  {"level": "C1", "skill": "vocabulary", "prompt": "The minister tried to ___ the criticism by announcing new funding.", "options": ["deflect", "deflate", "defer", "defy"], "answer": 0},
-  {"level": "C1", "skill": "reading", "passage": "Critics argue that the novel's ending, far from resolving the tension, deliberately leaves the reader suspended between hope and dread, a choice some find frustrating and others consider its greatest strength.", "prompt": "How do critics describe the ending?", "options": ["It clearly resolves the story.", "It is universally praised.", "It is intentionally open and divides opinion.", "It was changed after publication."], "answer": 2},
-  {"level": "C1", "skill": "listening", "say": "Had the council consulted residents from the outset, much of this backlash could, in all likelihood, have been avoided.", "prompt": "What does the speaker imply?", "options": ["Residents were consulted early.", "The backlash was unavoidable.", "Early consultation might have prevented the anger.", "The council ignored the backlash."], "answer": 2}
+ {
+  "level": "A1",
+  "skill": "grammar",
+  "prompt": "I ___ a student.",
+  "options": [
+   "am",
+   "is",
+   "are",
+   "be"
+  ],
+  "answer": 0,
+  "type": "choice"
+ },
+ {
+  "level": "A1",
+  "skill": "grammar",
+  "prompt": "They ___ from Izmir.",
+  "options": [
+   "is",
+   "are",
+   "am",
+   "be"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "A1",
+  "skill": "vocabulary",
+  "prompt": "Which one is a colour?",
+  "options": [
+   "Table",
+   "Green",
+   "Chair",
+   "Water"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "A1",
+  "skill": "vocabulary",
+  "prompt": "“Kitchen” is a room where you ___.",
+  "options": [
+   "sleep",
+   "cook",
+   "drive",
+   "swim"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "A1",
+  "skill": "reading",
+  "passage": "Hi! I'm Sara. I live in Ankara with my mother and my brother. I have a cat. Her name is Minnoş.",
+  "prompt": "Who is Minnoş?",
+  "options": [
+   "Sara's brother",
+   "Sara's mother",
+   "Sara's cat",
+   "Sara's friend"
+  ],
+  "answer": 2,
+  "type": "choice"
+ },
+ {
+  "level": "A1",
+  "skill": "listening",
+  "say": "The bus leaves at seven o'clock.",
+  "prompt": "When does the bus leave?",
+  "options": [
+   "At 7:00",
+   "At 11:00",
+   "At 6:00",
+   "At 7:30"
+  ],
+  "answer": 0,
+  "type": "choice"
+ },
+ {
+  "type": "order",
+  "level": "A1",
+  "skill": "grammar",
+  "prompt": "Kelimeleri sırala, cümleyi kur.",
+  "tiles": [
+   "name",
+   "My",
+   "is",
+   "Can"
+  ],
+  "answer": [
+   "My name is Can"
+  ]
+ },
+ {
+  "type": "dictation",
+  "level": "A1",
+  "skill": "listening",
+  "prompt": "Duyduğun kelimeyi yaz.",
+  "say": "Thursday",
+  "answer": [
+   "thursday"
+  ]
+ },
+ {
+  "level": "A2",
+  "skill": "grammar",
+  "prompt": "Yesterday we ___ to the cinema.",
+  "options": [
+   "go",
+   "goes",
+   "went",
+   "going"
+  ],
+  "answer": 2,
+  "type": "choice"
+ },
+ {
+  "level": "A2",
+  "skill": "grammar",
+  "prompt": "There isn't ___ milk in the fridge.",
+  "options": [
+   "some",
+   "any",
+   "many",
+   "a"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "A2",
+  "skill": "vocabulary",
+  "prompt": "I'm hungry. Let's order ___.",
+  "options": [
+   "a meal",
+   "a ticket",
+   "a key",
+   "a coat"
+  ],
+  "answer": 0,
+  "type": "choice"
+ },
+ {
+  "level": "A2",
+  "skill": "vocabulary",
+  "prompt": "The opposite of “cheap” is ___.",
+  "options": [
+   "easy",
+   "expensive",
+   "empty",
+   "early"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "A2",
+  "skill": "reading",
+  "passage": "The museum is open every day except Monday, from 9 am to 5 pm. Tickets are free for children under 12.",
+  "prompt": "Which sentence is true?",
+  "options": [
+   "You can visit on Monday.",
+   "It closes at 9 pm.",
+   "A 10-year-old doesn't pay.",
+   "Tickets are free for everyone."
+  ],
+  "answer": 2,
+  "type": "choice"
+ },
+ {
+  "level": "A2",
+  "skill": "listening",
+  "say": "Sorry, I can't come on Friday. How about Saturday morning?",
+  "prompt": "What does the speaker suggest?",
+  "options": [
+   "Friday evening",
+   "Saturday morning",
+   "Sunday morning",
+   "Not meeting at all"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "type": "order",
+  "level": "A2",
+  "skill": "grammar",
+  "prompt": "Kelimeleri sırala, cümleyi kur.",
+  "tiles": [
+   "to",
+   "going",
+   "We",
+   "are",
+   "visit",
+   "grandma"
+  ],
+  "answer": [
+   "We are going to visit grandma"
+  ]
+ },
+ {
+  "type": "gap",
+  "level": "A2",
+  "skill": "vocabulary",
+  "prompt": "Boşluğa uygun kelimeyi yaz.",
+  "passage": "I always brush my ____ before bed. (dişler)",
+  "answer": [
+   "teeth"
+  ]
+ },
+ {
+  "level": "B1",
+  "skill": "grammar",
+  "prompt": "I have lived here ___ 2015.",
+  "options": [
+   "for",
+   "since",
+   "from",
+   "during"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "B1",
+  "skill": "grammar",
+  "prompt": "If it rains tomorrow, we ___ at home.",
+  "options": [
+   "stay",
+   "stayed",
+   "will stay",
+   "would stay"
+  ],
+  "answer": 2,
+  "type": "choice"
+ },
+ {
+  "level": "B1",
+  "skill": "vocabulary",
+  "prompt": "She was so ___ that she couldn't stop smiling.",
+  "options": [
+   "delighted",
+   "exhausted",
+   "confused",
+   "furious"
+  ],
+  "answer": 0,
+  "type": "choice"
+ },
+ {
+  "level": "B1",
+  "skill": "vocabulary",
+  "prompt": "Could you ___ me up at the station at six?",
+  "options": [
+   "take",
+   "pick",
+   "get",
+   "bring"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "B1",
+  "skill": "reading",
+  "passage": "Many people think working from home saves time, but a recent survey found that remote workers often work longer hours because they find it hard to switch off in the evening.",
+  "prompt": "What did the survey find?",
+  "options": [
+   "Remote workers save a lot of time.",
+   "Remote workers often work more hours.",
+   "People prefer working in an office.",
+   "Evenings are the most productive time."
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "B1",
+  "skill": "listening",
+  "say": "I'd love to join the trip, but I've already promised to help my sister move house that weekend.",
+  "prompt": "Why can't the speaker join the trip?",
+  "options": [
+   "The speaker doesn't like trips.",
+   "The speaker has to work.",
+   "The speaker promised to help a sister.",
+   "The speaker is moving house."
+  ],
+  "answer": 2,
+  "type": "choice"
+ },
+ {
+  "type": "order",
+  "level": "B1",
+  "skill": "grammar",
+  "prompt": "Kelimeleri sırala, cümleyi kur.",
+  "tiles": [
+   "have",
+   "never",
+   "I",
+   "been",
+   "to",
+   "Rome"
+  ],
+  "answer": [
+   "I have never been to Rome"
+  ]
+ },
+ {
+  "type": "dictation",
+  "level": "B1",
+  "skill": "listening",
+  "prompt": "Duyduğun cümleyi yaz.",
+  "say": "The museum opens at nine.",
+  "answer": [
+   "the museum opens at nine",
+   "the museum opens at 9"
+  ]
+ },
+ {
+  "level": "B2",
+  "skill": "grammar",
+  "prompt": "By the time we arrived, the film ___.",
+  "options": [
+   "already started",
+   "has already started",
+   "had already started",
+   "was already starting"
+  ],
+  "answer": 2,
+  "type": "choice"
+ },
+ {
+  "level": "B2",
+  "skill": "grammar",
+  "prompt": "I wish I ___ more time to travel last year.",
+  "options": [
+   "have",
+   "had",
+   "had had",
+   "would have"
+  ],
+  "answer": 2,
+  "type": "choice"
+ },
+ {
+  "level": "B2",
+  "skill": "vocabulary",
+  "prompt": "The new policy had a significant ___ on small businesses.",
+  "options": [
+   "affect",
+   "impact",
+   "effort",
+   "result"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "B2",
+  "skill": "vocabulary",
+  "prompt": "Despite the setbacks, the team managed to ___ the deadline.",
+  "options": [
+   "meet",
+   "reach up",
+   "catch",
+   "win"
+  ],
+  "answer": 0,
+  "type": "choice"
+ },
+ {
+  "level": "B2",
+  "skill": "reading",
+  "passage": "While the app attracted millions of downloads in its first month, fewer than one in ten users were still active a year later, prompting the company to rethink how it keeps people engaged.",
+  "prompt": "What problem did the company face?",
+  "options": [
+   "Too few downloads",
+   "Users stopped using the app",
+   "The app was too expensive",
+   "Competitors copied the app"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "B2",
+  "skill": "listening",
+  "say": "Frankly, the proposal looks great on paper, but I'm not convinced we have the budget to pull it off this year.",
+  "prompt": "What is the speaker's main concern?",
+  "options": [
+   "The design of the proposal",
+   "The lack of money",
+   "The deadline next year",
+   "The team's experience"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "type": "order",
+  "level": "B2",
+  "skill": "grammar",
+  "prompt": "Kelimeleri sırala, cümleyi kur.",
+  "tiles": [
+   "had",
+   "If",
+   "known,",
+   "I",
+   "would",
+   "have",
+   "come"
+  ],
+  "answer": [
+   "If I had known, I would have come",
+   "If I had known I would have come"
+  ]
+ },
+ {
+  "type": "gap",
+  "level": "B2",
+  "skill": "vocabulary",
+  "prompt": "Boşluğa uygun kelimeyi yaz.",
+  "passage": "The new law will come into ____ next month, so companies must prepare now. (yürürlük)",
+  "answer": [
+   "effect",
+   "force"
+  ]
+ },
+ {
+  "level": "C1",
+  "skill": "grammar",
+  "prompt": "Not only ___ late, but he also forgot the documents.",
+  "options": [
+   "he arrived",
+   "did he arrive",
+   "he did arrive",
+   "arrived he"
+  ],
+  "answer": 1,
+  "type": "choice"
+ },
+ {
+  "level": "C1",
+  "skill": "grammar",
+  "prompt": "Had I known about the traffic, I ___ earlier.",
+  "options": [
+   "would leave",
+   "left",
+   "would have left",
+   "had left"
+  ],
+  "answer": 2,
+  "type": "choice"
+ },
+ {
+  "level": "C1",
+  "skill": "vocabulary",
+  "prompt": "Her argument was so ___ that nobody could find a flaw in it.",
+  "options": [
+   "compelling",
+   "tedious",
+   "ambiguous",
+   "reluctant"
+  ],
+  "answer": 0,
+  "type": "choice"
+ },
+ {
+  "level": "C1",
+  "skill": "vocabulary",
+  "prompt": "The minister tried to ___ the criticism by announcing new funding.",
+  "options": [
+   "deflect",
+   "deflate",
+   "defer",
+   "defy"
+  ],
+  "answer": 0,
+  "type": "choice"
+ },
+ {
+  "level": "C1",
+  "skill": "reading",
+  "passage": "Critics argue that the novel's ending, far from resolving the tension, deliberately leaves the reader suspended between hope and dread, a choice some find frustrating and others consider its greatest strength.",
+  "prompt": "How do critics describe the ending?",
+  "options": [
+   "It clearly resolves the story.",
+   "It is universally praised.",
+   "It is intentionally open and divides opinion.",
+   "It was changed after publication."
+  ],
+  "answer": 2,
+  "type": "choice"
+ },
+ {
+  "level": "C1",
+  "skill": "listening",
+  "say": "Had the council consulted residents from the outset, much of this backlash could, in all likelihood, have been avoided.",
+  "prompt": "What does the speaker imply?",
+  "options": [
+   "Residents were consulted early.",
+   "The backlash was unavoidable.",
+   "Early consultation might have prevented the anger.",
+   "The council ignored the backlash."
+  ],
+  "answer": 2,
+  "type": "choice"
+ },
+ {
+  "type": "order",
+  "level": "C1",
+  "skill": "grammar",
+  "prompt": "Kelimeleri sırala, cümleyi kur.",
+  "tiles": [
+   "had",
+   "No",
+   "sooner",
+   "we",
+   "arrived",
+   "than",
+   "it",
+   "started",
+   "raining"
+  ],
+  "answer": [
+   "No sooner had we arrived than it started raining"
+  ]
+ },
+ {
+  "type": "gap",
+  "level": "C1",
+  "skill": "vocabulary",
+  "prompt": "Boşluğa uygun kelimeyi yaz.",
+  "passage": "Her argument was so ____ that even the sceptics were convinced. (ikna edici, c ile başlar)",
+  "answer": [
+   "compelling",
+   "convincing",
+   "cogent"
+  ]
+ }
 ]

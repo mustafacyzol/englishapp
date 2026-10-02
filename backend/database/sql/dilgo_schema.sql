@@ -108,6 +108,43 @@ CREATE TABLE `arena_presence` (
   CONSTRAINT `arena_presence_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `assignment_completions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignment_completions` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `assignment_id` bigint(20) unsigned NOT NULL,
+  `user_id` bigint(20) unsigned NOT NULL,
+  `completed_at` timestamp NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `assignment_completions_assignment_id_user_id_unique` (`assignment_id`,`user_id`),
+  KEY `assignment_completions_user_id_foreign` (`user_id`),
+  CONSTRAINT `assignment_completions_assignment_id_foreign` FOREIGN KEY (`assignment_id`) REFERENCES `assignments` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `assignment_completions_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `assignments`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `assignments` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `institution_id` bigint(20) unsigned NOT NULL,
+  `class_name` varchar(60) DEFAULT NULL,
+  `created_by` bigint(20) unsigned DEFAULT NULL,
+  `title` varchar(160) NOT NULL,
+  `kind` varchar(20) NOT NULL,
+  `target` varchar(120) DEFAULT NULL,
+  `note` text DEFAULT NULL,
+  `due_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `assignments_created_by_foreign` (`created_by`),
+  KEY `assignments_institution_id_class_name_index` (`institution_id`,`class_name`),
+  CONSTRAINT `assignments_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  CONSTRAINT `assignments_institution_id_foreign` FOREIGN KEY (`institution_id`) REFERENCES `institutions` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `audit_logs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -399,7 +436,7 @@ CREATE TABLE `exam_questions` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `exam_questions_section_index` (`section`)
-) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=52 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `failed_jobs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -584,7 +621,7 @@ CREATE TABLE `migrations` (
   `migration` varchar(255) NOT NULL,
   `batch` int(11) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `newsletter_subscribers`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -639,6 +676,8 @@ CREATE TABLE `orders` (
   `gateway_ref` varchar(255) DEFAULT NULL,
   `gateway_payload` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`gateway_payload`)),
   `paid_at` timestamp NULL DEFAULT NULL,
+  `refund_requested_at` timestamp NULL DEFAULT NULL,
+  `refund_reason` varchar(500) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -737,6 +776,7 @@ CREATE TABLE `placement_results` (
   `score` tinyint(3) unsigned NOT NULL,
   `bands` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`bands`)),
   `skills` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`skills`)),
+  `activities` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`activities`)),
   `answered` smallint(5) unsigned NOT NULL,
   `claimed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
@@ -886,6 +926,24 @@ CREATE TABLE `reward_items` (
   UNIQUE KEY `reward_items_key_unique` (`key`)
 ) ENGINE=InnoDB AUTO_INCREMENT=33 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `school_classes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `school_classes` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `institution_id` bigint(20) unsigned NOT NULL,
+  `name` varchar(60) NOT NULL,
+  `grade` tinyint(3) unsigned DEFAULT NULL,
+  `teacher_member_id` bigint(20) unsigned DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `school_classes_institution_id_name_unique` (`institution_id`,`name`),
+  KEY `school_classes_teacher_member_id_foreign` (`teacher_member_id`),
+  CONSTRAINT `school_classes_institution_id_foreign` FOREIGN KEY (`institution_id`) REFERENCES `institutions` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `school_classes_teacher_member_id_foreign` FOREIGN KEY (`teacher_member_id`) REFERENCES `institution_members` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `sessions`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8mb4 */;
@@ -976,6 +1034,9 @@ CREATE TABLE `subscriptions` (
   `starts_at` timestamp NOT NULL,
   `ends_at` timestamp NOT NULL,
   `status` varchar(12) NOT NULL DEFAULT 'active',
+  `cancelled_at` timestamp NULL DEFAULT NULL,
+  `cancel_reason` varchar(40) DEFAULT NULL,
+  `cancel_note` varchar(500) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1164,6 +1225,8 @@ CREATE TABLE `users` (
   `study_time` varchar(20) DEFAULT NULL,
   `motivation` varchar(30) DEFAULT NULL,
   `age_group` varchar(8) DEFAULT NULL,
+  `school_stage` varchar(16) DEFAULT NULL,
+  `grade` tinyint(3) unsigned DEFAULT NULL,
   `age_group_changed_at` timestamp NULL DEFAULT NULL,
   `exam_target` varchar(16) DEFAULT NULL,
   `exam_date` date DEFAULT NULL,

@@ -1,7 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { BarChart3, Pencil, Plus, Trash2 } from 'lucide-react'
+import { BarChart3, Eye, Pencil, Plus, Trash2 } from 'lucide-react'
 import { ApiError, del, get, post, put } from '@/lib/api'
 import type { Paginated } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
@@ -16,7 +16,7 @@ type Row = Record<string, unknown> & { id: number }
 type FieldType = 'text' | 'textarea' | 'number' | 'bool' | 'select' | 'json' | 'date' | 'list' | 'vocab' | 'paragraphs' | 'questions'
 interface Field { key: string; label: string; type: FieldType; options?: string[]; hint?: string; full?: boolean }
 interface Col { key: string; label: string; render?: (r: Row) => ReactNode }
-interface Cfg { title: string; cols: Col[]; fields: Field[]; defaults: Record<string, unknown>; noCreate?: boolean; preview?: (r: Row) => ReactNode; action?: (r: Row) => ReactNode; intro?: ReactNode }
+interface Cfg { title: string; cols: Col[]; fields: Field[]; defaults: Record<string, unknown>; noCreate?: boolean; readOnly?: boolean; preview?: (r: Row) => ReactNode; action?: (r: Row) => ReactNode; intro?: ReactNode }
 
 const CEFR = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
 const bool = (k: string) => (r: Row) => (r[k] ? <Pill tone="good">evet</Pill> : <Pill>hayır</Pill>)
@@ -129,6 +129,26 @@ const CONFIG: Record<string, Cfg> = {
     ),
     cols: [{ key: 'email', label: 'E-posta' }, { key: 'source', label: 'Kaynak' }, { key: 'confirmed_at', label: 'Onay', render: (r) => (r.confirmed_at ? 'Onaylı' : 'Bekliyor') }, { key: 'unsubscribed_at', label: 'Durum', render: (r) => (r.unsubscribed_at ? 'Çıktı' : 'Aktif') }, { key: 'created_at', label: 'Tarih', render: (r) => String(r.created_at ?? '').slice(0, 10) }],
     fields: [{ key: 'unsubscribed_at', label: 'Çıkış tarihi (listeden çıkarmak için doldur)', type: 'date' }],
+    defaults: {},
+  },
+  'placement-results': {
+    title: 'Seviye tespit sonuçları',
+    noCreate: true,
+    readOnly: true,
+    intro: (
+      <p className="mb-5 max-w-2xl text-sm text-ink-soft">
+        Seviye tespit sınavını bitiren herkes. Kayıt olmadan çözülen testler "Misafir" görünür, kişi kayıt olunca hesabına bağlanır. Sonuçlar değiştirilemez.
+      </p>
+    ),
+    cols: [
+      { key: 'created_at', label: 'Tarih', render: (r) => String(r.created_at ?? '').slice(0, 16).replace('T', ' ') },
+      { key: 'user', label: 'Öğrenci', render: (r) => { const u = r.user as { name: string; email: string } | null; return u ? <span><b>{u.name}</b> <span className="text-ink-soft">{u.email}</span></span> : <Pill>Misafir</Pill> } },
+      { key: 'level', label: 'Seviye', render: (r) => <Pill tone="good">{String(r.level)}</Pill> },
+      { key: 'score', label: 'Puan', render: (r) => `%${r.score}` },
+      { key: 'answered', label: 'Cevaplanan' },
+    ],
+    preview: (r) => <PlacementDetail r={r} />,
+    fields: [],
     defaults: {},
   },
   'contact-messages': {
@@ -260,7 +280,7 @@ export default function Resource() {
                 <div className="flex items-start gap-2">
                   <p className="min-w-0 flex-1 font-bold">{cfg.cols[0].render ? cfg.cols[0].render(r) : String(r[cfg.cols[0].key] ?? '-')}</p>
                   {cfg.action?.(r)}
-                  <button onClick={() => setEditing(r)} className="grid size-8 place-items-center rounded-lg text-ink-soft hover:bg-paper-2" aria-label="Düzenle"><Pencil className="size-4" /></button>
+                  <button onClick={() => setEditing(r)} className="grid size-8 place-items-center rounded-lg text-ink-soft hover:bg-paper-2" aria-label={cfg.readOnly ? 'Görüntüle' : 'Düzenle'}>{cfg.readOnly ? <Eye className="size-4" /> : <Pencil className="size-4" />}</button>
                   <button onClick={() => confirm('Silinsin mi? Bu işlem geri alınamaz.') && remove.mutate(r.id)} className="grid size-8 place-items-center rounded-lg text-ink-soft hover:text-berry" aria-label="Sil"><Trash2 className="size-4" /></button>
                 </div>
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
@@ -279,7 +299,7 @@ export default function Resource() {
                 {cfg.cols.map((c) => <td key={c.key} className="px-4 py-2.5">{c.render ? c.render(r) : String(r[c.key] ?? '-')}</td>)}
                 <td className="whitespace-nowrap px-4 text-right">
                   {cfg.action && <span className="mr-3">{cfg.action(r)}</span>}
-                  <button onClick={() => setEditing(r)} className="mr-3 text-ink-soft hover:text-ink" aria-label="Düzenle"><Pencil className="size-4" /></button>
+                  <button onClick={() => setEditing(r)} className="mr-3 text-ink-soft hover:text-ink" aria-label={cfg.readOnly ? 'Görüntüle' : 'Düzenle'}>{cfg.readOnly ? <Eye className="size-4" /> : <Pencil className="size-4" />}</button>
                   <button onClick={() => confirm('Silinsin mi? Bu işlem geri alınamaz.') && remove.mutate(r.id)} className="text-ink-soft hover:text-berry" aria-label="Sil"><Trash2 className="size-4" /></button>
                 </td>
               </tr>
@@ -327,7 +347,7 @@ function Editor({ resource, cfg, row, onClose }: { resource: string; cfg: Cfg; r
 
   return (
     <Modal open onClose={onClose} className="sm:!max-w-3xl">
-      <h2 className="mb-5 text-2xl font-extrabold">{row ? 'Düzenle' : 'Yeni kayıt'} · {cfg.title}</h2>
+      <h2 className="mb-5 text-2xl font-extrabold">{cfg.readOnly ? 'Ayrıntı' : row ? 'Düzenle' : 'Yeni kayıt'} · {cfg.title}</h2>
       {(err || jsonErr) && <div className="mb-4"><Alert tone="error">{jsonErr || err!.first()}</Alert></div>}
       {row && cfg.preview?.(row)}
       <div className="grid gap-4 sm:grid-cols-2">
@@ -352,8 +372,8 @@ function Editor({ resource, cfg, row, onClose }: { resource: string; cfg: Cfg; r
         })}
       </div>
       <div className="mt-6 flex justify-end gap-3">
-        <Button variant="ghost" onClick={onClose}>Vazgeç</Button>
-        <Button loading={save.isPending} onClick={submit}>Kaydet</Button>
+        <Button variant="ghost" onClick={onClose}>{cfg.readOnly ? 'Kapat' : 'Vazgeç'}</Button>
+        {!cfg.readOnly && <Button loading={save.isPending} onClick={submit}>Kaydet</Button>}
       </div>
     </Modal>
   )
@@ -390,6 +410,33 @@ function AvatarUpload() {
       </div>
       <Button disabled={!file || !label.trim()} loading={up.isPending} onClick={() => up.mutate()}>Yükle</Button>
       <p className="basis-full text-xs text-ink-soft">Kare bir görsel yükle (PNG, JPG veya WebP; 128 ile 2048 piksel arası, en fazla 1 MB). Öğrenciler yeni avatarı profil stüdyosunda hemen görür.</p>
+    </div>
+  )
+}
+
+const SKILL_TR: Record<string, string> = { vocabulary: 'Kelime', grammar: 'Dilbilgisi', reading: 'Okuma', listening: 'Dinleme' }
+const KIND_TR: Record<string, string> = { choice: 'Çoktan seçmeli', order: 'Cümle kurma', gap: 'Boşluk yazma', dictation: 'Dikte' }
+
+/** One placement result: bands, the four skills and each activity type. */
+function PlacementDetail({ r }: { r: Row }) {
+  const bands = (r.bands ?? {}) as Record<string, { total: number; correct: number }>
+  const skills = (r.skills ?? {}) as Record<string, number>
+  const kinds = (r.activities ?? {}) as Record<string, { total: number; correct: number }>
+  const bar = (pct: number) => <span className="block h-2 overflow-hidden rounded-full bg-paper-2"><span className="block h-full rounded-full bg-flame" style={{ width: `${pct}%` }} /></span>
+  return (
+    <div className="mb-5 grid gap-4 sm:grid-cols-3">
+      <div className="rounded-2xl bg-paper-2 p-4">
+        <p className="mb-2 text-xs font-black uppercase tracking-wider text-ink-soft">Bantlar</p>
+        {Object.entries(bands).map(([k, b]) => <div key={k} className="mb-1.5 text-sm"><div className="flex justify-between font-bold"><span>{k}</span><span>{b.correct}/{b.total}</span></div>{bar((b.correct / Math.max(1, b.total)) * 100)}</div>)}
+      </div>
+      <div className="rounded-2xl bg-paper-2 p-4">
+        <p className="mb-2 text-xs font-black uppercase tracking-wider text-ink-soft">Beceriler</p>
+        {Object.entries(skills).map(([k, v]) => <div key={k} className="mb-1.5 text-sm"><div className="flex justify-between font-bold"><span>{SKILL_TR[k] ?? k}</span><span>%{v}</span></div>{bar(v)}</div>)}
+      </div>
+      <div className="rounded-2xl bg-paper-2 p-4">
+        <p className="mb-2 text-xs font-black uppercase tracking-wider text-ink-soft">Etkinlikler</p>
+        {Object.keys(kinds).length ? Object.entries(kinds).map(([k, b]) => <div key={k} className="mb-1.5 text-sm"><div className="flex justify-between font-bold"><span>{KIND_TR[k] ?? k}</span><span>{b.correct}/{b.total}</span></div>{bar((b.correct / Math.max(1, b.total)) * 100)}</div>) : <p className="text-sm text-ink-soft">Bu test eski sürümle çözülmüş.</p>}
+      </div>
     </div>
   )
 }

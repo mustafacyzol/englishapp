@@ -13,7 +13,7 @@ import { rewardImg, img } from '@/lib/assets'
 import { RARITY } from '@/components/game/RewardCard'
 import { Button, LinkButton } from '@/components/ui/Button'
 import { PageHeader, SkeletonPage, Tabs } from '@/components/ui/Misc'
-import { FRAMES, UserAvatar } from '@/components/game/UserAvatar'
+import { UserAvatar } from '@/components/game/UserAvatar'
 import { ProfileBanner } from '@/components/game/ProfileBanner'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
@@ -136,7 +136,7 @@ export default function Shop() {
                       <h3 className="font-display text-xl font-extrabold">{it.name}</h3>
                       <p className="flex-1 text-sm text-ink-soft">{it.description}</p>
                       <span className="rounded-full bg-paper-2 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-ink-soft">
-                        {it.type === 'avatar_frame' ? `Çerçeve${val.frame && FRAMES[val.frame] ? ` · ${FRAMES[val.frame].note}` : ''}` : it.type === 'profile_banner' ? 'Profil kapağı' : it.type === 'chest' ? 'Sandık · hemen açılır' : it.type === 'bundle' ? 'Paket · kasana düşer' : 'Kasana düşer, istediğinde kullan'}
+                        {it.type === 'avatar_frame' ? 'Profil çerçevesi · alınca takılır' : it.type === 'profile_banner' ? 'Profil kapağı · alınca takılır' : it.type === 'chest' ? 'Sandık · hemen açılır' : it.type === 'bundle' ? 'Paket · kasana düşer' : 'Kasana düşer, istediğinde kullan'}
                       </span>
                       {it.type === 'bundle' && !!val.items?.length && (
                         <ul className="flex flex-wrap justify-center gap-1.5">

@@ -228,7 +228,7 @@ function rollChest(e: Json) {
     const won = { id: nextMsg++, status: 'active', source: 'chest', code, activated_at: new Date().toISOString(), expires_at: new Date(Date.now() + o.valid_days * 864e5).toISOString(), created_at: new Date().toISOString(),
       item: { name: 'İş ortağı hediyesi', type: 'partner_coupon', icon: 'ticket', rarity: 'epic' },
       meta: { partner: partner.name, partner_logo: partner.logo_url, partner_url: partner.website, color: partner.color, offer: o.title, description: o.description, terms: o.terms, rarity: o.rarity } }
-    db['/inventory'].data.unshift(won)
+    ;(db['/coupons'] ??= { data: [] }).data.unshift(won)
     return { message: `Sandıktan iş ortağı hediyesi çıktı: ${o.title}!`, user: me(), extra: { prize: { type: 'partner', item: won } } }
   }
   if (pick.type === 'item') {
@@ -252,8 +252,7 @@ const AREAS_ALL = ['users', 'sales', 'content', 'blog', 'gamification', 'institu
 const ROLE_DEFAULT: Record<string, string[]> = { support: ['users', 'marketing', 'desk'], editor: ['content', 'blog'] }
 
 function getRoute(path: string, admin: boolean): Json {
-  // Coupons are the partner gifts in the inventory, so a chest win shows up here at once.
-  if (path === '/coupons') return { data: (db['/inventory']?.data ?? []).filter((x: Json) => x.item?.type === 'partner_coupon') }
+  if (path === '/coupons') return db['/coupons'] ?? { data: [] }
   if (path === '/arena/lobby') {
     const players = (db['/duel']?.leaderboard ?? []).filter((r: Json) => !r.is_me).slice(0, 8)
     const st = ['idle', 'searching', 'playing', 'idle', 'playing', 'idle', 'searching', 'idle']
@@ -347,7 +346,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   if (path === '/auth/reset-password') return { token: 'demo-token', user: me() }
   if (path === '/auth/logout') return null
   if ((m = path.match(/^\/coupons\/(\d+)\/used$/))) {
-    const c = (db['/inventory']?.data ?? []).find((x: Json) => x.id === +m![1])
+    const c = (db['/coupons']?.data ?? []).find((x: Json) => x.id === +m![1])
     if (!c || c.status !== 'active') throw new DemoError(422, 'Bu kupon artık aktif değil.')
     c.status = 'used'
     c.meta = { ...(c.meta ?? {}), used_at: new Date().toISOString() }
@@ -367,8 +366,8 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   }
   if ((m = path.match(/^\/auth\/social\/(google|apple)$/))) return { token: 'demo-token', remember: true, user: me() }
   if (path === '/contact') return ok('Mesajın bize ulaştı. En geç 1 iş günü içinde dönüş yapacağız.')
-  if (path === '/placement') return { token: 'demo-placement', answered: 28, total: 30 }
-  if (path === '/placement/claim') return { result: { level: 'B1', score: 64, skills: { vocabulary: 72, grammar: 66, reading: 70, listening: 48 }, bands: {} }, user: me() }
+  if (path === '/placement') return { token: 'demo-placement', answered: 37, total: 40 }
+  if (path === '/placement/claim') return { result: { level: 'B1', score: 64, skills: { vocabulary: 72, grammar: 66, reading: 70, listening: 48 }, bands: {}, activities: { choice: { total: 30, correct: 19 }, order: { total: 5, correct: 3 }, gap: { total: 3, correct: 1 }, dictation: { total: 2, correct: 1 } } }, user: me() }
 
   // --- learning
   if ((m = path.match(/^\/lessons\/(\d+)\/complete$/))) {
@@ -649,6 +648,56 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   if (path === '/institution' && method === 'PATCH') {
     Object.assign(db['/institution'].institution, body)
     return db['/institution']
+  }
+  // --- school: classes and homework
+  if ((m = path.match(/^\/institution\/classes(?:\/(\d+))?$/))) {
+    const inst = db['/institution']
+    const list: Json[] = (inst.school_classes ??= [])
+    const teacher = (inst.teachers ?? []).find((t: Json) => t.id === body.teacher_member_id)
+    if (method === 'DELETE') inst.school_classes = list.filter((c) => c.id !== +m![1])
+    else if (m[1]) Object.assign(list.find((c) => c.id === +m![1]) ?? {}, body, { teacher: teacher ? { id: teacher.id, name: teacher.name ?? teacher.email } : null })
+    else {
+      if (list.some((c) => c.name === body.name)) throw new DemoError(422, 'Bu isimde bir sınıf zaten var.', { name: ['Bu isimde bir sınıf zaten var.'] })
+      list.push({ id: nextMsg++, students: 0, ...body, teacher: teacher ? { id: teacher.id, name: teacher.name ?? teacher.email } : null })
+    }
+    return { ok: true }
+  }
+  if ((m = path.match(/^\/institution\/assignments(?:\/(\d+))?$/))) {
+    const list: Json[] = (db['/institution/assignments'] ??= { data: [] }).data
+    if (method === 'DELETE') db['/institution/assignments'].data = list.filter((a) => a.id !== +m![1])
+    else {
+      const members: Json[] = (db['/institution']?.members ?? []).filter((x: Json) => x.role === 'student' && x.status === 'active' && (!body.class_name || x.class_name === body.class_name))
+      const story = (db['/institution/catalog']?.stories ?? []).find((x: Json) => x.slug === body.target)
+      const lesson = (db['/institution/catalog']?.lessons ?? []).find((x: Json) => String(x.id) === String(body.target))
+      const title = body.title || (story ? `${story.title} hikâyesini oku` : lesson ? lesson.title : { practice: 'Kelime pratiği', exam: 'Sınav denemesi', ai: 'Defne ile konuşma' }[body.kind as string] ?? 'Ödev')
+      list.unshift({ id: nextMsg++, title, kind: body.kind, target: body.target, note: body.note, class_name: body.class_name, due_at: body.due_at, created_at: new Date().toISOString(), students: members.length, done: 0, done_ids: [], author: me().name })
+    }
+    return db['/institution/assignments']
+  }
+  if ((m = path.match(/^\/me\/assignments\/(\d+)\/done$/))) {
+    const a = (db['/me/assignments']?.data ?? []).find((x: Json) => x.id === +m![1])
+    if (a) a.done = true
+    return db['/me/assignments'] ?? { data: [] }
+  }
+  // --- subscription
+  if (path === '/account/subscription/cancel' || path === '/account/subscription/resume') {
+    const sub = db['/account/subscription']
+    if (!sub?.current) throw new DemoError(422, 'İptal edilecek aktif bir Premium üyeliğin yok.')
+    if (path.endsWith('cancel')) {
+      if (body.refund) {
+        if (!sub.refund.eligible) throw new DemoError(422, 'Bu üyelik için iade süresi geçmiş ya da ödeme bulunamadı.')
+        sub.refund = { ...sub.refund, eligible: false, requested: true }
+        if (sub.order) sub.order.refund_requested_at = new Date().toISOString()
+      }
+      sub.current.cancelled_at = sub.current.cancelled_at ?? new Date().toISOString()
+      sub.current.cancel_reason = body.reason
+    } else {
+      sub.current.cancelled_at = null
+      sub.current.cancel_reason = null
+      if (sub.refund.requested) sub.refund = { ...sub.refund, eligible: true, requested: false }
+      if (sub.order) sub.order.refund_requested_at = null
+    }
+    return { ...sub, user: me() }
   }
 
   // --- account

@@ -14,7 +14,11 @@ import { canSpeak, speak } from '@/lib/speech'
 import { higoImg } from '@/components/game/Higo'
 
 type Skill = 'vocabulary' | 'grammar' | 'reading' | 'listening'
-interface Q { id: number; level: string; skill: Skill; prompt: string; passage: string | null; say: string | null; options: string[] }
+type Kind = 'choice' | 'order' | 'gap' | 'dictation'
+interface Q { id: number; level: string; skill: Skill; type?: Kind; prompt: string; passage: string | null; say: string | null; options: string[]; tiles?: string[] | null }
+type Given = number | string
+
+const KIND: Record<Exclude<Kind, 'choice'>, string> = { order: 'Cümle kur', gap: 'Yazarak cevapla', dictation: 'Dinle ve yaz' }
 
 const SKILL: Record<Skill, { label: string; icon: typeof BookOpen; tone: string }> = {
   vocabulary: { label: 'Kelime', icon: Type, tone: 'text-sky bg-sky/10' },
@@ -39,9 +43,11 @@ export default function Placement() {
   const [started, setStarted] = useState(false)
   const [i, setI] = useState(0)
   const [pick, setPick] = useState<number | null>(null)
-  const [answers, setAnswers] = useState<Record<number, number>>({})
+  const [built, setBuilt] = useState<number[]>([])
+  const [typed, setTyped] = useState('')
+  const [answers, setAnswers] = useState<Record<number, Given>>({})
   const submit = useMutation({
-    mutationFn: (a: Record<number, number>) => post<{ token: string; answered: number; total: number }>('/placement', { answers: a }),
+    mutationFn: (a: Record<number, Given>) => post<{ token: string; answered: number; total: number }>('/placement', { answers: a }),
     onSuccess: async (r) => { await storage.set(PLACEMENT_TOKEN, r.token) },
   })
 
@@ -49,10 +55,15 @@ export default function Placement() {
   const qs = data.data
   const q = qs[i]
 
-  const next = (opt: number) => {
+  const kind: Kind = q.type ?? 'choice'
+  const ready = kind === 'choice' ? pick !== null : kind === 'order' ? built.length === (q.tiles?.length ?? 0) : typed.trim().length > 0
+  const current = (): Given => (kind === 'choice' ? pick! : kind === 'order' ? built.map((t) => q.tiles![t]).join(' ') : typed.trim())
+  const next = (opt: Given) => {
     const a = { ...answers, [q.id]: opt }
     setAnswers(a)
     setPick(null)
+    setBuilt([])
+    setTyped('')
     if (i + 1 < qs.length) setI(i + 1)
     else submit.mutate(a)
   }
@@ -85,25 +96,44 @@ export default function Placement() {
         <motion.div key={q.id} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.22 }} className="flex flex-1 flex-col">
           <div className="mb-4 flex items-center gap-2">
             <span className={clsx('inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider', s.tone)}><s.icon className="size-3.5" /> {s.label}</span>
+            {kind !== 'choice' && <span className="rounded-full bg-flame/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-flame">{KIND[kind]}</span>}
             <span className="text-xs font-bold text-ink-soft">Bölüm {bandIndex + 1} / 5</span>
           </div>
 
           {q.passage && <div className="mb-5 rounded-2xl border-2 border-line bg-card p-4 text-[16px] leading-relaxed">{q.passage}</div>}
-          {q.say && <Listen text={q.say} key={q.id} />}
+          {q.say && <Listen text={q.say} key={q.id} hideText={kind === 'dictation'} />}
 
           <h1 className="mb-6 font-display text-[clamp(1.5rem,4.5vw,2rem)] font-black leading-snug">{q.prompt}</h1>
-          <div className="grid gap-2.5" role="radiogroup">
-            {q.options.map((o, oi) => (
-              <button key={oi} role="radio" aria-checked={pick === oi} onClick={() => setPick(oi)} className={clsx('flex items-center gap-4 rounded-2xl border-2 px-4 py-3.5 text-left text-[17px] font-bold transition', pick === oi ? 'border-ink bg-card shadow-[0_3px_0_0_var(--ink)]' : 'border-line bg-card hover:border-ink/30')}>
-                <span className={clsx('grid size-8 shrink-0 place-items-center rounded-lg font-mono text-sm font-black', pick === oi ? 'bg-ink text-paper' : 'bg-paper-2')}>{'ABCD'[oi]}</span>
-                {o}
-              </button>
-            ))}
-          </div>
+          {kind === 'choice' && (
+            <div className="grid gap-2.5" role="radiogroup">
+              {q.options.map((o, oi) => (
+                <button key={oi} role="radio" aria-checked={pick === oi} onClick={() => setPick(oi)} className={clsx('flex items-center gap-4 rounded-2xl border-2 px-4 py-3.5 text-left text-[17px] font-bold transition', pick === oi ? 'border-ink bg-card shadow-[0_3px_0_0_var(--ink)]' : 'border-line bg-card hover:border-ink/30')}>
+                  <span className={clsx('grid size-8 shrink-0 place-items-center rounded-lg font-mono text-sm font-black', pick === oi ? 'bg-ink text-paper' : 'bg-paper-2')}>{'ABCD'[oi]}</span>
+                  {o}
+                </button>
+              ))}
+            </div>
+          )}
+          {kind === 'order' && q.tiles && <Builder tiles={q.tiles} built={built} setBuilt={setBuilt} />}
+          {(kind === 'gap' || kind === 'dictation') && (
+            <input
+              autoFocus
+              value={typed}
+              onChange={(e) => setTyped(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && ready && next(current())}
+              maxLength={200}
+              autoCapitalize="off"
+              autoCorrect="off"
+              spellCheck={false}
+              placeholder={kind === 'dictation' ? 'Duyduğunu buraya yaz' : 'Cevabını yaz'}
+              aria-label="Cevabın"
+              className="h-14 w-full rounded-2xl border-2 border-line bg-card px-4 text-lg font-bold outline-none transition placeholder:font-semibold placeholder:text-ink-soft/60 focus:border-ink"
+            />
+          )}
 
           <div className="mt-auto flex items-center justify-between gap-3 pt-8">
             <button className="text-sm font-bold text-ink-soft hover:text-ink" onClick={() => next(-1)}>Bilmiyorum, geç</button>
-            <Button onClick={() => pick !== null && next(pick)} disabled={pick === null} className="min-w-40 gap-2">{i + 1 < qs.length ? 'Devam' : 'Testi bitir'} <ArrowRight className="size-4" /></Button>
+            <Button onClick={() => ready && next(current())} disabled={!ready} className="min-w-40 gap-2">{i + 1 < qs.length ? 'Devam' : 'Testi bitir'} <ArrowRight className="size-4" /></Button>
           </div>
         </motion.div>
       </AnimatePresence>
@@ -120,7 +150,7 @@ function Intro({ total, exit, onStart }: { total: number; exit: string; onStart:
         <motion.img initial={{ scale: 0.6, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }} src={higoImg('read')} alt="" className="mb-4 w-24" />
         <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Seviye tespit sınavı</p>
         <h1 className="mt-2 font-display text-[clamp(2rem,6vw,2.8rem)] font-black leading-[1.05]">Nereden başlaman gerektiğini bulalım.</h1>
-        <p className="mt-3 text-[17px] text-ink-soft">Kolaydan zora {total} soru. Bilmediğini geçebilirsin; tahmin etmek yerine “Bilmiyorum” demek sonucu daha doğru yapar.</p>
+        <p className="mt-3 text-[17px] text-ink-soft">Kolaydan zora {total} görev: seçmeli sorular, kelimelerle cümle kurma, boşluğa yazma ve dinleyip yazma. Bilmediğini geçebilirsin; tahmin etmek yerine “Bilmiyorum” demek sonucu daha doğru yapar.</p>
 
         <div className="mt-6 grid grid-cols-2 gap-2.5">
           {parts.map((k) => {
@@ -130,7 +160,7 @@ function Intro({ total, exit, onStart }: { total: number; exit: string; onStart:
         </div>
 
         <ul className="mt-5 space-y-2 text-sm font-semibold text-ink-soft">
-          <li className="flex items-center gap-2"><Clock className="size-4 text-flame" /> Yaklaşık 8-10 dakika</li>
+          <li className="flex items-center gap-2"><Clock className="size-4 text-flame" /> Yaklaşık 10-12 dakika</li>
           <li className="flex items-center gap-2"><Volume2 className="size-4 text-mint-deep" /> Dinleme soruları için sesin açık olsun</li>
           <li className="flex items-center gap-2"><Lock className="size-4 text-lilac" /> Sonucun hesabına işlenir ve ders yolun ona göre açılır</li>
         </ul>
@@ -141,10 +171,10 @@ function Intro({ total, exit, onStart }: { total: number; exit: string; onStart:
 }
 
 /** Plays the listening line with the browser voice; two replays, then the text can be shown. */
-function Listen({ text }: { text: string }) {
+function Listen({ text, hideText }: { text: string; hideText?: boolean }) {
   const [plays, setPlays] = useState(0)
   const [on, setOn] = useState(false)
-  const [show, setShow] = useState(!canSpeak())
+  const [show, setShow] = useState(!canSpeak() && !hideText)
   const play = () => {
     setPlays((p) => p + 1)
     speak(text, { rate: 0.92, onStart: () => setOn(true), onEnd: () => setOn(false) })
@@ -158,7 +188,7 @@ function Listen({ text }: { text: string }) {
       </button>
       <div className="min-w-0 flex-1">
         <p className="font-extrabold">{plays === 0 ? 'Önce dinle' : on ? 'Dinliyorsun…' : `${3 - plays} dinleme hakkın kaldı`}</p>
-        {show ? <p className="mt-1 text-sm italic text-ink-soft">“{text}”</p> : plays >= 2 && <button onClick={() => setShow(true)} className="mt-1 text-sm font-bold text-ink-soft underline">Metni göster</button>}
+        {show ? <p className="mt-1 text-sm italic text-ink-soft">“{text}”</p> : hideText ? (!canSpeak() && <p className="mt-1 text-sm text-ink-soft">Tarayıcın ses çalamıyor. Bu soruyu geçebilirsin.</p>) : plays >= 2 && <button onClick={() => setShow(true)} className="mt-1 text-sm font-bold text-ink-soft underline">Metni göster</button>}
       </div>
     </div>
   )
@@ -179,6 +209,32 @@ function Done({ pending, signedIn, onGo }: { pending: boolean; signedIn: boolean
           {!signedIn && <p className="mt-3 text-sm text-ink-soft">Zaten hesabın var mı? <Link to="/login" className="font-bold text-flame">Giriş yap</Link>, sonuç hesabına eklenir.</p>}
         </motion.div>
       )}
+    </div>
+  )
+}
+
+/** Sentence building: tap the shuffled tiles in order; tap a placed tile to send it back. */
+function Builder({ tiles, built, setBuilt }: { tiles: string[]; built: number[]; setBuilt: (b: number[]) => void }) {
+  return (
+    <div>
+      <div className="flex min-h-[64px] flex-wrap content-start gap-2 border-b-2 border-dashed border-line pb-3" aria-label="Kurduğun cümle">
+        {built.length === 0 && <span className="self-center text-sm font-semibold text-ink-soft">Kelimelere sırayla dokun</span>}
+        {built.map((t, k) => (
+          <motion.button layout key={t} onClick={() => setBuilt(built.filter((_, j) => j !== k))} className="rounded-xl border-2 border-ink bg-card px-3.5 py-2 text-[17px] font-bold shadow-[0_3px_0_0_var(--ink)]">
+            {tiles[t]}
+          </motion.button>
+        ))}
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {tiles.map((w, t) => {
+          const used = built.includes(t)
+          return (
+            <button key={t} disabled={used} onClick={() => setBuilt([...built, t])} className={clsx('rounded-xl border-2 px-3.5 py-2 text-[17px] font-bold transition', used ? 'border-line bg-paper-2 text-transparent' : 'border-line bg-card hover:border-ink/40')}>
+              {w}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }
