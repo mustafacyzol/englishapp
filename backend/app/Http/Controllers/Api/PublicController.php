@@ -68,6 +68,7 @@ class PublicController extends Controller
             ],
             'tts' => (bool) config('services.elevenlabs.key'),
             'ai' => (bool) config('dilgo.ai.api_key') && config('dilgo.ai.enabled'),
+            'cosmetics' => \App\Support\Cosmetics::custom(),
             'exams' => collect(Exams::EXAMS)->map(fn ($e, $k) => ['key' => $k, 'name' => $e['name'], 'full' => $e['full'], 'about' => $e['about']])->values(),
         ]);
     }
@@ -79,7 +80,7 @@ class PublicController extends Controller
             'stories' => Story::query()->where('is_published', true)->count(),
             'featured_stories' => Story::query()->where('is_published', true)->where('is_premium', false)->latest('id')->limit(6)
                 ->get(['slug', 'title', 'title_tr', 'cefr_level', 'category', 'cover_image', 'reading_minutes']),
-            'testimonials' => Testimonial::query()->where('is_published', true)->orderBy('position')->limit(12)
+            'testimonials' => Testimonial::query()->where('is_published', true)->orderBy('position')->limit(24)
                 ->get(['id', 'name', 'role', 'avatar', 'quote', 'highlight', 'rating', 'cefr_level', 'streak']),
         ]);
 

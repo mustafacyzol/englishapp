@@ -7,7 +7,7 @@ import { Bell, Settings } from 'lucide-react'
 import { IconBag, IconBook, IconCards, IconExam, IconGhost, IconGift, IconPath, IconProfile, IconQuest, IconSchool, IconShield, IconSliders, IconTicket, IconTalk, type NavIcon } from '@/components/ui/NavIcons'
 import { useAuth } from '@/lib/auth'
 import { get } from '@/lib/api'
-import { rewardImg } from '@/lib/assets'
+import { img, rewardImg } from '@/lib/assets'
 import { Logo } from '@/components/game/Logo'
 import { StatChips } from '@/components/game/StatChips'
 import { PageTransition } from '@/components/motion/Page'
@@ -19,6 +19,7 @@ import { Img } from '@/components/ui/Img'
 import { CoachMarks } from '@/components/game/CoachMarks'
 import { PlacementReveal } from '@/components/game/PlacementReveal'
 import { examOn } from '@/lib/onboarding'
+import { ProfileBanner } from '@/components/game/ProfileBanner'
 import { UserAvatar } from '@/components/game/UserAvatar'
 import { TUTOR } from '@/lib/tutor'
 
@@ -66,7 +67,9 @@ const GROUPS: { title: string; items: Item[] }[] = [
 ]
 
 /** Pages that live together under one menu entry, switched with a tab strip. */
-export const HUBS: { key: string; tabs: { to: string; label: string; icon: NavIcon }[] }[] = [
+export const HUBS: { key: string; mobileOnly?: boolean; tabs: { to: string; label: string; icon: NavIcon; feature?: 'exam' }[] }[] = [
+  // On phones, everything you practise with lives under one Pratik tab.
+  { key: 'practice', mobileOnly: true, tabs: [{ to: '/practice', label: 'Kelimeler', icon: IconCards }, { to: '/stories', label: 'Hikâyeler', icon: IconBook }, { to: '/exam', label: 'Sınav', icon: IconExam, feature: 'exam' }] },
   { key: 'rewards', tabs: [{ to: '/rewards', label: 'Ödüllerim', icon: IconGift }, { to: '/quests', label: 'Görevler', icon: IconQuest }, { to: '/shop', label: 'Mağaza', icon: IconBag }, { to: '/coupons', label: 'Kuponlar', icon: IconTicket }] },
 ]
 
@@ -76,7 +79,7 @@ export const HUBS: { key: string; tabs: { to: string; label: string; icon: NavIc
  */
 const TABS: Item[] = [
   { to: '/learn', label: 'Öğren', icon: IconPath, tone: 'flame', match: ['/learn', '/lesson'] },
-  { to: '/practice', label: 'Pratik', icon: IconCards, tone: 'sky', tour: 'tab-practice' },
+  { to: '/practice', label: 'Pratik', icon: IconCards, tone: 'sky', tour: 'tab-practice', match: ['/practice', '/stories', '/exam'] },
   { to: '/duel', label: 'Arena', icon: IconGhost, tone: 'ink', match: ['/duel', '/leagues'], tour: 'tab-arena' },
 ]
 
@@ -170,24 +173,26 @@ export default function AppLayout() {
 
         <div className="flex flex-1 gap-8 px-4 pb-32 pt-6 sm:px-6 md:px-8 lg:pb-12 xl:gap-10">
           <main className="min-w-0 flex-1">
-            {hub && <HubTabs tabs={hub.tabs} path={loc.pathname} />}
+            {hub && <div className={clsx(hub.mobileOnly && 'lg:hidden')}><HubTabs tabs={hub.tabs.filter((x) => !x.feature || on(x.feature))} path={loc.pathname} /></div>}
             <PageTransition key={loc.pathname}>{outlet}</PageTransition>
           </main>
           {withRail && data && <SideRail data={data} />}
         </div>
       </div>
 
-      {/* Floating tab bar (phones and tablets). */}
-      <nav aria-label="Alt menü" className="safe-bottom fixed inset-x-0 bottom-0 z-40 px-3 pb-2 lg:hidden">
-        <div className="relative mx-auto grid max-w-lg grid-cols-5 items-stretch rounded-[24px] border-2 border-line bg-card/95 p-1.5 shadow-soft backdrop-blur-md">
+      {/* Phone and tablet dock: edge to edge like a native app, safe-area aware.
+          Each tab has its own colour; the active one grows a pill with its name. */}
+      <nav aria-label="Alt menü" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/92 backdrop-blur-xl lg:hidden">
+        <div className="safe-bottom mx-auto grid max-w-xl grid-cols-5 items-end px-2 pt-1.5">
           {TABS.slice(0, 2).map((n) => <Tab key={n.to} n={n} active={isOn(n, loc.pathname)} />)}
           <DefneTab active={loc.pathname.startsWith('/ai')} />
           <Tab n={TABS[2]} active={isOn(TABS[2], loc.pathname)} />
-          <button onClick={() => setMore(true)} data-tour="more" aria-label="Menü" className="relative flex flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[11px] font-extrabold text-ink-soft">
-            <span className={clsx('absolute inset-0 rounded-2xl transition', MENU_PATHS.some((p) => loc.pathname.startsWith(p)) ? 'bg-ink/[0.07]' : 'bg-transparent')} />
-            <UserAvatar name={user.name} avatar={user.avatar} frame={user.frame} className="relative size-7" />
-            <span className="relative">{t('Menü')}</span>
-            {!!data?.available_items && <span className="absolute right-3 top-1 size-2.5 rounded-full bg-flame ring-2 ring-card" />}
+          <button onClick={() => setMore(true)} data-tour="more" aria-label="Ben" className="relative flex flex-col items-center gap-1 py-1">
+            <span className={clsx('relative grid h-8 w-14 place-items-center rounded-full transition-colors duration-200', MENU_PATHS.some((p) => loc.pathname.startsWith(p)) ? 'bg-ink/[0.08]' : '')}>
+              <UserAvatar name={user.name} avatar={user.avatar} className="size-7 ring-2 ring-card" />
+              {!!data?.available_items && <span className="absolute right-2 top-0 size-2.5 rounded-full bg-flame ring-2 ring-card" />}
+            </span>
+            <span className="text-[11px] font-extrabold text-ink-soft">{t('Ben')}</span>
           </button>
         </div>
       </nav>
@@ -199,17 +204,18 @@ export default function AppLayout() {
   )
 }
 
-const MENU_PATHS = ['/stories', '/exam', '/rewards', '/quests', '/shop', '/coupons', '/profile', '/settings', '/notifications', '/kurum']
+const MENU_PATHS = ['/rewards', '/quests', '/shop', '/coupons', '/profile', '/settings', '/notifications', '/kurum']
 
-/** A plain tab: the soft pill fades in place (no shared-layout jump between pages). */
+/** A dock tab: icon in a colour pill that lights up when active, the name under it. */
 function Tab({ n, active }: { n: Item; active: boolean }) {
   const { t } = useLang()
   const [text, bg] = TONE[n.tone].split(' ')
   return (
-    <Link to={n.to} data-tour={n.tour} aria-current={active ? 'page' : undefined} className="relative flex flex-col items-center justify-center gap-0.5 rounded-2xl py-1.5 text-[11px] font-extrabold">
-      <span className={clsx('absolute inset-0 rounded-2xl transition duration-200', active ? bg : 'scale-90 opacity-0')} />
-      <n.icon className={clsx('relative size-6 transition-colors', active ? text : 'text-ink-soft')} />
-      <span className={clsx('relative', active ? 'text-ink' : 'text-ink-soft')}>{t(n.label)}</span>
+    <Link to={n.to} data-tour={n.tour} aria-current={active ? 'page' : undefined} className="relative flex flex-col items-center gap-1 py-1">
+      <span className={clsx('relative grid h-8 w-14 place-items-center rounded-full transition-all duration-200', active ? bg : 'bg-transparent')}>
+        <n.icon className={clsx('size-6 transition-transform duration-200', active ? `${text} scale-110` : 'text-ink-soft')} />
+      </span>
+      <span className={clsx('text-[11px] transition-colors', active ? 'font-black text-ink' : 'font-extrabold text-ink-soft')}>{t(n.label)}</span>
     </Link>
   )
 }
@@ -217,15 +223,15 @@ function Tab({ n, active }: { n: Item; active: boolean }) {
 /** Defne, raised in the middle of the bar: her face, an online dot and a soft pulse. */
 function DefneTab({ active }: { active: boolean }) {
   return (
-    <Link to="/ai" data-tour="tab-defne" aria-label="Defne AI ile konuş" aria-current={active ? 'page' : undefined} className="relative flex flex-col items-center justify-end pb-1">
-      <span className="absolute -top-7 grid place-items-center">
-        {!active && <span aria-hidden className="absolute size-16 animate-ping rounded-full bg-sage/25 [animation-duration:2.4s]" />}
-        <span className={clsx('relative grid size-16 place-items-center rounded-full border-4 border-card shadow-[0_8px_20px_rgba(31,36,51,.18)] transition', active ? 'bg-sage' : 'bg-gradient-to-br from-sage to-mint-deep')}>
-          <Img src={TUTOR.avatar} alt="" className="size-[52px] rounded-full object-cover" />
+    <Link to="/ai" data-tour="tab-defne" aria-label="Defne AI ile konuş" aria-current={active ? 'page' : undefined} className="relative flex flex-col items-center gap-1 py-1">
+      <span className="relative -mt-5 grid place-items-center">
+        {!active && <span aria-hidden className="absolute size-14 animate-ping rounded-full bg-sage/20 [animation-duration:2.8s]" />}
+        <span className={clsx('relative grid size-14 place-items-center rounded-full border-[3px] border-card shadow-[0_6px_16px_rgba(31,36,51,.18)] transition', active ? 'bg-sage' : 'bg-gradient-to-br from-sage to-mint-deep')}>
+          <Img src={TUTOR.avatar} alt="" className="size-[46px] rounded-full object-cover" />
           <span className="absolute bottom-0.5 right-0.5 size-3.5 rounded-full border-2 border-card bg-mint" />
         </span>
       </span>
-      <span className={clsx('text-[11px] font-black', active ? 'text-sage-deep dark:text-sage' : 'text-ink')}>Defne</span>
+      <span className={clsx('text-[11px] font-black', active ? 'text-sage-deep dark:text-sage' : 'text-ink-soft')}>Defne</span>
     </Link>
   )
 }
@@ -269,24 +275,30 @@ function HubTabs({ tabs, path }: { tabs: (typeof HUBS)[number]['tabs']; path: st
 function MoreSheet({ open, onClose, staff, manager, exam }: { open: boolean; onClose: () => void; staff: boolean; manager: boolean; exam: boolean }) {
   const { t } = useLang()
   const { user } = useAuth()
-  const items: Item[] = [
-    { to: '/stories', label: 'Hikâyeler', icon: IconBook, tone: 'butter' },
-    { to: '/rewards', label: 'Ödüller', icon: IconGift, tone: 'berry' },
-    ...(exam ? [{ to: '/exam', label: 'Sınav modu', icon: IconExam, tone: 'lilac' }] : [{ to: '/shop', label: 'Mağaza', icon: IconBag, tone: 'lilac' }]),
+  if (!user) return null
+  const lvl = user.stats
+  const pct = Math.round(((lvl.xp_total - lvl.level_floor) / Math.max(1, lvl.level_ceil - lvl.level_floor)) * 100)
+  // big illustrated tiles for the things people open most
+  const tiles = [
+    { to: '/rewards', label: 'Ödüllerim', sub: 'Kasa ve sandıklar', art: rewardImg('chest'), tint: 'from-berry/15' },
+    { to: '/quests', label: 'Görevler', sub: 'Günlük ve haftalık', art: rewardImg('star'), tint: 'from-butter/25' },
+    { to: '/shop', label: 'Mağaza', sub: 'Çerçeve, kapak, güç', art: rewardImg('gems'), tint: 'from-sky/15' },
+    { to: '/leagues', label: 'Ligler', sub: `${lvl.league_name} ligi`, art: img(`leagues/${Math.max(0, Math.min(9, lvl.league_tier))}.webp`), tint: 'from-lilac/15' },
+    ...(exam ? [{ to: '/exam', label: 'Sınav modu', sub: 'Deneme ve analiz', art: rewardImg('trophy'), tint: 'from-flame/12' }] : []),
+    { to: '/coupons', label: 'Kuponlar', sub: 'Marka hediyeleri', art: rewardImg('coupon'), tint: 'from-mint/15' },
   ]
   const rows: Item[] = [
     { to: '/settings', label: 'Ayarlar', icon: IconSliders, tone: 'ink' },
     ...(manager ? [{ to: '/kurum', label: 'Okul paneli', icon: IconSchool, tone: 'sage' }] : []),
     ...(staff ? [{ to: '/admin', label: 'Yönetim paneli', icon: IconShield, tone: 'ink' }] : []),
   ]
-  if (!user) return null
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Menü">
+        <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Ben">
           <motion.button aria-label="Kapat" onClick={onClose} className="absolute inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
           <motion.div
-            className="safe-bottom absolute inset-x-0 bottom-0 max-h-[88dvh] overflow-y-auto rounded-t-[28px] border-t-2 border-line bg-card px-5 pb-6 pt-3"
+            className="safe-bottom absolute inset-x-0 bottom-0 max-h-[90dvh] overflow-y-auto rounded-t-[28px] bg-card pb-6"
             initial={{ y: '100%' }}
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
@@ -296,26 +308,41 @@ function MoreSheet({ open, onClose, staff, manager, exam }: { open: boolean; onC
             dragElastic={{ top: 0, bottom: 0.6 }}
             onDragEnd={(_, i) => i.offset.y > 90 && onClose()}
           >
-            <span className="mx-auto mb-4 block h-1.5 w-12 rounded-full bg-line" />
-            <Link to="/profile" className="flex items-center gap-3 rounded-2xl bg-paper-2 p-3">
-              <UserAvatar name={user.name} avatar={user.avatar} frame={user.frame} className="size-12" />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate font-display text-lg font-black">{user.name}</span>
-                <span className="block text-xs font-bold text-ink-soft">Profilini gör ve düzenle · Seviye {user.stats.level}</span>
+            {/* you, on your own cover */}
+            <Link to="/profile" className="relative block overflow-hidden rounded-t-[28px]">
+              <ProfileBanner banner={user.banner} className="h-28" />
+              <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
+              <span className="absolute left-1/2 top-2 h-1.5 w-12 -translate-x-1/2 rounded-full bg-white/70" />
+              <span className="relative -mt-12 flex items-end gap-3 px-5">
+                <UserAvatar name={user.name} avatar={user.avatar} frame={user.frame} className="size-[72px]" />
+                <span className="min-w-0 flex-1 pb-1">
+                  <span className="block truncate font-display text-xl font-black">{user.name}</span>
+                  <span className="mt-1 flex items-center gap-2 text-xs font-bold text-ink-soft">
+                    Seviye {lvl.level}
+                    <span className="h-1.5 w-20 overflow-hidden rounded-full bg-paper-2"><span className="block h-full rounded-full bg-flame" style={{ width: `${pct}%` }} /></span>
+                  </span>
+                </span>
+                <span className="mb-1 rounded-full bg-paper-2 px-3 py-1.5 text-xs font-extrabold">Profil</span>
               </span>
-              <span className="ml-auto grid size-9 place-items-center rounded-xl text-ink-soft" aria-hidden>›</span>
             </Link>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {items.map((n) => (
-                <NavLink key={n.to} to={n.to} className={({ isActive }) => clsx('flex flex-col items-center gap-1.5 rounded-2xl border-2 p-3 text-center text-xs font-extrabold transition', isActive ? 'border-flame/40 bg-flame/5' : 'border-line hover:bg-paper-2')}>
-                  <span className={clsx('grid size-12 place-items-center rounded-2xl', TONE[n.tone])}><n.icon className="size-6" /></span>
-                  <span className="leading-tight">{t(n.label)}</span>
-                </NavLink>
+
+            <div className="mt-4 grid grid-cols-2 gap-2.5 px-4">
+              {tiles.map((x, k) => (
+                <motion.div key={x.to} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + k * 0.035, type: 'spring', stiffness: 420, damping: 30 }}>
+                  <NavLink to={x.to} className={({ isActive }) => clsx('relative flex h-[84px] items-center gap-2 overflow-hidden rounded-2xl border-2 bg-gradient-to-br to-transparent p-3 transition active:scale-[.98]', x.tint, isActive ? 'border-ink/30' : 'border-line')}>
+                    <span className="min-w-0 flex-1">
+                      <span className="block font-display text-[15px] font-black leading-tight">{t(x.label)}</span>
+                      <span className="block truncate text-[11px] font-bold text-ink-soft">{x.sub}</span>
+                    </span>
+                    <Img src={x.art} alt="" className="size-12 shrink-0 object-contain drop-shadow" />
+                  </NavLink>
+                </motion.div>
               ))}
             </div>
-            <div className="mt-3 divide-y-2 divide-line/50 rounded-2xl border-2 border-line">
+
+            <div className="mx-4 mt-3 divide-y-2 divide-line/50 rounded-2xl border-2 border-line">
               {rows.map((n) => (
-                <Link key={n.to} to={n.to} className="flex items-center gap-3 px-4 py-3 text-sm font-extrabold"><n.icon className="size-5 text-ink-soft" /> {t(n.label)}</Link>
+                <Link key={n.to} to={n.to} className="flex items-center gap-3 px-4 py-3 text-sm font-extrabold"><n.icon className="size-5 text-ink-soft" /> {t(n.label)}<span className="ml-auto text-ink-soft">›</span></Link>
               ))}
               <div className="flex items-center justify-between px-4 py-2.5">
                 <span className="text-sm font-extrabold">{t('Dil')}</span>

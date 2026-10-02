@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
-import { AnimatePresence, motion, useInView, useMotionValue, useMotionValueEvent, useReducedMotion, useScroll, useSpring, useTime, useTransform } from 'motion/react'
+import { AnimatePresence, motion, useInView, useMotionValue, useReducedMotion, useScroll, useSpring, useTime, useTransform, useVelocity } from 'motion/react'
 import clsx from 'clsx'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { ArrowRight, Building2, Check, Crown, Sparkles } from 'lucide-react'
 import { useSiteConfig } from '@/lib/site'
 import { rewardImg, img, PHOTO } from '@/lib/assets'
@@ -9,7 +9,6 @@ import { tl } from '@/lib/format'
 import type { Plan } from '@/lib/types'
 import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
-import { Defne } from '@/components/game/Defne'
 import { higoImg } from '@/components/game/Higo'
 import { FrameSequence, HIGO_DAY, HigoMotion } from '@/components/game/HigoMotion'
 import { DefneMock, DuelMock, ExamMock, PathMock, Phone, SwipeMock } from './Mocks'
@@ -57,41 +56,45 @@ function useAutoplay(count: number, ms: number, inView: boolean, pauseOnHover = 
  * product itself (a phone with the real path screen, three small moments from
  * the app, Higo peeking over the edge). Pointer movement adds gentle depth.
  */
+/** "Her yaşta": learners of every age orbit Higo, each at their own pace. */
 const ORBIT = [
-  { t: 'Hello!', c: 'bg-sky text-white' },
-  { t: 'Merhaba', c: 'bg-butter text-[#1f2433]' },
-  { t: 'Let’s talk', c: 'bg-card text-ink ring-1 ring-line' },
-  { t: 'Well done!', c: 'bg-mint text-white' },
-  { t: 'Why?', c: 'bg-lilac text-white' },
+  { a: 'braids', t: '8 yaş', c: 'bg-mint text-white' },
+  { a: 'cap', t: '13 yaş', c: 'bg-sky text-white' },
+  { a: 'headphones', t: '17 yaş', c: 'bg-lilac text-white' },
+  { a: 'glasses', t: '21 yaş', c: 'bg-butter text-[#1f2433]' },
+  { a: 'ponytail', t: '34 yaş', c: 'bg-flame text-white' },
 ]
 
 /**
- * A word chip travelling round an ellipse: it grows and comes forward on the
- * near side, shrinks and slips behind Higo on the far side, which reads as 3D.
+ * A learner travelling round an ellipse: grows and comes forward on the near
+ * side, shrinks and slips behind Higo on the far side, which reads as 3D.
  */
 function OrbitChip({ word, phase }: { word: (typeof ORBIT)[number]; phase: number }) {
   const t = useTime()
-  const ang = useTransform(t, (ms) => (ms / 14000 + phase) * Math.PI * 2)
+  const ang = useTransform(t, (ms) => (ms / 16000 + phase) * Math.PI * 2)
   const x = useTransform(ang, (a) => `${Math.cos(a) * 47}cqw`)
   const y = useTransform(ang, (a) => `${Math.sin(a) * 15}cqw`)
-  const scale = useTransform(ang, (a) => 0.78 + (Math.sin(a) + 1) * 0.16)
+  const scale = useTransform(ang, (a) => 0.74 + (Math.sin(a) + 1) * 0.17)
   const zIndex = useTransform(ang, (a) => (Math.sin(a) > 0 ? 20 : 1))
-  const opacity = useTransform(ang, (a) => 0.55 + (Math.sin(a) + 1) * 0.225)
+  const opacity = useTransform(ang, (a) => 0.5 + (Math.sin(a) + 1) * 0.25)
   return (
-    <motion.span aria-hidden style={{ x, y, scale, zIndex, opacity, translateX: '-50%', translateY: '-50%' }} className={clsx('absolute left-1/2 top-[60%] whitespace-nowrap rounded-2xl px-3 py-1.5 font-display text-sm font-black shadow-[0_12px_24px_-12px_rgba(31,36,51,.35)] sm:text-base', word.c)}>
-      {word.t}
+    <motion.span aria-hidden style={{ x, y, scale, zIndex, opacity, translateX: '-50%', translateY: '-50%' }} className="absolute left-1/2 top-[60%] flex items-center gap-1.5 whitespace-nowrap rounded-full bg-card py-1 pl-1 pr-2.5 shadow-[0_12px_24px_-12px_rgba(31,36,51,.35)] ring-1 ring-line">
+      <img src={img(`avatars/${word.a}.webp`)} alt="" className="size-7 rounded-full object-cover sm:size-8" />
+      <span className={clsx('rounded-full px-1.5 py-0.5 font-display text-[11px] font-black sm:text-xs', word.c)}>{word.t}</span>
     </motion.span>
   )
 }
 
+const HEAD = ['İngilizceyi', 'her', 'yaşta,']
+
 export function HeroPro() {
   const reduced = useReducedMotion()
+  const nav = useNavigate()
   const mx = useMotionValue(0)
   const my = useMotionValue(0)
   const sx = useSpring(mx, { stiffness: 70, damping: 18 })
   const sy = useSpring(my, { stiffness: 70, damping: 18 })
   const near = (d: number) => ({ x: useTransform(sx, (v) => v * d), y: useTransform(sy, (v) => v * d) }) // eslint-disable-line react-hooks/rules-of-hooks
-  const a = near(0.6)
   const ph = near(0.3)
   const move = (e: React.PointerEvent) => {
     if (reduced) return
@@ -100,11 +103,10 @@ export function HeroPro() {
     my.set(((e.clientY - r.top) / r.height - 0.5) * 18)
   }
   const who = [
-    { k: 'İlkokul', a: 'braids' },
-    { k: 'Ortaokul · LGS', a: 'cap' },
-    { k: 'Lise · YDT', a: 'headphones' },
-    { k: 'Üniversite', a: 'glasses' },
-    { k: 'Okullar', a: 'afro' },
+    { k: 'İlkokul ve ortaokul', a: 'braids', to: '#kimler-icin' },
+    { k: 'Lise ve üniversite', a: 'headphones', to: '#kimler-icin' },
+    { k: 'Yetişkinler', a: 'glasses', to: '#kimler-icin' },
+    { k: 'Okullar', a: 'teacher', to: '/okullar' },
   ]
   return (
     <section onPointerMove={move} className="relative isolate overflow-hidden">
@@ -113,24 +115,34 @@ export function HeroPro() {
 
       <div className="mx-auto grid max-w-6xl items-center gap-6 px-5 pb-16 pt-8 sm:gap-12 lg:grid-cols-[1.05fr_1fr] lg:pb-24 lg:pt-16">
         <div>
-          <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05, duration: 0.7, ease }} className="font-display text-[clamp(2.6rem,5.8vw,4.6rem)] font-black leading-[1.06] tracking-[-0.02em]">
-            İngilizceyi her yaşta,{' '}
-            <span className="bg-gradient-to-r from-flame via-[#ff7a3d] to-[#ffb020] bg-clip-text pb-1 text-transparent">kendi hızında</span> öğren.
-          </motion.h1>
+          <h1 className="font-display text-[clamp(2.6rem,5.8vw,4.6rem)] font-black leading-[1.06] tracking-[-0.02em]">
+            {HEAD.map((w, k) => (
+              <motion.span key={w} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + k * 0.09, duration: 0.6, ease }} className="inline-block pr-[0.25em]">{w}</motion.span>
+            ))}
+            {/* "kendi hızında": each letter arrives at its own pace */}
+            <span className="inline-block whitespace-nowrap pb-1">
+              {'kendi hızında'.split('').map((ch, k) => (
+                <motion.span key={k} initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 + k * 0.035 + (k % 3) * 0.05, type: 'spring', stiffness: 380, damping: 20 }} className="inline-block bg-gradient-to-r from-flame via-[#ff7a3d] to-[#ffb020] bg-clip-text text-transparent [background-size:900%_100%]" style={{ backgroundPosition: `${(k / 12) * 100}% 0` }}>
+                  {ch === ' ' ? '\u00a0' : ch}
+                </motion.span>
+              ))}
+            </span>{' '}
+            <motion.span initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95, duration: 0.6, ease }} className="inline-block">öğren.</motion.span>
+          </h1>
           <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.6, ease }} className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-            İlkokuldan üniversiteye, LGS’den YDS’ye: Türkiye’deki öğrenciler için kurulmuş ders yolu, seninle konuşan yapay zekâ öğretmen ve günde birkaç dakikalık pratik.
+            İlkokuldan üniversiteye, okuldan işe: Türkiye’deki öğrenciler için kurulmuş ders yolu, seninle konuşan yapay zekâ öğretmen ve günde birkaç dakikalık pratik.
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.6, ease }} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <LinkButton to="/register" size="lg" className="gap-2">Ücretsiz başla <ArrowRight className="size-5" /></LinkButton>
             <LinkButton to="/placement" size="lg" variant="secondary">Seviyemi bul · 3 dk</LinkButton>
           </motion.div>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-9 hidden sm:block">
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-9">
             <p className="mb-2.5 text-xs font-black uppercase tracking-[0.16em] text-ink-soft">Kimin için?</p>
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-nowrap">
               {who.map((w, i) => (
-                <motion.a key={w.k} href="#kimler-icin" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 + i * 0.05 }} className="group flex items-center gap-2 rounded-full border-2 border-line bg-card py-1 pl-1 pr-3.5 text-sm font-extrabold transition hover:border-ink/25">
-                  <img src={img(`avatars/${w.a}.webp`)} alt="" className="size-7 rounded-full object-cover" />
-                  {w.k}
+                <motion.a key={w.k} href={w.to.startsWith('#') ? w.to : `#${w.to}`} onClick={(e) => { if (!w.to.startsWith('#')) { e.preventDefault(); nav(w.to) } }} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 + i * 0.05 }} className="group flex min-w-0 items-center gap-2 rounded-2xl border-2 border-line bg-card py-1 pl-1 pr-2.5 text-[13px] font-extrabold leading-tight transition hover:border-ink/25 sm:shrink-0 sm:rounded-full sm:pr-3 sm:text-sm">
+                  <img src={img(w.a === 'teacher' ? 'schools/teacher.webp' : `avatars/${w.a}.webp`)} alt="" className="size-7 shrink-0 rounded-full object-cover" />
+                  <span>{w.k}</span>
                 </motion.a>
               ))}
             </div>
@@ -144,16 +156,11 @@ export function HeroPro() {
           <svg aria-hidden viewBox="0 0 100 100" className="absolute inset-0 size-full overflow-visible">
             <ellipse cx="50" cy="60" rx="47" ry="15" fill="none" stroke="currentColor" strokeWidth="0.35" strokeDasharray="0.6 2.2" className="text-ink/25" />
           </svg>
-          {!reduced && ORBIT.map((w, k) => <OrbitChip key={w.t} word={w} phase={k / ORBIT.length} />)}
+          {!reduced && ORBIT.map((w, k) => <OrbitChip key={w.a} word={w} phase={k / ORBIT.length} />)}
           <motion.div style={ph} initial={{ opacity: 0, y: 40, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.9, ease }} className="absolute inset-[4%] z-10">
             <HigoMotion className="size-full object-contain drop-shadow-[0_24px_24px_rgba(200,60,20,.22)]" />
           </motion.div>
           <span aria-hidden className="absolute bottom-[9%] left-1/2 z-0 h-[5%] w-[34%] -translate-x-1/2 rounded-[50%] bg-ink/15 blur-md" />
-
-          <motion.div style={a} initial={{ opacity: 0, x: -24 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.9, type: 'spring', stiffness: 140, damping: 16 }} className="absolute -left-4 bottom-[6%] z-30 hidden w-[200px] rounded-2xl bg-card p-3 shadow-[0_20px_40px_-18px_rgba(31,36,51,.35)] ring-1 ring-line sm:block lg:-left-16">
-            <div className="mb-1.5 flex items-center gap-2"><Defne className="size-7" /><p className="text-sm font-black">Defne</p><span className="ml-auto rounded-full bg-mint/12 px-1.5 py-0.5 text-[10px] font-black uppercase tracking-wider text-mint-deep">Düzeltme</span></div>
-            <p className="text-sm"><s className="text-berry">I am agree</s> → <b className="text-mint-deep">I agree</b></p>
-          </motion.div>
         </div>
       </div>
     </section>
@@ -163,16 +170,16 @@ export function HeroPro() {
 /* ---------------------------------------------------------------- Türkiye */
 
 const LADDER = [
-  { stage: 'İlkokul', range: '2-4. sınıf', tag: 'İlk kelimeler', text: 'Şarkılar, oyunlar ve resimlerle; okulda görülen konularla birlikte.', color: '#22b573', icon: 'braids' },
-  { stage: 'Ortaokul', range: '5-8. sınıf', tag: 'LGS', text: 'Okul İngilizcesi ve 8. sınıfta LGS formatında diyalog, okuma ve görsel soruları.', color: '#2f7cf6', icon: 'cap' },
-  { stage: 'Lise', range: '9-12. sınıf', tag: 'YKS-YDT', text: 'Okul sınavlarına destek; dil bölümü için YDT’nin paragraf, diyalog ve çeviri soruları.', color: '#8f7cf8', icon: 'headphones' },
-  { stage: 'Üniversite', range: 'Hazırlık dahil', tag: 'Muafiyet · YDS · YÖKDİL', text: 'Hazırlığı atlatan akademik okuma ve yazma, ardından ÖSYM sınavları.', color: '#ff7a3d', icon: 'glasses' },
-  { stage: 'Okullar', range: 'Müdür ve öğretmen', tag: 'Okul paneli', text: 'Sınıflar, ödevler ve raporlarla okulun bütün İngilizce ihtiyacı tek yerde.', color: '#1f2433', icon: 'afro' },
+  { stage: 'İlkokul', range: '2-4. sınıf', tag: 'Oyunla ilk adımlar', text: 'Şarkılar, oyunlar ve resimlerle; okulda görülen konularla birlikte.', color: '#22b573', icon: 'braids' },
+  { stage: 'Ortaokul', range: '5-8. sınıf', tag: 'Okul dersine destek', text: 'Sınıfına göre kelime ve dilbilgisi, kısa hikâyeler ve konuşma pratiği.', color: '#2f7cf6', icon: 'cap' },
+  { stage: 'Lise', range: '9-12. sınıf', tag: 'Akıcı konuşma', text: 'Okul İngilizcesinin üstüne okuma, yazma ve Defne ile gerçek konuşmalar.', color: '#8f7cf8', icon: 'headphones' },
+  { stage: 'Üniversite ve sonrası', range: 'Hazırlık, iş, seyahat', tag: 'Hedefine göre', text: 'Akademik okuma, iş görüşmesi, seyahat; ne için öğrendiğini söyle, yol ona göre kurulsun.', color: '#ff7a3d', icon: 'glasses' },
+  { stage: 'Okullar', range: 'Müdür ve öğretmen', tag: 'Okul paneli', text: 'Sınıflar, ödevler ve raporlarla okulun bütün İngilizce ihtiyacı tek yerde.', color: '#1f2433', icon: 'teacher' },
 ] as const
 
 /**
- * The "made for Turkey" band: one ladder from primary school to university and
- * schools, each step naming the exam that matters at that age.
+ * The "made for Turkey" band: one ladder from primary school to adult life and
+ * schools, each step naming what learners at that stage actually want.
  */
 export function TurkeyLadder() {
   return (
@@ -183,8 +190,8 @@ export function TurkeyLadder() {
             <svg viewBox="0 0 30 20" className="h-3.5 w-5 rounded-[2px]" aria-hidden><rect width="30" height="20" fill="#e30a17" /><circle cx="11" cy="10" r="5" fill="#fff" /><circle cx="12.3" cy="10" r="4" fill="#e30a17" /><polygon fill="#fff" points="16.5,10 19.8,8.9 17.8,11.7 17.8,8.3 19.8,11.1" /></svg>
             Türkiye için tasarlandı
           </p>
-          <h2 className="mt-4 font-display text-[clamp(2rem,4.6vw,3.3rem)] font-black leading-[1.06] tracking-tight">İlkokuldan üniversiteye, <span className="text-flame">her sınava</span> bir yol.</h2>
-          <p className="mt-4 text-lg text-ink-soft">Sınıfını ve hedefini söyle; ders yolu, soru tipleri ve Defne’nin konuşması ona göre ayarlansın.</p>
+          <h2 className="mt-4 font-display text-[clamp(2rem,4.6vw,3.3rem)] font-black leading-[1.06] tracking-tight">İlkokuldan üniversiteye, <span className="text-flame">her hedefe</span> bir yol.</h2>
+          <p className="mt-4 text-lg text-ink-soft">Okulda mısın, işte mi, yolda mı? Bize ne için öğrendiğini söyle; ders yolu ve Defne’nin konuşması ona göre ayarlansın.</p>
         </div>
 
         <ol className="relative grid gap-4 md:grid-cols-5">
@@ -192,7 +199,7 @@ export function TurkeyLadder() {
           {LADDER.map((l, k) => (
             <motion.li key={l.stage} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ delay: k * 0.08, type: 'spring', stiffness: 220, damping: 22 }} className="relative flex gap-4 rounded-3xl border-2 border-line bg-card p-4 md:flex-col md:items-center md:p-5 md:text-center">
               <span className="relative z-10 grid size-[60px] shrink-0 place-items-center overflow-hidden rounded-2xl ring-4 ring-paper md:size-[76px]" style={{ background: `color-mix(in oklab, ${l.color} 16%, var(--card))` }}>
-                <img src={img(`avatars/${l.icon}.webp`)} alt="" className="size-full object-cover" />
+                <img src={img(l.icon === 'teacher' ? 'schools/teacher.webp' : `avatars/${l.icon}.webp`)} alt="" className="size-full object-cover" />
               </span>
               <span className="min-w-0">
                 <span className="block font-display text-xl font-black">{l.stage}</span>
@@ -216,15 +223,14 @@ export function TurkeyLadder() {
 /* -------------------------------------------------------------- audiences */
 
 const AUDIENCES = [
-  { key: 'kid', tab: 'İlkokul', age: '2-4. sınıf', photo: img('photos/aud-kid.webp'), title: 'Oyun gibi, güvenli ve sade', points: ['Kısa cümleler, bol teşvik, çocuğa uygun konular', 'Yalnızca yaşıtlarıyla düello, reklam yok', 'Veli onaylı hesap ve günlük süre hedefi'], cta: 'Çocuğum için başla', to: '/register', tone: 'text-mint-deep bg-mint/12' },
-  { key: 'teen', tab: 'Ortaokul ve lise', age: '5-12. sınıf · LGS · YDT', photo: img('photos/aud-teen.webp'), title: 'Okul İngilizcesi, LGS ve YDT', points: ['Sınıfına göre kelime ve dilbilgisi', '8. sınıfta LGS, lisede YKS-YDT formatında sorular', 'Arkadaşlarınla lig ve Gölge Düellosu'], cta: 'Hemen başla', to: '/register', tone: 'text-sky bg-sky/12' },
+  { key: 'kid', tab: 'İlkokul ve ortaokul', age: '2-8. sınıf', photo: img('photos/aud-kid.webp'), title: 'Oyun gibi, güvenli ve okulla uyumlu', points: ['Kısa cümleler, bol teşvik, yaşına uygun konular', 'Sınıfına göre kelime ve dilbilgisi', 'Yalnızca yaşıtlarıyla düello, veli onaylı hesap'], cta: 'Çocuğum için başla', to: '/register', tone: 'text-mint-deep bg-mint/12' },
+  { key: 'teen', tab: 'Lise ve üniversite', age: '9. sınıftan hazırlığa', photo: img('photos/aud-teen.webp'), title: 'Okul, hazırlık ve özgüven', points: ['Okuma, yazma ve konuşmayı birlikte geliştiren yol', 'İstersen sınav modu: hedefini sen seçersin', 'Arkadaşlarınla lig ve Gölge Düellosu'], cta: 'Hemen başla', to: '/register', tone: 'text-sky bg-sky/12' },
   { key: 'adult', tab: 'Yetişkinler', age: '18 yaş ve üzeri', photo: PHOTO.hero, title: 'İş, seyahat, özgüven', points: ['Toplantı, mülakat ve seyahat senaryoları', 'Defne ile sesli konuşma provası', 'Günde 5-20 dakikalık esnek plan'], cta: 'Ücretsiz dene', to: '/register', tone: 'text-flame bg-flame/10' },
-  { key: 'exam', tab: 'Üniversite ve sınavlar', age: 'Hazırlık · YDS · YÖKDİL · IELTS', photo: PHOTO.write, title: 'Hazırlıktan YDS’ye, Türkçe çözümle', points: ['Hazırlık muafiyet ve ÖSYM formatında sorular', 'Her sorudan sonra neden doğru, neden yanlış', 'Zayıf bölüm önerisi ve sınav geri sayımı'], cta: 'Sınav hedefimi seç', to: '/register', tone: 'text-lilac bg-lilac/15' },
   { key: 'org', tab: 'Okullar', age: 'Müdür · öğretmen · öğrenci', photo: PHOTO.classroom, title: 'Okulunuzun tüm İngilizcesi tek yerde', points: ['Müdür ve öğretmen panelleri, sınıf yönetimi', 'Ödev verme, takip ve dört beceri raporu', 'Öğrenciler kodla katılır, veliler ilerlemeyi görür'], cta: 'Okullar için', to: '/okullar', tone: 'text-sage-deep bg-sage/15' },
 ] as const
 
 /**
- * "Who is it for": five audiences, one after another. Every photo sits in the
+ * "Who is it for": four audiences, one after another. Every photo sits in the
  * same frame, the next one crossfades in with a slow zoom, and the tabs show a
  * progress line. It plays by itself while on screen and stops on hover.
  */
@@ -309,26 +315,29 @@ const BEATS: { from: number; tint: string; kicker: string; title: string; text: 
   { from: 0.58, tint: '#22b573', kicker: 'Tekrar', title: 'Oyunla, tam zamanında', text: 'Kelimle ve kelime avı: unutmak üzere olduğun kelime, oyunun içinde geri gelir.', Scene: () => <Tiles /> },
   { from: 0.76, tint: '#ffb020', kicker: 'Gün sonu', title: 'Her başarını kutlar', text: 'Günlük hedef tamam, seri bir gün uzadı, sandık seni bekliyor. Yarın görüşürüz!', Scene: () => <Win /> },
 ]
-const beatAt = (p: number) => BEATS.reduce((acc, b, k) => (p >= b.from ? k : acc), 0)
 
 /**
- * Meet Higo, scroll-driven: the page scrubs through a real animation of Higo
- * (wave, read, think, cheer) frame by frame, so he transforms smoothly as you
- * scroll. Kept light on purpose: one canvas, a short scroll distance, and colour
- * changes done with CSS transitions per beat rather than repainting the screen
- * on every scroll frame. With reduced motion it is a simple list.
+ * Meet Higo plays by itself: the beats advance on a timer while the section is
+ * on screen and Higo's animation runs through the matching part of his day. No
+ * scrolling needed. When you do scroll, he reacts: he leans and bobs with the
+ * scroll speed, then settles back. With reduced motion it is a simple list.
  */
 export function MeetHigoPro() {
   const ref = useRef<HTMLElement>(null)
   const reduced = useReducedMotion()
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end end'] })
-  // a light spring only to round off wheel steps; it settles within ~150 ms
-  const smooth = useSpring(scrollYProgress, { stiffness: 420, damping: 48, mass: 0.4, restDelta: 0.0005 })
-  const [i, setI] = useState(0)
-  useMotionValueEvent(scrollYProgress, 'change', (v) => {
-    const k = beatAt(v)
-    if (k !== i) setI(k)
-  })
+  const inView = useInView(ref, { amount: 0.4 })
+  const { i, pick, progress } = useAutoplay(BEATS.length, 5200, inView)
+  const frame = useMotionValue(0)
+  useEffect(() => {
+    const from = BEATS[i].from
+    const to = i + 1 < BEATS.length ? BEATS[i + 1].from : 1
+    frame.set(from + (to - from) * Math.min(0.999, progress))
+  }, [i, progress, frame])
+  // scroll reaction: lean into the direction of travel, then spring back upright
+  const { scrollY } = useScroll()
+  const vel = useVelocity(scrollY)
+  const lean = useSpring(useTransform(vel, [-2500, 0, 2500], [-9, 0, 9]), { stiffness: 180, damping: 14 })
+  const bob = useSpring(useTransform(vel, [-2500, 0, 2500], [16, 0, -16]), { stiffness: 180, damping: 12 })
 
   if (reduced)
     return (
@@ -339,59 +348,48 @@ export function MeetHigoPro() {
     )
 
   const cur = BEATS[i]
-  const go = (k: number) => {
-    const el = ref.current
-    if (!el) return
-    const top = el.getBoundingClientRect().top + window.scrollY
-    window.scrollTo({ top: top + (BEATS[k].from + 0.02) * (el.offsetHeight - window.innerHeight), behavior: 'smooth' })
-  }
-
   return (
-    <section ref={ref} className="relative" style={{ height: '320vh' }} aria-label="Higo ile tanış">
-      <div className="sticky top-0 flex h-dvh items-center overflow-hidden">
-        {/* one soft wash per beat, cross-faded by CSS */}
-        {BEATS.map((b, k) => <div key={b.title} aria-hidden className="absolute inset-0 transition-opacity duration-500" style={{ opacity: k === i ? 0.12 : 0, background: `radial-gradient(56rem 38rem at 30% 55%, ${b.tint}, transparent 70%)` }} />)}
+    <section ref={ref} className="relative overflow-hidden py-16 md:py-24" aria-label="Higo ile tanış">
+      {/* one soft wash per beat, cross-faded by CSS */}
+      {BEATS.map((b, k) => <div key={b.title} aria-hidden className="absolute inset-0 transition-opacity duration-700" style={{ opacity: k === i ? 0.12 : 0, background: `radial-gradient(56rem 38rem at 30% 55%, ${b.tint}, transparent 70%)` }} />)}
 
-        <div className="relative mx-auto grid w-full max-w-6xl items-center gap-4 px-5 pt-14 lg:grid-cols-[1.05fr_1fr] lg:gap-14 lg:pt-0">
-          {/* Higo on his stage */}
-          <div className="relative mx-auto w-[min(76vw,42vh)] lg:w-[min(100%,60vh)]">
-            <span aria-hidden className="absolute inset-[12%] rounded-full transition-colors duration-500" style={{ backgroundColor: `color-mix(in oklab, ${cur.tint} 18%, transparent)` }} />
-            <span aria-hidden className="absolute inset-[18%] rounded-full border-[3px] border-dashed transition-colors duration-500" style={{ borderColor: `color-mix(in oklab, ${cur.tint} 45%, transparent)` }} />
-            <FrameSequence seq={HIGO_DAY} progress={smooth} label="Higo animasyonu" className="relative w-full [filter:drop-shadow(0_22px_18px_rgba(160,50,20,.16))]" />
-            <span aria-hidden className="absolute bottom-[3%] left-1/2 h-[5%] w-[32%] -translate-x-1/2 rounded-[50%] bg-ink/12 blur-md" />
-            {/* the real bit of the app for this beat, popping in beside him */}
-            <div className="absolute -bottom-8 right-[-8%] w-[58%] sm:w-[50%] lg:-bottom-2 lg:right-[-6%] lg:w-[50%]">
-              <AnimatePresence mode="popLayout" initial={false}>
-                <motion.div key={i} initial={{ opacity: 0, scale: 0.85, y: 18 }} animate={{ opacity: 1, scale: 1, y: 0, rotate: -2 }} exit={{ opacity: 0, scale: 0.9, y: -10 }} transition={{ type: 'spring', stiffness: 420, damping: 30 }} className="origin-bottom-left [&>div]:max-w-none [&>div]:p-3.5 sm:[&>div]:p-4">
-                  <cur.Scene />
-                </motion.div>
-              </AnimatePresence>
-            </div>
+      <div className="relative mx-auto grid w-full max-w-6xl items-center gap-4 px-5 lg:grid-cols-[1.05fr_1fr] lg:gap-14">
+        {/* Higo on his stage */}
+        <motion.div style={{ rotate: lean, y: bob }} className="relative mx-auto w-[min(76vw,380px)] lg:w-[min(100%,460px)]">
+          <span aria-hidden className="absolute inset-[12%] rounded-full transition-colors duration-500" style={{ backgroundColor: `color-mix(in oklab, ${cur.tint} 18%, transparent)` }} />
+          <span aria-hidden className="absolute inset-[18%] animate-[spin_40s_linear_infinite] rounded-full border-[3px] border-dashed transition-colors duration-500" style={{ borderColor: `color-mix(in oklab, ${cur.tint} 45%, transparent)` }} />
+          <FrameSequence seq={HIGO_DAY} progress={frame} label="Higo animasyonu" className="relative w-full [filter:drop-shadow(0_22px_18px_rgba(160,50,20,.16))]" />
+          <span aria-hidden className="absolute bottom-[3%] left-1/2 h-[5%] w-[32%] -translate-x-1/2 rounded-[50%] bg-ink/12 blur-md" />
+          <div className="absolute -bottom-8 right-[-8%] w-[58%] sm:w-[50%] lg:-bottom-2 lg:right-[-6%] lg:w-[50%]">
+            <AnimatePresence mode="popLayout" initial={false}>
+              <motion.div key={i} initial={{ opacity: 0, scale: 0.85, y: 18 }} animate={{ opacity: 1, scale: 1, y: 0, rotate: -2 }} exit={{ opacity: 0, scale: 0.9, y: -10 }} transition={{ type: 'spring', stiffness: 420, damping: 30 }} className="origin-bottom-left [&>div]:max-w-none [&>div]:p-3.5 sm:[&>div]:p-4">
+                <cur.Scene />
+              </motion.div>
+            </AnimatePresence>
           </div>
+        </motion.div>
 
-          {/* the words */}
-          <div className="relative mt-8 lg:mt-0">
-            <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Tanış: Higo</p>
-            <div className="relative mt-3 min-h-[190px] sm:min-h-[210px]">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div key={i} initial="hide" animate="show" exit="out" variants={{ show: { transition: { staggerChildren: 0.04 } } }}>
-                  <motion.p variants={WORD_V} className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em]" style={{ color: cur.tint }}>
-                    <span className="font-mono">0{i + 1}</span><span className="h-px w-6 bg-current" />{cur.kicker}
-                  </motion.p>
-                  <motion.h2 variants={WORD_V} className="mt-2 font-display text-[clamp(1.8rem,4vw,3rem)] font-black leading-[1.05] tracking-tight">{cur.title}</motion.h2>
-                  <motion.p variants={WORD_V} className="mt-3 max-w-md text-[17px] leading-relaxed text-ink-soft">{cur.text}</motion.p>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-            {/* chapter rail: shows where you are, and jumps */}
-            <div className="mt-6 flex items-center gap-2">
-              {BEATS.map((b, k) => (
-                <button key={b.title} onClick={() => go(k)} aria-label={b.title} className="relative h-2.5 overflow-hidden rounded-full bg-line transition-[width] duration-300" style={{ width: k === i ? 48 : 14 }}>
-                  <span className="absolute inset-0 rounded-full transition-opacity" style={{ background: b.tint, opacity: k <= i ? 1 : 0 }} />
-                </button>
-              ))}
-              <span className="ml-2 text-xs font-bold text-ink-soft">{i < BEATS.length - 1 ? 'Kaydırmaya devam et' : 'Hazırsın!'}</span>
-            </div>
+        {/* the words */}
+        <div className="relative mt-12 lg:mt-0">
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Tanış: Higo</p>
+          <div className="relative mt-3 min-h-[200px] sm:min-h-[210px]">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={i} initial="hide" animate="show" exit="out" variants={{ show: { transition: { staggerChildren: 0.04 } } }}>
+                <motion.p variants={WORD_V} className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em]" style={{ color: cur.tint }}>
+                  <span className="font-mono">0{i + 1}</span><span className="h-px w-6 bg-current" />{cur.kicker}
+                </motion.p>
+                <motion.h2 variants={WORD_V} className="mt-2 font-display text-[clamp(1.8rem,4vw,3rem)] font-black leading-[1.05] tracking-tight">{cur.title}</motion.h2>
+                <motion.p variants={WORD_V} className="mt-3 max-w-md text-[17px] leading-relaxed text-ink-soft">{cur.text}</motion.p>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          {/* chapter rail: fills as the beat plays, tap to jump */}
+          <div className="mt-6 flex items-center gap-2">
+            {BEATS.map((b, k) => (
+              <button key={b.title} onClick={() => pick(k)} aria-label={b.title} className="relative h-2.5 overflow-hidden rounded-full bg-line transition-[width] duration-300" style={{ width: k === i ? 56 : 14 }}>
+                <span className="absolute inset-y-0 left-0 rounded-full" style={{ background: b.tint, width: k < i ? '100%' : k === i ? `${progress * 100}%` : '0%' }} />
+              </button>
+            ))}
           </div>
         </div>
       </div>

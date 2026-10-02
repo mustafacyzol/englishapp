@@ -152,21 +152,17 @@ export default function Duel() {
           </div>
         </div>
 
-        {/* who is in the arena right now */}
+        {/* the arena is busy: anonymous silhouettes drift by, no names, no head count */}
         {!!lobby.data?.players.length && (
-          <div className="relative border-t border-white/10 px-6 py-4 sm:px-9">
-            <p className="mb-2.5 text-[11px] font-black uppercase tracking-[0.18em] text-white/45">Şu an arenada</p>
-            <div className="no-scrollbar -mx-2 flex gap-4 overflow-x-auto px-2 py-1">
-              {lobby.data.players.map((p) => (
-                <Link key={p.username} to={`/u/${p.username}`} className="flex w-16 shrink-0 flex-col items-center gap-1 text-center">
-                  <span className="relative">
-                    <UserAvatar name={p.name} avatar={p.avatar} avatarUrl={p.avatar_url} frame={p.frame} className="size-12" />
-                    <span className={clsx('absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-[#0a0d1a]', p.status === 'searching' ? 'animate-pulse bg-butter' : p.status === 'idle' ? 'bg-mint' : 'bg-berry')} />
-                  </span>
-                  <span className="w-full truncate text-[11px] font-bold text-white/70">{p.name.split(' ')[0]}</span>
-                </Link>
+          <div className="relative flex items-center gap-4 overflow-hidden border-t border-white/10 px-6 py-4 sm:px-9">
+            <div className="flex -space-x-3" aria-hidden>
+              {lobby.data.players.slice(0, 5).map((p, i) => (
+                <motion.span key={i} className="relative size-10 overflow-hidden rounded-full border-2 border-[#0a0d1a] bg-white/10" animate={{ y: [0, -3, 0] }} transition={{ duration: 2.4, delay: i * 0.3, repeat: Infinity, ease: 'easeInOut' }}>
+                  <UserAvatar name={p.name} avatar={p.avatar} avatarUrl={p.avatar_url} className="size-full scale-110 opacity-60 blur-[2px] grayscale-[.3]" />
+                </motion.span>
               ))}
             </div>
+            <p className="min-w-0 text-sm font-bold text-white/70">Ligindeki oyuncular şu an arenada. <span className="text-butter">Rakip bul</span> deyince biriyle eşleşirsin.</p>
           </div>
         )}
       </section>
@@ -250,8 +246,12 @@ export default function Duel() {
           <p className="mb-3 text-sm text-ink-soft">{league.name} Ligi grubundaki herkes, bu haftaki düello galibiyetine göre.</p>
           <div className="overflow-hidden rounded-2xl border-2 border-line bg-card">
             {data.leaderboard.length === 0 && <p className="p-6 text-center text-ink-soft">Grubun doluyor. İlk düelloyu sen başlat!</p>}
-            {data.leaderboard.map((r) => (
-              <Link to={`/u/${r.username}`} key={r.username} className={clsx('flex items-center gap-3 border-b-2 border-line px-4 py-2.5 last:border-b-0 hover:bg-paper-2', r.is_me && 'bg-butter/12')}>
+            {(() => {
+              const top = data.leaderboard.slice(0, 6)
+              const me = data.leaderboard.find((r) => r.is_me)
+              return [...top, ...(me && !top.includes(me) ? [{ ...me, gap: true }] : [])]
+            })().map((r) => (
+              <Link to={`/u/${r.username}`} key={r.username} className={clsx('flex items-center gap-3 border-b-2 border-line px-4 py-2.5 last:border-b-0 hover:bg-paper-2', r.is_me && 'bg-butter/12', 'gap' in r && 'relative mt-3 border-t-2 before:absolute before:-top-3 before:left-1/2 before:-translate-x-1/2 before:text-xs before:font-black before:text-ink-soft before:content-["•••"]')}>
                 <span className={clsx('w-7 text-center font-display font-black tabular-nums', r.position <= 3 ? 'text-butter-deep' : 'text-ink-soft')}>{r.position <= 3 ? <Crown className="mx-auto size-5" /> : r.position}</span>
                 <UserAvatar name={r.name} avatar={r.avatar} avatarUrl={r.avatar_url} frame={r.frame} className="size-10" />
                 <span className="min-w-0 flex-1">
@@ -676,13 +676,14 @@ function Dots({ v }: { v: boolean[] }) {
 
 /* ============================================================ Live lobby */
 
+/** The arena feels alive without exposing who or how many: a calm pulse and a mood word. */
 function LiveDot({ lobby }: { lobby?: Lobby }) {
   if (!lobby) return <p className="h-5" />
+  const mood = lobby.searching > 0 ? 'Rakipler sıra bekliyor' : lobby.playing > 0 ? 'Düellolar sürüyor' : 'Arena açık'
   return (
-    <p className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-black uppercase tracking-[0.14em] text-white/60">
-      <span className="flex items-center gap-1.5 text-mint"><span className="relative flex size-2.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-mint opacity-70" /><span className="relative inline-flex size-2.5 rounded-full bg-mint" /></span>{lobby.online} çevrimiçi</span>
-      {lobby.searching > 0 && <span className="text-butter">{lobby.searching} rakip arıyor</span>}
-      {lobby.playing > 0 && <span>{lobby.playing} maçta</span>}
+    <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-mint">
+      <span className="relative flex size-2.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-mint opacity-70" /><span className="relative inline-flex size-2.5 rounded-full bg-mint" /></span>
+      Canlı · <span className="text-white/70">{mood}</span>
     </p>
   )
 }

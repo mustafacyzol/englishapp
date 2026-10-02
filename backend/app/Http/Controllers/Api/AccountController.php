@@ -28,8 +28,8 @@ class AccountController extends Controller
             'username' => ['sometimes', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9_.]+$/', Rule::unique('users', 'username')->ignore($user->id)],
             'avatar' => ['sometimes', 'required', Rule::in(array_keys(Avatar::catalog()))],
             'bio' => ['sometimes', 'nullable', 'string', 'max:120'],
-            'frame' => ['sometimes', 'nullable', Rule::in(config('dilgo.cosmetics.frames'))],
-            'banner' => ['sometimes', 'nullable', Rule::in(config('dilgo.cosmetics.banners'))],
+            'frame' => ['sometimes', 'nullable', Rule::in(\App\Support\Cosmetics::frameKeys())],
+            'banner' => ['sometimes', 'nullable', Rule::in(\App\Support\Cosmetics::bannerKeys())],
             'cefr_level' => ['sometimes', 'in:A1,A2,B1,B2,C1,C2'],
             'learning_goal' => ['sometimes', 'nullable', 'in:travel,career,exam,school,fun'],
             'daily_goal_xp' => ['sometimes', 'integer', Rule::in(config('dilgo.gamification.daily_goal_options'))],
@@ -89,6 +89,16 @@ class AccountController extends Controller
             }
             $user->forceFill(['age_group_changed_at' => now()]);
         }
+        // The exam goal comes from onboarding. Switching to another exam is allowed, but
+        // only once per 30 days, so progress and the AI plan are not reset on a whim.
+        if (! empty($data['exam_target']) && $user->exam_target && $data['exam_target'] !== $user->exam_target) {
+            $changed = isset($user->preferences['exam_target_changed_at']) ? \Illuminate\Support\Carbon::parse($user->preferences['exam_target_changed_at']) : null;
+            if ($changed && $changed->gt(now()->subDays(30))) {
+                abort(422, 'Sınav hedefini 30 günde bir değiştirebilirsin. Sonraki değişiklik: '.$changed->addDays(30)->format('d.m.Y'));
+            }
+            $examStamp = now()->toIso8601String();
+        }
+
         // Exam practice is for teens and adults only.
         if (($data['age_group'] ?? $user->age_group) === 'kid') {
             if (! empty($data['exam_target'])) {
@@ -102,6 +112,10 @@ class AccountController extends Controller
             // merge and whitelist; never let the client overwrite server-owned keys (frame)
             $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'sound', 'tts_voice', 'tts_rate', 'theme', 'tour_done', 'exam_mode']));
             $data['preferences'] = array_merge($user->preferences ?? [], $allowed);
+        }
+        if (isset($examStamp)) {
+            // server-owned: when the exam goal last changed
+            $data['preferences'] = array_merge($data['preferences'] ?? $user->preferences ?? [], ['exam_target_changed_at' => $examStamp]);
         }
         if (isset($data['name'])) {
             $data['name'] = strip_tags($data['name']);

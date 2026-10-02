@@ -54,6 +54,8 @@ const EN: Record<string, string> = {
   'Ücretsiz başla': 'Start free',
   'Kayıt ol': 'Sign up',
   'Menü': 'Menu',
+  'Ben': 'Me',
+  'Kelimeler': 'Words',
   'Yöntem': 'Method',
   'Kimler için': 'Who it’s for',
   'Dene': 'Try it',

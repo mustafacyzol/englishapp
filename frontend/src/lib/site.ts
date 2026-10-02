@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { get } from './api'
 import type { ExamKey } from './types'
+import { registerCosmetics, type CustomBanner, type CustomFrame } from './cosmetics'
 
 export interface SiteConfig {
   brand: string
@@ -22,11 +23,12 @@ export interface SiteConfig {
   }
   social_login?: { google: string | null; apple: string | null }
   exams?: { key: ExamKey; name: string; full: string; about: string }[]
+  cosmetics?: { frames?: Record<string, CustomFrame>; banners?: Record<string, CustomBanner> }
 }
 
 /** Public site configuration (brand, contact, feature switches) managed from the admin panel. */
 export function useSiteConfig() {
-  return useQuery({ queryKey: ['config'], queryFn: () => get<SiteConfig>('/config'), staleTime: 600_000 })
+  return useQuery({ queryKey: ['config'], queryFn: () => get<SiteConfig>('/config').then((c) => { registerCosmetics(c.cosmetics); return c }), staleTime: 600_000 })
 }
 
 /** A feature is on unless the admin switched it off. */

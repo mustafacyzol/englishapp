@@ -333,6 +333,11 @@ class ResourceController extends Controller
                     'description' => ['nullable', 'string', 'max:255'],
                     'type' => ['required', 'in:streak_freeze,xp_boost,heart_refill,premium_days,gems,live_lesson,discount_coupon,avatar_frame,profile_banner,bundle,chest,partner_coupon'],
                     'value' => ['nullable', 'array'],
+                    // custom frames/covers: an https image, a key, and for frames the inner hole (share of width)
+                    'value.image' => ['nullable', 'url:https', 'max:500'],
+                    'value.frame' => ['nullable', 'alpha_dash', 'max:40'],
+                    'value.banner' => ['nullable', 'alpha_dash', 'max:40'],
+                    'value.hole' => ['nullable', 'numeric', 'between:0.1,0.48'],
                     'price_gems' => ['nullable', 'integer', 'min:0'],
                     'icon' => ['required', 'string', 'max:40'],
                     'rarity' => ['required', 'in:common,rare,epic,legendary'],
@@ -413,6 +418,7 @@ class ResourceController extends Controller
         $data = isset($cfg['before']) ? $cfg['before']($data) : $data;
         $record = $cfg['model']::query()->create($data);
         Audit::log("admin.{$resource}.created", $request->user(), $record);
+        \App\Support\Cosmetics::forget();
 
         return response()->json(['data' => $this->reveal($cfg, $record)], 201);
     }
@@ -427,6 +433,7 @@ class ResourceController extends Controller
         $data = isset($cfg['before']) ? $cfg['before']($data) : $data;
         $record->update($data);
         Audit::log("admin.{$resource}.updated", $request->user(), $record, ['fields' => array_keys($data)]);
+        \App\Support\Cosmetics::forget();
 
         return response()->json(['data' => $this->reveal($cfg, $record->fresh())]);
     }
@@ -437,6 +444,7 @@ class ResourceController extends Controller
         $record = $cfg['model']::query()->findOrFail($id);
         $record->delete();
         Audit::log("admin.{$resource}.deleted", $request->user(), null, ['id' => $id]);
+        \App\Support\Cosmetics::forget();
 
         return response()->json(['ok' => true]);
     }

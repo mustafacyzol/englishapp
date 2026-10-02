@@ -22,11 +22,11 @@ type LookFilter = 'all' | 'avatar_frame' | 'profile_banner'
 const LOOK_FILTERS: { value: LookFilter; label: string }[] = [
   { value: 'all', label: 'Tümü' },
   { value: 'avatar_frame', label: 'Çerçeveler' },
-  { value: 'profile_banner', label: 'Kapaklar' },
+  { value: 'profile_banner', label: 'Arka plan kapakları' },
 ]
 type TabKey = 'look' | 'boost' | 'pack' | 'chest' | 'premium'
 const GROUPS: { key: TabKey; title: string; text: string; types: string[] }[] = [
-  { key: 'look', title: 'Görünüm', text: 'Çerçeve ve kapaklar profilinde, ligde ve arenada herkese görünür.', types: ['avatar_frame', 'profile_banner'] },
+  { key: 'look', title: 'Görünüm', text: 'Çerçeveler fotoğrafını, arka plan kapakları profilinin üst kısmını süsler. Herkes görür.', types: ['avatar_frame', 'profile_banner'] },
   { key: 'boost', title: 'Güçlendiriciler', text: 'XP takviyesi, can ve seri koruması.', types: ['xp_boost', 'streak_freeze', 'heart_refill'] },
   { key: 'pack', title: 'Paketler', text: 'Birlikte al, daha az öde. Paket açılınca kartlar kasana düşer.', types: ['bundle'] },
   { key: 'chest', title: 'Sandıklar', text: 'Sandığı aç, içinden elmas, güçlendirici ya da iş ortağı hediyesi çıksın. Neler çıkabileceğini açtıktan sonra görürsün.', types: ['chest'] },
@@ -121,13 +121,13 @@ export default function Shop() {
                 const worn = !!cos && (user.frame === cos || user.banner === cos)
                 return (
                   <article key={it.id} className={clsx('ink-card group flex flex-col overflow-hidden', it.type === 'chest' && 'sm:col-span-2 lg:col-span-1')}>
-                    <div className={clsx('relative grid h-36 place-items-center overflow-hidden bg-gradient-to-b to-transparent', r.glow)}>
+                    <div className={clsx('relative grid place-items-center overflow-hidden bg-gradient-to-b to-transparent', it.type === 'profile_banner' ? 'aspect-[21/9]' : 'h-36', r.glow)}>
                       {it.type === 'profile_banner' && <ProfileBanner banner={val.banner} className="absolute inset-0" />}
-                      <span className={clsx('absolute left-4 top-3 z-10 rounded-full px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-widest', r.text, it.type === 'profile_banner' && 'bg-white/85')}>{r.label}</span>
+                      <span className={clsx('absolute left-3 top-3 z-10 rounded-full px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-widest', r.text, it.type === 'profile_banner' && 'bg-white/90 shadow-sm')}>{r.label}</span>
                       {it.type === 'avatar_frame' ? (
                         <UserAvatar name={user.name} avatar={user.avatar} frame={val.frame} className="size-28 transition duration-300 group-hover:scale-105" rounded="rounded-full" />
                       ) : it.type === 'profile_banner' ? (
-                        <UserAvatar name={user.name} avatar={user.avatar} frame={user.frame} className="relative mt-8 size-16 border-4 border-card" rounded="rounded-[22px]" />
+                        <span className="absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/35 to-transparent" />
                       ) : (
                         <Img src={rewardImg(it.icon)} alt="" loading="lazy" className="size-28 object-contain drop-shadow-lg transition duration-300 group-hover:-translate-y-1 group-hover:scale-105" />
                       )}
@@ -136,7 +136,7 @@ export default function Shop() {
                       <h3 className="font-display text-xl font-extrabold">{it.name}</h3>
                       <p className="flex-1 text-sm text-ink-soft">{it.description}</p>
                       <span className="rounded-full bg-paper-2 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-ink-soft">
-                        {it.type === 'avatar_frame' ? 'Profil çerçevesi · alınca takılır' : it.type === 'profile_banner' ? 'Profil kapağı · alınca takılır' : it.type === 'chest' ? 'Sandık · hemen açılır' : it.type === 'bundle' ? 'Paket · kasana düşer' : 'Kasana düşer, istediğinde kullan'}
+                        {it.type === 'avatar_frame' ? 'Profil çerçevesi · alınca takılır' : it.type === 'profile_banner' ? 'Profil arka planı · alınca takılır' : it.type === 'chest' ? 'Sandık · hemen açılır' : it.type === 'bundle' ? 'Paket · kasana düşer' : 'Kasana düşer, istediğinde kullan'}
                       </span>
                       {it.type === 'bundle' && !!val.items?.length && (
                         <ul className="flex flex-wrap justify-center gap-1.5">

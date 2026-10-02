@@ -3,7 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient, type UseMutationResult } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { Bell, GraduationCap, LogOut, Monitor, Moon, Palette, Shield, Smartphone, Sun, Target, Trash2, User } from 'lucide-react'
+import { Bell, Crown, GraduationCap, LogOut, Monitor, Moon, Palette, Shield, Smartphone, Sun, Target, Trash2, User } from 'lucide-react'
 import { setTheme, useTheme } from '@/lib/theme'
 import { img } from '@/lib/assets'
 import { ApiError, del, get, patch, post } from '@/lib/api'
@@ -11,6 +11,7 @@ import { useAuth } from '@/lib/auth'
 import { dateTR, GOALS, tl } from '@/lib/format'
 import { speak } from '@/lib/speech'
 import type { Me } from '@/lib/types'
+import { SubscriptionCard } from '@/components/game/Subscription'
 import { EXAMS, INTERESTS, PACES, STAGES, STUDY_TIMES, examOn } from '@/lib/onboarding'
 import { SKILL, SKILLS } from '@/lib/skills'
 import { Button } from '@/components/ui/Button'
@@ -36,7 +37,7 @@ function Label({ children, note }: { children: ReactNode; note?: string }) {
 
 const pill = (on: boolean) => clsx('rounded-xl border-2 py-2 text-sm font-bold transition', on ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')
 
-type Tab = 'hesap' | 'ogrenme' | 'sinav' | 'gorunum' | 'bildirim' | 'guvenlik'
+type Tab = 'hesap' | 'ogrenme' | 'sinav' | 'gorunum' | 'bildirim' | 'guvenlik' | 'abonelik'
 
 const AGE = [
   { key: 'kid', label: 'Çocuk', text: '7-12 yaş', art: 'braids' },
@@ -66,7 +67,8 @@ export default function Settings() {
     ...(kid ? [] : [{ key: 'sinav' as Tab, label: 'Sınav modu', text: examOn(user) ? 'Açık' : 'İsteğe bağlı', icon: Target }]),
     { key: 'gorunum', label: 'Görünüm ve ses', text: 'Tema, dil, okuma hızı', icon: Palette },
     { key: 'bildirim', label: 'Bildirimler', text: 'Hatırlatma, e-posta', icon: Bell },
-    { key: 'guvenlik', label: 'Güvenlik', text: 'Şifre, oturumlar, siparişler', icon: Shield },
+    { key: 'abonelik', label: 'Abonelik', text: user.premium.active ? 'Premium' : 'Ücretsiz', icon: Crown },
+    { key: 'guvenlik', label: 'Güvenlik', text: 'Şifre, oturumlar', icon: Shield },
   ]
   const want = params.get('s') as Tab | null
   const tab: Tab = tabs.some((t) => t.key === want) ? want! : 'hesap'
@@ -99,7 +101,8 @@ export default function Settings() {
             {tab === 'sinav' && <ExamTab save={save} />}
             {tab === 'gorunum' && <LookTab save={save} />}
             {tab === 'bildirim' && <NotifyTab save={save} />}
-            {tab === 'guvenlik' && <><Security /><Orders /></>}
+            {tab === 'abonelik' && <><SubscriptionCard /><Orders /></>}
+            {tab === 'guvenlik' && <Security />}
           </motion.div>
         </AnimatePresence>
       </div>
@@ -225,31 +228,43 @@ function LearningTab({ save }: { save: Save }) {
 
 function ExamTab({ save }: { save: Save }) {
   const { user } = useAuth()
+  const [changing, setChanging] = useState(false)
   if (!user) return null
   const on = examOn(user)
+  const current = EXAMS.find((e) => e.key === user.exam_target)
   return (
-    <Section title="Sınav modu" hint="Herkesin hedefi sınav değil. Açarsan menüye Sınav modu eklenir, Defne ve günlük plan seçtiğin sınava göre çalışır.">
+    <Section title="Sınav modu" hint="Sınav hedefin kayıt sırasında seçtiğin hedeften gelir; Defne, günlük plan ve denemeler buna göre çalışır.">
       <div className="rounded-2xl bg-paper-2 px-4">
-        <Toggle label="Sınav modunu göster" description={on ? 'Menüde görünüyor.' : 'Kapalı. Menüde görünmez.'} checked={on} onChange={(v) => save.mutate({ preferences: { exam_mode: v } })} />
+        <Toggle label="Sınav modunu menüde göster" description={on ? 'Menüde görünüyor.' : 'Kapalı. Menüde görünmez, hedefin saklı kalır.'} checked={on} onChange={(v) => save.mutate({ preferences: { exam_mode: v } })} />
       </div>
-      {on && (
-        <div className="mt-5">
-          <Label>Hangi sınava hazırlanıyorsun?</Label>
-          <div className="mb-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-            {EXAMS.map((e) => {
-              const sel = user.exam_target === e.key
-              return (
-                <button key={e.key} onClick={() => save.mutate({ exam_target: sel ? null : e.key })} aria-pressed={sel} className={clsx('flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition', sel ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>
-                  <span className="grid h-9 min-w-12 place-items-center rounded-lg px-1.5 text-xs font-black text-white" style={{ background: e.color }}>{e.name}</span>
-                  <span className="text-xs font-bold leading-tight">{e.label}</span>
-                </button>
-              )
-            })}
+      <div className="mt-5">
+        <Label>Sınav hedefin</Label>
+        {current && !changing ? (
+          <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-line bg-card p-3">
+            <span className="grid h-11 min-w-14 place-items-center rounded-xl px-2 text-sm font-black text-white" style={{ background: current.color }}>{current.name}</span>
+            <span className="min-w-0 flex-1 text-sm font-bold leading-tight">{current.label}<span className="block text-xs font-semibold text-ink-soft">Kayıt sırasında seçildi</span></span>
+            <Button variant="secondary" size="sm" onClick={() => setChanging(true)}>Değiştir</Button>
           </div>
-          {user.exam_target && (
-            <Input label="Sınav tarihi" type="date" defaultValue={user.exam_date ?? ''} min={new Date(Date.now() + 864e5).toISOString().slice(0, 10)} onBlur={(e) => e.target.value !== (user.exam_date ?? '') && save.mutate({ exam_date: e.target.value || null })} hint="Geri sayım ve deneme planı için." />
-          )}
-        </div>
+        ) : (
+          <>
+            {current && <p className="mb-3 rounded-2xl bg-butter/15 p-3 text-sm font-semibold">Hedefini 30 günde bir değiştirebilirsin. Deneme geçmişin silinmez, plan yeni sınava göre yeniden kurulur.</p>}
+            <div className="mb-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+              {EXAMS.map((e) => {
+                const sel = user.exam_target === e.key
+                return (
+                  <button key={e.key} onClick={() => { if (!sel) save.mutate({ exam_target: e.key }, { onSuccess: () => setChanging(false) }) }} aria-pressed={sel} className={clsx('flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition', sel ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>
+                    <span className="grid h-9 min-w-12 place-items-center rounded-lg px-1.5 text-xs font-black text-white" style={{ background: e.color }}>{e.name}</span>
+                    <span className="text-xs font-bold leading-tight">{e.label}</span>
+                  </button>
+                )
+              })}
+            </div>
+            {current && <button onClick={() => setChanging(false)} className="text-sm font-bold text-ink-soft hover:text-ink">Vazgeç</button>}
+          </>
+        )}
+      </div>
+      {user.exam_target && (
+        <Input className="mt-4" label="Sınav tarihi" type="date" defaultValue={user.exam_date ?? ''} min={new Date(Date.now() + 864e5).toISOString().slice(0, 10)} onBlur={(e) => e.target.value !== (user.exam_date ?? '') && save.mutate({ exam_date: e.target.value || null })} hint="Geri sayım ve deneme planı için." />
       )}
     </Section>
   )

@@ -149,7 +149,7 @@ return [
     */
     'cosmetics' => [
         'frames' => ['gold', 'flame', 'emerald', 'sky', 'neon', 'sakura', 'royal', 'rainbow'],
-        'banners' => ['sunset', 'ocean', 'forest', 'candy', 'galaxy', 'istanbul'],
+        'banners' => ['sunset', 'ocean', 'forest', 'candy', 'galaxy', 'istanbul', 'sunrise', 'aurora', 'cappadocia', 'library', 'higo'],
     ],
 
     'referral' => [

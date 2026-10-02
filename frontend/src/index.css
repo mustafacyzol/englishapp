@@ -397,3 +397,6 @@ html[data-age='teen'] {
 @keyframes twinkle {
   50% { opacity: .35; transform: scale(.85) }
 }
+@keyframes hue {
+  to { filter: hue-rotate(360deg) }
+}

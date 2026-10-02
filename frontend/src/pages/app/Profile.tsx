@@ -17,7 +17,6 @@ import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 import { UserAvatar } from '@/components/game/UserAvatar'
 import { AvatarPicker } from '@/components/game/AvatarPicker'
-import { SubscriptionCard } from '@/components/game/Subscription'
 
 /** Kept for other screens: the profile picture at the large profile size. */
 export function Avatar({ name, avatar, frame, size = 'size-24' }: { name: string; avatar?: string | null; frame?: string | null; size?: string }) {
@@ -105,7 +104,15 @@ export default function Profile() {
 
       <SkillMeter className="mb-6" />
 
-      <SubscriptionCard />
+      <Link to="/settings?s=abonelik" className="ink-card press mb-6 flex items-center gap-4 p-4">
+        <span className={clsx('grid size-12 shrink-0 place-items-center rounded-2xl', user.premium.active ? 'bg-butter/25' : 'bg-paper-2')}><Img src={img('rewards/crown.webp')} alt="" className={clsx('size-8', !user.premium.active && 'opacity-50 grayscale')} /></span>
+        <span className="min-w-0 flex-1">
+          <span className="block text-xs font-bold uppercase tracking-wider text-ink-soft">Üyelik</span>
+          <span className="block font-display text-lg font-black leading-tight">{user.premium.active ? 'Premium' : 'Ücretsiz'}</span>
+          {user.premium.active && user.premium.until && <span className="block text-xs font-semibold text-ink-soft">{dateTR(user.premium.until)} tarihine kadar</span>}
+        </span>
+        <span className="flex items-center gap-1 text-sm font-extrabold text-ink-soft">Yönet <ChevronRight className="size-4" /></span>
+      </Link>
 
       <section className="ink-card mb-6 p-5">
         <h2 className="mb-4 text-xl font-extrabold">İstatistikler</h2>

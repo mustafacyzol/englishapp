@@ -1,12 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, ArrowRight, BarChart3, Building2, Mail, Quote, Star } from 'lucide-react'
+import { BarChart3, Building2, Mail, Quote, Star } from 'lucide-react'
 import { get } from '@/lib/api'
 import type { Plan } from '@/lib/types'
 import { rewardImg } from '@/lib/assets'
 import { LinkButton } from '@/components/ui/Button'
+import { UserAvatar } from '@/components/game/UserAvatar'
 import { Img } from '@/components/ui/Img'
 import { Reveal } from '@/components/motion/Page'
 import { SKILL, SKILLS as SKILL_KEYS } from '@/lib/skills'
@@ -84,95 +85,58 @@ function Ticker({ reviews }: { reviews: Review[] }) {
 
 /* --------------------------------------------------------------- reviews */
 
+/**
+ * Two rows of reviews drifting in opposite directions, fading out at the edges.
+ * Hover (or touch) pauses a row. Every card wears the learner's level colour.
+ */
 function Reviews({ reviews }: { reviews: Review[] }) {
-  const [i, setI] = useState(0)
-  const [dir, setDir] = useState(1)
-  const [paused, setPaused] = useState(false)
-  const n = reviews.length
-
-  const go = useCallback((d: number) => {
-    setDir(d)
-    setI((x) => (x + d + n) % Math.max(1, n))
-  }, [n])
-
-  useEffect(() => {
-    if (paused || n < 2) return
-    const t = setTimeout(() => go(1), 6500)
-    return () => clearTimeout(t)
-  }, [i, paused, n, go])
-
-  if (!n) return null
-  const r = reviews[i]
-
+  if (!reviews.length) return null
+  const half = Math.ceil(reviews.length / 2)
+  const rows = [reviews.slice(0, half), reviews.slice(half).length ? reviews.slice(half) : reviews.slice(0, half)]
   return (
     <section id="yorumlar" className="relative overflow-hidden bg-paper py-24">
-      <div className="relative mx-auto max-w-5xl px-5">
-        <Reveal className="mb-10 flex flex-wrap items-end justify-between gap-5">
-          <div className="max-w-lg">
-            <p className="mb-2 font-extrabold uppercase tracking-widest text-berry">Öğrencilerimiz</p>
-            <h2 className="text-4xl leading-tight sm:text-5xl">Ne değişti?</h2>
-          </div>
-          <div className="flex gap-2">
-            <button onClick={() => go(-1)} aria-label="Önceki yorum" className="press grid size-12 place-items-center rounded-2xl border-2 border-line bg-card hover:bg-paper-2"><ArrowLeft className="size-5" /></button>
-            <button onClick={() => go(1)} aria-label="Sonraki yorum" className="press grid size-12 place-items-center rounded-2xl border-2 border-line bg-card hover:bg-paper-2"><ArrowRight className="size-5" /></button>
-          </div>
+      <div className="mx-auto mb-10 max-w-6xl px-5">
+        <Reveal className="max-w-2xl">
+          <p className="mb-2 font-extrabold uppercase tracking-widest text-berry">Öğrencilerimiz</p>
+          <h2 className="text-4xl leading-tight sm:text-5xl">Ne değişti?</h2>
+          <p className="mt-3 text-lg text-ink-soft">Öğrenciler, veliler ve öğretmenler anlatıyor.</p>
         </Reveal>
-
-        <div
-          className="relative min-h-[320px] sm:min-h-[280px]"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
-          <AnimatePresence mode="wait" custom={dir} initial={false}>
-            <motion.figure
-              key={r.id}
-              custom={dir}
-              initial={{ opacity: 0, x: dir * 48 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: dir * -48 }}
-              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.18}
-              onDragEnd={(_, info) => Math.abs(info.offset.x) > 70 && go(info.offset.x < 0 ? 1 : -1)}
-              className="absolute inset-0 cursor-grab rounded-[32px] border-2 border-line bg-card p-8 shadow-soft active:cursor-grabbing sm:p-10"
-            >
-              <Quote className="mb-4 size-9 text-flame/30" />
-              <blockquote className="font-display text-xl font-extrabold leading-snug sm:text-2xl">“{r.quote}”</blockquote>
-              <figcaption className="mt-7 flex flex-wrap items-center gap-4">
-                <span className="grid size-12 shrink-0 place-items-center rounded-2xl bg-sky font-display text-xl font-black text-white">{r.name[0]}</span>
-                <span className="min-w-0">
-                  <span className="block font-extrabold">{r.name}</span>
-                  <span className="block text-sm text-ink-soft">{r.role}</span>
-                </span>
-                <span className="ml-auto flex flex-wrap items-center gap-2">
-                  {r.cefr_level && <span className="ink-chip py-0.5 text-xs">{r.cefr_level} seviye</span>}
-                  {!!r.streak && (
-                    <span className="ink-chip py-0.5 text-xs">
-                      <Img src={rewardImg('flame')} alt="" className="size-4" /> {r.streak} gün seri
-                    </span>
-                  )}
-                  <span className="flex gap-0.5">
-                    {[...Array(r.rating)].map((_, k) => <Star key={k} className="size-4 fill-butter text-butter" />)}
-                  </span>
-                </span>
-              </figcaption>
-            </motion.figure>
-          </AnimatePresence>
-        </div>
-
-        <div className="mt-6 flex justify-center gap-2">
-          {reviews.map((x, k) => (
-            <button
-              key={x.id}
-              onClick={() => { setDir(k > i ? 1 : -1); setI(k) }}
-              aria-label={`${k + 1}. yorum`}
-              className={clsx('h-2 rounded-full transition-all', k === i ? 'w-7 bg-flame' : 'w-2 bg-line hover:bg-ink-soft/40')}
-            />
-          ))}
-        </div>
+      </div>
+      <div className="space-y-5 [mask-image:linear-gradient(90deg,transparent,#000_8%,#000_92%,transparent)]">
+        {rows.map((row, k) => (
+          <div key={k} className="group flex w-max gap-5 hover:[animation-play-state:paused] active:[animation-play-state:paused] motion-reduce:animate-none" style={{ animation: `marquee ${Math.max(28, row.length * 9)}s linear infinite ${k ? 'reverse' : ''}` }}>
+            {[...row, ...row].map((r, j) => <ReviewCard key={`${r.id}-${j}`} r={r} hidden={j >= row.length} />)}
+          </div>
+        ))}
       </div>
     </section>
+  )
+}
+
+const LEVEL_TONE: Record<string, string> = { A1: '#22b573', A2: '#2fb8a0', B1: '#2f7cf6', B2: '#8f7cf8', C1: '#ef4e7b', C2: '#ff7a3d' }
+
+function ReviewCard({ r, hidden }: { r: Review; hidden: boolean }) {
+  const tone = LEVEL_TONE[r.cefr_level ?? ''] ?? '#ff5a36'
+  return (
+    <figure aria-hidden={hidden || undefined} className="relative flex w-[300px] shrink-0 flex-col overflow-hidden rounded-3xl border-2 border-line bg-card p-5 sm:w-[360px]">
+      <span aria-hidden className="absolute inset-x-0 top-0 h-1" style={{ background: tone }} />
+      <div className="flex items-center justify-between">
+        <span className="flex gap-0.5">{[...Array(r.rating)].map((_, k) => <Star key={k} className="size-3.5 fill-butter text-butter" />)}</span>
+        <Quote className="size-6 text-ink/10" />
+      </div>
+      <blockquote className="mt-3 flex-1 text-[15px] leading-relaxed">{r.quote}</blockquote>
+      <figcaption className="mt-4 flex items-center gap-3 border-t-2 border-dashed border-line pt-4">
+        <UserAvatar name={r.name} avatar={r.avatar} className="size-10" />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-extrabold">{r.name}</span>
+          <span className="block truncate text-xs text-ink-soft">{r.role}</span>
+        </span>
+        <span className="flex shrink-0 flex-col items-end gap-1">
+          {r.cefr_level && <span className="rounded-full px-2 py-0.5 text-[10px] font-black text-white" style={{ background: tone }}>{r.cefr_level}</span>}
+          {!!r.streak && <span className="flex items-center gap-0.5 text-[11px] font-bold text-ink-soft"><Img src={rewardImg('flame')} alt="" className="size-3.5" />{r.streak} gün</span>}
+        </span>
+      </figcaption>
+    </figure>
   )
 }
 
