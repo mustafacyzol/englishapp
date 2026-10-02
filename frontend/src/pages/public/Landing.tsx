@@ -12,7 +12,7 @@ import { Reveal } from '@/components/motion/Page'
 import { SKILL, SKILLS as SKILL_KEYS } from '@/lib/skills'
 import { Bento, TryIt } from './landing/Sections'
 import { FinalCta3D, TrustBar } from './landing/Story'
-import { AudiencesPro, HeroPro, MeetHigoPro, PricingPro, Strengths } from './landing/Showcase'
+import { AudiencesPro, HeroPro, MeetHigoPro, PricingPro, Strengths, TurkeyLadder } from './landing/Showcase'
 
 export interface Review {
   id: number
@@ -35,6 +35,7 @@ export default function Landing() {
     <>
       <HeroPro />
       <TrustBar />
+      <TurkeyLadder />
       <AudiencesPro />
       <Strengths />
       <MeetHigoPro />

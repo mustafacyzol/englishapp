@@ -10,7 +10,7 @@ import { useAuth } from '@/lib/auth'
 import { storage } from '@/lib/storage'
 import type { Cefr, Me, SkillKey } from '@/lib/types'
 import { SKILL, SKILLS } from '@/lib/skills'
-import { EXAMS, FOCUS_TEXT, INTERESTS, MOTIVATIONS, PACES, PLACEMENT_TOKEN, STUDY_TIMES } from '@/lib/onboarding'
+import { EXAMS, FOCUS_TEXT, INTERESTS, MOTIVATIONS, PACES, PLACEMENT_TOKEN, STAGES, STUDY_TIMES, ageFromStage, examsForStage } from '@/lib/onboarding'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert } from '@/components/ui/Misc'
@@ -35,6 +35,8 @@ interface Draft {
   step: StepKey
   name: string
   age: '' | 'kid' | 'teen' | 'adult'
+  stage: string
+  grade: number | null
   motivation: string
   exam: string
   examDate: string
@@ -46,16 +48,11 @@ interface Draft {
   /** also preparing for an exam, whatever the main goal */
   examOpt: boolean
 }
-const AGES = [
-  { key: 'kid', label: 'Çocuk', range: '7-12 yaş', art: 'braids', tint: 'bg-mint/15', points: ['Oyun gibi kısa dersler', 'Yalnızca yaşıtlarla düello', 'Veli onayıyla, reklamsız'] },
-  { key: 'teen', label: 'Genç', range: '13-17 yaş', art: 'cap', tint: 'bg-sky/15', points: ['Okul, dizi, müzik, oyun', 'Arkadaşlarla lig', 'İsteğe bağlı YDT hazırlığı'] },
-  { key: 'adult', label: 'Yetişkin', range: '18 yaş ve üzeri', art: 'glasses', tint: 'bg-butter/20', points: ['İş, seyahat, günlük hayat', 'Defne ile konuşma provası', 'İsteğe bağlı sınav modu'] },
-] as const
 
 /** The exam step only appears for teens and adults who want it: exam as the goal, or ticked as an extra. */
 // With a finished placement test the level step is skipped: the test result becomes the level.
 const flowFor = (d: Pick<Draft, 'motivation' | 'examOpt' | 'age'>, placed = false): StepKey[] => ['name', 'age', 'goal', ...(d.age !== 'kid' && (d.motivation === 'exam' || d.examOpt) ? (['exam'] as const) : []), 'interests', 'focus', ...(placed ? [] : (['level'] as const)), 'time', 'account']
-const EMPTY: Draft = { step: 'name', name: '', age: '', motivation: '', exam: '', examDate: '', interests: [], focus: '', level: 'A1', time: '', daily: 20, examOpt: false }
+const EMPTY: Draft = { step: 'name', name: '', age: '', stage: '', grade: null, motivation: '', exam: '', examDate: '', interests: [], focus: '', level: 'A1', time: '', daily: 20, examOpt: false }
 
 export default function Register() {
   const { code } = useParams()
@@ -116,6 +113,8 @@ export default function Register() {
   const payload = () => ({
     name: d.name.trim(),
     age_group: d.age || undefined,
+    school_stage: d.stage || undefined,
+    grade: d.grade ?? undefined,
     parent_consent: d.age === 'kid' ? form.parent_consent : undefined,
     learning_goal: mot?.goal,
     motivation: d.motivation || undefined,
@@ -160,7 +159,7 @@ export default function Register() {
 
   const who = firstName ? `${firstName}, ` : ''
   const Q: Record<StepKey, { title: ReactNode; sub: string }> = {
-    age: { title: `${who}hangi yaş grubundasın?`, sub: 'İçerik, rakiplerin ve ödüller yaşına göre seçilir. Hesabı kim kullanacaksa onu seç.' },
+    age: { title: `${who}şu an neredesin?`, sub: 'Okulundaki konulara ve sınavına göre plan kurarız. Hesabı kim kullanacaksa onu seç.' },
     name: { title: 'Merhaba! Sana nasıl hitap edelim?', sub: 'Birkaç soruyla planını kuralım, 1 dakika sürer.' },
     goal: { title: `${who}İngilizce seni nereye götürsün?`, sub: 'Hedefin derslerdeki örnekleri ve senaryoları belirler.' },
     exam: { title: 'Hangi sınava hazırlanıyorsun?', sub: 'Okuma parçaları, soru tipleri ve Defne’nin geri bildirimleri bu sınava göre ayarlanır.' },
@@ -170,7 +169,7 @@ export default function Register() {
     time: { title: 'Ne zaman çalışacaksın?', sub: 'Saatini belirleyenlerin alışkanlığı sürdürme ihtimali çok daha yüksek.' },
     account: { title: firstName ? `Planın hazır, ${firstName}.` : 'Planın hazır.', sub: 'Hesabını oluştur ve ilk dersine başla. Ücretsiz, kredi kartı gerekmez.' },
   }
-  const canNext: Record<StepKey, boolean> = { name: d.name.trim().length >= 2, age: !!d.age, goal: !!d.motivation, exam: !!d.exam, interests: d.interests.length > 0, focus: !!d.focus, level: true, time: !!d.time, account: true }
+  const canNext: Record<StepKey, boolean> = { name: d.name.trim().length >= 2, age: !!d.stage && (!(STAGES.find((x) => x.key === d.stage)?.grades.length) || !!d.grade), goal: !!d.motivation, exam: !!d.exam, interests: d.interests.length > 0, focus: !!d.focus, level: true, time: !!d.time, account: true }
 
   return (
     <AuthShell
@@ -218,38 +217,48 @@ export default function Register() {
           )}
 
           {key === 'age' && (
-            <div className="grid gap-3 sm:grid-cols-3">
-              {AGES.map((a, i) => {
-                const on = d.age === a.key
-                return (
-                  <motion.button
-                    key={a.key}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.06 }}
-                    onClick={pick({ age: a.key, ...(a.key === 'kid' ? { examOpt: false, ...(d.motivation === 'exam' ? { motivation: '' } : {}) } : {}) })}
-                    aria-pressed={on}
-                    className={clsx('group relative flex items-center gap-4 overflow-hidden rounded-3xl border-2 p-3 text-left transition sm:flex-col sm:items-stretch sm:p-0', on ? 'border-flame shadow-[0_0_0_4px_rgba(255,90,54,.14)]' : 'border-line hover:border-ink/25')}
-                  >
-                    <span className={clsx('relative grid size-20 shrink-0 place-items-center overflow-hidden rounded-2xl sm:aspect-[5/4] sm:size-auto sm:rounded-none', a.tint)}>
-                      <img src={img(`avatars/${a.art}.webp`)} alt="" className="size-full object-cover transition duration-500 group-hover:scale-105" />
-                    </span>
-                    <span className="min-w-0 flex-1 sm:px-4 sm:pb-4">
-                      <span className="flex items-baseline justify-between gap-2">
-                        <span className="font-display text-xl font-black">{a.label}</span>
-                        <span className="text-xs font-bold text-ink-soft">{a.range}</span>
+            <div className="space-y-4">
+              <div className="grid gap-2.5 sm:grid-cols-2">
+                {STAGES.map((a, i) => {
+                  const on = d.stage === a.key
+                  return (
+                    <motion.button
+                      key={a.key}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.04 }}
+                      onClick={() => {
+                        const grade = a.grades.length ? (on ? d.grade : null) : null
+                        const age = ageFromStage(a.key, grade)
+                        up({ stage: a.key, grade, age, ...(age === 'kid' ? { examOpt: false, ...(d.motivation === 'exam' ? { motivation: '' } : {}) } : {}), ...(a.exams[0] ? { exam: d.exam || a.exams[0] } : {}) })
+                      }}
+                      aria-pressed={on}
+                      className={clsx('group relative flex items-center gap-3.5 rounded-2xl border-2 p-2.5 pr-3 text-left transition', on ? 'border-flame shadow-[0_0_0_4px_rgba(255,90,54,.14)]' : 'border-line hover:border-ink/25', i === STAGES.length - 1 && 'sm:col-span-2')}
+                    >
+                      <span className={clsx('size-14 shrink-0 overflow-hidden rounded-xl', a.tint)}><img src={img(`avatars/${a.art}.webp`)} alt="" className="size-full object-cover" /></span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-baseline gap-2"><span className="font-display text-lg font-black">{a.label}</span><span className="text-xs font-bold text-ink-soft">{a.range}</span></span>
+                        <span className="block truncate text-[13px] text-ink-soft">{a.points.join(' · ')}</span>
                       </span>
-                      <span className="mt-1.5 hidden space-y-1 sm:block">
-                        {a.points.map((p) => <span key={p} className="flex items-center gap-1.5 text-[13px] text-ink-soft"><Check className="size-3.5 shrink-0 text-mint-deep" strokeWidth={3} />{p}</span>)}
-                      </span>
-                      <span className="mt-0.5 block text-[13px] text-ink-soft sm:hidden">{a.points[0]}</span>
-                    </span>
-                    {on && <Tick />}
-                  </motion.button>
-                )
-              })}
-              <p className="text-center text-xs text-ink-soft sm:col-span-3">Yaş grubunu sonradan ayda bir değiştirebilirsin. Çocuk hesabı veli onayıyla açılır.</p>
-              <div className="sm:col-span-3">{nextBtn(canNext.age)}</div>
+                      {on && <Tick />}
+                    </motion.button>
+                  )
+                })}
+              </div>
+              <AnimatePresence initial={false}>
+                {!!STAGES.find((x) => x.key === d.stage)?.grades.length && (
+                  <motion.div key={d.stage} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="overflow-hidden">
+                    <p className="mb-2 text-sm font-bold">Kaçıncı sınıftasın?</p>
+                    <div className="flex flex-wrap gap-2">
+                      {STAGES.find((x) => x.key === d.stage)!.grades.map((g) => (
+                        <button key={g} onClick={() => up({ grade: g, age: ageFromStage(d.stage, g) })} aria-pressed={d.grade === g} className={clsx('h-11 min-w-14 rounded-xl border-2 px-3 font-display font-black transition', d.grade === g ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink/30')}>{g}. sınıf</button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <p className="text-center text-xs text-ink-soft">İlkokul ve 5-6. sınıf hesapları veli onayıyla açılır. Bunu sonradan Ayarlar’dan değiştirebilirsin.</p>
+              {nextBtn(canNext.age)}
             </div>
           )}
 
@@ -267,7 +276,7 @@ export default function Register() {
           {key === 'exam' && (
             <div className="space-y-5">
               <div className="grid gap-2.5 sm:grid-cols-2">
-                {EXAMS.map((e) => {
+                {examsForStage(d.stage).map((e) => {
                   const on = d.exam === e.key
                   return (
                     <button key={e.key} onClick={() => up({ exam: e.key })} aria-pressed={on} className={clsx('press relative flex items-center gap-3.5 rounded-2xl border-2 p-3.5 text-left transition', on ? 'border-ink shadow-[0_3px_0_0_var(--ink)]' : 'border-line shadow-hard hover:border-ink/25')}>

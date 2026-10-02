@@ -23,6 +23,20 @@ class Exams
     ];
 
     public const EXAMS = [
+        'lgs' => [
+            'name' => 'LGS', 'full' => 'Liselere Geçiş Sınavı, Yabancı Dil bölümü', 'by' => 'MEB',
+            'about' => '8. sınıf. Sözel bölümde 10 İngilizce sorusu: diyalog, kısa okuma, görsel ve tablo yorumlama, dört seçenek.',
+            'questions' => 10, 'minutes' => 15, 'options' => 4,
+            'sections' => ['vocabulary', 'grammar', 'dialogue', 'reading'],
+            'focus' => ['reading' => 50, 'writing' => 15, 'listening' => 20, 'speaking' => 15],
+        ],
+        'proficiency' => [
+            'name' => 'Hazırlık muafiyet', 'full' => 'Üniversite İngilizce hazırlık yeterlik (proficiency) sınavı', 'by' => 'Üniversiteler',
+            'about' => 'Hazırlık sınıfını atlamak ya da bitirmek için. Dilbilgisi, kelime, okuma ve çoğu üniversitede yazma bölümü.',
+            'questions' => 60, 'minutes' => 120, 'options' => 4,
+            'sections' => ['vocabulary', 'grammar', 'cloze', 'sentence_completion', 'reading', 'paragraph'],
+            'focus' => ['reading' => 40, 'writing' => 30, 'listening' => 15, 'speaking' => 15],
+        ],
         'yds' => [
             'name' => 'YDS', 'full' => 'Yabancı Dil Bilgisi Seviye Tespit Sınavı', 'by' => 'ÖSYM',
             'about' => 'Akademik kadro, kamu yabancı dil tazminatı ve lisansüstü başvuruları için. 80 soru, 180 dakika.',
@@ -76,6 +90,12 @@ class Exams
         $exam = self::get($key);
         if (! $exam) {
             return null;
+        }
+        if ($key === 'lgs') {
+            return 'The learner is an 8th grader preparing for the LGS (Turkey\'s high-school entrance exam, run by MEB). Its English part has 10 four-option questions built on the 8th grade units: short dialogues, reading a message, chart or poster, and choosing the right response. Keep language at A2, short and clear, explain answers in simple Turkish, and teach how to find the clue in the text.';
+        }
+        if ($key === 'proficiency') {
+            return 'The learner is preparing for a Turkish university English prep-year proficiency exam (muafiyet). Train B1-B2 grammar, academic vocabulary, reading passages with inference questions and a short opinion or summary essay; give Turkish tips on common prep-school pitfalls.';
         }
         if (in_array($key, ['yds', 'yokdil', 'ydt'], true)) {
             return "The learner is preparing for the {$exam['name']} ({$exam['full']}, run by ÖSYM in Turkey). It is a reading-heavy, five-option multiple-choice exam: vocabulary, grammar, cloze, sentence completion, EN-TR translation, reading passages and paragraph questions. Favour academic vocabulary, linkers (whereas, albeit, notwithstanding), tense and clause accuracy, and explain in short Turkish notes why distractors are wrong. Mention elimination tactics and time management when useful.";

@@ -79,6 +79,16 @@ Route::prefix('v1')->group(function () {
         Route::patch('institution', [InstitutionController::class, 'update'])->middleware('throttle:20,1');
         Route::post('institution/invite', [InstitutionController::class, 'invite'])->middleware('throttle:20,1');
         Route::delete('institution/members/{member}', [InstitutionController::class, 'removeMember']);
+        Route::patch('institution/members/{member}', [InstitutionController::class, 'moveMember']);
+        Route::post('institution/classes', [InstitutionController::class, 'saveClass'])->middleware('throttle:30,1');
+        Route::patch('institution/classes/{class}', [InstitutionController::class, 'saveClass'])->middleware('throttle:30,1');
+        Route::delete('institution/classes/{class}', [InstitutionController::class, 'deleteClass']);
+        Route::get('institution/assignments', [InstitutionController::class, 'assignments']);
+        Route::post('institution/assignments', [InstitutionController::class, 'createAssignment'])->middleware('throttle:30,1');
+        Route::delete('institution/assignments/{assignment}', [InstitutionController::class, 'deleteAssignment']);
+        Route::get('institution/catalog', [InstitutionController::class, 'catalog']);
+        Route::get('me/assignments', [InstitutionController::class, 'myAssignments']);
+        Route::post('me/assignments/{assignment}/done', [InstitutionController::class, 'markDone'])->middleware('throttle:30,1');
         Route::post('notifications/read', [AccountController::class, 'readNotifications']);
         Route::post('notifications/{id}/read', [AccountController::class, 'readNotification']);
         Route::delete('notifications/{id}', [AccountController::class, 'deleteNotification']);

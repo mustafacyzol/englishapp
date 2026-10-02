@@ -49,6 +49,8 @@ export const timeLabel = (k?: string | null) => STUDY_TIMES.find((t) => t.key ==
 
 /** Exam tracks. ÖSYM exams first: they are what most Turkish adult learners sit. */
 export const EXAMS = [
+  { key: 'lgs', name: 'LGS', label: '8. sınıf, liselere geçiş', text: '10 İngilizce sorusu · MEB', color: '#ff7a3d' },
+  { key: 'proficiency', name: 'Hazırlık', label: 'Üniversite hazırlık muafiyet', text: 'Proficiency · üniversiteler', color: '#0f8a55' },
   { key: 'yds', name: 'YDS', label: 'Akademik kadro ve tazminat', text: '80 soru · 180 dk · ÖSYM', color: '#e8403a' },
   { key: 'yokdil', name: 'YÖKDİL', label: 'Lisansüstü ve doçentlik', text: 'Fen, sağlık, sosyal · ÖSYM', color: '#8f7cf8' },
   { key: 'ydt', name: 'YKS-YDT', label: 'Dil bölümleri için', text: '80 soru · 120 dk · ÖSYM', color: '#2f7cf6' },
@@ -67,3 +69,23 @@ export const examOn = (u?: { exam_target?: string | null; learning_goal?: string
 
 /** Token of a finished placement test, kept until the account exists and the result is revealed. */
 export const PLACEMENT_TOKEN = 'dilgo.placement_token'
+
+/** The Turkish school ladder. The age group (safety rules) follows from stage and grade. */
+export const STAGES = [
+  { key: 'ilkokul', label: 'İlkokul', range: '2-4. sınıf', grades: [2, 3, 4], art: 'braids', tint: 'bg-mint/15', points: ['Oyunlarla, şarkılarla ilk kelimeler', 'Okuldaki konularla birlikte', 'Veli onaylı, reklamsız'], exams: [] as string[] },
+  { key: 'ortaokul', label: 'Ortaokul', range: '5-8. sınıf', grades: [5, 6, 7, 8], art: 'cap', tint: 'bg-sky/15', points: ['Okul İngilizcesi ve kelime', '8. sınıfta LGS hazırlığı', 'Yaşıtlarla lig ve düello'], exams: ['lgs'] },
+  { key: 'lise', label: 'Lise', range: '9-12. sınıf', grades: [9, 10, 11, 12], art: 'headphones', tint: 'bg-lilac/15', points: ['Okul sınavlarına destek', 'YKS-YDT ve IELTS hazırlığı', 'Konuşma ve yazma pratiği'], exams: ['ydt', 'ielts', 'toefl'] },
+  { key: 'universite', label: 'Üniversite', range: 'Hazırlık dahil', grades: [] as number[], art: 'glasses', tint: 'bg-butter/20', points: ['Hazırlık muafiyet sınavı', 'YDS, YÖKDİL, IELTS', 'Akademik okuma ve yazma'], exams: ['proficiency', 'yds', 'yokdil', 'ielts', 'toefl'] },
+  { key: 'yetiskin', label: 'Yetişkin', range: 'Çalışan, mezun', grades: [] as number[], art: 'afro', tint: 'bg-flame/10', points: ['İş, seyahat, günlük hayat', 'Defne ile konuşma provası', 'İsteğe bağlı YDS, IELTS'], exams: ['yds', 'yokdil', 'ielts', 'toefl'] },
+] as const
+
+export type StageKey = (typeof STAGES)[number]['key']
+
+export const ageFromStage = (stage: string, grade?: number | null): 'kid' | 'teen' | 'adult' =>
+  stage === 'ilkokul' ? 'kid' : stage === 'ortaokul' ? ((grade ?? 5) <= 6 ? 'kid' : 'teen') : stage === 'lise' ? 'teen' : 'adult'
+
+/** Exams in the order that suits the stage: the stage's own first, then the rest. */
+export const examsForStage = (stage?: string | null) => {
+  const own: readonly string[] = STAGES.find((s) => s.key === stage)?.exams ?? []
+  return [...EXAMS].sort((a, b) => (own.indexOf(a.key) === -1 ? 99 : own.indexOf(a.key)) - (own.indexOf(b.key) === -1 ? 99 : own.indexOf(b.key)))
+}

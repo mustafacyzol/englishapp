@@ -11,7 +11,7 @@ import { useAuth } from '@/lib/auth'
 import { dateTR, GOALS, tl } from '@/lib/format'
 import { speak } from '@/lib/speech'
 import type { Me } from '@/lib/types'
-import { EXAMS, INTERESTS, PACES, STUDY_TIMES, examOn } from '@/lib/onboarding'
+import { EXAMS, INTERESTS, PACES, STAGES, STUDY_TIMES, examOn } from '@/lib/onboarding'
 import { SKILL, SKILLS } from '@/lib/skills'
 import { Button } from '@/components/ui/Button'
 import { Input, Toggle } from '@/components/ui/Field'
@@ -124,6 +124,23 @@ function AccountTab({ save }: { save: Save }) {
           <Button type="submit" loading={save.isPending} className="sm:col-span-2 sm:w-fit">Kaydet</Button>
         </form>
       </Section>
+      <Section title="Okul durumu" hint="Dersler, sınav modu ve Defne okulundaki konulara ve sınıfına göre ayarlanır.">
+        <div className="flex flex-wrap gap-2">
+          {STAGES.map((st) => (
+            <button key={st.key} onClick={() => st.key !== user.school_stage && save.mutate({ school_stage: st.key, grade: st.grades.length ? st.grades[0] : null })} aria-pressed={user.school_stage === st.key} className={clsx(pill(user.school_stage === st.key), 'px-4 py-2.5')}>
+              {st.label} <span className="text-xs opacity-70">{st.range}</span>
+            </button>
+          ))}
+        </div>
+        {!!STAGES.find((x) => x.key === user.school_stage)?.grades.length && (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {STAGES.find((x) => x.key === user.school_stage)!.grades.map((g) => (
+              <button key={g} onClick={() => save.mutate({ grade: g })} aria-pressed={user.grade === g} className={clsx(pill(user.grade === g), 'px-3.5 py-2')}>{g}. sınıf</button>
+            ))}
+          </div>
+        )}
+      </Section>
+
       <Section title="Yaş grubu" hint="İçerik, Defne'nin konuşma tonu, iş ortağı hediyeleri ve rakip eşleşmesi buna göre ayarlanır.">
         <div className="grid grid-cols-3 gap-2">
           {AGE.map((a) => (

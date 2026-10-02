@@ -119,9 +119,11 @@ class InstitutionService
     }
 
     /** Overview + per-learner progress for the institution panel. */
-    public function report(Institution $inst): array
+    /** @param ?array $scope class names a teacher may see (null = the whole institution) */
+    public function report(Institution $inst, ?array $scope = null): array
     {
-        $members = $inst->members()->where('status', '!=', 'removed')->with('user')->orderBy('class_name')->orderBy('name')->get();
+        $members = $inst->members()->where('status', '!=', 'removed')->with('user')->orderBy('class_name')->orderBy('name')
+            ->when($scope !== null, fn ($q) => $q->where('role', 'student')->whereIn('class_name', $scope))->get();
         $game = app(GamificationService::class);
         $weekAgo = now()->subDays(7)->toDateString();
 

@@ -53,7 +53,7 @@ class User extends Authenticatable
     protected $fillable = [
         'name', 'username', 'email', 'password', 'avatar', 'bio', 'locale', 'timezone',
         'cefr_level', 'learning_goal', 'daily_goal_xp', 'onboarded', 'marketing_opt_in', 'preferences',
-        'focus_skill', 'interests', 'study_time', 'motivation', 'exam_target', 'exam_date', 'age_group',
+        'focus_skill', 'interests', 'study_time', 'motivation', 'exam_target', 'exam_date', 'age_group', 'school_stage', 'grade',
     ];
 
     protected $hidden = [

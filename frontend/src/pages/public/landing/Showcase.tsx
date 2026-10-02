@@ -100,11 +100,11 @@ export function HeroPro() {
     my.set(((e.clientY - r.top) / r.height - 0.5) * 18)
   }
   const who = [
-    { k: 'Çocuk', a: 'braids' },
-    { k: 'Genç', a: 'cap' },
-    { k: 'Yetişkin', a: 'glasses' },
-    { k: 'Sınav', a: 'ponytail' },
-    { k: 'Kurum', a: 'afro' },
+    { k: 'İlkokul', a: 'braids' },
+    { k: 'Ortaokul · LGS', a: 'cap' },
+    { k: 'Lise · YDT', a: 'headphones' },
+    { k: 'Üniversite', a: 'glasses' },
+    { k: 'Okullar', a: 'afro' },
   ]
   return (
     <section onPointerMove={move} className="relative isolate overflow-hidden">
@@ -118,7 +118,7 @@ export function HeroPro() {
             <span className="bg-gradient-to-r from-flame via-[#ff7a3d] to-[#ffb020] bg-clip-text pb-1 text-transparent">kendi hızında</span> öğren.
           </motion.h1>
           <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.6, ease }} className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-            Kişisel ders planı, seninle konuşan yapay zekâ öğretmen ve günde birkaç dakikalık pratik. Çocuktan yetişkine, sınav hazırlığından iş İngilizcesine.
+            İlkokuldan üniversiteye, LGS’den YDS’ye: Türkiye’deki öğrenciler için kurulmuş ders yolu, seninle konuşan yapay zekâ öğretmen ve günde birkaç dakikalık pratik.
           </motion.p>
           <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.6, ease }} className="mt-8 flex flex-col gap-3 sm:flex-row">
             <LinkButton to="/register" size="lg" className="gap-2">Ücretsiz başla <ArrowRight className="size-5" /></LinkButton>
@@ -160,14 +160,67 @@ export function HeroPro() {
   )
 }
 
+/* ---------------------------------------------------------------- Türkiye */
+
+const LADDER = [
+  { stage: 'İlkokul', range: '2-4. sınıf', tag: 'İlk kelimeler', text: 'Şarkılar, oyunlar ve resimlerle; okulda görülen konularla birlikte.', color: '#22b573', icon: 'braids' },
+  { stage: 'Ortaokul', range: '5-8. sınıf', tag: 'LGS', text: 'Okul İngilizcesi ve 8. sınıfta LGS formatında diyalog, okuma ve görsel soruları.', color: '#2f7cf6', icon: 'cap' },
+  { stage: 'Lise', range: '9-12. sınıf', tag: 'YKS-YDT', text: 'Okul sınavlarına destek; dil bölümü için YDT’nin paragraf, diyalog ve çeviri soruları.', color: '#8f7cf8', icon: 'headphones' },
+  { stage: 'Üniversite', range: 'Hazırlık dahil', tag: 'Muafiyet · YDS · YÖKDİL', text: 'Hazırlığı atlatan akademik okuma ve yazma, ardından ÖSYM sınavları.', color: '#ff7a3d', icon: 'glasses' },
+  { stage: 'Okullar', range: 'Müdür ve öğretmen', tag: 'Okul paneli', text: 'Sınıflar, ödevler ve raporlarla okulun bütün İngilizce ihtiyacı tek yerde.', color: '#1f2433', icon: 'afro' },
+] as const
+
+/**
+ * The "made for Turkey" band: one ladder from primary school to university and
+ * schools, each step naming the exam that matters at that age.
+ */
+export function TurkeyLadder() {
+  return (
+    <section className="relative overflow-x-clip py-20 md:py-24" aria-label="Türkiye için tasarlandı">
+      <div className="mx-auto max-w-6xl px-5">
+        <div className="mx-auto mb-12 max-w-2xl text-center">
+          <p className="inline-flex items-center gap-2 rounded-full bg-[#e30a17]/10 px-3 py-1 text-sm font-black uppercase tracking-[0.16em] text-[#c8102e]">
+            <svg viewBox="0 0 30 20" className="h-3.5 w-5 rounded-[2px]" aria-hidden><rect width="30" height="20" fill="#e30a17" /><circle cx="11" cy="10" r="5" fill="#fff" /><circle cx="12.3" cy="10" r="4" fill="#e30a17" /><polygon fill="#fff" points="16.5,10 19.8,8.9 17.8,11.7 17.8,8.3 19.8,11.1" /></svg>
+            Türkiye için tasarlandı
+          </p>
+          <h2 className="mt-4 font-display text-[clamp(2rem,4.6vw,3.3rem)] font-black leading-[1.06] tracking-tight">İlkokuldan üniversiteye, <span className="text-flame">her sınava</span> bir yol.</h2>
+          <p className="mt-4 text-lg text-ink-soft">Sınıfını ve hedefini söyle; ders yolu, soru tipleri ve Defne’nin konuşması ona göre ayarlansın.</p>
+        </div>
+
+        <ol className="relative grid gap-4 md:grid-cols-5">
+          <span aria-hidden className="absolute left-[10%] right-[10%] top-[38px] hidden h-[3px] rounded-full bg-gradient-to-r from-[#22b573] via-[#8f7cf8] to-[#1f2433] md:block" />
+          {LADDER.map((l, k) => (
+            <motion.li key={l.stage} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ delay: k * 0.08, type: 'spring', stiffness: 220, damping: 22 }} className="relative flex gap-4 rounded-3xl border-2 border-line bg-card p-4 md:flex-col md:items-center md:p-5 md:text-center">
+              <span className="relative z-10 grid size-[60px] shrink-0 place-items-center overflow-hidden rounded-2xl ring-4 ring-paper md:size-[76px]" style={{ background: `color-mix(in oklab, ${l.color} 16%, var(--card))` }}>
+                <img src={img(`avatars/${l.icon}.webp`)} alt="" className="size-full object-cover" />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-display text-xl font-black">{l.stage}</span>
+                <span className="block text-xs font-bold text-ink-soft">{l.range}</span>
+                <span className="mt-2 inline-block rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-white" style={{ background: l.color }}>{l.tag}</span>
+                <span className="mt-2 block text-sm leading-relaxed text-ink-soft">{l.text}</span>
+              </span>
+            </motion.li>
+          ))}
+        </ol>
+
+        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <LinkButton to="/register" size="lg" className="gap-2">Sınıfıma göre başla <ArrowRight className="size-5" /></LinkButton>
+          <LinkButton to="/okullar" size="lg" variant="secondary">Okullar için</LinkButton>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 /* -------------------------------------------------------------- audiences */
 
 const AUDIENCES = [
-  { key: 'kid', tab: 'Çocuklar', age: '7-12 yaş', photo: img('photos/aud-kid.webp'), title: 'Oyun gibi, güvenli ve sade', points: ['Kısa cümleler, bol teşvik, çocuğa uygun konular', 'Yalnızca yaşıtlarıyla düello, reklam yok', 'Veli onaylı hesap ve günlük süre hedefi'], cta: 'Çocuğum için başla', to: '/register', tone: 'text-mint-deep bg-mint/12' },
-  { key: 'teen', tab: 'Gençler', age: '13-17 yaş', photo: img('photos/aud-teen.webp'), title: 'Okul, dizi, müzik, oyun', points: ['İlgi alanına göre hikâyeler ve sohbetler', 'Arkadaşlarınla lig ve Gölge Düellosu', 'İsteğe bağlı YKS-YDT hazırlığı'], cta: 'Hemen başla', to: '/register', tone: 'text-sky bg-sky/12' },
+  { key: 'kid', tab: 'İlkokul', age: '2-4. sınıf', photo: img('photos/aud-kid.webp'), title: 'Oyun gibi, güvenli ve sade', points: ['Kısa cümleler, bol teşvik, çocuğa uygun konular', 'Yalnızca yaşıtlarıyla düello, reklam yok', 'Veli onaylı hesap ve günlük süre hedefi'], cta: 'Çocuğum için başla', to: '/register', tone: 'text-mint-deep bg-mint/12' },
+  { key: 'teen', tab: 'Ortaokul ve lise', age: '5-12. sınıf · LGS · YDT', photo: img('photos/aud-teen.webp'), title: 'Okul İngilizcesi, LGS ve YDT', points: ['Sınıfına göre kelime ve dilbilgisi', '8. sınıfta LGS, lisede YKS-YDT formatında sorular', 'Arkadaşlarınla lig ve Gölge Düellosu'], cta: 'Hemen başla', to: '/register', tone: 'text-sky bg-sky/12' },
   { key: 'adult', tab: 'Yetişkinler', age: '18 yaş ve üzeri', photo: PHOTO.hero, title: 'İş, seyahat, özgüven', points: ['Toplantı, mülakat ve seyahat senaryoları', 'Defne ile sesli konuşma provası', 'Günde 5-20 dakikalık esnek plan'], cta: 'Ücretsiz dene', to: '/register', tone: 'text-flame bg-flame/10' },
-  { key: 'exam', tab: 'Sınava hazırlık', age: 'YDS · YÖKDİL · YDT · IELTS · TOEFL', photo: PHOTO.write, title: 'Gerçek formatta, Türkçe çözümle', points: ['Sınav formatında 5 seçenekli sorular', 'Her sorudan sonra neden doğru, neden yanlış', 'Zayıf bölüm önerisi ve sınav geri sayımı'], cta: 'Sınav hedefimi seç', to: '/register', tone: 'text-lilac bg-lilac/15' },
-  { key: 'org', tab: 'Okul ve şirketler', age: 'Kurumsal', photo: PHOTO.classroom, title: 'Sınıfınız tek panelde', points: ['Kendi logonuzla kurum paneli', 'Sınıf karnesi, dört beceri raporu', 'E-posta ya da kodla toplu katılım'], cta: 'Kurumsal teklif alın', to: '/contact?konu=corporate', tone: 'text-sage-deep bg-sage/15' },
+  { key: 'exam', tab: 'Üniversite ve sınavlar', age: 'Hazırlık · YDS · YÖKDİL · IELTS', photo: PHOTO.write, title: 'Hazırlıktan YDS’ye, Türkçe çözümle', points: ['Hazırlık muafiyet ve ÖSYM formatında sorular', 'Her sorudan sonra neden doğru, neden yanlış', 'Zayıf bölüm önerisi ve sınav geri sayımı'], cta: 'Sınav hedefimi seç', to: '/register', tone: 'text-lilac bg-lilac/15' },
+  { key: 'org', tab: 'Okullar', age: 'Müdür · öğretmen · öğrenci', photo: PHOTO.classroom, title: 'Okulunuzun tüm İngilizcesi tek yerde', points: ['Müdür ve öğretmen panelleri, sınıf yönetimi', 'Ödev verme, takip ve dört beceri raporu', 'Öğrenciler kodla katılır, veliler ilerlemeyi görür'], cta: 'Okullar için', to: '/okullar', tone: 'text-sage-deep bg-sage/15' },
 ] as const
 
 /**

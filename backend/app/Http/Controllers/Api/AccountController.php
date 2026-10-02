@@ -43,6 +43,8 @@ class AccountController extends Controller
             'exam_date' => ['sometimes', 'nullable', 'date', 'after:today', 'before:+3 years'],
             'locale' => ['sometimes', 'in:tr,en'],
             'age_group' => ['sometimes', 'nullable', 'in:kid,teen,adult'],
+            'school_stage' => ['sometimes', 'nullable', \Illuminate\Validation\Rule::in(\App\Support\SchoolStage::keys())],
+            'grade' => ['sometimes', 'nullable', 'integer', 'between:1,12'],
             'preferences' => ['sometimes', 'array'],
             'preferences.language' => ['sometimes', 'in:tr,en'],
             'preferences.tour_done' => ['sometimes', 'boolean'],

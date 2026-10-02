@@ -49,6 +49,8 @@ class AuthController extends Controller
             'motivation' => ['nullable', 'in:confidence,job,abroad,exam,kids,hobby'],
             'exam_target' => ['nullable', Rule::in(Exams::keys())],
             'age_group' => ['nullable', 'in:kid,teen,adult'],
+            'school_stage' => ['nullable', Rule::in(\App\Support\SchoolStage::keys())],
+            'grade' => ['nullable', 'integer', 'between:1,12'],
             // under 13: a parent creates the account (KVKK / COPPA-style consent)
             'parent_consent' => ['accepted_if:age_group,kid'],
             'exam_date' => ['nullable', 'date', 'after:today', 'before:+3 years'],
@@ -79,8 +81,10 @@ class AuthController extends Controller
             'interests' => array_values(array_unique($data['interests'] ?? [])) ?: null,
             'study_time' => $data['study_time'] ?? null,
             'motivation' => $data['motivation'] ?? null,
-            'exam_target' => ($data['age_group'] ?? null) === 'kid' ? null : ($data['exam_target'] ?? null),
-            'age_group' => $data['age_group'] ?? null,
+            'exam_target' => ($data['age_group'] ?? \App\Support\SchoolStage::ageGroup($data['school_stage'] ?? null, $data['grade'] ?? null)) === 'kid' ? null : ($data['exam_target'] ?? null),
+            'age_group' => $data['age_group'] ?? \App\Support\SchoolStage::ageGroup($data['school_stage'] ?? null, $data['grade'] ?? null),
+            'school_stage' => $data['school_stage'] ?? null,
+            'grade' => $data['grade'] ?? null,
             'exam_date' => $data['exam_date'] ?? null,
             'marketing_opt_in' => $data['marketing_opt_in'] ?? false,
             'onboarded' => isset($data['learning_goal']),
@@ -178,6 +182,8 @@ class AuthController extends Controller
             'motivation' => ['nullable', 'in:confidence,job,abroad,exam,kids,hobby'],
             'exam_target' => ['nullable', Rule::in(Exams::keys())],
             'age_group' => ['nullable', 'in:kid,teen,adult'],
+            'school_stage' => ['nullable', Rule::in(\App\Support\SchoolStage::keys())],
+            'grade' => ['nullable', 'integer', 'between:1,12'],
             // under 13: a parent creates the account (KVKK / COPPA-style consent)
             'parent_consent' => ['accepted_if:age_group,kid'],
             'referral_code' => ['nullable', 'string', 'max:16'],
@@ -213,8 +219,10 @@ class AuthController extends Controller
                 'interests' => array_values(array_unique($data['interests'] ?? [])) ?: null,
                 'study_time' => $data['study_time'] ?? null,
                 'motivation' => $data['motivation'] ?? null,
-                'exam_target' => ($data['age_group'] ?? null) === 'kid' ? null : ($data['exam_target'] ?? null),
-                'age_group' => $data['age_group'] ?? null,
+                'exam_target' => ($data['age_group'] ?? \App\Support\SchoolStage::ageGroup($data['school_stage'] ?? null, $data['grade'] ?? null)) === 'kid' ? null : ($data['exam_target'] ?? null),
+                'age_group' => $data['age_group'] ?? \App\Support\SchoolStage::ageGroup($data['school_stage'] ?? null, $data['grade'] ?? null),
+            'school_stage' => $data['school_stage'] ?? null,
+            'grade' => $data['grade'] ?? null,
                 'onboarded' => isset($data['learning_goal']),
             ]);
             $user->forceFill([$column => $claims['sub'], 'email_verified_at' => $claims['email_verified'] ? now() : null])->save();

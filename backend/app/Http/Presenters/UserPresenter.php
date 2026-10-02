@@ -38,6 +38,8 @@ class UserPresenter
             'motivation' => $user->motivation,
             'exam_target' => $user->exam_target,
             'age_group' => $user->age_group,
+            'school_stage' => $user->school_stage,
+            'grade' => $user->grade,
             'exam_date' => $user->exam_date?->toDateString(),
             'linked' => ['google' => (bool) $user->google_id, 'apple' => (bool) $user->apple_id],
             ...self::institution($user),
@@ -70,7 +72,7 @@ class UserPresenter
     private static function institution(User $user): array
     {
         $m = InstitutionMember::query()->where('user_id', $user->id)->where('status', 'active')
-            ->orderByRaw("CASE WHEN role = 'manager' THEN 0 ELSE 1 END")->with('institution:id,name,type')->first();
+            ->orderByRaw("CASE role WHEN 'manager' THEN 0 WHEN 'teacher' THEN 1 ELSE 2 END")->with('institution:id,name,type')->first();
 
         return ['institution' => $m?->institution?->only(['id', 'name', 'type']), 'institution_role' => $m?->role];
     }

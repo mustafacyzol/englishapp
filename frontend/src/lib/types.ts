@@ -28,6 +28,8 @@ export interface Me {
   exam_target: ExamKey | null
   exam_date: string | null
   age_group?: 'kid' | 'teen' | 'adult' | null
+  school_stage?: string | null
+  grade?: number | null
   linked?: { google: boolean; apple: boolean }
   institution: { id: number; name: string; type: string } | null
   institution_role: 'student' | 'manager' | null
@@ -53,7 +55,7 @@ export interface Me {
 
 export type SkillKey = 'reading' | 'listening' | 'speaking' | 'writing'
 
-export type ExamKey = 'yds' | 'yokdil' | 'ydt' | 'ielts' | 'toefl'
+export type ExamKey = 'lgs' | 'proficiency' | 'yds' | 'yokdil' | 'ydt' | 'ielts' | 'toefl'
 
 export interface RewardSummary {
   xp_gained: number

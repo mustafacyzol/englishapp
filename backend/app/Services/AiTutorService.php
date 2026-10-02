@@ -213,7 +213,8 @@ TXT;
             .($interests ? "\n- Interests: {$interests} (pick examples and small-talk topics from these)" : '')
             .($focus ? "\n- Wants to improve most: {$focus}" : '')
             .(($exam = Exams::tutorBrief($user->exam_target)) ? "\n- Exam goal: {$exam}" : '')
-            .(($age = self::ageBrief($user->age_group)) ? "\n- Age: {$age}" : '');
+            .(($age = self::ageBrief($user->age_group)) ? "\n- Age: {$age}" : '')
+            .(($stage = \App\Support\SchoolStage::tutorBrief($user->school_stage, $user->grade)) ? "\n- School: {$stage}" : '');
 
         if ($scenario) {
             $goals = collect($scenario->goals ?? [])->map(fn ($g, $i) => "  {$i}. {$g}")->implode("\n");

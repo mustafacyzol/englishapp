@@ -95,7 +95,7 @@ class ExamController extends Controller
         return response()->json([
             'exam' => $exam,
             'section' => $section,
-            'seconds_per_question' => in_array($exam, ['yds', 'yokdil'], true) ? 135 : 90,
+            'seconds_per_question' => match ($exam) { 'yds', 'yokdil' => 135, 'lgs' => 75, default => 90 },
             'questions' => $pool->map(fn (ExamQuestion $q) => [
                 'id' => $q->id,
                 'section' => $q->section,
