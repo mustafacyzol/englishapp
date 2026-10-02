@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ComponentType, type ReactNode } from 'react'
-import { AnimatePresence, motion, useInView, useMotionValue, useReducedMotion, useScroll, useSpring, useTime, useTransform, useVelocity } from 'motion/react'
+import { animate, AnimatePresence, motion, useInView, useMotionValue, useReducedMotion, useScroll, useSpring, useTime, useTransform, useVelocity, type MotionValue } from 'motion/react'
 import clsx from 'clsx'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { ArrowRight, Building2, Check, Crown, Sparkles } from 'lucide-react'
 import { useSiteConfig } from '@/lib/site'
 import { rewardImg, img, PHOTO } from '@/lib/assets'
@@ -10,9 +10,10 @@ import type { Plan } from '@/lib/types'
 import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
 import { higoImg } from '@/components/game/Higo'
-import { FrameSequence, HIGO_DAY, HigoMotion } from '@/components/game/HigoMotion'
+import { FrameSequence, HIGO_DAY_LOOP, HigoMotion } from '@/components/game/HigoMotion'
 import { DefneMock, DuelMock, ExamMock, PathMock, Phone, SwipeMock } from './Mocks'
 import { BRAND } from '@/lib/brand'
+import { SKILL, SKILLS } from '@/lib/skills'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -53,115 +54,101 @@ function useAutoplay(count: number, ms: number, inView: boolean, pauseOnHover = 
 /* ------------------------------------------------------------------ hero */
 
 /**
- * Hero for every age: a clear promise, two actions, who it is for, and the
- * product itself (a phone with the real path screen, three small moments from
- * the app, Higo peeking over the edge). Pointer movement adds gentle depth.
+ * Two rings round Higo. Inside, the four skills; outside, who it is for. Each
+ * chip travels an ellipse: bigger and in front on the near side, smaller and
+ * behind Higo on the far side, which reads as 3D. `spread` (0..1) lets the rings
+ * open out from Higo after his entrance.
  */
-/** "Her yaşta": learners of every age orbit Higo, each at their own pace. */
-const ORBIT = [
-  { a: 'braids', t: '8 yaş', c: 'bg-mint text-white' },
-  { a: 'cap', t: '13 yaş', c: 'bg-sky text-white' },
-  { a: 'headphones', t: '17 yaş', c: 'bg-lilac text-white' },
-  { a: 'glasses', t: '21 yaş', c: 'bg-butter text-[#1f2433]' },
-  { a: 'ponytail', t: '34 yaş', c: 'bg-flame text-white' },
+const SKILL_ORBIT = SKILLS.map((k) => SKILL[k])
+const WHO_ORBIT = [
+  { a: 'avatars/braids.webp', t: 'İlkokul' },
+  { a: 'avatars/cap.webp', t: 'Ortaokul · LGS' },
+  { a: 'avatars/headphones.webp', t: 'Lise · YDT' },
+  { a: 'avatars/glasses.webp', t: 'Üniversite' },
+  { a: 'avatars/ponytail.webp', t: 'Yetişkin' },
+  { a: 'schools/teacher.webp', t: 'Okullar' },
 ]
 
-/**
- * A learner travelling round an ellipse: grows and comes forward on the near
- * side, shrinks and slips behind Higo on the far side, which reads as 3D.
- */
-function OrbitChip({ word, phase }: { word: (typeof ORBIT)[number]; phase: number }) {
+function Orbit({ phase, rx, ry, period, dir = 1, spread, children }: { phase: number; rx: number; ry: number; period: number; dir?: 1 | -1; spread: MotionValue<number>; children: ReactNode }) {
   const t = useTime()
-  const ang = useTransform(t, (ms) => (ms / 16000 + phase) * Math.PI * 2)
-  const x = useTransform(ang, (a) => `${Math.cos(a) * 47}cqw`)
-  const y = useTransform(ang, (a) => `${Math.sin(a) * 15}cqw`)
-  const scale = useTransform(ang, (a) => 0.74 + (Math.sin(a) + 1) * 0.17)
+  const ang = useTransform(t, (ms) => (dir * ms / period + phase) * Math.PI * 2)
+  const x = useTransform([ang, spread] as MotionValue<number>[], ([a, k]: number[]) => `${Math.cos(a) * rx * k}cqw`)
+  const y = useTransform([ang, spread] as MotionValue<number>[], ([a, k]: number[]) => `${Math.sin(a) * ry * k}cqw`)
+  const scale = useTransform([ang, spread] as MotionValue<number>[], ([a, k]: number[]) => (0.72 + (Math.sin(a) + 1) * 0.16) * (0.4 + 0.6 * k))
   const zIndex = useTransform(ang, (a) => (Math.sin(a) > 0 ? 20 : 1))
-  const opacity = useTransform(ang, (a) => 0.5 + (Math.sin(a) + 1) * 0.25)
+  const opacity = useTransform([ang, spread] as MotionValue<number>[], ([a, k]: number[]) => (0.55 + (Math.sin(a) + 1) * 0.225) * k)
   return (
-    <motion.span aria-hidden style={{ x, y, scale, zIndex, opacity, translateX: '-50%', translateY: '-50%' }} className="absolute left-1/2 top-[60%] flex items-center gap-1.5 whitespace-nowrap rounded-full bg-card py-1 pl-1 pr-2.5 shadow-[0_12px_24px_-12px_rgba(31,36,51,.35)] ring-1 ring-line">
-      <img src={img(`avatars/${word.a}.webp`)} alt="" className="size-7 rounded-full object-cover sm:size-8" />
-      <span className={clsx('rounded-full px-1.5 py-0.5 font-display text-[11px] font-black sm:text-xs', word.c)}>{word.t}</span>
+    <motion.span aria-hidden style={{ x, y, scale, zIndex, opacity, translateX: '-50%', translateY: '-50%' }} className="absolute left-1/2 top-[76%] will-change-transform">
+      {children}
     </motion.span>
   )
 }
 
-const HEAD = ['İngilizceyi', 'her', 'yaşta,']
-
 export function HeroPro() {
   const reduced = useReducedMotion()
-  const nav = useNavigate()
-  const mx = useMotionValue(0)
-  const my = useMotionValue(0)
-  const sx = useSpring(mx, { stiffness: 70, damping: 18 })
-  const sy = useSpring(my, { stiffness: 70, damping: 18 })
-  const near = (d: number) => ({ x: useTransform(sx, (v) => v * d), y: useTransform(sy, (v) => v * d) }) // eslint-disable-line react-hooks/rules-of-hooks
-  const ph = near(0.3)
-  const move = (e: React.PointerEvent) => {
+  // the rings open once Higo has landed
+  const spread = useMotionValue(reduced ? 1 : 0)
+  useEffect(() => {
     if (reduced) return
-    const r = e.currentTarget.getBoundingClientRect()
-    mx.set(((e.clientX - r.left) / r.width - 0.5) * 24)
-    my.set(((e.clientY - r.top) / r.height - 0.5) * 18)
-  }
-  const who = [
-    { k: 'İlkokul ve ortaokul', a: 'braids', to: '#kimler-icin' },
-    { k: 'Lise ve üniversite', a: 'headphones', to: '#kimler-icin' },
-    { k: 'Yetişkinler', a: 'glasses', to: '#kimler-icin' },
-    { k: 'Okullar', a: 'teacher', to: '/okullar' },
-  ]
+    const c = animate(spread, 1, { delay: 0.95, duration: 1.1, ease })
+    return () => c.stop()
+  }, [reduced, spread])
+
   return (
-    <section onPointerMove={move} className="relative isolate overflow-hidden">
+    <section className="relative isolate overflow-hidden">
       <div aria-hidden className="absolute inset-0 -z-10 bg-[radial-gradient(60rem_34rem_at_85%_0%,color-mix(in_oklab,var(--color-flame)_10%,transparent),transparent_70%),radial-gradient(44rem_30rem_at_0%_100%,color-mix(in_oklab,var(--color-sky)_9%,transparent),transparent_70%)]" />
       <div aria-hidden className="absolute inset-0 -z-10 opacity-60 [background-image:linear-gradient(var(--line)_1px,transparent_1px),linear-gradient(90deg,var(--line)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:radial-gradient(70%_60%_at_50%_30%,#000_10%,transparent_75%)]" />
 
-      <div className="mx-auto grid max-w-6xl items-center gap-6 px-5 pb-16 pt-8 sm:gap-12 lg:grid-cols-[1.05fr_1fr] lg:pb-24 lg:pt-16">
-        <div>
-          <h1 className="font-display text-[clamp(2.6rem,5.8vw,4.6rem)] font-black leading-[1.06] tracking-[-0.02em]">
-            {HEAD.map((w, k) => (
-              <motion.span key={w} initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 + k * 0.09, duration: 0.6, ease }} className="inline-block pr-[0.25em]">{w}</motion.span>
-            ))}
-            {/* "kendi hızında": each letter arrives at its own pace */}
-            <span className="inline-block whitespace-nowrap pb-1">
-              {'kendi hızında'.split('').map((ch, k) => (
-                <motion.span key={k} initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.38 + k * 0.035 + (k % 3) * 0.05, type: 'spring', stiffness: 380, damping: 20 }} className="inline-block bg-gradient-to-r from-flame via-[#ff7a3d] to-[#ffb020] bg-clip-text text-transparent [background-size:900%_100%]" style={{ backgroundPosition: `${(k / 12) * 100}% 0` }}>
-                  {ch === ' ' ? '\u00a0' : ch}
-                </motion.span>
-              ))}
-            </span>{' '}
-            <motion.span initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.95, duration: 0.6, ease }} className="inline-block">öğren.</motion.span>
+      <div className="mx-auto grid max-w-6xl items-center gap-4 px-5 pb-14 pt-8 sm:gap-10 lg:grid-cols-[1fr_1.05fr] lg:pb-24 lg:pt-14">
+        <div className="text-center lg:text-left">
+          <h1 className="font-display text-[clamp(2.8rem,6.4vw,5rem)] font-black leading-[1.02] tracking-[-0.025em]">
+            <motion.span initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1, duration: 0.6, ease }} className="block">İngilizce,</motion.span>
+            <motion.span initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.22, duration: 0.6, ease }} className="block bg-gradient-to-r from-flame via-[#ff7a3d] to-[#ffb020] bg-clip-text pb-1 text-transparent">oyun gibi.</motion.span>
           </h1>
-          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15, duration: 0.6, ease }} className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-            İlkokuldan üniversiteye, okuldan işe: Türkiye’deki öğrenciler için kurulmuş ders yolu, seninle konuşan yapay zekâ öğretmen ve günde birkaç dakikalık pratik.
+          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35, duration: 0.6, ease }} className="mx-auto mt-5 max-w-md text-lg leading-relaxed text-ink-soft lg:mx-0">
+            Günde 10 dakika. Konuş, dinle, oku, yaz.
           </motion.p>
-          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.25, duration: 0.6, ease }} className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45, duration: 0.6, ease }} className="mt-8 flex flex-col justify-center gap-3 sm:flex-row lg:justify-start">
             <LinkButton to="/register" size="lg" className="gap-2">Ücretsiz başla <ArrowRight className="size-5" /></LinkButton>
-            <LinkButton to="/placement" size="lg" variant="secondary">Seviyemi bul · 3 dk</LinkButton>
-          </motion.div>
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.4 }} className="mt-9">
-            <p className="mb-2.5 text-xs font-black uppercase tracking-[0.16em] text-ink-soft">Kimin için?</p>
-            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-nowrap">
-              {who.map((w, i) => (
-                <motion.a key={w.k} href={w.to.startsWith('#') ? w.to : `#${w.to}`} onClick={(e) => { if (!w.to.startsWith('#')) { e.preventDefault(); nav(w.to) } }} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 + i * 0.05 }} className="group flex min-w-0 items-center gap-2 rounded-2xl border-2 border-line bg-card py-1 pl-1 pr-2.5 text-[13px] font-extrabold leading-tight transition hover:border-ink/25 sm:shrink-0 sm:rounded-full sm:pr-3 sm:text-sm">
-                  <img src={img(w.a === 'teacher' ? 'schools/teacher.webp' : `avatars/${w.a}.webp`)} alt="" className="size-7 shrink-0 rounded-full object-cover" />
-                  <span>{w.k}</span>
-                </motion.a>
-              ))}
-            </div>
+            <LinkButton to="/placement" size="lg" variant="secondary">Seviyemi bul</LinkButton>
           </motion.div>
         </div>
 
-        {/* Higo himself, animated on a transparent stage: words in several
-            languages orbit him like little moons, passing in front and behind */}
-        <div className="relative mx-auto aspect-square w-full max-w-[300px] [container-type:inline-size] sm:max-w-[400px] lg:max-w-[480px]">
-          <motion.div aria-hidden className="absolute inset-[14%] rounded-full bg-[radial-gradient(circle,color-mix(in_oklab,var(--color-flame)_22%,transparent),transparent_68%)]" animate={reduced ? {} : { scale: [1, 1.08, 1], opacity: [0.8, 1, 0.8] }} transition={{ repeat: Infinity, duration: 5, ease: 'easeInOut' }} />
+        {/* Higo drops in, lands with a little squash and a ring of dust, then
+            the skills and the people it is for open out round him. */}
+        <div className="relative mx-auto aspect-square w-full max-w-[330px] [container-type:inline-size] sm:max-w-[430px] lg:max-w-[520px]">
+          <motion.div aria-hidden className="absolute inset-x-[10%] bottom-[14%] top-[0%] rounded-full bg-[radial-gradient(circle,color-mix(in_oklab,var(--color-flame)_22%,transparent),transparent_68%)]" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.7, duration: 0.9, ease }} />
           <svg aria-hidden viewBox="0 0 100 100" className="absolute inset-0 size-full overflow-visible">
-            <ellipse cx="50" cy="60" rx="47" ry="15" fill="none" stroke="currentColor" strokeWidth="0.35" strokeDasharray="0.6 2.2" className="text-ink/25" />
+            <motion.ellipse cx="50" cy="76" rx="33" ry="9" fill="none" stroke="currentColor" strokeWidth="0.35" strokeDasharray="0.6 2.2" className="text-ink/25" initial={{ opacity: 0, scale: 0.3 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.95, duration: 1, ease }} style={{ transformOrigin: '50px 76px' }} />
+            <motion.ellipse cx="50" cy="76" rx="41" ry="14" fill="none" stroke="currentColor" strokeWidth="0.3" strokeDasharray="0.6 2.6" className="text-ink/15" initial={{ opacity: 0, scale: 0.3 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.05, duration: 1.1, ease }} style={{ transformOrigin: '50px 76px' }} />
           </svg>
-          {!reduced && ORBIT.map((w, k) => <OrbitChip key={w.a} word={w} phase={k / ORBIT.length} />)}
-          <motion.div style={ph} initial={{ opacity: 0, y: 40, scale: 0.8 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ duration: 0.9, ease }} className="absolute inset-[4%] z-10">
+
+          {!reduced && SKILL_ORBIT.map((S, k) => (
+            <Orbit key={S.label} phase={k / 4} rx={33} ry={9} period={22000} spread={spread}>
+              <span className={clsx('flex items-center gap-1.5 whitespace-nowrap rounded-full py-1 pl-1 pr-3 font-display text-xs font-black text-white shadow-[0_10px_22px_-10px_rgba(31,36,51,.5)] sm:text-sm', S.bg, S.bg === 'bg-butter' && '!text-[#1f2433]')}>
+                <span className="grid size-6 place-items-center rounded-full bg-white/25 sm:size-7"><S.icon className="size-3.5 sm:size-4" strokeWidth={2.6} /></span>{S.verb}
+              </span>
+            </Orbit>
+          ))}
+          {!reduced && WHO_ORBIT.map((w, k) => (
+            <Orbit key={w.t} phase={k / WHO_ORBIT.length + 0.08} rx={41} ry={14} period={34000} dir={-1} spread={spread}>
+              <span className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-card py-1 pl-1 pr-2.5 text-[11px] font-extrabold shadow-[0_12px_24px_-12px_rgba(31,36,51,.35)] ring-1 ring-line sm:text-xs">
+                <img src={img(w.a)} alt="" className="size-6 rounded-full object-cover sm:size-7" />{w.t}
+              </span>
+            </Orbit>
+          ))}
+
+          <motion.div
+            initial={reduced ? false : { opacity: 0, y: '-70%', scaleX: 0.9, scaleY: 1.12 }}
+            animate={{ opacity: 1, y: ['-70%', '3%', '-2%', '0%'], scaleX: [0.9, 1.1, 0.97, 1], scaleY: [1.12, 0.88, 1.03, 1] }}
+            transition={{ duration: 1.05, times: [0, 0.55, 0.8, 1], ease: ['easeIn', 'easeOut', 'easeInOut'], opacity: { duration: 0.25 } }}
+            className="absolute inset-x-[17%] bottom-[20%] top-[2%] z-10 origin-bottom"
+          >
             <HigoMotion className="size-full object-contain drop-shadow-[0_24px_24px_rgba(200,60,20,.22)]" />
           </motion.div>
-          <span aria-hidden className="absolute bottom-[9%] left-1/2 z-0 h-[5%] w-[34%] -translate-x-1/2 rounded-[50%] bg-ink/15 blur-md" />
+          {/* landing dust ring */}
+          {!reduced && <motion.span aria-hidden className="absolute bottom-[19%] left-1/2 z-0 h-[8%] w-[40%] -translate-x-1/2 rounded-[50%] border-2 border-flame/40" initial={{ opacity: 0, scale: 0.4 }} animate={{ opacity: [0, 0.8, 0], scale: [0.4, 1.4, 1.9] }} transition={{ delay: 0.55, duration: 0.8, ease: 'easeOut' }} />}
+          <motion.span aria-hidden className="absolute bottom-[20%] left-1/2 z-0 h-[5%] w-[30%] -translate-x-1/2 rounded-[50%] bg-ink/15 blur-md" initial={{ opacity: 0, scaleX: 0.3 }} animate={{ opacity: 1, scaleX: 1 }} transition={{ delay: 0.35, duration: 0.5 }} />
         </div>
       </div>
     </section>
@@ -320,7 +307,7 @@ const BEATS: { from: number; tint: string; kicker: string; title: string; text: 
 /**
  * Meet Higo plays by itself: the beats advance on a timer while the section is
  * on screen and Higo's animation runs through the matching part of his day. No
- * scrolling needed. When you do scroll, he reacts: he leans and bobs with the
+ * scrolling needed. Higo loops at his own natural speed, not tied to the words. When you do scroll, he reacts: he leans and bobs with the
  * scroll speed, then settles back. With reduced motion it is a simple list.
  */
 export function MeetHigoPro() {
@@ -328,12 +315,6 @@ export function MeetHigoPro() {
   const reduced = useReducedMotion()
   const inView = useInView(ref, { amount: 0.4 })
   const { i, pick, progress } = useAutoplay(BEATS.length, 5200, inView)
-  const frame = useMotionValue(0)
-  useEffect(() => {
-    const from = BEATS[i].from
-    const to = i + 1 < BEATS.length ? BEATS[i + 1].from : 1
-    frame.set(from + (to - from) * Math.min(0.999, progress))
-  }, [i, progress, frame])
   // scroll reaction: lean into the direction of travel, then spring back upright
   const { scrollY } = useScroll()
   const vel = useVelocity(scrollY)
@@ -359,7 +340,7 @@ export function MeetHigoPro() {
         <motion.div style={{ rotate: lean, y: bob }} className="relative mx-auto w-[min(76vw,380px)] lg:w-[min(100%,460px)]">
           <span aria-hidden className="absolute inset-[12%] rounded-full transition-colors duration-500" style={{ backgroundColor: `color-mix(in oklab, ${cur.tint} 18%, transparent)` }} />
           <span aria-hidden className="absolute inset-[18%] animate-[spin_40s_linear_infinite] rounded-full border-[3px] border-dashed transition-colors duration-500" style={{ borderColor: `color-mix(in oklab, ${cur.tint} 45%, transparent)` }} />
-          <FrameSequence seq={HIGO_DAY} progress={frame} label="Higo animasyonu" className="relative w-full [filter:drop-shadow(0_22px_18px_rgba(160,50,20,.16))]" />
+          <FrameSequence seq={HIGO_DAY_LOOP} label="Higo animasyonu" className="relative w-full [filter:drop-shadow(0_22px_18px_rgba(160,50,20,.16))]" />
           <span aria-hidden className="absolute bottom-[3%] left-1/2 h-[5%] w-[32%] -translate-x-1/2 rounded-[50%] bg-ink/12 blur-md" />
           <div className="absolute -bottom-8 right-[-8%] w-[58%] sm:w-[50%] lg:-bottom-2 lg:right-[-6%] lg:w-[50%]">
             <AnimatePresence mode="popLayout" initial={false}>

@@ -35,6 +35,9 @@ class Settings
         'social.tiktok' => 'https://www.tiktok.com/@dilgoapp', // örnek adres, Yönetim > Site ayarları'ndan kendi hesabınızla değiştirin
         'social.linkedin' => 'https://www.linkedin.com/company/dilgoapp', // örnek adres, Yönetim > Site ayarları'ndan kendi hesabınızla değiştirin
         'social.x' => 'https://x.com/dilgoapp', // örnek adres, Yönetim > Site ayarları'ndan kendi hesabınızla değiştirin
+        // Store pages for the mobile apps (örnek adresler: yayınlanınca Yönetim > Site ayarları'ndan değiştirin)
+        'apps.ios' => 'https://apps.apple.com/tr/app/dilgo/id0000000000',
+        'apps.android' => 'https://play.google.com/store/apps/details?id=app.dilgo',
         'seo.description' => null,
         // Feature switches, off hides the feature everywhere for learners.
         'features.duel' => true,
@@ -59,7 +62,7 @@ class Settings
     ];
 
     /** The subset safe to expose on the public /config endpoint. */
-    public const PUBLIC = ['brand.tagline', 'contact.email', 'contact.phone', 'contact.address', 'social.instagram', 'social.youtube', 'social.tiktok', 'social.linkedin', 'social.x', 'seo.description',
+    public const PUBLIC = ['brand.tagline', 'contact.email', 'contact.phone', 'contact.address', 'social.instagram', 'social.youtube', 'social.tiktok', 'social.linkedin', 'social.x', 'apps.ios', 'apps.android', 'seo.description',
         'features.duel', 'features.ai', 'features.stories', 'features.exam', 'features.chest_partners', 'features.social_login', 'features.leagues',
         'corporate.enabled', 'corporate.name', 'corporate.tagline', 'corporate.price', 'corporate.note', 'corporate.features', 'corporate.cta', 'corporate.url'];
 

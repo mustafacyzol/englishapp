@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
@@ -189,6 +190,7 @@ function Faq() {
           )
         })}
       </div>
+      <p className="mt-6 text-center"><Link to="/yardim" className="font-extrabold text-flame underline-offset-4 hover:underline">Tüm sorular için Yardım merkezi →</Link></p>
     </section>
   )
 }

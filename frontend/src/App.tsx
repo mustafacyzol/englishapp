@@ -22,6 +22,7 @@ const BlogList = lazy(() => import('./pages/public/Blog').then((m) => ({ default
 const BlogPost = lazy(() => import('./pages/public/Blog').then((m) => ({ default: m.BlogPost })))
 const Placement = lazy(() => import('./pages/public/Placement'))
 const Schools = lazy(() => import('./pages/public/Schools'))
+const Help = lazy(() => import('./pages/public/Help'))
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'))
@@ -122,6 +123,7 @@ export default function App() {
           <Route path="/" element={user ? <Navigate to="/learn" replace /> : <Landing />} />
           <Route path="/about" element={<About />} />
           <Route path="/okullar" element={<Schools />} />
+          <Route path="/yardim" element={<Help />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/newsletter/confirm/:token" element={<Newsletter action="confirm" />} />
           <Route path="/newsletter/unsubscribe/:token" element={<Newsletter action="unsubscribe" />} />

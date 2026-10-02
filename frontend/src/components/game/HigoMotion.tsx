@@ -10,10 +10,12 @@ import { img } from '@/lib/assets'
  * iPhones) and no VP9-alpha support gaps. Frames are decoded off the main thread
  * with createImageBitmap, and drawing only happens when the frame changes.
  */
-export interface Sequence { dir: string; count: number; w: number; h: number; fps: number }
+export interface Sequence { dir: string; count: number; w: number; h: number; fps: number; pingpong?: boolean }
 
 export const HIGO_HELLO: Sequence = { dir: 'higo/anim/hello', count: 76, w: 560, h: 560, fps: 15 }
 export const HIGO_DAY: Sequence = { dir: 'higo/anim/day', count: 81, w: 680, h: 632, fps: 8 }
+/** The same frames as a calm idle loop at a natural speed, played forwards and back so it never jumps. */
+export const HIGO_DAY_LOOP: Sequence = { ...HIGO_DAY, fps: 15, pingpong: true }
 
 const frameUrl = (s: Sequence, i: number) => img(`${s.dir}/${String(i + 1).padStart(2, '0')}.webp`)
 
@@ -106,7 +108,9 @@ export function FrameSequence({ seq, progress, className, label }: { seq: Sequen
     let start = 0
     const tick = (now: number) => {
       if (!start) start = now
-      draw(Math.floor(((now - start) / 1000) * seq.fps) % seq.count)
+      const n = Math.floor(((now - start) / 1000) * seq.fps)
+      const span = seq.count * 2 - 2
+      draw(seq.pingpong ? seq.count - 1 - Math.abs((n % span) - (seq.count - 1)) : n % seq.count)
       raf = requestAnimationFrame(tick)
     }
     const play = (v: boolean) => {

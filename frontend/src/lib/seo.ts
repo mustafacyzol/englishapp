@@ -49,6 +49,7 @@ const ROUTES: [RegExp, string, string?][] = [
   [/^\/about/, 'Hakkımızda', `Bayrak Dil Okulları’nın dijital İngilizce platformu ${BRAND}’nun hikâyesi ve ekibi.`],
   [/^\/contact/, 'İletişim', 'Sorular, kurumsal teklifler ve destek için bize yazın.'],
   [/^\/blog$/, 'Blog', 'İngilizce öğrenme ipuçları, sınav rehberleri ve kelime listeleri.'],
+  [/^\/yardim/, 'Yardım merkezi', 'Ders yolu, Defne, seri ve ödüller, sınav modu, Premium, okullar ve hesabınla ilgili tüm sorular ve yanıtları.'],
   [/^\/okullar/, 'Okullar için', 'Okulunuzun bütün İngilizcesi tek yerde: müdür ve öğretmen panelleri, ödev, sınıf karnesi, LGS ve YDT hazırlığı.'],
   [/^\/placement/, 'Seviye testi', '3 dakikada İngilizce seviyeni öğren, sana uygun yerden başla.'],
   [/^\/login/, 'Giriş yap'],

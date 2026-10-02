@@ -49,6 +49,8 @@ const SOCIAL: [string, string][] = [
   ['social.tiktok', 'TikTok'],
   ['social.linkedin', 'LinkedIn'],
   ['social.x', 'X (Twitter)'],
+  ['apps.ios', 'App Store sayfası (iOS)'],
+  ['apps.android', 'Google Play sayfası (Android)'],
 ]
 
 function Card({ title, text, children }: { title: string; text?: string; children: ReactNode }) {
