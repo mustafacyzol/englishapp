@@ -390,3 +390,10 @@ html[data-age='teen'] {
 @media (prefers-reduced-motion: reduce) {
   .arcade-floor, .arcade-btn { animation: none; }
 }
+
+@keyframes neon-pulse {
+  50% { opacity: .4; transform: scale(1.03) }
+}
+@keyframes twinkle {
+  50% { opacity: .35; transform: scale(.85) }
+}

@@ -17,6 +17,7 @@ import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 import { UserAvatar } from '@/components/game/UserAvatar'
 import { AvatarPicker } from '@/components/game/AvatarPicker'
+import { SubscriptionCard } from '@/components/game/Subscription'
 
 /** Kept for other screens: the profile picture at the large profile size. */
 export function Avatar({ name, avatar, frame, size = 'size-24' }: { name: string; avatar?: string | null; frame?: string | null; size?: string }) {
@@ -103,6 +104,8 @@ export default function Profile() {
       </div>
 
       <SkillMeter className="mb-6" />
+
+      <SubscriptionCard />
 
       <section className="ink-card mb-6 p-5">
         <h2 className="mb-4 text-xl font-extrabold">İstatistikler</h2>

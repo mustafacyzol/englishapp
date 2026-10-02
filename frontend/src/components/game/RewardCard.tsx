@@ -16,6 +16,13 @@ export const RARITY = {
   legendary: { bg: 'bg-card', glow: 'from-butter/35', text: 'text-butter-deep', label: 'Efsanevi' },
 } as const
 
+/** Where a card came from, so a purchase never looks like a mystery. */
+export const SOURCE: Record<string, string> = {
+  shop: 'Mağazadan aldın', chest: 'Sandıktan çıktı', bundle: 'Paketten çıktı', streak: 'Seri ödülü', quest: 'Görev ödülü',
+  achievement: 'Rozet ödülü', league: 'Lig ödülü', level: 'Seviye ödülü', duel: 'Arena ödülü', redeem: 'Kodla geldi',
+  referral: 'Davet ödülü', purchase: 'Satın alma hediyesi', admin: 'DilGO hediyesi', reward: 'Ödül',
+}
+
 const STATUS = { available: 'Hazır', active: 'Aktif', used: 'Kullanıldı', expired: 'Süresi doldu' }
 
 export function RewardCard({ entry, flipped, back, onClick }: { entry: UserItem; flipped?: boolean; back?: React.ReactNode; onClick?: () => void; rotate?: number }) {
@@ -37,7 +44,7 @@ export function RewardCard({ entry, flipped, back, onClick }: { entry: UserItem;
             <p className="line-clamp-2 text-sm text-ink-soft">{entry.item.description}</p>
           </div>
           <div className="relative border-t-2 border-dashed border-line px-4 py-2.5 text-center text-xs font-bold text-ink-soft">
-            {entry.code ? <span className="font-mono text-sm text-ink">{entry.code}</span> : entry.expires_at ? `Son gün: ${dateTR(entry.expires_at)}` : `Kazanıldı: ${dateTR(entry.created_at)}`}
+            {entry.code ? <span className="font-mono text-sm text-ink">{entry.code}</span> : entry.expires_at ? `${SOURCE[entry.source] ?? 'Ödül'} · son gün ${dateTR(entry.expires_at)}` : `${SOURCE[entry.source] ?? 'Ödül'} · ${dateTR(entry.created_at)}`}
           </div>
         </div>
         <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 rounded-3xl border-2 border-line bg-card p-6 text-center shadow-hard" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>

@@ -64,6 +64,9 @@ Route::prefix('v1')->group(function () {
         Route::patch('account', [AccountController::class, 'update']);
         Route::post('account/password', [AccountController::class, 'changePassword'])->middleware('throttle:auth');
         Route::get('account/sessions', [AccountController::class, 'sessions']);
+        Route::get('account/subscription', [AccountController::class, 'subscription']);
+        Route::post('account/subscription/cancel', [AccountController::class, 'cancelSubscription'])->middleware('throttle:10,1');
+        Route::post('account/subscription/resume', [AccountController::class, 'resumeSubscription'])->middleware('throttle:10,1');
         Route::delete('account/sessions/{id}', [AccountController::class, 'revokeSession']);
         Route::post('account/2fa/setup', [AccountController::class, 'twoFactorSetup']);
         Route::post('account/2fa/confirm', [AccountController::class, 'twoFactorConfirm'])->middleware('throttle:auth');

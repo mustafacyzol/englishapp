@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'motion/react'
-import { useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import clsx from 'clsx'
 import { Check, Copy, Share2 } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
@@ -20,39 +20,27 @@ import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 
 /**
- * Three plain questions, three tabs: what do I have (cards and partner coupons),
- * how do I earn more (streak track, XP and gems), and codes or invites.
+ * Four plain tabs: what do I have (cards and chests), how do I earn more, a gift
+ * code to use, and friends to invite. Partner coupons have their own page.
  */
-type Tab = 'vault' | 'earn' | 'extra'
-const HASH: Record<string, Tab> = { '#yol': 'earn', '#seri': 'earn', '#xp': 'earn', '#kuponlar': 'vault', '#davet': 'extra', '#kod': 'extra' }
+type Tab = 'vault' | 'earn' | 'code' | 'invite'
+const HASH: Record<string, Tab> = { '#yol': 'earn', '#seri': 'earn', '#xp': 'earn', '#davet': 'invite', '#kod': 'code' }
 
 export default function Rewards() {
   const { hash } = useLocation()
+  const nav = useNavigate()
   const [tab, setTab] = useState<Tab>(() => HASH[hash] ?? 'vault')
   useEffect(() => {
-    if (HASH[hash]) setTab(HASH[hash])
-  }, [hash])
-  // Partner gifts get their own tab the moment one is won, so they never hide among cards.
-  const coupons = useQuery({ queryKey: ['coupons'], queryFn: () => get<{ data: UserItem[] }>('/coupons') })
-  const live = coupons.data?.data.filter((c) => c.status === 'active').length ?? 0
+    if (hash === '#kuponlar') nav('/coupons', { replace: true })
+    else if (HASH[hash]) setTab(HASH[hash])
+  }, [hash, nav])
   return (
     <div className="mx-auto max-w-5xl">
       <PageHeader kicker="Kazandıkların" title="Ödüllerim" />
       <div className="mb-8">
-        <Tabs value={tab} onChange={setTab} items={[{ value: 'vault', label: live ? `Kasam · ${live} kupon` : 'Kasam' }, { value: 'earn', label: 'Nasıl kazanırım?' }, { value: 'extra', label: 'Kod ve davet' }]} />
+        <Tabs value={tab} onChange={setTab} items={[{ value: 'vault', label: 'Kasam' }, { value: 'earn', label: 'Nasıl kazanırım?' }, { value: 'code', label: 'Kod kullan' }, { value: 'invite', label: 'Davet et' }]} />
       </div>
-      {tab === 'vault' && (
-        <>
-          {!!coupons.data?.data.length && (
-            <section className="mb-10">
-              <h2 className="mb-3 font-display text-xl font-black">İş ortağı kuponların</h2>
-              <Coupons list={coupons.data?.data} />
-            </section>
-          )}
-          {!!coupons.data?.data.length && <h2 className="mb-3 font-display text-xl font-black">Kartların</h2>}
-          <Vault />
-        </>
-      )}
+      {tab === 'vault' && <Vault />}
       {tab === 'earn' && (
         <>
           <h2 className="mb-1 font-display text-xl font-black">Seri ödülleri</h2>
@@ -63,12 +51,8 @@ export default function Rewards() {
           <Earn />
         </>
       )}
-      {tab === 'extra' && (
-        <div className="grid gap-8 lg:grid-cols-2">
-          <section><h2 className="mb-3 font-display text-xl font-black">Kod kullan</h2><Redeem /></section>
-          <section><h2 className="mb-3 font-display text-xl font-black">Arkadaşını davet et</h2><Invite /></section>
-        </div>
-      )}
+      {tab === 'code' && <Redeem />}
+      {tab === 'invite' && <Invite />}
     </div>
   )
 }
@@ -102,14 +86,16 @@ function Vault() {
   })
 
   if (isLoading || !data) return <SkeletonPage variant="cards" />
-  const open = data.data.filter((i) => i.status === 'available' || i.status === 'active')
-  const history = data.data.filter((i) => i.status === 'used' || i.status === 'expired')
+  // cards and chests only: frames and covers are worn from the profile, partner gifts live under Kuponlar
+  const cards = data.data.filter((i) => !['avatar_frame', 'profile_banner', 'partner_coupon'].includes(i.item.type))
+  const open = cards.filter((i) => i.status === 'available' || i.status === 'active')
+  const history = cards.filter((i) => i.status === 'used' || i.status === 'expired')
   const list = filter === 'open' ? open : history
 
   return (
     <>
       <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <p className="max-w-lg text-ink-soft">Seriden, rozetlerden, görevlerden ve liglerden kazandığın kartlar burada birikir. İstediğin an aç.</p>
+        <p className="max-w-lg text-ink-soft">Kazandığın ve Mağaza’dan aldığın kartlar, sandıklar burada. Her kartın altında nereden geldiği yazar. Çerçeve ve kapaklar profilinde, marka hediyeleri <Link to="/coupons" className="font-bold text-flame underline underline-offset-2">Kuponlar</Link>’da.</p>
         <Tabs value={filter} onChange={setFilter} items={[{ value: 'open', label: `Hazır (${open.length})` }, { value: 'history', label: 'Geçmiş' }]} />
       </div>
       {!list.length ? (
@@ -144,7 +130,6 @@ function Vault() {
                     </Button>
                   )}
                   {e.item.type === 'streak_freeze' && e.status === 'available' && <p className="text-center text-sm font-bold text-sky">Hazır bekliyor · bir gün kaçırırsan serini otomatik korur</p>}
-                  {e.meta?.offer && <p className="mb-1 text-center text-sm font-extrabold">{e.meta.partner}: {e.meta.offer}</p>}
                   {e.status === 'active' && e.code && <p className="text-center text-sm font-bold">Kodun: <span className="font-mono">{e.code}</span>{e.expires_at && <span className="text-ink-soft"> · {dateTR(e.expires_at)} tarihine kadar</span>}</p>}
                   {e.status === 'active' && !e.code && e.expires_at && <p className="text-center text-sm font-bold text-mint-deep">Aktif · {new Date(e.expires_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}'e kadar</p>}
                 </div>
@@ -155,59 +140,6 @@ function Vault() {
       )}
       {chest && <ChestOpening chest={chest.item} odds={chest.odds} onOpen={() => openChest(chest)} onClose={() => setChest(null)} />}
     </>
-  )
-}
-
-/** Won partner gifts as tickets: brand, the offer, the code to copy, expiry and "I used it". */
-function Coupons({ list }: { list?: UserItem[] }) {
-  const qc = useQueryClient()
-  const toast = useToast()
-  const used = useMutation({
-    mutationFn: (id: number) => post(`/coupons/${id}/used`),
-    onSuccess: () => { qc.invalidateQueries({ queryKey: ['coupons'] }); qc.invalidateQueries({ queryKey: ['inventory'] }); toast('Kupon kullanıldı olarak işaretlendi', 'success') },
-    onError: (e: ApiError) => toast(e.first(), 'error'),
-  })
-  if (!list) return <SkeletonPage variant="cards" />
-  if (!list.length) return <Empty icon={<Img src={rewardImg('ticket')} alt="" className="size-12 object-contain opacity-60" />} title="Henüz kuponun yok" text="Gizemli sandıklardan bazen iş ortaklarımızın hediyeleri çıkar. Kazandığında burada görünür." />
-  const copy = (c: string) => { navigator.clipboard?.writeText(c).catch(() => {}); toast('Kod kopyalandı', 'success') }
-  return (
-    <div className="grid gap-5 md:grid-cols-2">
-      {list.map((c, i) => {
-        const m = c.meta ?? {}
-        const on = c.status === 'active'
-        const days = c.expires_at ? Math.max(0, Math.ceil((new Date(c.expires_at).getTime() - Date.now()) / 864e5)) : null
-        return (
-          <motion.article key={c.id} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }} className={clsx('relative flex overflow-hidden rounded-3xl border-2 border-line bg-card', !on && 'opacity-60 grayscale-[.6]')}>
-            <div className="w-2 shrink-0" style={{ background: m.color ?? 'var(--color-flame)' }} />
-            <div className="min-w-0 flex-1 p-5">
-              <div className="flex items-center gap-3">
-                {m.partner_logo ? <Img src={m.partner_logo} alt="" className="size-10 rounded-xl bg-paper-2 object-contain p-1" /> : <span className="grid size-10 place-items-center rounded-xl font-black text-white" style={{ background: m.color ?? 'var(--color-flame)' }}>{m.partner?.[0]}</span>}
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-black uppercase tracking-wider text-ink-soft">{m.partner}</p>
-                  <p className="font-display text-lg font-black leading-tight">{m.offer}</p>
-                </div>
-              </div>
-              {m.description && <p className="mt-2 text-sm text-ink-soft">{m.description}</p>}
-              <div className="mt-4 flex flex-wrap items-center gap-2">
-                <button onClick={() => on && c.code && copy(c.code)} disabled={!on} className="flex items-center gap-2 rounded-xl border-2 border-dashed border-ink/25 bg-paper-2 px-3 py-1.5 font-mono text-[15px] font-bold tracking-wider">
-                  {c.code} {on && <Copy className="size-4 text-ink-soft" />}
-                </button>
-                <span className={clsx('rounded-full px-2.5 py-1 text-xs font-black', on ? (days !== null && days <= 3 ? 'bg-berry/12 text-berry' : 'bg-mint/15 text-mint-deep') : 'bg-paper-2 text-ink-soft')}>
-                  {c.status === 'used' ? `Kullanıldı${m.used_at ? ` · ${dateTR(m.used_at)}` : ''}` : c.status === 'expired' ? 'Süresi doldu' : days === 0 ? 'Bugün son gün' : `${days} gün kaldı`}
-                </span>
-              </div>
-              {m.terms && <p className="mt-3 text-[11px] leading-snug text-ink-soft">{m.terms}</p>}
-              {on && (
-                <div className="mt-4 flex flex-wrap gap-2">
-                  {m.partner_url && <a href={m.partner_url} target="_blank" rel="noreferrer" className="press rounded-xl bg-ink px-3.5 py-2 text-sm font-extrabold text-paper">Markaya git</a>}
-                  <button onClick={() => used.mutate(c.id)} disabled={used.isPending} className="rounded-xl border-2 border-line px-3.5 py-2 text-sm font-bold hover:border-ink/30"><Check className="mr-1 inline size-4" />Kullandım</button>
-                </div>
-              )}
-            </div>
-          </motion.article>
-        )
-      })}
-    </div>
   )
 }
 
@@ -331,14 +263,27 @@ function Redeem() {
     },
   })
   return (
-    <div className="mx-auto max-w-lg">
-      <form onSubmit={(e: FormEvent) => { e.preventDefault(); m.mutate() }} className="rounded-3xl border-2 border-line bg-card p-8 text-center">
-        <Img src={rewardImg('coupon')} alt="" className="mx-auto mb-2 size-24 object-contain" />
+    <div className="mx-auto grid max-w-4xl items-center gap-8 md:grid-cols-[1fr_1.1fr]">
+      {/* a gift card, so the page says what it is before reading a word */}
+      <div className="relative mx-auto aspect-[1.6] w-full max-w-sm rotate-[-4deg] overflow-hidden rounded-[26px] bg-gradient-to-br from-[#1f2433] via-[#2b3350] to-[#3b2a5c] p-6 text-white shadow-[0_30px_50px_-25px_rgba(31,36,51,.8)]">
+        <span aria-hidden className="absolute -right-10 -top-12 size-44 rounded-full bg-butter/25 blur-2xl" />
+        <span aria-hidden className="absolute inset-y-0 right-16 w-6 bg-gradient-to-b from-butter to-flame opacity-90" />
+        <span aria-hidden className="absolute inset-x-0 top-1/2 h-6 -translate-y-1/2 bg-gradient-to-r from-butter to-flame opacity-90" />
+        <Img src={rewardImg('voucher')} alt="" className="absolute right-6 top-1/2 size-20 -translate-y-1/2 object-contain drop-shadow-xl" />
+        <p className="relative font-display text-2xl font-black italic">dilgo</p>
+        <p className="relative text-xs font-bold uppercase tracking-[0.2em] text-white/60">Hediye kartı</p>
+        <p className="absolute bottom-5 left-6 font-mono text-lg font-bold tracking-[0.18em] text-white/90">{code || 'DG-XXXX-XXXX'}</p>
+      </div>
+      <form onSubmit={(e: FormEvent) => { e.preventDefault(); m.mutate() }} className="rounded-3xl border-2 border-line bg-card p-6 sm:p-8">
         <h2 className="text-2xl">Hediye kodunu kullan</h2>
-        <p className="mb-6 mt-1 text-ink-soft">Bayrak Dil Okulları kampanyalarından ya da hediye kartlarından gelen kodu gir.</p>
+        <p className="mb-5 mt-1 text-sm text-ink-soft">Hediye kartı, okul ya da kampanya kodun varsa buraya yaz. Premium günler, elmas veya kartlar hemen hesabına geçer.</p>
         <Input id="redeem-code" value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="DG-XXXX-XXXX" className="[&_input]:text-center [&_input]:font-mono [&_input]:text-xl [&_input]:tracking-widest" error={(m.error as ApiError | null)?.first('code')} />
         <Button type="submit" block className="mt-4" loading={m.isPending} disabled={code.length < 3}>Kodu kullan</Button>
         {m.data && <motion.p initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="mt-4 rounded-xl bg-mint/15 p-3 font-bold text-mint-deep">{m.data.message}</motion.p>}
+        <ul className="mt-5 space-y-1.5 text-xs text-ink-soft">
+          <li className="flex gap-2"><Check className="size-3.5 shrink-0 text-mint-deep" strokeWidth={3} /> Kodlar büyük-küçük harfe duyarlı değildir.</li>
+          <li className="flex gap-2"><Check className="size-3.5 shrink-0 text-mint-deep" strokeWidth={3} /> Her kod hesap başına bir kez kullanılır.</li>
+        </ul>
       </form>
     </div>
   )
@@ -361,34 +306,55 @@ function Invite() {
       toast(data.link)
     }
   }
+  const copyCode = () => { navigator.clipboard?.writeText(data.code).catch(() => {}); toast('Davet kodu kopyalandı', 'success') }
   const STATUS: Record<string, [string, string]> = { pending: ['Doğrulama bekliyor', 'bg-paper-2 text-ink-soft'], qualified: ['Katıldı', 'bg-butter/25'], rewarded: ['Premium aldı', 'bg-mint/15 text-mint-deep'] }
+  const STEPS = [
+    { n: 1, title: 'Bağlantını paylaş', text: 'WhatsApp, Instagram ya da sınıf grubunda.' },
+    { n: 2, title: 'Arkadaşın katılsın', text: `E-postasını doğrulayınca sana ${data.rewards.referrer_gems}, ona ${data.rewards.referee_gems} elmas.` },
+    { n: 3, title: 'Premium alırsa', text: `Sana ${data.rewards.referrer_premium_days} gün Premium kartı.` },
+  ]
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
-      <section className="rounded-3xl bg-flame p-7 text-white">
-        <h2 className="text-3xl">Arkadaşını getir, birlikte kazanın</h2>
-        <div className="mt-5 space-y-3">
-          <div className="flex items-center gap-3 rounded-2xl bg-white/15 p-3"><Img src={rewardImg('gem')} alt="" className="size-10" /><p className="font-bold">Arkadaşın e-postasını doğrulayınca: sana {data.rewards.referrer_gems}, ona {data.rewards.referee_gems} elmas</p></div>
-          <div className="flex items-center gap-3 rounded-2xl bg-white/15 p-3"><Img src={rewardImg('crown')} alt="" className="size-10" /><p className="font-bold">İlk Premium alışverişinde: sana {data.rewards.referrer_premium_days} gün Premium kartı</p></div>
+    <div className="space-y-6">
+      <section className="relative overflow-hidden rounded-[28px] bg-flame p-6 text-white sm:p-8">
+        <span aria-hidden className="absolute -right-16 -top-16 size-56 rounded-full bg-white/10" />
+        <span aria-hidden className="absolute -bottom-20 right-24 size-40 rounded-full bg-butter/30" />
+        <div className="relative grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-end">
+          <div>
+            <h2 className="text-3xl leading-tight sm:text-4xl">Arkadaşını getir,<br />birlikte kazanın</h2>
+            <div className="mt-5 flex items-center gap-2 rounded-2xl bg-card p-2 text-ink">
+              <span className="min-w-0 flex-1 truncate px-2 font-mono text-sm font-bold">{data.link}</span>
+              <Button size="sm" variant="dark" onClick={share} icon={<Share2 className="size-4" />}>Paylaş</Button>
+            </div>
+            <button onClick={copyCode} className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-white/90 hover:text-white">
+              Davet kodun: <span className="rounded-lg bg-white/20 px-2 py-0.5 font-mono font-bold">{data.code}</span> <Copy className="size-3.5" />
+            </button>
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            {[['Davet', data.stats.total], ['Katılan', data.stats.qualified], ['Premium', data.stats.rewarded]].map(([l, v]) => (
+              <div key={l as string} className="rounded-2xl bg-white/15 p-3 backdrop-blur"><p className="font-display text-3xl font-black">{v}</p><p className="text-xs font-bold text-white/80">{l}</p></div>
+            ))}
+          </div>
         </div>
-        <div className="mt-6 flex items-center gap-2 rounded-2xl bg-card p-2 text-ink">
-          <span className="flex-1 truncate px-2 font-mono text-sm font-bold">{data.link}</span>
-          <Button size="sm" variant="dark" onClick={share} icon={<Share2 className="size-4" />}>Paylaş</Button>
-        </div>
-        <p className="mt-3 text-sm font-semibold">Davet kodun: <span className="rounded-lg bg-white/20 px-2 py-0.5 font-mono font-bold">{data.code}</span></p>
       </section>
-      <section className="rounded-3xl border-2 border-line bg-card p-6">
-        <div className="mb-5 grid grid-cols-3 gap-2 text-center">
-          {[['Davet', data.stats.total], ['Katılan', data.stats.qualified], ['Premium', data.stats.rewarded]].map(([l, v]) => (
-            <div key={l as string} className="rounded-2xl bg-paper-2 p-3"><p className="text-2xl font-black">{v}</p><p className="text-xs font-bold text-ink-soft">{l}</p></div>
-          ))}
-        </div>
-        {data.data.length === 0 ? <p className="text-center text-ink-soft">Henüz davetin yok. İlk arkadaşını çağır!</p> : (
+
+      <ol className="grid gap-3 sm:grid-cols-3">
+        {STEPS.map((x) => (
+          <li key={x.n} className="flex gap-3 rounded-2xl border-2 border-line bg-card p-4">
+            <span className="grid size-9 shrink-0 place-items-center rounded-xl bg-flame/12 font-display text-lg font-black text-flame">{x.n}</span>
+            <span><span className="block font-black">{x.title}</span><span className="block text-sm text-ink-soft">{x.text}</span></span>
+          </li>
+        ))}
+      </ol>
+
+      <section className="rounded-3xl border-2 border-line bg-card p-5 sm:p-6">
+        <h3 className="mb-3 font-display text-lg font-black">Davet ettiklerin</h3>
+        {data.data.length === 0 ? <p className="py-4 text-center text-ink-soft">Henüz davetin yok. İlk arkadaşını çağır!</p> : (
           <ul className="divide-y-2 divide-line">
             {data.data.map((r) => (
-              <li key={r.username} className="flex items-center justify-between py-3">
-                <span className="font-bold">{r.name}</span>
-                <span className={clsx('rounded-lg px-2 py-0.5 text-xs font-bold', STATUS[r.status]?.[1])}>{STATUS[r.status]?.[0]}</span>
+              <li key={r.username} className="flex items-center justify-between gap-3 py-3">
+                <span className="min-w-0 truncate font-bold">{r.name}</span>
+                <span className={clsx('shrink-0 rounded-lg px-2 py-0.5 text-xs font-bold', STATUS[r.status]?.[1])}>{STATUS[r.status]?.[0]}</span>
               </li>
             ))}
           </ul>

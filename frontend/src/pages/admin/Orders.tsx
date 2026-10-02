@@ -8,7 +8,7 @@ import { Spinner } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { AdminTitle, Pager, Pill, Table, ORDER_STATUS } from './kit'
 
-interface O { id: number; uuid: string; total: string; discount: string; status: string; gateway: string; gateway_ref: string | null; created_at: string; paid_at: string | null; user: { name: string; email: string } | null; plan: { name: string } | null; coupon: { code: string } | null }
+interface O { id: number; uuid: string; total: string; discount: string; status: string; gateway: string; gateway_ref: string | null; created_at: string; paid_at: string | null; refund_requested_at?: string | null; refund_reason?: string | null; user: { name: string; email: string } | null; plan: { name: string } | null; coupon: { code: string } | null }
 
 export default function Orders() {
   const [status, setStatus] = useState('')
@@ -29,7 +29,7 @@ export default function Orders() {
       <AdminTitle title="Siparişler">
         <Input placeholder="Sipariş no / e-posta" value={q} onChange={(e) => setQ(e.target.value)} className="w-60" />
         <Select value={status} onChange={(e) => setStatus(e.target.value)} className="w-40">
-          <option value="">Tümü</option>{['paid', 'pending', 'failed', 'refunded'].map((s) => <option key={s}>{s}</option>)}
+          <option value="">Tümü</option>{['paid', 'pending', 'failed', 'refunded'].map((s) => <option key={s}>{s}</option>)}<option value="refund_requested">İade talebi</option>
         </Select>
       </AdminTitle>
       {isLoading || !data ? <Spinner /> : (
@@ -42,7 +42,7 @@ export default function Orders() {
                 <td className="px-4">{o.plan?.name}</td>
                 <td className="px-4 font-mono">{tl(o.total)}{Number(o.discount) > 0 && <span className="block text-xs text-mint-deep">-{tl(o.discount)}</span>}</td>
                 <td className="px-4 font-mono text-xs">{o.coupon?.code ?? '-'}</td>
-                <td className="px-4"><Pill tone={o.status === 'paid' ? 'good' : o.status === 'failed' ? 'bad' : o.status === 'refunded' ? 'warn' : 'default'}>{ORDER_STATUS[o.status] ?? o.status}</Pill></td>
+                <td className="px-4"><Pill tone={o.status === 'paid' ? 'good' : o.status === 'failed' ? 'bad' : o.status === 'refunded' ? 'warn' : 'default'}>{ORDER_STATUS[o.status] ?? o.status}</Pill>{o.status === 'paid' && o.refund_requested_at && <span title={o.refund_reason ?? undefined} className="ml-1.5 inline-block"><Pill tone="warn">İade talebi</Pill></span>}</td>
                 <td className="px-4">{dateTR(o.created_at, true)}</td>
                 <td className="px-4">{o.status === 'paid' && <button onClick={() => confirm('Bu siparişi iade olarak işaretle ve Premium süresini geri al?') && refund.mutate(o.id)} className="text-xs font-bold text-berry">İade</button>}</td>
               </tr>

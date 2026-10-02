@@ -13,7 +13,7 @@ class Order extends Model
 
     protected function casts(): array
     {
-        return ['gateway_payload' => 'array', 'paid_at' => 'datetime', 'amount' => 'decimal:2', 'discount' => 'decimal:2', 'total' => 'decimal:2'];
+        return ['gateway_payload' => 'array', 'paid_at' => 'datetime', 'refund_requested_at' => 'datetime', 'amount' => 'decimal:2', 'discount' => 'decimal:2', 'total' => 'decimal:2'];
     }
 
     public function user(): BelongsTo

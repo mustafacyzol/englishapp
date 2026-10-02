@@ -90,6 +90,15 @@ export const IconGift: NavIcon = (p) => (
   </svg>
 )
 
+/** A notched ticket with a perforation: partner coupons. */
+export const IconTicket: NavIcon = (p) => (
+  <svg {...base(p)}>
+    <path {...soft} d="M3.5 7.5A1.5 1.5 0 0 1 5 6h14a1.5 1.5 0 0 1 1.5 1.5V10a2 2 0 0 0 0 4v2.5A1.5 1.5 0 0 1 19 18H5a1.5 1.5 0 0 1-1.5-1.5V14a2 2 0 0 0 0-4z" />
+    <path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h14a1.5 1.5 0 0 1 1.5 1.5V10a2 2 0 0 0 0 4v2.5A1.5 1.5 0 0 1 19 18H5a1.5 1.5 0 0 1-1.5-1.5V14a2 2 0 0 0 0-4z" />
+    <path strokeDasharray="1.6 2" d="M15 7v10" />
+  </svg>
+)
+
 /** A shopping bag with a gem tag: shop. */
 export const IconBag: NavIcon = (p) => (
   <svg {...base(p)}>

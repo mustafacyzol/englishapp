@@ -52,6 +52,7 @@ const Profile = lazy(() => import('./pages/app/Profile'))
 const Achievements = lazy(() => import('./pages/app/Achievements'))
 const Shop = lazy(() => import('./pages/app/Shop'))
 const Rewards = lazy(() => import('./pages/app/Rewards'))
+const Coupons = lazy(() => import('./pages/app/Coupons'))
 const Premium = lazy(() => import('./pages/app/Premium'))
 const PremiumResult = lazy(() => import('./pages/app/PremiumResult'))
 const Settings = lazy(() => import('./pages/app/Settings'))
@@ -164,6 +165,7 @@ export default function App() {
           <Route path="/profile/achievements" element={<Achievements />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/rewards" element={<Rewards />} />
+          <Route path="/coupons" element={<Coupons />} />
           <Route path="/premium" element={<Premium />} />
           <Route path="/premium/result" element={<PremiumResult />} />
           <Route path="/settings" element={<Settings />} />

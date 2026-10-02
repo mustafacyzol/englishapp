@@ -16,6 +16,6 @@ class PartnerGiftWon extends Notification
 
     public function toArray(object $notifiable): array
     {
-        return ['kind' => 'gift', 'title' => "{$this->partner} hediyen hazır", 'body' => "{$this->offer} · {$this->expires} tarihine kadar geçerli. Kodun Ödüller > Kuponlarım'da.", 'icon' => 'gift', 'link' => '/rewards#kuponlar'];
+        return ['kind' => 'gift', 'title' => "{$this->partner} hediyen hazır", 'body' => "{$this->offer} · {$this->expires} tarihine kadar geçerli. Kodun Ödüller > Kuponlar'da.", 'icon' => 'gift', 'link' => '/coupons'];
     }
 }

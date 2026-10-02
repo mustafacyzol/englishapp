@@ -4,7 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { Bell, Settings } from 'lucide-react'
-import { IconBag, IconBook, IconCards, IconCup, IconExam, IconGhost, IconGift, IconPath, IconProfile, IconQuest, IconSchool, IconShield, IconSliders, IconTalk, type NavIcon } from '@/components/ui/NavIcons'
+import { IconBag, IconBook, IconCards, IconExam, IconGhost, IconGift, IconPath, IconProfile, IconQuest, IconSchool, IconShield, IconSliders, IconTicket, IconTalk, type NavIcon } from '@/components/ui/NavIcons'
 import { useAuth } from '@/lib/auth'
 import { get } from '@/lib/api'
 import { rewardImg } from '@/lib/assets'
@@ -59,7 +59,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
   {
     title: 'Hesabım',
     items: [
-      { to: '/rewards', label: 'Ödüller', icon: IconGift, tone: 'berry', match: ['/rewards', '/quests', '/shop'], tour: 'rewards' },
+      { to: '/rewards', label: 'Ödüller', icon: IconGift, tone: 'berry', match: ['/rewards', '/quests', '/shop', '/coupons'], tour: 'rewards' },
       { to: '/profile', label: 'Profil', icon: IconProfile, tone: 'sky', match: ['/profile', '/settings'] },
     ],
   },
@@ -67,8 +67,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
 
 /** Pages that live together under one menu entry, switched with a tab strip. */
 export const HUBS: { key: string; tabs: { to: string; label: string; icon: NavIcon }[] }[] = [
-  { key: 'arena', tabs: [{ to: '/duel', label: 'Gölge Düellosu', icon: IconGhost }, { to: '/leagues', label: 'Ligler', icon: IconCup }] },
-  { key: 'rewards', tabs: [{ to: '/rewards', label: 'Ödüllerim', icon: IconGift }, { to: '/quests', label: 'Görevler', icon: IconQuest }, { to: '/shop', label: 'Mağaza', icon: IconBag }] },
+  { key: 'rewards', tabs: [{ to: '/rewards', label: 'Ödüllerim', icon: IconGift }, { to: '/quests', label: 'Görevler', icon: IconQuest }, { to: '/shop', label: 'Mağaza', icon: IconBag }, { to: '/coupons', label: 'Kuponlar', icon: IconTicket }] },
 ]
 
 /**
@@ -200,7 +199,7 @@ export default function AppLayout() {
   )
 }
 
-const MENU_PATHS = ['/stories', '/exam', '/rewards', '/quests', '/shop', '/profile', '/settings', '/notifications', '/kurum']
+const MENU_PATHS = ['/stories', '/exam', '/rewards', '/quests', '/shop', '/coupons', '/profile', '/settings', '/notifications', '/kurum']
 
 /** A plain tab: the soft pill fades in place (no shared-layout jump between pages). */
 function Tab({ n, active }: { n: Item; active: boolean }) {
@@ -251,13 +250,13 @@ function HubTabs({ tabs, path }: { tabs: (typeof HUBS)[number]['tabs']; path: st
   const { t } = useLang()
   return (
     <div className="mb-6 flex justify-center">
-      <div className="inline-flex gap-1 rounded-2xl border-2 border-line bg-card p-1" role="tablist">
+      <div className="inline-flex max-w-full gap-1 rounded-2xl border-2 border-line bg-card p-1" role="tablist">
         {tabs.map((x) => {
           const on = path === x.to
           return (
-            <Link key={x.to} to={x.to} role="tab" aria-selected={on} className={clsx('relative flex items-center gap-2 rounded-xl px-3.5 py-2 text-sm font-extrabold transition sm:px-4', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
+            <Link key={x.to} to={x.to} role="tab" aria-selected={on} className={clsx('relative flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-extrabold transition sm:px-4', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
               {on && <motion.span layoutId="hub-tab" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="absolute inset-0 rounded-xl bg-ink" />}
-              <x.icon className="relative size-[18px]" />
+              <x.icon className="relative hidden size-[18px] sm:block" />
               <span className="relative">{t(x.label)}</span>
             </Link>
           )

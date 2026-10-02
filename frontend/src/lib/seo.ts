@@ -58,7 +58,7 @@ const ROUTES: [RegExp, string, string?][] = [
 ]
 const APP: [RegExp, string][] = [
   [/^\/learn/, 'Yol haritası'], [/^\/stories/, 'Hikâyeler'], [/^\/practice/, 'Kelime pratiği'], [/^\/ai\/writing/, 'Yazma atölyesi'], [/^\/ai/, 'Defne AI'],
-  [/^\/duel/, 'Arena'], [/^\/leagues/, 'Ligler'], [/^\/exam/, 'Sınav modu'], [/^\/rewards/, 'Ödüller'], [/^\/shop/, 'Mağaza'], [/^\/quests/, 'Görevler'],
+  [/^\/duel/, 'Arena'], [/^\/leagues/, 'Ligler'], [/^\/exam/, 'Sınav modu'], [/^\/rewards/, 'Ödüller'], [/^\/shop/, 'Mağaza'], [/^\/coupons/, 'Kuponlar'], [/^\/quests/, 'Görevler'],
   [/^\/profile/, 'Profil'], [/^\/settings/, 'Ayarlar'], [/^\/notifications/, 'Bildirimler'], [/^\/premium/, 'Premium'], [/^\/lesson/, 'Ders'], [/^\/u\//, 'Profil'],
   [/^\/admin/, 'Yönetim'], [/^\/kurum/, 'Kurum paneli'],
 ]

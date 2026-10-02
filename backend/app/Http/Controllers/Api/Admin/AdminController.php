@@ -298,7 +298,8 @@ class AdminController extends Controller
     public function orders(Request $request): JsonResponse
     {
         $q = Order::query()->with('user:id,name,email', 'plan:id,name', 'coupon:id,code')
-            ->when($request->query('status'), fn ($q, $s) => $q->where('status', $s))
+            ->when($request->query('status') === 'refund_requested', fn ($q) => $q->where('status', 'paid')->whereNotNull('refund_requested_at'))
+            ->when($request->query('status') && $request->query('status') !== 'refund_requested', fn ($q) => $q->where('status', $request->query('status')))
             ->when(is_string($request->query('q')) ? $request->query('q') : null, fn ($q, $s) => $q->where(fn ($w) => $w->where('uuid', 'like', "%{$s}%")->orWhereHas('user', fn ($u) => $u->where('email', 'like', "%{$s}%"))))
             ->latest();
 

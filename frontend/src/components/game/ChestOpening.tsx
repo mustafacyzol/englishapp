@@ -32,8 +32,8 @@ const RARITY_COLOR: Record<RewardItem['rarity'], string> = { common: '#22b573', 
 /**
  * The mystery chest ceremony. A golden key flies in and turns in the lock, the
  * chest trembles with a heartbeat, the lid bursts open in light, and the prize
- * rises out of it in its rarity colour. The published odds are shown before the
- * learner turns the key. The server roll starts at the first click, so the
+ * rises out of it in its rarity colour. The published odds sit under the prize once
+ * the chest is open. The server roll starts at the first click, so the
  * animation never waits on the network for long.
  */
 export function ChestOpening({ chest, odds, onOpen, onClose }: { chest: RewardItem; odds?: ChestOdds[]; onOpen: () => Promise<ChestResult>; onClose: () => void }) {
@@ -213,7 +213,6 @@ export function ChestOpening({ chest, odds, onOpen, onClose }: { chest: RewardIt
         {stage === 'ready' && (
           <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="w-full">
             <Button size="lg" variant="butter" block onClick={start}>Anahtarı çevir</Button>
-            {!!odds?.length && <Odds odds={odds} />}
           </motion.div>
         )}
         {(stage === 'key' || stage === 'open') && <p className="mt-6 h-14 font-display text-2xl font-black">{stage === 'key' ? 'Kilit açılıyor...' : filmDone ? 'Az kaldı...' : 'Açılıyor!'}</p>}
@@ -233,6 +232,7 @@ export function ChestOpening({ chest, odds, onOpen, onClose }: { chest: RewardIt
               {prize.url && <a href={prize.url} target="_blank" rel="noreferrer" className="inline-flex h-12 items-center gap-2 rounded-2xl bg-white/10 px-5 font-bold hover:bg-white/20">İş ortağına git <ExternalLink className="size-4" /></a>}
               <Button onClick={onClose}>Harika!</Button>
             </div>
+            {!!odds?.length && <Odds odds={odds} />}
           </motion.div>
         )}
       </div>

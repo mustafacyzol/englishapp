@@ -76,6 +76,7 @@ const EN: Record<string, string> = {
   'Hesabım': 'My account',
   'Ödüller': 'Rewards',
   'Mağaza': 'Shop',
+  'Kuponlar': 'Coupons',
   'Kasa': 'Vault',
   'Profil': 'Profile',
   'Ayarlar': 'Settings',

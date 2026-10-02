@@ -17,6 +17,8 @@ import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 import { ExerciseView, correctText, isCorrect, type Answer } from './LessonPlayer'
 import { UserAvatar } from '@/components/game/UserAvatar'
+import { LeagueEmblem } from '@/components/game/LeagueEmblem'
+import { timeLeft } from '@/lib/format'
 
 interface Rank { key: string; name: string; min: number; tier: number }
 interface Overview {
@@ -154,7 +156,7 @@ export default function Duel() {
         {!!lobby.data?.players.length && (
           <div className="relative border-t border-white/10 px-6 py-4 sm:px-9">
             <p className="mb-2.5 text-[11px] font-black uppercase tracking-[0.18em] text-white/45">Şu an arenada</p>
-            <div className="no-scrollbar flex gap-4 overflow-x-auto">
+            <div className="no-scrollbar -mx-2 flex gap-4 overflow-x-auto px-2 py-1">
               {lobby.data.players.map((p) => (
                 <Link key={p.username} to={`/u/${p.username}`} className="flex w-16 shrink-0 flex-col items-center gap-1 text-center">
                   <span className="relative">
@@ -243,7 +245,8 @@ export default function Duel() {
 
         {/* ---------------------------------------------------------- Board */}
         <section>
-          <h2 className="mb-1 text-xl">Lig grubunda bu hafta</h2>
+          <LeagueCard />
+          <h2 className="mb-1 mt-8 text-xl">Düello sıralaması</h2>
           <p className="mb-3 text-sm text-ink-soft">{league.name} Ligi grubundaki herkes, bu haftaki düello galibiyetine göre.</p>
           <div className="overflow-hidden rounded-2xl border-2 border-line bg-card">
             {data.leaderboard.length === 0 && <p className="p-6 text-center text-ink-soft">Grubun doluyor. İlk düelloyu sen başlat!</p>}
@@ -762,5 +765,30 @@ function Matchmaking({ lobby, onMatched, onGhost, onCancel }: { lobby?: Lobby; o
         )}
       </div>
     </motion.div>
+  )
+}
+
+/**
+ * The weekly XP league, as a card inside the arena: the tier, time left and the
+ * learner's place, one tap from the full table.
+ */
+function LeagueCard() {
+  const { data } = useQuery({ queryKey: ['league'], queryFn: () => get<{ ends_at: string; tier: number; tier_name: string; promote_count: number; rows: { rank: number; xp: number; is_me: boolean }[] }>('/league') })
+  if (!data) return <div className="h-[132px] animate-pulse rounded-3xl bg-paper-2" />
+  const mine = data.rows.find((r) => r.is_me)
+  const up = mine && mine.rank <= data.promote_count
+  return (
+    <Link to="/leagues" className="group flex items-center gap-4 rounded-3xl border-2 border-line bg-card p-5 transition hover:border-butter/60 hover:shadow-[0_10px_30px_-18px_rgba(255,194,51,.8)]">
+      <LeagueEmblem tier={data.tier} size={76} className="shrink-0 transition group-hover:-translate-y-0.5" />
+      <span className="min-w-0 flex-1">
+        <span className="block text-[11px] font-black uppercase tracking-[0.18em] text-ink-soft">Haftalık lig · XP</span>
+        <span className="block font-display text-2xl font-black leading-tight">{data.tier_name} Ligi</span>
+        <span className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm font-bold text-ink-soft">
+          {mine && <span className={clsx(up ? 'text-mint-deep' : 'text-ink')}>{mine.rank}. sıradasın · {mine.xp} XP</span>}
+          <span>{timeLeft(data.ends_at)} kaldı</span>
+        </span>
+      </span>
+      <span className="hidden shrink-0 rounded-xl bg-ink px-3.5 py-2 text-sm font-extrabold text-paper sm:block">Ligi gör</span>
+    </Link>
   )
 }

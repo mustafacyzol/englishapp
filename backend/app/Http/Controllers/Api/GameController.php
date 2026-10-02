@@ -286,7 +286,9 @@ class GameController extends Controller
         $user->items()->where('status', 'active')->whereNotNull('expires_at')->where('expires_at', '<', now())->update(['status' => 'expired']);
 
         return response()->json([
-            'data' => $user->items()->with('item')->orderByRaw("CASE status WHEN 'available' THEN 0 WHEN 'active' THEN 1 ELSE 2 END")->latest()->limit(100)->get()
+            // The vault holds cards and chests. Frames and covers live on the profile, partner gifts under Kuponlar.
+            'data' => $user->items()->whereHas('item', fn ($q) => $q->whereNotIn('type', ['avatar_frame', 'profile_banner', 'partner_coupon']))
+                ->with('item')->orderByRaw("CASE status WHEN 'available' THEN 0 WHEN 'active' THEN 1 ELSE 2 END")->latest()->limit(100)->get()
                 ->each(function (UserItem $i) {
                     if ($i->item?->type === 'chest' && $i->status === 'available') {
                         $i->setAttribute('odds', $this->rewards->odds($i->item, request()->user()));

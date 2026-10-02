@@ -61,10 +61,10 @@ const TEXT: Record<LegalKind, Doc> = {
     title: 'İptal ve İade Politikası',
     intro: 'Premium üyeliğini nasıl iptal edeceğin ve iadenin nasıl işlediği.',
     body: [
-      ['İptal', 'Premium paketler otomatik yenilenmediği için ayrıca iptal işlemi gerekmez. Sürenin sonunda hesabın kendiliğinden ücretsiz sürüme döner.'],
+      ['İptal', 'Premium paketler otomatik yenilenmez; sürenin sonunda hesabın kendiliğinden ücretsiz sürüme döner. İstersen Profil > Aboneliğim bölümünden üyeliğini iptal edebilir, iptali süre bitmeden geri alabilirsin.'],
       ['İade koşulu', 'Satın alma tarihinden itibaren 14 gün içinde ve Premium’a özel içerikleri kullanmadıysan ücretin tamamı iade edilir.'],
       ['Kısmi kullanım', 'Premium hikâyeleri açtıysan, ek AI mesaj hakkını kullandıysan veya canlı ders kuponunu açtıysan hizmet ifa edilmiş sayılır ve iade yapılamaz.'],
-      ['Nasıl talep edilir', 'İletişim sayfasındaki formdan "Teknik destek" konusuyla ya da destek e-postamızdan sipariş numaranla başvurman yeterlidir.'],
+      ['Nasıl talep edilir', 'Profil > Aboneliğim > Aboneliği iptal et adımında "İptal et ve iade iste" seçeneğini seçmen yeterlidir. Dilersen iletişim formundan ya da destek e-postamızdan sipariş numaranla da başvurabilirsin.'],
       ['Süre', 'Onaylanan iadeler 3 iş günü içinde ödeme kuruluşuna iletilir; kartına yansıma süresi bankana göre değişir.'],
       ['Canlı ders kuponları', 'Hediye edilen ve kazanılan canlı ders kuponlarının nakit karşılığı yoktur, iadeye konu edilemez.'],
     ],

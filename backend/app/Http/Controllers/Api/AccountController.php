@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Presenters\UserPresenter;
 use App\Models\Avatar;
 use App\Services\OtpService;
+use App\Services\SubscriptionService;
 use App\Support\Audit;
 use App\Support\Exams;
 use App\Support\Totp;
@@ -254,5 +255,28 @@ class AccountController extends Controller
         $request->user()->unreadNotifications->markAsRead();
 
         return response()->json(['ok' => true]);
+    }
+
+    /** Profile > Aboneliğim: the live period, the refund window and the history. */
+    public function subscription(Request $request, SubscriptionService $subs): JsonResponse
+    {
+        return response()->json($subs->overview($request->user()));
+    }
+
+    public function cancelSubscription(Request $request, SubscriptionService $subs): JsonResponse
+    {
+        $data = $request->validate([
+            'reason' => ['required', Rule::in(array_keys(SubscriptionService::REASONS))],
+            'note' => ['nullable', 'string', 'max:400'],
+            'refund' => ['boolean'],
+        ]);
+        $out = $subs->cancel($request->user(), $data['reason'], $data['note'] ?? null, (bool) ($data['refund'] ?? false));
+
+        return response()->json($out + ['user' => UserPresenter::me($request->user()->fresh())]);
+    }
+
+    public function resumeSubscription(Request $request, SubscriptionService $subs): JsonResponse
+    {
+        return response()->json($subs->resume($request->user()) + ['user' => UserPresenter::me($request->user()->fresh())]);
     }
 }

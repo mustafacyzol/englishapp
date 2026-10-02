@@ -13,17 +13,23 @@ import { rewardImg, img } from '@/lib/assets'
 import { RARITY } from '@/components/game/RewardCard'
 import { Button, LinkButton } from '@/components/ui/Button'
 import { PageHeader, SkeletonPage, Tabs } from '@/components/ui/Misc'
-import { UserAvatar } from '@/components/game/UserAvatar'
+import { FRAMES, UserAvatar } from '@/components/game/UserAvatar'
 import { ProfileBanner } from '@/components/game/ProfileBanner'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 
+type LookFilter = 'all' | 'avatar_frame' | 'profile_banner'
+const LOOK_FILTERS: { value: LookFilter; label: string }[] = [
+  { value: 'all', label: 'Tümü' },
+  { value: 'avatar_frame', label: 'Çerçeveler' },
+  { value: 'profile_banner', label: 'Kapaklar' },
+]
 type TabKey = 'look' | 'boost' | 'pack' | 'chest' | 'premium'
 const GROUPS: { key: TabKey; title: string; text: string; types: string[] }[] = [
   { key: 'look', title: 'Görünüm', text: 'Çerçeve ve kapaklar profilinde, ligde ve arenada herkese görünür.', types: ['avatar_frame', 'profile_banner'] },
   { key: 'boost', title: 'Güçlendiriciler', text: 'XP takviyesi, can ve seri koruması.', types: ['xp_boost', 'streak_freeze', 'heart_refill'] },
   { key: 'pack', title: 'Paketler', text: 'Birlikte al, daha az öde. Paket açılınca kartlar kasana düşer.', types: ['bundle'] },
-  { key: 'chest', title: 'Sandıklar', text: 'Olasılıklar açık, iş ortaklarımızdan hediyeler dahil.', types: ['chest'] },
+  { key: 'chest', title: 'Sandıklar', text: 'Sandığı aç, içinden elmas, güçlendirici ya da iş ortağı hediyesi çıksın. Neler çıkabileceğini açtıktan sonra görürsün.', types: ['chest'] },
   { key: 'premium', title: 'Premium', text: 'Elmaslarınla Premium günleri aç.', types: ['premium_days'] },
 ]
 
@@ -35,6 +41,7 @@ export default function Shop() {
   const [chest, setChest] = useState<UserItem | null>(null)
   const [params] = useSearchParams()
   const [tab, setTab] = useState<TabKey>(() => (GROUPS.some((g) => g.key === params.get('tab')) ? (params.get('tab') as TabKey) : 'look'))
+  const [look, setLook] = useState<LookFilter>('all')
   const wear = useMutation({
     mutationFn: (b: { frame?: string | null; banner?: string | null }) => patch<{ user: Me }>('/account', b),
     onSuccess: (r) => { setUser(r.user); toast('Profilinde! Ligde ve arenada artık böyle görünüyorsun.', 'success') },
@@ -89,11 +96,21 @@ export default function Shop() {
         <Tabs value={tab} onChange={setTab} items={GROUPS.filter((g) => data.items.some((it) => g.types.includes(it.type))).map((g) => ({ value: g.key, label: g.title }))} />
       </div>
       {GROUPS.filter((g) => g.key === tab).map((g) => {
-        const items = data.items.filter((it) => g.types.includes(it.type))
-        if (!items.length) return null
+        const items = data.items.filter((it) => g.types.includes(it.type) && (g.key !== 'look' || look === 'all' || it.type === look))
         return (
           <section key={g.title} className="mb-10">
-            <p className="mb-4 text-sm text-ink-soft">{g.text}</p>
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-sm text-ink-soft">{g.text}</p>
+              {g.key === 'look' && (
+                <div role="radiogroup" aria-label="Görünüm filtresi" className="flex shrink-0 gap-1.5">
+                  {LOOK_FILTERS.map((f) => (
+                    <button key={f.value} role="radio" aria-checked={look === f.value} onClick={() => setLook(f.value)} className={clsx('rounded-full px-3.5 py-1.5 text-sm font-bold transition', look === f.value ? 'bg-ink text-paper' : 'bg-paper-2 text-ink-soft hover:text-ink')}>
+                      {f.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((it) => {
                 const r = RARITY[it.rarity] ?? RARITY.common
@@ -108,7 +125,7 @@ export default function Shop() {
                       {it.type === 'profile_banner' && <ProfileBanner banner={val.banner} className="absolute inset-0" />}
                       <span className={clsx('absolute left-4 top-3 z-10 rounded-full px-2 py-0.5 text-[11px] font-extrabold uppercase tracking-widest', r.text, it.type === 'profile_banner' && 'bg-white/85')}>{r.label}</span>
                       {it.type === 'avatar_frame' ? (
-                        <UserAvatar name={user.name} avatar={user.avatar} frame={val.frame} className="size-24 transition duration-300 group-hover:scale-105" rounded="rounded-[28px]" />
+                        <UserAvatar name={user.name} avatar={user.avatar} frame={val.frame} className="size-28 transition duration-300 group-hover:scale-105" rounded="rounded-full" />
                       ) : it.type === 'profile_banner' ? (
                         <UserAvatar name={user.name} avatar={user.avatar} frame={user.frame} className="relative mt-8 size-16 border-4 border-card" rounded="rounded-[22px]" />
                       ) : (
@@ -118,20 +135,12 @@ export default function Shop() {
                     <div className="flex flex-1 flex-col items-center gap-2 px-5 pb-5 text-center">
                       <h3 className="font-display text-xl font-extrabold">{it.name}</h3>
                       <p className="flex-1 text-sm text-ink-soft">{it.description}</p>
+                      <span className="rounded-full bg-paper-2 px-2.5 py-1 text-[11px] font-extrabold uppercase tracking-wider text-ink-soft">
+                        {it.type === 'avatar_frame' ? `Çerçeve${val.frame && FRAMES[val.frame] ? ` · ${FRAMES[val.frame].note}` : ''}` : it.type === 'profile_banner' ? 'Profil kapağı' : it.type === 'chest' ? 'Sandık · hemen açılır' : it.type === 'bundle' ? 'Paket · kasana düşer' : 'Kasana düşer, istediğinde kullan'}
+                      </span>
                       {it.type === 'bundle' && !!val.items?.length && (
                         <ul className="flex flex-wrap justify-center gap-1.5">
                           {val.items.map((x) => <li key={x.item} className="rounded-full bg-paper-2 px-2.5 py-1 text-xs font-bold">{x.qty} × {data.items.find((d) => d.key === x.item)?.name ?? x.item}</li>)}
-                        </ul>
-                      )}
-                      {!!it.odds?.length && (
-                        <ul className="mt-1 w-full space-y-1 rounded-2xl bg-paper-2 p-2.5 text-left text-xs font-bold">
-                          {it.odds.map((o, k) => (
-                            <li key={k} className="flex items-center gap-2">
-                              <span className={clsx('size-2 shrink-0 rounded-full', { common: 'bg-mint', rare: 'bg-sky', epic: 'bg-berry', legendary: 'bg-butter' }[o.rarity])} />
-                              <span className="min-w-0 flex-1 truncate">{o.label}</span>
-                              <span className="tabular-nums text-ink-soft">%{o.chance}</span>
-                            </li>
-                          ))}
                         </ul>
                       )}
                       {owned ? (

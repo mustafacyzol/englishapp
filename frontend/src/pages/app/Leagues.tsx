@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
 import { motion } from 'motion/react'
-import { ChevronsDown, ChevronsUp, Clock, Flame } from 'lucide-react'
+import { ArrowLeft, ChevronsDown, ChevronsUp, Clock, Flame } from 'lucide-react'
 import { img } from '@/lib/assets'
 import { get } from '@/lib/api'
 import { timeLeft } from '@/lib/format'
@@ -30,7 +30,8 @@ export default function Leagues() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="no-scrollbar mb-6 flex gap-3 overflow-x-auto pb-2">
+      <Link to="/duel" className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-ink-soft hover:text-ink"><ArrowLeft className="size-4" /> Arena</Link>
+      <div className="no-scrollbar mb-6 flex items-center gap-3 overflow-x-auto px-2 py-3">
         {data.tiers.map((t, i) => (
           <div key={t} className={clsx('flex shrink-0 flex-col items-center', i === data.tier ? 'scale-110' : 'opacity-60')}>
             <LeagueEmblem tier={i} size={i === data.tier ? 60 : 42} dim={i > data.tier} />
