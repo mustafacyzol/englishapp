@@ -152,13 +152,13 @@ export default function Duel() {
           </div>
         </div>
 
-        {/* the arena is busy: anonymous silhouettes drift by, no names, no head count */}
+        {/* the arena is busy: real faces drift by, crisp, but no names and no head count */}
         {!!lobby.data?.players.length && (
           <div className="relative flex items-center gap-4 overflow-hidden border-t border-white/10 px-6 py-4 sm:px-9">
             <div className="flex -space-x-3" aria-hidden>
               {lobby.data.players.slice(0, 5).map((p, i) => (
                 <motion.span key={i} className="relative size-10 overflow-hidden rounded-full border-2 border-[#0a0d1a] bg-white/10" animate={{ y: [0, -3, 0] }} transition={{ duration: 2.4, delay: i * 0.3, repeat: Infinity, ease: 'easeInOut' }}>
-                  <UserAvatar name={p.name} avatar={p.avatar} avatarUrl={p.avatar_url} className="size-full scale-110 opacity-60 blur-[2px] grayscale-[.3]" />
+                  <UserAvatar name={p.name} avatar={p.avatar} avatarUrl={p.avatar_url} className="size-full" />
                 </motion.span>
               ))}
             </div>
@@ -744,7 +744,7 @@ function Matchmaking({ lobby, onMatched, onGhost, onCancel }: { lobby?: Lobby; o
                 <UserAvatar name={found.ghost.name} avatar={found.ghost.look?.avatar} avatarUrl={found.ghost.look?.avatar_url} frame={found.ghost.look?.frame} className="size-28" />
               </motion.div>
             ) : f ? (
-              <UserAvatar key={face} name={f.name} avatar={f.avatar} avatarUrl={f.avatar_url} frame={f.frame} className="size-24 opacity-80 blur-[1px]" />
+              <UserAvatar key={face} name={f.name} avatar={f.avatar} avatarUrl={f.avatar_url} frame={f.frame} className="size-24" />
             ) : (
               <Swords className="size-16 text-mint" />
             )}

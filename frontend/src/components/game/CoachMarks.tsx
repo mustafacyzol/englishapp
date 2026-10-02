@@ -50,7 +50,7 @@ export function CoachMarks() {
     const first = user.name.split(' ')[0]
     const exam = examOn(user) ? examName(user.exam_target) ?? 'Sınav' : undefined
     return [
-      { targets: ['here', 'path'], title: `Merhaba ${first}, burası senin yolun`, text: '“Buradasın” işareti kaldığın durağı gösterir. Dokun, dersi başlat. Her ünitenin sonunda bir kupa var.' },
+      { targets: ['here'], title: `Merhaba ${first}, burası senin yolun`, text: '“Buradasın” işareti kaldığın durağı gösterir. Dokun, dersi başlat. Her ünitenin sonunda bir kupa var.' },
       { targets: ['stats'], title: 'Serin, elmasın, canların', text: 'Her gün biraz çalış, alev büyüsün. Elmaslarla mağazadan dondurucu ve sandık alırsın.' },
       { targets: ['practice', 'tab-practice'], title: 'Kelime pratiği', text: 'Kaydırmalı kartlar ve hızlı oyunlarla kelimeleri unutmadan tekrar et. Sağa bildim, sola bilmedim.' },
       ...(exam ? [{ targets: ['exam', 'more'], title: `${exam} hazırlığın burada`, text: `${exam} formatında sorular, Türkçe çözümler ve zayıf bölümüne göre öneri. Defne de sınavına göre konuşur.` }] : []),
@@ -92,13 +92,19 @@ export function CoachMarks() {
       else setRect(null)
       return
     }
-    el.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-    const t = setTimeout(measure, 280)
-    measure()
+    // Bars that never scroll (header, bottom dock) stay put; anything in the page is centred,
+    // so it never ends up under the sticky header or the dock on a phone.
+    const pinned = !!el.closest('header, nav[aria-label="Alt menü"], aside')
+    if (!pinned) el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+    // Follow the smooth scroll frame by frame for a moment, then on scroll/resize only.
+    let raf = 0
+    const until = performance.now() + 700
+    const follow = () => { measure(); if (performance.now() < until) raf = requestAnimationFrame(follow) }
+    follow()
     window.addEventListener('resize', measure)
     window.addEventListener('scroll', measure, true)
     return () => {
-      clearTimeout(t)
+      cancelAnimationFrame(raf)
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }
@@ -149,18 +155,29 @@ export function CoachMarks() {
   const m = marks[i]
   const vw = window.innerWidth
   const vh = window.innerHeight
-  const hole = { x: rect.left - PAD, y: rect.top - PAD, w: rect.width + PAD * 2, h: rect.height + PAD * 2 }
-  // Place the card where there is most room: right of a sidebar item, above a bottom bar, else below.
+  // The spotlight never leaves the screen, even for a tall target.
+  const top = Math.max(4, rect.top - PAD)
+  const bottom = Math.min(vh - 4, rect.bottom + PAD)
+  const hole = { x: Math.max(4, rect.left - PAD), y: top, w: Math.min(vw - 8, rect.width + PAD * 2), h: Math.max(24, bottom - top) }
+  // Place the card where there is most room: right of a sidebar item, else the taller side.
   const CARD_W = Math.min(340, vw - 24)
-  let place: 'right' | 'above' | 'below' = 'below'
+  const CARD_H = 210
+  const roomAbove = hole.y - 16
+  const roomBelow = vh - (hole.y + hole.h) - 16
+  let place: 'right' | 'above' | 'below' | 'over' = 'below'
   if (rect.right + CARD_W + 24 < vw && rect.width < vw / 3) place = 'right'
-  else if (rect.top > vh * 0.55) place = 'above'
+  else if (roomBelow >= CARD_H) place = 'below'
+  else if (roomAbove >= CARD_H) place = 'above'
+  else place = 'over'
+  const left = Math.min(Math.max(12, rect.left + rect.width / 2 - CARD_W / 2), vw - CARD_W - 12)
   const cardStyle: React.CSSProperties =
     place === 'right'
       ? { left: rect.right + PAD + 16, top: Math.min(Math.max(12, rect.top + rect.height / 2 - 90), vh - 240), width: CARD_W }
       : place === 'above'
-        ? { left: Math.min(Math.max(12, rect.left + rect.width / 2 - CARD_W / 2), vw - CARD_W - 12), bottom: vh - rect.top + PAD + 16, width: CARD_W }
-        : { left: Math.min(Math.max(12, rect.left + rect.width / 2 - CARD_W / 2), vw - CARD_W - 12), top: rect.bottom + PAD + 16, width: CARD_W }
+        ? { left, bottom: vh - hole.y + 12, width: CARD_W }
+        : place === 'below'
+          ? { left, top: hole.y + hole.h + 12, width: CARD_W }
+          : { left: (vw - CARD_W) / 2, bottom: 'calc(env(safe-area-inset-bottom) + 84px)', width: CARD_W }
 
   return (
     <div className="fixed inset-0 z-[70]" role="dialog" aria-modal="true" aria-label="Uygulama rehberi">

@@ -104,6 +104,15 @@ Bu anahtarları .env'e yazmak zorunda değilsiniz. **Yönetim → Sistem → Ent
 
 - **Ödeme:** "Test ödemesi" ↔ "iyzico" seçer, ortamı (Sandbox / Canlı) belirler, API anahtarı ve gizli anahtarı girer. Canlıya geçmeden önce sandbox anahtarlarıyla bir deneme satın alma yapın (https://sandbox-merchant.iyzipay.com). Geri dönüş adresi otomatiktir: `https://API_ALAN_ADI/api/v1/payments/iyzico/callback`.
 - **Defne'nin sesi:** ElevenLabs anahtarı, ses kimliği (voice ID), model, kararlılık ve benzerlik.
+- **Kelime ve ders sesi (anlatıcı):** Kelimeler, örnek cümleler, dersler ve hikâyeler sunucuda üretilen doğal İngilizce sesle okunur; telefonun dili Türkçe olsa bile. Google Cloud TTS, OpenAI veya ElevenLabs'tan **biri** yeterli. Her ses bir kez üretilip `storage/app/tts` altında saklanır, aynı kelime tekrar ücretlendirilmez. Hiçbiri girilmezse cihazın İngilizce sesi kullanılır (bazı Türkçe Android telefonlarda yüklü değildir, bu yüzden canlıda bir sağlayıcı önerilir).
+
+#### Ses sağlayıcısı kurulumu (adım adım)
+
+1. **Google Cloud TTS (önerilen, en ucuz):** console.cloud.google.com → yeni proje → "Cloud Text-to-Speech API"yi etkinleştir → API ve Hizmetler → Kimlik bilgileri → API anahtarı oluştur → anahtarı yalnızca Text-to-Speech API ile sınırla. Panele "Google Cloud TTS anahtarı" olarak yapıştır. Ses: `en-GB-Neural2-C` (İngiliz) veya `en-US-Neural2-F` (Amerikan).
+2. **OpenAI:** platform.openai.com → API keys → yeni anahtar. Panele "OpenAI API anahtarı", ses `nova`.
+3. **ElevenLabs (Defne için):** elevenlabs.io → Profile → API key. Voice Library'den bir ses seç, "voice ID"yi kopyala. Kelimeler için ayrı bir anlatıcı sesi istersen "ElevenLabs anlatıcı sesi"ne ikinci bir voice ID gir.
+4. Kaydet, ardından iki kartta da **"Kayıtlı ayarlarla dinle"** ile dene. Sunucunun dışarıya `texttospeech.googleapis.com`, `api.openai.com` ve `api.elevenlabs.io` adreslerine HTTPS ile çıkabildiğinden emin ol (Hostinger'da varsayılan olarak açık).
+5. `.env` ile kurmak istersen: `GOOGLE_TTS_KEY`, `GOOGLE_TTS_VOICE`, `OPENAI_TTS_KEY`, `OPENAI_TTS_VOICE`, `ELEVENLABS_API_KEY`, `ELEVENLABS_VOICE_ID`, `ELEVENLABS_NARRATOR_VOICE_ID`.
 - **Dudak senkronu:** aç / kapat, ağız açıklığı (1 ila 8) ve konuşma hızı (0.80x ila 1.15x). "Kayıtlı ayarlarla dinle" düğmesiyle hemen denenir.
 - **Yapay zekâ:** Anthropic API anahtarı ve model adı.
 

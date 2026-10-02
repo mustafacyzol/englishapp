@@ -116,14 +116,14 @@ export default function Stories() {
 
       {/* ------------------------------------------------------------ Filters: one calm toolbar */}
       <section className="mb-5 flex flex-wrap items-center gap-2 rounded-2xl border-2 border-line bg-card p-2">
-        <div className="no-scrollbar flex max-w-full overflow-x-auto rounded-xl bg-paper-2 p-1" role="radiogroup" aria-label="Seviye">
+        <div className="grid w-full auto-cols-fr grid-flow-col rounded-xl bg-paper-2 p-1 sm:w-auto" role="radiogroup" aria-label="Seviye">
           {['', ...LEVELS].map((l) => {
             const on = level === l
             const mine = !!l && user?.cefr_level === l
             return (
-              <button key={l || 'all'} role="radio" aria-checked={on} onClick={() => setLevel(l)} title={l ? LEVEL_TEXT[l] : undefined} className={clsx('relative shrink-0 rounded-lg px-3 py-1.5 text-sm font-extrabold transition', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
+              <button key={l || 'all'} role="radio" aria-checked={on} onClick={() => setLevel(l)} title={l ? LEVEL_TEXT[l] : undefined} className={clsx('relative min-w-0 rounded-lg px-1.5 py-1.5 text-sm font-extrabold transition sm:px-3', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
                 {on && <motion.span layoutId="lvl" className="absolute inset-0 rounded-lg bg-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
-                <span className="relative">{l || 'Tüm seviyeler'}</span>
+                <span className="relative">{l || 'Tümü'}</span>
                 {mine && <span className={clsx('absolute bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full', on ? 'bg-paper' : 'bg-flame')} aria-label="senin seviyen" />}
               </button>
             )

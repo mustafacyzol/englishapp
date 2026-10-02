@@ -24,7 +24,7 @@ export interface SiteConfig {
   }
   social_login?: { google: string | null; apple: string | null }
   exams?: { key: ExamKey; name: string; full: string; about: string }[]
-  defne?: { voice: boolean; lipsync: boolean; gain: number; rate: number }
+  defne?: { voice: boolean; speech?: boolean; lipsync: boolean; gain: number; rate: number }
   cosmetics?: { frames?: Record<string, CustomFrame>; banners?: Record<string, CustomBanner> }
 }
 

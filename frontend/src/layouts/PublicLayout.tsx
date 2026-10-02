@@ -13,6 +13,7 @@ import { useLang } from '@/lib/i18n'
 import { useSiteConfig } from '@/lib/site'
 import { LinkButton } from '@/components/ui/Button'
 import { PageTransition } from '@/components/motion/Page'
+import { PageBoundary } from '@/components/ui/PageBoundary'
 import { BRAND, SUPPORT_EMAIL, WORDMARK } from '@/lib/brand'
 
 /** A short main menu: who we are, who it's for, what it costs, and the blog. */
@@ -61,7 +62,7 @@ export default function PublicLayout() {
       <MenuSheet open={open} onClose={() => setOpen(false)} />
       <ScrollProgress />
 
-      <PageTransition key={loc.pathname}>{outlet}</PageTransition>
+      <PageBoundary key={loc.pathname}><PageTransition>{outlet}</PageTransition></PageBoundary>
 
       <Footer />
     </div>
@@ -110,7 +111,7 @@ function SiteHeader({ onMenu }: { onMenu: () => void }) {
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-1.5 lg:ml-0">
-          <LangSelect className="hidden xl:block" />
+          <LangSelect className="hidden xl:grid" />
           {user ? (
             <span className="hidden sm:block"><LinkButton to="/learn" size="sm">{t('Uygulamaya git')}</LinkButton></span>
           ) : (

@@ -93,6 +93,23 @@ class EconomyAgeTest extends TestCase
         \Illuminate\Support\Facades\Storage::disk('local')->deleteDirectory('tts');
     }
 
+    public function test_narrator_speech_uses_the_configured_neural_voice(): void
+    {
+        $user = $this->learner();
+        $this->actingAs($user)->getJson('/api/v1/config')->assertJsonPath('defne.speech', false);
+        $this->actingAs($user)->postJson('/api/v1/speech', ['text' => 'apple'])->assertNoContent();
+
+        config(['services.google_tts.key' => 'g']);
+        Http::fake(['texttospeech.googleapis.com/*' => Http::response(['audioContent' => base64_encode('MP3')], 200)]);
+        $this->actingAs($user)->getJson('/api/v1/config')->assertJsonPath('defne.speech', true);
+        $res = $this->actingAs($user)->postJson('/api/v1/speech', ['text' => 'apple'])->assertOk()->assertHeader('Content-Type', 'audio/mpeg');
+        $this->assertSame('MP3', $res->getContent());
+        $this->actingAs($user)->postJson('/api/v1/speech', ['text' => 'apple'])->assertOk();
+        Http::assertSent(fn ($r) => $r['voice']['languageCode'] === 'en-GB' && $r['input']['text'] === 'apple');
+        Http::assertSentCount(1);
+        \Illuminate\Support\Facades\Storage::disk('local')->deleteDirectory('tts');
+    }
+
     public function test_avatars_standard_for_all_premium_only_while_premium(): void
     {
         $user = $this->learner();

@@ -12,7 +12,7 @@ import { ChestOpening, type ChestResult } from '@/components/game/ChestOpening'
 import { rewardImg, img } from '@/lib/assets'
 import { RARITY } from '@/components/game/RewardCard'
 import { Button, LinkButton } from '@/components/ui/Button'
-import { PageHeader, SkeletonPage, Tabs } from '@/components/ui/Misc'
+import { PageHeader, SkeletonPage } from '@/components/ui/Misc'
 import { UserAvatar } from '@/components/game/UserAvatar'
 import { ProfileBanner } from '@/components/game/ProfileBanner'
 import { useToast } from '@/components/ui/Toast'
@@ -25,12 +25,12 @@ const LOOK_FILTERS: { value: LookFilter; label: string }[] = [
   { value: 'profile_banner', label: 'Arka plan kapakları' },
 ]
 type TabKey = 'look' | 'boost' | 'pack' | 'chest' | 'premium'
-const GROUPS: { key: TabKey; title: string; text: string; types: string[] }[] = [
-  { key: 'look', title: 'Görünüm', text: 'Çerçeveler fotoğrafını, arka plan kapakları profilinin üst kısmını süsler. Herkes görür.', types: ['avatar_frame', 'profile_banner'] },
-  { key: 'boost', title: 'Güçlendiriciler', text: 'XP takviyesi, can ve seri koruması.', types: ['xp_boost', 'streak_freeze', 'heart_refill'] },
-  { key: 'pack', title: 'Paketler', text: 'Birlikte al, daha az öde. Paket açılınca kartlar kasana düşer.', types: ['bundle'] },
-  { key: 'chest', title: 'Sandıklar', text: 'Sandığı aç, içinden elmas, güçlendirici ya da iş ortağı hediyesi çıksın. Neler çıkabileceğini açtıktan sonra görürsün.', types: ['chest'] },
-  { key: 'premium', title: 'Premium', text: 'Elmaslarınla Premium günleri aç.', types: ['premium_days'] },
+const GROUPS: { key: TabKey; title: string; art: string; text: string; types: string[] }[] = [
+  { key: 'look', title: 'Görünüm', art: 'frame', text: 'Çerçeveler fotoğrafını, arka plan kapakları profilinin üst kısmını süsler. Herkes görür.', types: ['avatar_frame', 'profile_banner'] },
+  { key: 'boost', title: 'Güçlendirici', art: 'boost', text: 'XP takviyesi, can ve seri koruması.', types: ['xp_boost', 'streak_freeze', 'heart_refill'] },
+  { key: 'pack', title: 'Paketler', art: 'gems', text: 'Birlikte al, daha az öde. Paket açılınca kartlar kasana düşer.', types: ['bundle'] },
+  { key: 'chest', title: 'Sandıklar', art: 'chest', text: 'Sandığı aç, içinden elmas, güçlendirici ya da iş ortağı hediyesi çıksın. Neler çıkabileceğini açtıktan sonra görürsün.', types: ['chest'] },
+  { key: 'premium', title: 'Premium', art: 'crown', text: 'Elmaslarınla Premium günleri aç.', types: ['premium_days'] },
 ]
 
 export default function Shop() {
@@ -92,8 +92,15 @@ export default function Shop() {
         )}
       </section>
 
-      <div className="sticky top-[64px] z-20 -mx-4 mb-5 bg-paper/90 px-4 py-2 backdrop-blur sm:mx-0 sm:px-0">
-        <Tabs value={tab} onChange={setTab} items={GROUPS.filter((g) => data.items.some((it) => g.types.includes(it.type))).map((g) => ({ value: g.key, label: g.title }))} />
+      {/* Categories as tiles that all fit on screen: no hidden tabs to scroll sideways for. */}
+      <div role="tablist" aria-label="Mağaza bölümleri" className="sticky top-[64px] z-20 -mx-4 mb-5 grid auto-cols-fr grid-flow-col gap-1.5 bg-paper/90 px-4 py-2 backdrop-blur sm:mx-0 sm:gap-2 sm:px-0">
+        {GROUPS.filter((g) => data.items.some((it) => g.types.includes(it.type))).map((g) => (
+          <button key={g.key} role="tab" aria-selected={tab === g.key} onClick={() => setTab(g.key)}
+            className={clsx('flex min-w-0 flex-col items-center gap-0.5 rounded-2xl border-2 px-1 py-1.5 text-[11px] font-extrabold transition sm:flex-row sm:justify-center sm:gap-2 sm:py-2 sm:text-sm', tab === g.key ? 'border-ink bg-card text-ink shadow-[0_3px_0_var(--color-ink)]' : 'border-line bg-card text-ink-soft hover:text-ink')}>
+            <Img src={rewardImg(g.art)} alt="" className={clsx('size-7 object-contain transition sm:size-8', tab !== g.key && 'opacity-70 grayscale-[.4]')} />
+            <span className="max-w-full truncate">{g.title}</span>
+          </button>
+        ))}
       </div>
       {GROUPS.filter((g) => g.key === tab).map((g) => {
         const items = data.items.filter((it) => g.types.includes(it.type) && (g.key !== 'look' || look === 'all' || it.type === look))
@@ -102,7 +109,7 @@ export default function Shop() {
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-ink-soft">{g.text}</p>
               {g.key === 'look' && (
-                <div role="radiogroup" aria-label="Görünüm filtresi" className="flex shrink-0 gap-1.5">
+                <div role="radiogroup" aria-label="Görünüm filtresi" className="flex flex-wrap gap-1.5">
                   {LOOK_FILTERS.map((f) => (
                     <button key={f.value} role="radio" aria-checked={look === f.value} onClick={() => setLook(f.value)} className={clsx('rounded-full px-3.5 py-1.5 text-sm font-bold transition', look === f.value ? 'bg-ink text-paper' : 'bg-paper-2 text-ink-soft hover:text-ink')}>
                       {f.label}

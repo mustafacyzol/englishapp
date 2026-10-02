@@ -1,5 +1,6 @@
 import { lazy, Suspense, useEffect, type ReactNode } from 'react'
 import { Navigate, Route, Routes, useLocation } from 'react-router-dom'
+import { PageBoundary } from './components/ui/PageBoundary'
 import { RouteSeo } from './lib/seo'
 import { useAuth } from './lib/auth'
 import { Spinner } from './components/ui/Misc'
@@ -115,6 +116,7 @@ export default function App() {
     <Suspense fallback={<Spinner className="min-h-[60vh]" />}>
       {DEMO && <DemoBar />}
       <RouteSeo />
+      <TopBoundary>
       <Routes>
         <Route element={<PublicLayout />}>
           <Route path="/" element={user ? <Navigate to="/learn" replace /> : <Landing />} />
@@ -194,6 +196,13 @@ export default function App() {
         </Route>
 
       </Routes>
+      </TopBoundary>
     </Suspense>
   )
+}
+
+/** Last line of defence for full-screen routes (lessons, chats): reset on every navigation. */
+function TopBoundary({ children }: { children: React.ReactNode }) {
+  const loc = useLocation()
+  return <PageBoundary resetKey={loc.pathname}>{children}</PageBoundary>
 }

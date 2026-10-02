@@ -11,6 +11,7 @@ import { img, rewardImg } from '@/lib/assets'
 import { Logo } from '@/components/game/Logo'
 import { StatChips } from '@/components/game/StatChips'
 import { PageTransition } from '@/components/motion/Page'
+import { PageBoundary } from '@/components/ui/PageBoundary'
 import { LangSelect } from '@/components/ui/LangSelect'
 import { useLang } from '@/lib/i18n'
 import { useSiteConfig } from '@/lib/site'
@@ -159,7 +160,7 @@ export default function AppLayout() {
             </p>
             <div className="flex min-w-0 items-center gap-0.5 sm:gap-1">
               <span data-tour="stats" className="flex min-w-0"><StatChips user={user} /></span>
-              <LangSelect className="mr-1 hidden md:block" />
+              <LangSelect className="mr-1 hidden md:grid" />
               <Link to="/notifications" className="relative grid size-10 shrink-0 place-items-center rounded-xl text-ink-soft hover:bg-paper-2" aria-label={t('Bildirimler')}>
                 <Bell className="size-[22px]" />
                 {!!data?.unread_notifications && <span className="absolute right-1 top-1 grid size-4 place-items-center rounded-full bg-flame text-[10px] font-black text-white">{data.unread_notifications}</span>}
@@ -174,25 +175,26 @@ export default function AppLayout() {
         <div className="flex flex-1 gap-8 px-4 pb-32 pt-6 sm:px-6 md:px-8 lg:pb-12 xl:gap-10">
           <main className="min-w-0 flex-1">
             {hub && <div className={clsx(hub.mobileOnly && 'lg:hidden')}><HubTabs tabs={hub.tabs.filter((x) => !x.feature || on(x.feature))} path={loc.pathname} /></div>}
-            <PageTransition key={loc.pathname}>{outlet}</PageTransition>
+            <PageBoundary key={loc.pathname}><PageTransition>{outlet}</PageTransition></PageBoundary>
           </main>
           {withRail && data && <SideRail data={data} />}
         </div>
       </div>
 
-      {/* Phone and tablet dock: edge to edge like a native app, safe-area aware.
-          Each tab has its own colour; the active one grows a pill with its name. */}
-      <nav aria-label="Alt menü" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/92 backdrop-blur-xl lg:hidden">
-        <div className="safe-bottom mx-auto grid max-w-xl grid-cols-5 items-end px-2 pt-1.5">
+      {/* Phone and tablet dock: edge to edge like a native app, safe-area aware. Five equal
+          tabs, Defne among them at the same size; the active one gets a small bar and its colour. */}
+      <nav aria-label="Alt menü" className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-card/95 backdrop-blur-xl lg:hidden">
+        <div className="safe-bottom mx-auto grid max-w-xl grid-cols-5 px-1">
           {TABS.slice(0, 2).map((n) => <Tab key={n.to} n={n} active={isOn(n, loc.pathname)} />)}
           <DefneTab active={loc.pathname.startsWith('/ai')} />
           <Tab n={TABS[2]} active={isOn(TABS[2], loc.pathname)} />
-          <button onClick={() => setMore(true)} data-tour="more" aria-label="Ben" className="relative flex flex-col items-center gap-1 py-1">
-            <span className={clsx('relative grid h-8 w-14 place-items-center rounded-full transition-colors duration-200', MENU_PATHS.some((p) => loc.pathname.startsWith(p)) ? 'bg-ink/[0.08]' : '')}>
-              <UserAvatar name={user.name} avatar={user.avatar} className="size-7 ring-2 ring-card" />
-              {!!data?.available_items && <span className="absolute right-2 top-0 size-2.5 rounded-full bg-flame ring-2 ring-card" />}
+          <button onClick={() => setMore(true)} data-tour="more" aria-label="Ben" className="relative flex flex-col items-center gap-0.5 pb-1.5 pt-2">
+            <DockBar on={MENU_PATHS.some((p) => loc.pathname.startsWith(p))} color="bg-ink" />
+            <span className="relative">
+              <UserAvatar name={user.name} avatar={user.avatar} className="size-[26px]" />
+              {!!data?.available_items && <span className="absolute -right-0.5 -top-0.5 size-2.5 rounded-full bg-flame ring-2 ring-card" />}
             </span>
-            <span className="text-[11px] font-extrabold text-ink-soft">{t('Ben')}</span>
+            <span className={clsx('text-[11px]', MENU_PATHS.some((p) => loc.pathname.startsWith(p)) ? 'font-black text-ink' : 'font-bold text-ink-soft')}>{t('Ben')}</span>
           </button>
         </div>
       </nav>
@@ -206,32 +208,34 @@ export default function AppLayout() {
 
 const MENU_PATHS = ['/rewards', '/quests', '/shop', '/coupons', '/profile', '/settings', '/notifications', '/kurum']
 
-/** A dock tab: icon in a colour pill that lights up when active, the name under it. */
+/** The little bar over the active dock tab; it glides from tab to tab. */
+function DockBar({ on, color }: { on: boolean; color: string }) {
+  return on ? <motion.span layoutId="dock-bar" transition={{ type: 'spring', stiffness: 500, damping: 38 }} className={clsx('absolute inset-x-5 top-0 h-[3px] rounded-b-full', color)} /> : null
+}
+
+/** A dock tab: the icon fills with its colour when active, the name under it. */
 function Tab({ n, active }: { n: Item; active: boolean }) {
   const { t } = useLang()
-  const [text, bg] = TONE[n.tone].split(' ')
+  const [text] = TONE[n.tone].split(' ')
   return (
-    <Link to={n.to} data-tour={n.tour} aria-current={active ? 'page' : undefined} className="relative flex flex-col items-center gap-1 py-1">
-      <span className={clsx('relative grid h-8 w-14 place-items-center rounded-full transition-all duration-200', active ? bg : 'bg-transparent')}>
-        <n.icon className={clsx('size-6 transition-transform duration-200', active ? `${text} scale-110` : 'text-ink-soft')} />
-      </span>
-      <span className={clsx('text-[11px] transition-colors', active ? 'font-black text-ink' : 'font-extrabold text-ink-soft')}>{t(n.label)}</span>
+    <Link to={n.to} data-tour={n.tour} aria-current={active ? 'page' : undefined} className="relative flex flex-col items-center gap-0.5 pb-1.5 pt-2">
+      <DockBar on={active} color={text.replace('text-', 'bg-')} />
+      <n.icon className={clsx('size-[26px] transition-transform duration-200', active ? `${text} scale-105` : 'text-ink-soft')} strokeWidth={active ? 2.4 : 2} />
+      <span className={clsx('text-[11px] transition-colors', active ? 'font-black text-ink' : 'font-bold text-ink-soft')}>{t(n.label)}</span>
     </Link>
   )
 }
 
-/** Defne, raised in the middle of the bar: her face, an online dot and a soft pulse. */
+/** Defne as an ordinary tab: her face in the icon's place, with a small online dot. */
 function DefneTab({ active }: { active: boolean }) {
   return (
-    <Link to="/ai" data-tour="tab-defne" aria-label="Defne AI ile konuş" aria-current={active ? 'page' : undefined} className="relative flex flex-col items-center gap-1 py-1">
-      <span className="relative -mt-5 grid place-items-center">
-        {!active && <span aria-hidden className="absolute size-14 animate-ping rounded-full bg-sage/20 [animation-duration:2.8s]" />}
-        <span className={clsx('relative grid size-14 place-items-center rounded-full border-[3px] border-card shadow-[0_6px_16px_rgba(31,36,51,.18)] transition', active ? 'bg-sage' : 'bg-gradient-to-br from-sage to-mint-deep')}>
-          <Img src={TUTOR.avatar} alt="" className="size-[46px] rounded-full object-cover" />
-          <span className="absolute bottom-0.5 right-0.5 size-3.5 rounded-full border-2 border-card bg-mint" />
-        </span>
+    <Link to="/ai" data-tour="tab-defne" aria-label="Defne AI ile konuş" aria-current={active ? 'page' : undefined} className="relative flex flex-col items-center gap-0.5 pb-1.5 pt-2">
+      <DockBar on={active} color="bg-sage" />
+      <span className={clsx('relative rounded-full transition', active ? 'ring-2 ring-sage ring-offset-1 ring-offset-card' : '')}>
+        <Img src={TUTOR.avatar} alt="" className="size-[26px] rounded-full object-cover" />
+        <span className="absolute -bottom-0.5 -right-0.5 size-2.5 rounded-full border-2 border-card bg-mint" />
       </span>
-      <span className={clsx('text-[11px] font-black', active ? 'text-sage-deep dark:text-sage' : 'text-ink-soft')}>Defne</span>
+      <span className={clsx('text-[11px]', active ? 'font-black text-ink' : 'font-bold text-ink-soft')}>Defne</span>
     </Link>
   )
 }

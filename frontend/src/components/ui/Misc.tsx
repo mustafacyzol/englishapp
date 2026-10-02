@@ -167,7 +167,7 @@ export function Modal({ open, onClose, children, className, dismissable = true }
 
 export function Tabs<T extends string>({ value, onChange, items }: { value: T; onChange: (v: T) => void; items: { value: T; label: ReactNode }[] }) {
   return (
-    <div className="no-scrollbar flex gap-2 overflow-x-auto pb-1">
+    <div className="flex flex-wrap gap-2 pb-1">
       {items.map((it) => (
         <button
           key={it.value}

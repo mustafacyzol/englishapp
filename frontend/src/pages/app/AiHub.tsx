@@ -116,7 +116,7 @@ export default function AiHub() {
             <h2 className="text-2xl">Rol yapma görevleri</h2>
             <p className="text-ink-soft">Gerçek hayattan sahneler. {forYou.size > 0 && 'İlgi alanlarına uyanlar önde.'}</p>
           </div>
-          <div className="no-scrollbar -mx-1 flex max-w-full gap-1.5 overflow-x-auto px-1">
+          <div className="flex max-w-full flex-wrap gap-1.5">
             {cats.map((c) => (
               <button key={c} onClick={() => setCat(c)} className={clsx('shrink-0 rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', cat === c ? 'border-ink bg-ink text-paper' : 'border-line text-ink-soft hover:text-ink')}>
                 {c === 'all' ? 'Tümü' : CAT[c] ?? c}

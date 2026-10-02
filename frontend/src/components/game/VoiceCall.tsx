@@ -62,11 +62,11 @@ export function VoiceCall({
   useEffect(() => {
     const t = setInterval(() => setSeconds((s) => s + 1), 1000)
     const html = document.documentElement
-    const prev = html.style.overflow
     html.style.overflow = 'hidden'
     return () => {
       clearInterval(t)
-      html.style.overflow = prev
+      // Always give the page its scroll back (a remount would otherwise remember "hidden").
+      html.style.overflow = ''
       stopSpeaking()
       stopListen.current()
     }

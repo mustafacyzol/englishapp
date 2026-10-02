@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
-import { AnimatePresence, motion } from 'motion/react'
-import { Check, ChevronDown } from 'lucide-react'
+import { motion } from 'motion/react'
 import clsx from 'clsx'
 import { useLang, type Lang } from '@/lib/i18n'
 import { useAuth } from '@/lib/auth'
@@ -34,81 +32,36 @@ function Flag({ v, className }: { v: Lang; className?: string }) {
 }
 
 /**
- * The header language switch: a compact pill (flag + code) that opens a small card
- * with both languages, each greeting in its own language. Saved on the account too.
+ * The language switch. With only two languages a menu is one tap too many, so it is
+ * a two-sided pill: one tap flips TR and EN, the knob slides over. Saved on the account too.
  */
-export function LangSelect({ className, align = 'right' }: { className?: string; align?: 'left' | 'right' }) {
+export function LangSelect({ className }: { className?: string; align?: 'left' | 'right' }) {
   const { lang, setLang, t } = useLang()
   const { user, setUser } = useAuth()
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    const close = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false)
-    const esc = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    document.addEventListener('mousedown', close)
-    document.addEventListener('keydown', esc)
-    return () => {
-      document.removeEventListener('mousedown', close)
-      document.removeEventListener('keydown', esc)
-    }
-  }, [open])
-
-  const choose = (v: Lang) => {
-    setLang(v)
-    setOpen(false)
-    if (user && user.preferences?.language !== v) {
-      setUser({ ...user, preferences: { ...user.preferences, language: v } })
-      patch('/account', { preferences: { language: v } }).catch(() => {})
+  const next: Lang = lang === 'tr' ? 'en' : 'tr'
+  const flip = () => {
+    setLang(next)
+    if (user && user.preferences?.language !== next) {
+      setUser({ ...user, preferences: { ...user.preferences, language: next } })
+      patch('/account', { preferences: { language: next } }).catch(() => {})
     }
   }
-  const cur = LANGS.find((l) => l.v === lang)!
+  const other = LANGS.find((l) => l.v === next)!
 
   return (
-    <div ref={ref} className={clsx('relative', className)}>
-      <button
-        onClick={() => setOpen((o) => !o)}
-        aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-label={`${t('Dil')}: ${cur.name}`}
-        className={clsx('flex h-10 items-center gap-1.5 rounded-full border-2 pl-1 pr-2.5 text-sm font-black transition', open ? 'border-ink/30 bg-paper-2' : 'border-line bg-card hover:border-ink/20')}
-      >
-        <Flag v={lang} className="size-7" />
-        <span className="tabular-nums tracking-wide">{cur.code}</span>
-        <ChevronDown className={clsx('size-3.5 text-ink-soft transition', open && 'rotate-180')} />
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            role="listbox"
-            initial={{ opacity: 0, y: -6, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.97 }}
-            transition={{ duration: 0.16 }}
-            className={clsx('absolute top-[calc(100%+8px)] z-50 w-60 rounded-2xl border-2 border-line bg-card p-1.5 shadow-soft', align === 'right' ? 'right-0 origin-top-right' : 'left-0 origin-top-left')}
-          >
-            <p className="px-2.5 pb-1 pt-1.5 text-[11px] font-black uppercase tracking-widest text-ink-soft">{t('Arayüz dili')}</p>
-            {LANGS.map((l) => (
-              <button
-                key={l.v}
-                role="option"
-                aria-selected={l.v === lang}
-                onClick={() => choose(l.v)}
-                className={clsx('flex w-full items-center gap-3 rounded-xl px-2.5 py-2 text-left transition', l.v === lang ? 'bg-paper-2' : 'hover:bg-paper-2/70')}
-              >
-                <Flag v={l.v} className="size-8" />
-                <span className="min-w-0 flex-1">
-                  <span className="block font-extrabold leading-tight">{l.name}</span>
-                  <span className="block text-xs font-semibold text-ink-soft">{l.hello}!</span>
-                </span>
-                {l.v === lang && <Check className="size-4 text-mint-deep" strokeWidth={3} />}
-              </button>
-            ))}
-            <p className="px-2.5 pb-1.5 pt-2 text-xs text-ink-soft">{t('Ders içeriği her zaman İngilizce.')}</p>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <button
+      onClick={flip}
+      aria-label={`${t('Dil')}: ${LANGS.find((l) => l.v === lang)!.name}. ${other.name}`}
+      title={other.name}
+      className={clsx('relative grid h-9 w-[76px] shrink-0 grid-cols-2 items-center rounded-full border-2 border-line bg-paper-2 p-0.5 text-[11px] font-black tracking-wide', className)}
+    >
+      <motion.span layout transition={{ type: 'spring', stiffness: 520, damping: 34 }} aria-hidden
+        className={clsx('absolute inset-y-0.5 w-[34px] rounded-full bg-card shadow-[0_1px_3px_rgba(31,36,51,.18)]', lang === 'tr' ? 'left-0.5' : 'right-0.5')} />
+      {LANGS.map((l) => (
+        <span key={l.v} className={clsx('relative z-10 flex items-center justify-center gap-1 transition-colors', l.v === lang ? 'text-ink' : 'text-ink-soft')}>
+          {l.v === lang ? <Flag v={l.v} className="size-[18px] ring-0" /> : l.code}
+        </span>
+      ))}
+    </button>
   )
 }

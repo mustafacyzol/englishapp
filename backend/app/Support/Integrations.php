@@ -28,6 +28,13 @@ class Integrations
         'tts.elevenlabs.model' => ['services.elevenlabs.model', false],
         'tts.stability' => [null, false],
         'tts.similarity' => [null, false],
+        'tts.elevenlabs.narrator_voice_id' => ['services.elevenlabs.narrator_voice_id', false],
+        'tts.narrator' => [null, false], // auto | elevenlabs | openai | google | browser
+        'tts.openai.key' => ['services.openai_tts.key', true],
+        'tts.openai.voice' => ['services.openai_tts.voice', false],
+        'tts.openai.model' => ['services.openai_tts.model', false],
+        'tts.google.key' => ['services.google_tts.key', true],
+        'tts.google.voice' => ['services.google_tts.voice', false],
         'defne.lipsync' => [null, false],      // true | false
         'defne.lipsync_gain' => [null, false], // how wide the mouth opens per loudness, 1..8
         'defne.voice_rate' => [null, false],   // 0.8..1.15
@@ -39,6 +46,7 @@ class Integrations
         'payments.iyzico.mode' => 'sandbox',
         'tts.stability' => 0.5,
         'tts.similarity' => 0.75,
+        'tts.narrator' => 'auto',
         'defne.lipsync' => true,
         'defne.lipsync_gain' => 4,
         'defne.voice_rate' => 1,
@@ -131,6 +139,8 @@ class Integrations
     {
         return [
             'voice' => filled(self::get('tts.elevenlabs.key')),
+            // a neural English voice for words, lessons and stories
+            'speech' => \App\Services\SpeechService::narratorProvider() !== null,
             'lipsync' => filter_var(self::get('defne.lipsync'), FILTER_VALIDATE_BOOLEAN),
             'gain' => (float) self::get('defne.lipsync_gain'),
             'rate' => (float) self::get('defne.voice_rate'),

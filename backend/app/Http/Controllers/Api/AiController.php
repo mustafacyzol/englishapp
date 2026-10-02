@@ -9,8 +9,6 @@ use App\Services\AiTutorService;
 use App\Services\GamificationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\Response;
 
 class AiController extends Controller
@@ -115,32 +113,21 @@ class AiController extends Controller
      * nothing. Returns 204 when no voice provider is configured; the app then
      * falls back to the browser's speech synthesis.
      */
-    public function tts(Request $request): Response
+    /** Defne's own voice for replies and calls. 204 when no voice is configured (the app then uses the browser's). */
+    public function tts(Request $request, \App\Services\SpeechService $speech): Response
     {
         $data = $request->validate(['text' => ['required', 'string', 'max:600']]);
-        $cfg = \App\Support\Integrations::tts();
-        if (empty($cfg['key'])) {
-            return response()->noContent();
-        }
-        $text = trim(strip_tags($data['text']));
-        $path = 'tts/'.sha1($cfg['voice_id'].'|'.$cfg['model'].'|'.$text).'.mp3';
-        $disk = Storage::disk('local');
-        if (! $disk->exists($path)) {
-            $res = Http::timeout(20)
-                ->withHeaders(['xi-api-key' => $cfg['key'], 'Accept' => 'audio/mpeg'])
-                ->post("https://api.elevenlabs.io/v1/text-to-speech/{$cfg['voice_id']}?output_format=mp3_44100_64", [
-                    'text' => $text,
-                    'model_id' => $cfg['model'],
-                    'voice_settings' => ['stability' => $cfg['stability'], 'similarity_boost' => $cfg['similarity']],
-                ]);
-            if (! $res->successful()) {
-                report(new \RuntimeException('TTS failed: '.$res->status()));
+        $mp3 = $speech->synth($data['text'], 'defne');
 
-                return response()->noContent();
-            }
-            $disk->put($path, $res->body());
-        }
+        return $mp3 ? response($mp3, 200, ['Content-Type' => 'audio/mpeg', 'Cache-Control' => 'private, max-age=86400']) : response()->noContent();
+    }
 
-        return response($disk->get($path), 200, ['Content-Type' => 'audio/mpeg', 'Cache-Control' => 'private, max-age=86400']);
+    /** The narrator: words, example sentences, lessons and stories, always in English. */
+    public function speech(Request $request, \App\Services\SpeechService $speech): Response
+    {
+        $data = $request->validate(['text' => ['required', 'string', 'max:400']]);
+        $mp3 = $speech->synth($data['text'], 'narrator');
+
+        return $mp3 ? response($mp3, 200, ['Content-Type' => 'audio/mpeg', 'Cache-Control' => 'private, max-age=604800']) : response()->noContent();
     }
 }

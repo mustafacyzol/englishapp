@@ -62,7 +62,8 @@ export default function AiChat() {
     if (data.conversation.mode === 'speaking' && data.conversation.messages.length === 1) setCall(true)
   }, [data])
   useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), [messages])
-  useEffect(() => () => stopSpeaking(), [])
+  // Leaving the chat ends everything it started: no voice or open mic follows you to the next page.
+  useEffect(() => () => { stopSpeaking(); stopRef.current() }, [])
 
   const say = (t: string) => {
     setTalking(true)

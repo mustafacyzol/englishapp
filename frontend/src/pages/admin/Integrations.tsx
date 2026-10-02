@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { CreditCard, Mic, Save, Sparkles, Volume2 } from 'lucide-react'
+import { BookAudio, CreditCard, Mic, Save, Sparkles, Volume2 } from 'lucide-react'
 import { ApiError, get, put } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
-import { speakNeural } from '@/lib/speech'
+import { speak, speakNeural } from '@/lib/speech'
 import { Button } from '@/components/ui/Button'
 import { Input, Toggle } from '@/components/ui/Field'
 import { Spinner } from '@/components/ui/Misc'
@@ -14,7 +14,7 @@ import { AdminTitle, Pill } from './kit'
 type Secret = { set: boolean; hint: string | null }
 type Data = Record<string, string | number | boolean | null | Secret>
 
-const SECRETS = ['payments.iyzico.api_key', 'payments.iyzico.secret_key', 'tts.elevenlabs.key', 'ai.api_key'] as const
+const SECRETS = ['payments.iyzico.api_key', 'payments.iyzico.secret_key', 'tts.elevenlabs.key', 'tts.openai.key', 'tts.google.key', 'ai.api_key'] as const
 const isSecret = (k: string) => (SECRETS as readonly string[]).includes(k)
 
 function Card({ icon, title, text, status, children }: { icon: ReactNode; title: string; text: string; status?: ReactNode; children: ReactNode }) {
@@ -119,6 +119,8 @@ export default function AdminIntegrations() {
   const mode = (str('payments.iyzico.mode') || 'sandbox') as 'sandbox' | 'live'
   const iyzicoReady = secretInfo('payments.iyzico.api_key')?.set && secretInfo('payments.iyzico.secret_key')?.set
   const voiceReady = secretInfo('tts.elevenlabs.key')?.set
+  const narrator = (str('tts.narrator') || 'auto') as 'auto' | 'google' | 'openai' | 'elevenlabs' | 'browser'
+  const narratorReady = !!(secretInfo('tts.google.key')?.set || secretInfo('tts.openai.key')?.set || voiceReady)
 
   return (
     <div className="max-w-4xl pb-24">
@@ -168,6 +170,31 @@ export default function AdminIntegrations() {
               <Range label="Kararlılık" hint="Düşük: daha canlı ve değişken. Yüksek: daha düz ve tutarlı." min={0} max={1} step={0.05} value={num('tts.stability', 0.5)} onChange={(v) => set('tts.stability', v)} disabled={!canEdit} fmt={(v) => v.toFixed(2)} />
               <Range label="Benzerlik" min={0} max={1} step={0.05} value={num('tts.similarity', 0.75)} onChange={(v) => set('tts.similarity', v)} disabled={!canEdit} fmt={(v) => v.toFixed(2)} />
             </div>
+          </div>
+        </Card>
+
+        <Card
+          icon={<BookAudio className="size-5" />}
+          title="Kelime ve ders sesi"
+          text="Kelimeler, örnek cümleler, dersler ve hikâyeler bu sesle okunur. Cihazın dili ne olursa olsun her zaman doğal İngilizce. Boşken telefonun İngilizce sesi kullanılır; bazı Türkçe telefonlarda bu ses yüklü değildir."
+          status={narrator !== 'browser' && narratorReady ? <Pill tone="good">Sunucu sesi</Pill> : <Pill tone="warn">Cihaz sesi</Pill>}
+        >
+          <div className="grid gap-5">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-bold">Sağlayıcı</span>
+              <Segmented value={narrator} onChange={(v) => set('tts.narrator', v)} disabled={!canEdit} items={[['auto', 'Otomatik'], ['google', 'Google'], ['openai', 'OpenAI'], ['elevenlabs', 'ElevenLabs'], ['browser', 'Cihaz']]} />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              {secretField('tts.google.key', 'Google Cloud TTS anahtarı')}
+              <Input label="Google sesi" disabled={!canEdit} value={str('tts.google.voice')} onChange={(e) => set('tts.google.voice', e.target.value || null)} hint="ör. en-GB-Neural2-C, en-US-Neural2-F" />
+              {secretField('tts.openai.key', 'OpenAI API anahtarı')}
+              <Input label="OpenAI sesi" disabled={!canEdit} value={str('tts.openai.voice')} onChange={(e) => set('tts.openai.voice', e.target.value || null)} hint="ör. nova, alloy, shimmer" />
+              <Input label="ElevenLabs anlatıcı sesi (isteğe bağlı)" disabled={!canEdit} value={str('tts.elevenlabs.narrator_voice_id')} onChange={(e) => set('tts.elevenlabs.narrator_voice_id', e.target.value || null)} hint="Boşsa Defne'nin sesi kullanılır." />
+            </div>
+            <p className="text-xs text-ink-soft">Otomatik: önce Google, sonra OpenAI, sonra ElevenLabs. Her ses bir kez üretilip sunucuda saklanır, aynı kelime tekrar ücretlendirilmez.</p>
+            <Button variant="ghost" className="justify-self-start" disabled={dirty} onClick={() => speak('Apple. I usually have an apple for breakfast.')}>
+              <Volume2 className="size-4" /> Kayıtlı ayarlarla dinle
+            </Button>
           </div>
         </Card>
 

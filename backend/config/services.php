@@ -43,6 +43,20 @@ return [
         'key' => env('ELEVENLABS_API_KEY'),
         'voice_id' => env('ELEVENLABS_VOICE_ID', 'EXAVITQu4vr4xnSDxMaL'),
         'model' => env('ELEVENLABS_MODEL', 'eleven_multilingual_v2'),
+        // optional second voice for words, lessons and stories (defaults to Defne's)
+        'narrator_voice_id' => env('ELEVENLABS_NARRATOR_VOICE_ID'),
+    ],
+
+    // Other neural voices for words, lessons and stories. Any one is enough; the
+    // admin panel (Yönetim > Entegrasyonlar) can set or override them.
+    'openai_tts' => [
+        'key' => env('OPENAI_TTS_KEY'),
+        'voice' => env('OPENAI_TTS_VOICE', 'nova'),
+        'model' => env('OPENAI_TTS_MODEL', 'gpt-4o-mini-tts'),
+    ],
+    'google_tts' => [
+        'key' => env('GOOGLE_TTS_KEY'),
+        'voice' => env('GOOGLE_TTS_VOICE', 'en-GB-Neural2-C'),
     ],
 
     'slack' => [

@@ -100,6 +100,7 @@ Route::prefix('v1')->group(function () {
         Route::delete('notifications', [AccountController::class, 'clearNotifications']);
 
         // Everything below requires a verified e-mail
+        Route::post('speech', [AiController::class, 'speech'])->middleware('throttle:240,1');
         Route::middleware('verified.api')->group(function () {
             Route::get('dashboard', [GameController::class, 'dashboard']);
 

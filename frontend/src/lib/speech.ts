@@ -38,7 +38,61 @@ function pickVoice(preferred?: string) {
   )
 }
 
-export function speak(text: string, opts: { rate?: number; voice?: string; onStart?: () => void; onEnd?: () => void; onBoundary?: (charIndex: number) => void } = {}) {
+type SpeakOpts = { rate?: number; voice?: string; onStart?: () => void; onEnd?: () => void; onBoundary?: (charIndex: number) => void }
+
+/**
+ * Reads English aloud. With a neural voice on the server (Yönetim > Entegrasyonlar)
+ * every word, sentence and story line is real English audio, whatever the phone's
+ * language; clips are cached in memory. Otherwise an English browser voice is used.
+ */
+export function speak(text: string, opts: SpeakOpts = {}) {
+  if (tuning.speech && Date.now() > serverDownUntil) {
+    void speakServer(text, opts)
+    return
+  }
+  speakBrowser(text, opts)
+}
+
+const clips = new Map<string, string>()
+let serverDownUntil = 0
+let clip: HTMLAudioElement | null = null
+let clipGen = 0
+
+async function speakServer(text: string, opts: SpeakOpts) {
+  stopSpeaking()
+  const gen = ++clipGen
+  const key = text.trim().toLowerCase()
+  let url = clips.get(key)
+  if (!url) {
+    const { postBlob } = await import('./api')
+    const blob = await postBlob('/speech', { text })
+    if (!blob) {
+      // not signed in yet, busy or offline: use the browser voice for a minute, then try again
+      serverDownUntil = Date.now() + 60_000
+      if (gen === clipGen) speakBrowser(text, opts)
+      return
+    }
+    url = URL.createObjectURL(blob)
+    if (clips.size > 300) { const [k, u] = clips.entries().next().value!; URL.revokeObjectURL(u); clips.delete(k) }
+    clips.set(key, url)
+  }
+  if (gen !== clipGen) return
+  const el = new Audio(url)
+  clip = el
+  el.playbackRate = Math.min(1.2, Math.max(0.6, (opts.rate ?? 0.95) / 0.95))
+  let t = 0
+  el.onplay = () => {
+    opts.onStart?.()
+    if (opts.onBoundary) t = window.setInterval(() => el.duration && opts.onBoundary?.(Math.round((el.currentTime / el.duration) * text.length)), 120)
+  }
+  const end = () => { clearInterval(t); if (clip === el) clip = null; opts.onEnd?.() }
+  el.onended = end
+  el.onerror = end
+  el.onpause = () => { if (!el.ended) end() }
+  await el.play().catch(end)
+}
+
+function speakBrowser(text: string, opts: SpeakOpts = {}) {
   if (!canSpeak()) {
     // No synthesis (some WebViews, headless): still drive the UI for a natural reading time.
     opts.onStart?.()
@@ -58,6 +112,7 @@ export function speak(text: string, opts: { rate?: number; voice?: string; onSta
   const u = new SpeechSynthesisUtterance(text)
   const voice = pickVoice(opts.voice)
   if (voice) u.voice = voice
+  // Even with no English voice installed, asking for en-GB makes most engines switch language.
   u.lang = voice?.lang ?? 'en-GB'
   u.rate = opts.rate ?? 0.95
   u.onstart = () => opts.onStart?.()
@@ -68,6 +123,8 @@ export function speak(text: string, opts: { rate?: number; voice?: string; onSta
 }
 
 export const stopSpeaking = () => {
+  clipGen++
+  if (clip) { const c = clip; clip = null; c.pause() }
   if (canSpeak()) speechSynthesis.cancel()
 }
 
@@ -139,8 +196,8 @@ export function normalize(s: string) {
 type VoiceOpts = { rate?: number; voice?: string; onStart?: () => void; onEnd?: () => void; onBoundary?: (charIndex: number) => void; onLevel?: (level: number) => void }
 
 /** Admin-tuned voice and lip-sync values from /config (Yönetim → Entegrasyonlar). */
-export type DefneTuning = { voice: boolean; lipsync: boolean; gain: number; rate: number }
-const tuning: DefneTuning = { voice: true, lipsync: true, gain: 4, rate: 1 }
+export type DefneTuning = { voice: boolean; speech: boolean; lipsync: boolean; gain: number; rate: number }
+const tuning: DefneTuning = { voice: true, speech: false, lipsync: true, gain: 4, rate: 1 }
 export function setDefneTuning(t?: Partial<DefneTuning>) {
   if (t) Object.assign(tuning, t)
 }
@@ -175,7 +232,7 @@ export async function speakNeural(text: string, opts: VoiceOpts = {}) {
       opts.onLevel?.(tuning.lipsync ? pulse : 0)
       raf = requestAnimationFrame(decay)
     }
-    speak(text, {
+    speakBrowser(text, {
       ...opts,
       rate: (opts.rate ?? 0.95) * tuning.rate,
       onStart: () => {
