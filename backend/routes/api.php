@@ -183,6 +183,8 @@ Route::prefix('v1')->group(function () {
             Route::get('dashboard', [AdminController::class, 'dashboard']);
             Route::get('settings', [AdminController::class, 'settings'])->middleware('perm:settings');
             Route::put('settings', [AdminController::class, 'updateSettings'])->middleware('perm:settings');
+            Route::get('integrations', [AdminController::class, 'integrations'])->middleware('perm:settings');
+            Route::put('integrations', [AdminController::class, 'updateIntegrations'])->middleware('perm:settings');
             Route::post('vouchers', [AdminController::class, 'voucher'])->middleware('perm:desk');
 
             Route::middleware('perm:users')->group(function () {

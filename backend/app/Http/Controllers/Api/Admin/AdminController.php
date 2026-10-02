@@ -16,6 +16,7 @@ use App\Models\UserItem;
 use App\Services\InstitutionService;
 use App\Services\RewardService;
 use App\Support\Audit;
+use App\Support\Integrations;
 use App\Support\Settings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -336,6 +337,49 @@ class AdminController extends Controller
             ->when($request->query('action'), fn ($q, $a) => $q->where('action', 'like', "{$a}%"))
             ->when($request->query('user_id'), fn ($q, $u) => $q->where('user_id', $u))
             ->latest('id')->paginate(50));
+    }
+
+    /** Payments, Defne's voice and lip sync, AI keys: editable here, secrets never echoed back. */
+    public function integrations(): JsonResponse
+    {
+        return response()->json(['data' => Integrations::forAdmin()]);
+    }
+
+    public function updateIntegrations(Request $request): JsonResponse
+    {
+        abort_unless($request->user()->isSuperAdmin(), 403, 'Entegrasyonları yalnızca süper yönetici değiştirebilir.');
+        $rules = [
+            'payments.gateway' => ['sometimes', 'in:fake,iyzico'],
+            'payments.iyzico.mode' => ['sometimes', 'in:sandbox,live'],
+            'payments.iyzico.api_key' => ['sometimes', 'nullable', 'string', 'max:200'],
+            'payments.iyzico.secret_key' => ['sometimes', 'nullable', 'string', 'max:200'],
+            'tts.elevenlabs.key' => ['sometimes', 'nullable', 'string', 'max:200'],
+            'tts.elevenlabs.voice_id' => ['sometimes', 'nullable', 'string', 'max:80', 'regex:/^[A-Za-z0-9_-]*$/'],
+            'tts.elevenlabs.model' => ['sometimes', 'nullable', 'string', 'max:80'],
+            'tts.stability' => ['sometimes', 'numeric', 'between:0,1'],
+            'tts.similarity' => ['sometimes', 'numeric', 'between:0,1'],
+            'defne.lipsync' => ['sometimes', 'boolean'],
+            'defne.lipsync_gain' => ['sometimes', 'numeric', 'between:1,8'],
+            'defne.voice_rate' => ['sometimes', 'numeric', 'between:0.8,1.15'],
+            'ai.api_key' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'ai.model' => ['sometimes', 'nullable', 'string', 'max:80'],
+        ];
+        // keys are dotted names sent flat (not nested), so validate them as plain fields
+        $all = $request->all();
+        $input = array_intersect_key($all, $rules);
+        unset($all);
+        $flat = [];
+        $validator = validator(collect($input)->mapWithKeys(fn ($v, $k) => [str_replace('.', '__', $k) => $v])->all(),
+            collect($rules)->mapWithKeys(fn ($r, $k) => [str_replace('.', '__', $k) => $r])->all());
+        foreach ($validator->validate() as $k => $v) {
+            $flat[str_replace('__', '.', $k)] = $v;
+        }
+        $clear = $request->validate(['clear' => ['sometimes', 'array'], 'clear.*' => ['string', Rule::in(array_keys(Integrations::FIELDS))]])['clear'] ?? [];
+        Integrations::put($flat);
+        Integrations::clear($clear);
+        Audit::log('admin.integrations.updated', $request->user(), null, ['keys' => array_keys($flat), 'cleared' => $clear]);
+
+        return response()->json(['data' => Integrations::forAdmin()]);
     }
 
     public function settings(): JsonResponse

@@ -118,7 +118,7 @@ class AiController extends Controller
     public function tts(Request $request): Response
     {
         $data = $request->validate(['text' => ['required', 'string', 'max:600']]);
-        $cfg = config('services.elevenlabs');
+        $cfg = \App\Support\Integrations::tts();
         if (empty($cfg['key'])) {
             return response()->noContent();
         }
@@ -131,7 +131,7 @@ class AiController extends Controller
                 ->post("https://api.elevenlabs.io/v1/text-to-speech/{$cfg['voice_id']}?output_format=mp3_44100_64", [
                     'text' => $text,
                     'model_id' => $cfg['model'],
-                    'voice_settings' => ['stability' => 0.5, 'similarity_boost' => 0.75],
+                    'voice_settings' => ['stability' => $cfg['stability'], 'similarity_boost' => $cfg['similarity']],
                 ]);
             if (! $res->successful()) {
                 report(new \RuntimeException('TTS failed: '.$res->status()));

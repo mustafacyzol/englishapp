@@ -3,7 +3,7 @@ import { PageFallback } from '@/components/motion/Page'
 import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { ArrowLeft, Building2, Menu, X, BookOpen, Boxes, ClipboardList, Crown, FileQuestion, Gift, Handshake, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Package, Quote, Receipt, ScrollText, Send, Settings, ShieldCheck, SmilePlus, Swords, Ticket, Trophy, UserCog, Users, Wallet } from 'lucide-react'
+import { ArrowLeft, Building2, Menu, X, BookOpen, Boxes, ClipboardList, Crown, FileQuestion, Gift, Handshake, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Package, Plug, Quote, Receipt, ScrollText, Send, Settings, ShieldCheck, SmilePlus, Swords, Ticket, Trophy, UserCog, Users, Wallet } from 'lucide-react'
 import { can, roleLabel } from '@/lib/adminAccess'
 import type { Me } from '@/lib/types'
 import { useAuth } from '@/lib/auth'
@@ -64,6 +64,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
   ] },
   { title: 'Sistem', items: [
     { to: '/admin/settings', label: 'Site ayarları', icon: Settings, perm: 'settings' },
+    { to: '/admin/integrations', label: 'Entegrasyonlar', icon: Plug, perm: 'settings' },
     { to: '/admin/audit', label: 'Denetim kaydı', icon: ScrollText, perm: 'audit' },
   ] },
 ]

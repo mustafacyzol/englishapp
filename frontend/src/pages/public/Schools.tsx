@@ -2,6 +2,7 @@ import { motion } from 'motion/react'
 import { ArrowRight, BarChart3, BookOpenCheck, Check, ClipboardList, GraduationCap, KeyRound, MessageCircle, Palette, ShieldCheck, Users } from 'lucide-react'
 import { LinkButton } from '@/components/ui/Button'
 import { Img } from '@/components/ui/Img'
+import { img } from '@/lib/assets'
 import { PHOTO } from '@/lib/assets'
 import { higoImg } from '@/components/game/Higo'
 
@@ -49,6 +50,10 @@ export default function Schools() {
               <Img src={PHOTO.classroom} alt="Sınıfta İngilizce dersi" className="aspect-[4/3] w-full object-cover" />
             </div>
             <div className="absolute -bottom-6 -left-4 w-[240px] rounded-2xl bg-card p-4 shadow-[0_24px_50px_-24px_rgba(31,36,51,.45)] ring-1 ring-line sm:-left-8">
+              <div className="mb-2 flex items-center gap-2">
+                <img src={img('schools/teacher.webp')} alt="" className="size-8 rounded-full object-cover ring-2 ring-card" />
+                <span className="text-xs font-bold leading-tight text-ink-soft"><b className="text-ink">Ayşe Öğretmen</b> ödev verdi</span>
+              </div>
               <p className="text-xs font-black uppercase tracking-widest text-flame">8-A · Ödev</p>
               <p className="mt-1 font-extrabold">Hikâye: The Red Umbrella</p>
               <div className="mt-2 flex items-center gap-2 text-xs font-bold"><span className="h-2 flex-1 overflow-hidden rounded-full bg-paper-2"><span className="block h-full w-[78%] rounded-full bg-mint" /></span>21/27 yaptı</div>
@@ -63,7 +68,7 @@ export default function Schools() {
         <div className="mt-10 grid gap-5 md:grid-cols-3">
           {ROLES.map((r, k) => (
             <motion.div key={r.who} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: k * 0.08 }} className="rounded-3xl border-2 border-line bg-card p-6">
-              <span className="grid size-12 place-items-center rounded-2xl text-white" style={{ background: r.color }}><r.icon className="size-6" /></span>
+              {r.who === 'İngilizce öğretmeni' ? <img src={img('schools/teacher.webp')} alt="" className="size-12 rounded-2xl object-cover" /> : <span className="grid size-12 place-items-center rounded-2xl text-white" style={{ background: r.color }}><r.icon className="size-6" /></span>}
               <h3 className="mt-4 font-display text-xl font-black">{r.who}</h3>
               <ul className="mt-3 space-y-2">
                 {r.points.map((p) => <li key={p} className="flex gap-2 text-[15px]"><Check className="mt-1 size-4 shrink-0 text-mint-deep" strokeWidth={3} />{p}</li>)}

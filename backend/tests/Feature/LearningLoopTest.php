@@ -38,6 +38,9 @@ class LearningLoopTest extends TestCase
     {
         $lesson = Lesson::query()->where('title', 'Ben kimim? (am / is / are)')->firstOrFail();
         $answers = collect($lesson->exercises)->map(fn ($ex) => $this->correctAnswer($ex))->all();
+        // a later lesson opens once the one before it is done (or the level is above A1)
+        $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertForbidden();
+        $this->user->forceFill(['cefr_level' => 'A2'])->save();
 
         $res = $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertOk();
         $this->assertSame(100, $res->json('score'));

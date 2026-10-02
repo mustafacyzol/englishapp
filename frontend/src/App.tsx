@@ -67,6 +67,7 @@ const AdminOrders = lazy(() => import('./pages/admin/Orders'))
 const AdminVouchers = lazy(() => import('./pages/admin/Vouchers'))
 const AdminCodes = lazy(() => import('./pages/admin/CodeGenerator'))
 const AdminSettings = lazy(() => import('./pages/admin/Settings'))
+const AdminIntegrations = lazy(() => import('./pages/admin/Integrations'))
 const AdminAudit = lazy(() => import('./pages/admin/Audit'))
 const AdminRevenue = lazy(() => import('./pages/admin/Revenue'))
 const AdminSubscribers = lazy(() => import('./pages/admin/Subscribers'))
@@ -181,6 +182,7 @@ export default function App() {
           <Route path="vouchers" element={<AdminVouchers />} />
           <Route path="codes" element={<AdminCodes />} />
           <Route path="settings" element={<AdminSettings />} />
+          <Route path="integrations" element={<AdminIntegrations />} />
           <Route path="audit" element={<AdminAudit />} />
           <Route path="revenue" element={<AdminRevenue />} />
           <Route path="subscribers" element={<AdminSubscribers />} />

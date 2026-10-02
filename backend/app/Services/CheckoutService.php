@@ -26,7 +26,7 @@ class CheckoutService
 
     public function gateway(?string $name = null): PaymentGateway
     {
-        return match ($name ?? config('dilgo.payments.gateway')) {
+        return match ($name ?? \App\Support\Integrations::get('payments.gateway')) {
             'iyzico' => app(IyzicoGateway::class),
             default => app(FakeGateway::class),
         };

@@ -1,75 +1,179 @@
-import { PHOTO } from '@/lib/assets'
+import { useRef } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { motion, useScroll, useSpring, useTransform } from 'motion/react'
+import { ArrowRight, BookOpen, GraduationCap, HeartHandshake, MessageCircle, School, Sparkles, Sprout } from 'lucide-react'
+import { get } from '@/lib/api'
+import { img } from '@/lib/assets'
 import { LinkButton } from '@/components/ui/Button'
-import { Reveal } from '@/components/motion/Page'
 import { Img } from '@/components/ui/Img'
+import { higoImg } from '@/components/game/Higo'
+
+const ease = [0.22, 1, 0.36, 1] as const
 
 const VALUES = [
-  ['Önce konuşmak', 'Dil, konuşulmak için vardır. Her dersimiz ve her uygulama ekranımız öğrencinin ağzını açmasını hedefler.'],
-  ['Küçük adımlar, her gün', 'Uzun ve seyrek çalışma yerine kısa ve düzenli pratik. Seriler ve günlük hedefler bu yüzden var.'],
-  ['Türkçe konuşanı anlamak', 'Türk öğrencilerin tipik hatalarını biliyoruz. Açıklamalarımız bu hatalara göre hazırlanır.'],
-  ['Gerçek öğretmen, gerçek ödül', 'Teknoloji öğretmenin yerini almaz; onu her güne taşır. Uygulamadaki ödüller sınıfta karşılık bulur.'],
+  { icon: MessageCircle, color: '#ff5a36', title: 'Önce konuşmak', text: 'Dil konuşulmak için var. Her ders, her ekran öğrencinin ağzını açmasını hedefler; Defne bu yüzden var.' },
+  { icon: Sprout, color: '#22b573', title: 'Küçük adımlar, her gün', text: 'Uzun ve seyrek çalışma yerine kısa ve düzenli pratik. Günlük hedef ve seri bu alışkanlığı korur.' },
+  { icon: HeartHandshake, color: '#8f7cf8', title: 'Türkçe konuşanı anlamak', text: 'Türk öğrencilerin tipik hatalarını biliyoruz. Açıklamalar Türkçe ve bu hatalara göre yazılır.' },
+  { icon: GraduationCap, color: '#2f7cf6', title: 'Gerçek öğretmen, gerçek sınıf', text: 'Teknoloji öğretmenin yerini almaz, onu her güne taşır. Okul paneli bu yüzden uygulamanın parçası.' },
 ]
 
+const STORY = [
+  { tag: 'Sınıfta', title: 'Her şey bir sınıfta başladı', text: 'Bayrak Dil Okulları’nda öğrencilerimiz derste hızla ilerliyordu, ama iki ders arasındaki günlerde pratik yapacak bir yer bulamıyordu.', icon: School },
+  { tag: 'İlk adım', title: 'Önce hikâyeler geldi', text: 'Okuma ve dinlemeyi her güne taşıyan hikâye uygulamamızı yaptık. Öğrenciler daha fazlasını istedi: konuşmak, yazmak, yarışmak.', icon: BookOpen },
+  { tag: 'Bugün', title: 'Dört beceri, tek uygulama', text: 'Ders yolu, hikâyeler, oyunlar, Defne ile konuşma ve Gölge Düellosu. İlkokuldan üniversiteye, kendi hızında.', icon: Sparkles },
+  { tag: 'Okullarla', title: 'Sınıfa geri dönüyoruz', text: 'Öğretmen ve müdür panelleriyle uygulama, çıktığı yere, sınıfa geri dönüyor: ödev, takip ve dört beceri karnesi.', icon: GraduationCap },
+]
+
+/**
+ * About, told as a story: a collage hero that drifts apart as you scroll, a
+ * timeline whose line draws itself, the values, and the people behind it.
+ */
 export default function About() {
+  const { data } = useQuery({ queryKey: ['landing'], queryFn: () => get<{ learners: number; stories: number }>('/landing') })
+  const hero = useRef<HTMLElement>(null)
+  const { scrollYProgress } = useScroll({ target: hero, offset: ['start start', 'end start'] })
+  const p = useSpring(scrollYProgress, { stiffness: 120, damping: 24 })
+  const y1 = useTransform(p, [0, 1], [0, -120])
+  const y2 = useTransform(p, [0, 1], [0, 60])
+  const y3 = useTransform(p, [0, 1], [0, -40])
+  const r1 = useTransform(p, [0, 1], [-4, -10])
+  const r3 = useTransform(p, [0, 1], [5, 12])
+
+  const line = useRef<HTMLDivElement>(null)
+  const { scrollYProgress: lp } = useScroll({ target: line, offset: ['start 70%', 'end 60%'] })
+  const draw = useSpring(lp, { stiffness: 90, damping: 22 })
+
   return (
-    <>
-      <section className="mx-auto max-w-6xl px-5 pb-12 pt-12">
-        <Reveal className="max-w-3xl">
-          <p className="mb-3 font-extrabold uppercase tracking-widest text-flame">Hakkımızda</p>
-          <h1 className="text-[clamp(2.3rem,5vw,3.8rem)] leading-[1.05]">Sınıfta öğrendiklerimizi herkesin cebine taşıyoruz.</h1>
-          <p className="mt-6 text-xl leading-relaxed text-ink-soft">DilGO, Bayrak Dil Okulları'nın yıllardır sınıfta kullandığı yöntemlerin dijital hali. Öğretmenlerimizin hazırladığı müfredatı; hikayeler, sesli pratik ve yapay zekâ ile her gün birkaç dakikada uygulanabilir hale getirdik.</p>
-        </Reveal>
-      </section>
-
-      <Reveal className="mx-auto max-w-6xl px-5">
-        <div className="overflow-hidden rounded-[36px]">
-          <Img src={PHOTO.team} alt="Bayrak Dil Okulları öğretmen ekibi" className="aspect-[16/8] w-full object-cover" />
+    <div className="overflow-x-clip">
+      {/* ------------------------------------------------------------ hero */}
+      <section ref={hero} className="relative mx-auto grid max-w-6xl items-center gap-12 px-5 pb-20 pt-12 lg:grid-cols-[1fr_1.05fr] lg:pt-20">
+        <div>
+          <motion.p initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-sm font-black uppercase tracking-[0.2em] text-flame">Hakkımızda</motion.p>
+          <h1 className="mt-4 font-display text-[clamp(2.4rem,5.4vw,4.2rem)] font-black leading-[1.04] tracking-tight">
+            {['Sınıfta', 'öğrendiklerimizi', 'herkesin', 'cebine', 'taşıyoruz.'].map((w, k) => (
+              <motion.span key={w} initial={{ opacity: 0, y: 22 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08 * k, duration: 0.6, ease }} className={k === 3 ? 'inline-block pr-[0.25em] text-flame' : 'inline-block pr-[0.25em]'}>{w}</motion.span>
+            ))}
+          </h1>
+          <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
+            DilGO, Bayrak Dil Okulları’nın yıllardır sınıfta kullandığı yöntemlerin dijital hali. Öğretmenlerimizin hazırladığı müfredatı hikâyeler, sesli pratik ve yapay zekâ ile her gün birkaç dakikada uygulanabilir hale getirdik.
+          </motion.p>
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="mt-8 flex flex-wrap gap-3">
+            <LinkButton to="/register" size="lg" className="gap-2">Ücretsiz başla <ArrowRight className="size-5" /></LinkButton>
+            <LinkButton to="/okullar" size="lg" variant="secondary">Okullar için</LinkButton>
+          </motion.div>
         </div>
-      </Reveal>
 
-      <section className="mx-auto grid max-w-6xl gap-12 px-5 py-24 lg:grid-cols-2">
-        <Reveal>
-          <h2 className="text-4xl leading-tight">Neden bir uygulama yaptık?</h2>
-        </Reveal>
-        <Reveal delay={0.08} className="space-y-5 text-lg leading-relaxed text-ink-soft">
-          <p>Öğrencilerimiz sınıfta hızla ilerliyordu ama dersler arasındaki günlerde pratik yapacak bir yer bulamıyordu. Kelime uygulamaları konuşmayı, konuşma uygulamaları okumayı, hiçbiri de Türk öğrencinin ihtiyacını tam karşılamıyordu.</p>
-          <p>Önce hikaye okumayı ve dinlemeyi getiren HikayeGO'yu yaptık. Öğrencilerimiz daha fazlasını istedi: konuşmak, yazmak, yarışmak. DilGO bu isteklerin cevabı. Dört beceri, tek uygulama.</p>
-        </Reveal>
+        {/* collage: three moments of learning that drift apart as you scroll */}
+        <div className="relative mx-auto h-[420px] w-full max-w-[520px] sm:h-[480px]">
+          <motion.div style={{ y: y1, rotate: r1 }} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease }} className="absolute left-0 top-6 w-[58%] overflow-hidden rounded-[28px] border-4 border-card shadow-[0_30px_60px_-30px_rgba(31,36,51,.5)]">
+            <Img src={img('about/home.webp')} alt="Evde, babasıyla İngilizce çalışan bir öğrenci" className="aspect-[4/5] w-full object-cover" />
+          </motion.div>
+          <motion.div style={{ y: y2 }} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.15, duration: 0.8, ease }} className="absolute right-0 top-0 w-[52%] overflow-hidden rounded-[28px] border-4 border-card shadow-[0_30px_60px_-30px_rgba(31,36,51,.5)]">
+            <Img src={img('about/uni.webp')} alt="Kampüste telefonla konuşma pratiği yapan bir üniversite öğrencisi" className="aspect-[4/5] w-full object-cover" />
+          </motion.div>
+          <motion.div style={{ y: y3, rotate: r3 }} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3, duration: 0.8, ease }} className="absolute bottom-0 left-[18%] w-[66%] overflow-hidden rounded-[28px] border-4 border-card shadow-[0_30px_60px_-30px_rgba(31,36,51,.5)]">
+            <Img src={img('about/class.webp')} alt="İstanbul’da bir dil okulu sınıfı" className="aspect-[16/10] w-full object-cover" />
+          </motion.div>
+          <motion.img src={higoImg('wave')} alt="" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: [0, -6, 0] }} transition={{ opacity: { delay: 0.8 }, y: { repeat: Infinity, duration: 3, ease: 'easeInOut' } }} className="absolute -bottom-6 right-0 w-24 drop-shadow-xl sm:w-28" />
+        </div>
       </section>
 
-      <section className="bg-paper py-24">
+      {/* -------------------------------------------------------- numbers */}
+      <section className="border-y-2 border-line bg-card">
+        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-6 px-5 py-10 md:grid-cols-4">
+          {[
+            [data?.learners ? data.learners.toLocaleString('tr-TR') : '·', 'öğrenci DilGO ile çalışıyor'],
+            [data?.stories ?? '·', 'seviyeli hikâye'],
+            ['4', 'beceri: okuma, dinleme, konuşma, yazma'],
+            ['A1 → C1', 'tek yolda, kendi hızında'],
+          ].map(([v, l], k) => (
+            <motion.div key={l} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: k * 0.08 }}>
+              <p className="font-display text-[clamp(1.8rem,3.4vw,2.6rem)] font-black leading-none">{v}</p>
+              <p className="mt-2 text-sm font-semibold text-ink-soft">{l}</p>
+            </motion.div>
+          ))}
+        </div>
+      </section>
+
+      {/* ------------------------------------------------------ timeline */}
+      <section className="mx-auto grid max-w-6xl gap-12 px-5 py-24 lg:grid-cols-[0.8fr_1.2fr]">
+        <div className="lg:sticky lg:top-28 lg:self-start">
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Hikâyemiz</p>
+          <h2 className="mt-3 font-display text-[clamp(2rem,4vw,3rem)] font-black leading-[1.05]">Neden bir uygulama yaptık?</h2>
+          <p className="mt-4 text-lg text-ink-soft">Kısa cevap: öğrencilerimiz istedi. Uzun cevap yanda.</p>
+          <img src={higoImg('map')} alt="" className="mt-8 hidden w-40 lg:block" />
+        </div>
+        <div ref={line} className="relative pl-10">
+          <span aria-hidden className="absolute left-[15px] top-2 h-[calc(100%-1rem)] w-[3px] rounded-full bg-line" />
+          <motion.span aria-hidden style={{ scaleY: draw }} className="absolute left-[15px] top-2 h-[calc(100%-1rem)] w-[3px] origin-top rounded-full bg-gradient-to-b from-flame via-butter to-mint" />
+          {STORY.map((s, k) => (
+            <motion.article key={s.title} initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.6, ease }} className="relative mb-10 last:mb-0">
+              <span className="absolute -left-10 top-0 grid size-8 place-items-center rounded-full border-[3px] border-card bg-ink text-paper shadow"><s.icon className="size-4" /></span>
+              <p className="text-xs font-black uppercase tracking-[0.18em] text-ink-soft">0{k + 1} · {s.tag}</p>
+              <h3 className="mt-1 font-display text-2xl font-black">{s.title}</h3>
+              <p className="mt-2 text-[17px] leading-relaxed text-ink-soft">{s.text}</p>
+            </motion.article>
+          ))}
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------- values */}
+      <section className="bg-paper-2/60 py-24">
         <div className="mx-auto max-w-6xl px-5">
-          <Reveal><h2 className="mb-10 text-4xl">İnandıklarımız</h2></Reveal>
+          <div className="mb-12 max-w-2xl">
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">İlkelerimiz</p>
+            <h2 className="mt-3 font-display text-[clamp(2rem,4vw,3rem)] font-black leading-[1.05]">Her kararı bu dört cümleyle tartıyoruz.</h2>
+          </div>
           <div className="grid gap-5 sm:grid-cols-2">
-            {VALUES.map(([t, d], i) => (
-              <Reveal key={t} delay={(i % 2) * 0.08}>
-                <div className="h-full rounded-3xl border-2 border-line bg-card p-7">
-                  <h3 className="text-2xl">{t}</h3>
-                  <p className="mt-3 text-lg text-ink-soft">{d}</p>
-                </div>
-              </Reveal>
+            {VALUES.map((v, k) => (
+              <motion.div key={v.title} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ delay: (k % 2) * 0.1, duration: 0.5, ease }} whileHover={{ y: -4 }} className="group relative overflow-hidden rounded-[28px] border-2 border-line bg-card p-7">
+                <span aria-hidden className="absolute -right-10 -top-10 size-36 rounded-full opacity-10 transition-transform duration-500 group-hover:scale-125" style={{ background: v.color }} />
+                <span className="grid size-12 place-items-center rounded-2xl text-white" style={{ background: v.color }}><v.icon className="size-6" /></span>
+                <h3 className="mt-5 font-display text-2xl font-black">{v.title}</h3>
+                <p className="mt-2 text-[16px] leading-relaxed text-ink-soft">{v.text}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      <section id="okul" className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-24 lg:grid-cols-2">
-        <Reveal>
-          <div className="overflow-hidden rounded-[32px]"><Img src={PHOTO.classroom} alt="Sınıfta ders" loading="lazy" className="aspect-[4/3] w-full object-cover" /></div>
-        </Reveal>
-        <Reveal delay={0.08}>
-          <h2 className="text-4xl leading-tight">Uygulama ve sınıf birlikte çalışır.</h2>
-          <ul className="mt-6 space-y-4 text-lg text-ink-soft">
-            <li><b className="text-ink">Aynı müfredat:</b> Uygulamadaki üniteler, sınıftaki derslerimizle aynı CEFR hedeflerine göre hazırlanır.</li>
-            <li><b className="text-ink">Canlı ders kuponları:</b> Uygulamada kazandığın kuponu şubelerimizde ya da online derslerimizde kullanırsın.</li>
-            <li><b className="text-ink">Sertifika:</b> Yıllık paketle seviyeni okulumuzun sertifikasıyla belgelersin.</li>
-          </ul>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <LinkButton to="/register">Ücretsiz başla</LinkButton>
-            <LinkButton to="/contact" variant="secondary">Kurslarımız hakkında bilgi al</LinkButton>
+      {/* ---------------------------------------------------------- team */}
+      <section className="mx-auto grid max-w-6xl items-center gap-12 px-5 py-24 lg:grid-cols-2">
+        <motion.div initial={{ opacity: 0, scale: 0.94 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.3 }} transition={{ duration: 0.7, ease }} className="relative">
+          <div className="overflow-hidden rounded-[32px] border-2 border-line">
+            <Img src={img('about/team.webp')} alt="Ürün ekibi bir dil öğrenme uygulamasının taslakları üzerinde çalışıyor" className="aspect-[4/5] w-full object-cover sm:aspect-[5/4]" />
           </div>
-        </Reveal>
+          <div className="absolute -bottom-5 -right-3 rounded-2xl bg-card px-4 py-3 shadow-[0_20px_40px_-20px_rgba(31,36,51,.45)] ring-1 ring-line sm:-right-6">
+            <p className="text-xs font-black uppercase tracking-widest text-ink-soft">Ekip</p>
+            <p className="font-display text-lg font-black">Öğretmenler + yazılımcılar</p>
+          </div>
+        </motion.div>
+        <div>
+          <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Biz kimiz?</p>
+          <h2 className="mt-3 font-display text-[clamp(2rem,4vw,3rem)] font-black leading-[1.05]">Öğretmenlerle yazılımcılar aynı masada.</h2>
+          <p className="mt-5 text-lg leading-relaxed text-ink-soft">Her dersi önce sınıfta deneyen öğretmenlerimiz yazar; ekibimiz onu her ekranda aynı özenle çalışır hale getirir. Öğrencilerden gelen her geri bildirim bir sonraki sürüme girer.</p>
+          <ul className="mt-6 space-y-3">
+            {['Müfredat: deneyimli İngilizce öğretmenleri', 'Ürün ve tasarım: İstanbul’daki ekibimiz', 'Destek: gerçek insanlar, Türkçe'].map((t) => (
+              <li key={t} className="flex items-center gap-3 font-bold"><span className="size-2.5 rounded-full bg-flame" />{t}</li>
+            ))}
+          </ul>
+        </div>
       </section>
-    </>
+
+      {/* ----------------------------------------------------------- cta */}
+      <section className="mx-auto max-w-6xl px-5 pb-24">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="relative overflow-hidden rounded-[36px] bg-ink px-6 py-14 text-center text-paper sm:px-12">
+          <span aria-hidden className="absolute -left-16 -top-16 size-56 rounded-full bg-flame/25 blur-2xl" />
+          <span aria-hidden className="absolute -bottom-20 -right-10 size-64 rounded-full bg-butter/20 blur-2xl" />
+          <img src={higoImg('cheer')} alt="" className="relative mx-auto mb-4 w-24" />
+          <h2 className="relative font-display text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight">Bugün birkaç dakikayla başla.</h2>
+          <p className="relative mx-auto mt-3 max-w-lg text-paper/70">Ücretsiz hesap, kredi kartı yok. Seviyeni ölç, yolun sana göre açılsın.</p>
+          <div className="relative mt-8 flex flex-wrap justify-center gap-3">
+            <LinkButton to="/register" size="lg" variant="butter" className="gap-2">Ücretsiz başla <ArrowRight className="size-5" /></LinkButton>
+            <LinkButton to="/contact" size="lg" variant="secondary">Bize yaz</LinkButton>
+          </div>
+        </motion.div>
+      </section>
+    </div>
   )
 }

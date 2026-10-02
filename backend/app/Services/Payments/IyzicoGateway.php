@@ -97,7 +97,7 @@ class IyzicoGateway implements PaymentGateway
 
     private function request(string $path, array $body): array
     {
-        $cfg = config('dilgo.payments.iyzico');
+        $cfg = \App\Support\Integrations::iyzico();
         if (blank($cfg['api_key']) || blank($cfg['secret_key'])) {
             throw new RuntimeException('iyzico keys are not configured.');
         }

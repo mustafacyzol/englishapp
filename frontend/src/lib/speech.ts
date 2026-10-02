@@ -138,6 +138,13 @@ export function normalize(s: string) {
 
 type VoiceOpts = { rate?: number; voice?: string; onStart?: () => void; onEnd?: () => void; onBoundary?: (charIndex: number) => void; onLevel?: (level: number) => void }
 
+/** Admin-tuned voice and lip-sync values from /config (Yönetim → Entegrasyonlar). */
+export type DefneTuning = { voice: boolean; lipsync: boolean; gain: number; rate: number }
+const tuning: DefneTuning = { voice: true, lipsync: true, gain: 4, rate: 1 }
+export function setDefneTuning(t?: Partial<DefneTuning>) {
+  if (t) Object.assign(tuning, t)
+}
+
 let audioCtx: AudioContext | null = null
 let current: { stop: () => void } | null = null
 
@@ -156,7 +163,8 @@ export async function speakNeural(text: string, opts: VoiceOpts = {}) {
   stopSpeaking()
   const gen = ++voiceGen
   const { postBlob } = await import('./api')
-  const blob = await postBlob('/ai/tts', { text })
+  // no neural voice configured: skip the round trip and use the browser voice
+  const blob = tuning.voice ? await postBlob('/ai/tts', { text }) : null
   // Something newer started (or the call was stopped) while this line was on its way.
   if (gen !== voiceGen) return
   if (!blob) {
@@ -164,11 +172,12 @@ export async function speakNeural(text: string, opts: VoiceOpts = {}) {
     let raf = 0
     const decay = () => {
       pulse *= 0.86
-      opts.onLevel?.(pulse)
+      opts.onLevel?.(tuning.lipsync ? pulse : 0)
       raf = requestAnimationFrame(decay)
     }
     speak(text, {
       ...opts,
+      rate: (opts.rate ?? 0.95) * tuning.rate,
       onStart: () => {
         opts.onStart?.()
         raf = requestAnimationFrame(decay)
@@ -190,7 +199,7 @@ export async function speakNeural(text: string, opts: VoiceOpts = {}) {
 
   const url = URL.createObjectURL(blob)
   const el = new Audio(url)
-  el.playbackRate = Math.min(1.15, Math.max(0.8, opts.rate ?? 1))
+  el.playbackRate = Math.min(1.15, Math.max(0.8, (opts.rate ?? 1) * tuning.rate))
   audioCtx ??= new AudioContext()
   if (audioCtx.state === 'suspended') void audioCtx.resume()
   const src = audioCtx.createMediaElementSource(el)
@@ -203,7 +212,7 @@ export async function speakNeural(text: string, opts: VoiceOpts = {}) {
     analyser.getByteTimeDomainData(buf)
     let sum = 0
     for (const v of buf) sum += ((v - 128) / 128) ** 2
-    opts.onLevel?.(Math.min(1, Math.sqrt(sum / buf.length) * 4))
+    opts.onLevel?.(tuning.lipsync ? Math.min(1, Math.sqrt(sum / buf.length) * tuning.gain) : 0)
     if (el.duration) opts.onBoundary?.(Math.round((el.currentTime / el.duration) * text.length))
     raf = requestAnimationFrame(tick)
   }

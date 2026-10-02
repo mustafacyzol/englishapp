@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
+import { HigoMotion } from '@/components/game/HigoMotion'
 import { ArrowLeft, ArrowRight, Building2, Check, Gift } from 'lucide-react'
 import { Capacitor } from '@capacitor/core'
 import { ApiError, get, post } from '@/lib/api'
@@ -22,13 +23,7 @@ import { MobilePass, PassPanel } from './PlanPanel'
 import { higoImg } from '@/components/game/Higo'
 import { img } from '@/lib/assets'
 
-const LEVELS: { v: Cefr; t: string; d: string }[] = [
-  { v: 'A1', t: 'Sıfırdan başlıyorum', d: 'Birkaç kelime biliyorum' },
-  { v: 'A2', t: 'Temel cümleler kurabiliyorum', d: 'Kendimi tanıtır, sipariş veririm' },
-  { v: 'B1', t: 'Günlük konuşmaları anlıyorum', d: 'Derdimi anlatırım ama takılırım' },
-  { v: 'B2', t: 'Rahat konuşabiliyorum', d: 'Dizileri çoğunlukla anlıyorum' },
-]
-type StepKey = 'name' | 'age' | 'goal' | 'exam' | 'interests' | 'focus' | 'level' | 'time' | 'account'
+type StepKey = 'hello' | 'name' | 'age' | 'goal' | 'exam' | 'interests' | 'focus' | 'level' | 'time' | 'account'
 const DRAFT = 'dilgo.onboarding'
 
 interface Draft {
@@ -51,7 +46,7 @@ interface Draft {
 
 /** The exam step only appears for teens and adults who want it: exam as the goal, or ticked as an extra. */
 // With a finished placement test the level step is skipped: the test result becomes the level.
-const flowFor = (d: Pick<Draft, 'motivation' | 'examOpt' | 'age'>, placed = false): StepKey[] => ['name', 'age', 'goal', ...(d.age !== 'kid' && (d.motivation === 'exam' || d.examOpt) ? (['exam'] as const) : []), 'interests', 'focus', ...(placed ? [] : (['level'] as const)), 'time', 'account']
+const flowFor = (d: Pick<Draft, 'motivation' | 'examOpt' | 'age'>, placed = false): StepKey[] => ['hello', 'name', 'age', 'goal', ...(d.age !== 'kid' && (d.motivation === 'exam' || d.examOpt) ? (['exam'] as const) : []), 'interests', 'focus', ...(placed ? [] : (['level'] as const)), 'time', 'account']
 const EMPTY: Draft = { step: 'name', name: '', age: '', stage: '', grade: null, motivation: '', exam: '', examDate: '', interests: [], focus: '', level: 'A1', time: '', daily: 20, examOpt: false }
 
 export default function Register() {
@@ -159,17 +154,18 @@ export default function Register() {
 
   const who = firstName ? `${firstName}, ` : ''
   const Q: Record<StepKey, { title: ReactNode; sub: string }> = {
+    hello: { title: 'Merhaba, ben Higo!', sub: 'İngilizce yolculuğunda yanında olacağım. Önce seni biraz tanıyalım; birkaç kısa soru, bir dakika.' },
     age: { title: `${who}şu an neredesin?`, sub: 'Okulundaki konulara ve sınavına göre plan kurarız. Hesabı kim kullanacaksa onu seç.' },
     name: { title: 'Merhaba! Sana nasıl hitap edelim?', sub: 'Birkaç soruyla planını kuralım, 1 dakika sürer.' },
     goal: { title: `${who}İngilizce seni nereye götürsün?`, sub: 'Hedefin derslerdeki örnekleri ve senaryoları belirler.' },
     exam: { title: 'Hangi sınava hazırlanıyorsun?', sub: 'Okuma parçaları, soru tipleri ve Defne’nin geri bildirimleri bu sınava göre ayarlanır.' },
     interests: { title: 'Hangi konular seni heyecanlandırır?', sub: 'Hikâyeler ve Defne ile sohbetler bunlardan seçilir. Birden fazla seçebilirsin.' },
     focus: { title: 'En çok nerede zorlanıyorsun?', sub: 'Bu beceriye biraz daha ağırlık vereceğiz, ama dördünü de dengede tutacağız.' },
-    level: { title: 'Şu an hangi seviyedesin?', sub: 'Tahmin etmen yeterli; ilk derslerde kendini ayarlar.' },
+    level: { title: 'Nereden başlayalım?', sub: 'Seviyeni tahmin etmene gerek yok. Kısa testle ölçeriz ya da en baştan başlarsın; ikisi de sonra değişebilir.' },
     time: { title: 'Ne zaman çalışacaksın?', sub: 'Saatini belirleyenlerin alışkanlığı sürdürme ihtimali çok daha yüksek.' },
     account: { title: firstName ? `Planın hazır, ${firstName}.` : 'Planın hazır.', sub: 'Hesabını oluştur ve ilk dersine başla. Ücretsiz, kredi kartı gerekmez.' },
   }
-  const canNext: Record<StepKey, boolean> = { name: d.name.trim().length >= 2, age: !!d.stage && (!(STAGES.find((x) => x.key === d.stage)?.grades.length) || !!d.grade), goal: !!d.motivation, exam: !!d.exam, interests: d.interests.length > 0, focus: !!d.focus, level: true, time: !!d.time, account: true }
+  const canNext: Record<StepKey, boolean> = { hello: true, name: d.name.trim().length >= 2, age: !!d.stage && (!(STAGES.find((x) => x.key === d.stage)?.grades.length) || !!d.grade), goal: !!d.motivation, exam: !!d.exam, interests: d.interests.length > 0, focus: !!d.focus, level: true, time: !!d.time, account: true }
 
   return (
     <AuthShell
@@ -329,18 +325,38 @@ export default function Register() {
 
           {key === 'level' && (
             <div className="space-y-3">
-              {LEVELS.map((l) => (
-                <button key={l.v} onClick={pick({ level: l.v })} className={clsx('press flex w-full items-center gap-4 rounded-2xl border-2 px-4 py-3.5 text-left transition', d.level === l.v ? 'border-ink shadow-[0_3px_0_0_var(--ink)]' : 'border-line shadow-hard hover:border-ink/25')}>
-                  <span className={clsx('grid size-11 shrink-0 place-items-center rounded-xl font-display font-black', d.level === l.v ? 'bg-ink text-paper' : 'bg-paper-2')}>{l.v}</span>
-                  <span className="min-w-0 flex-1">
-                    <span className="block font-extrabold">{l.t}</span>
-                    <span className="block text-sm text-ink-soft">{l.d}</span>
-                  </span>
-                  {d.level === l.v && <Check className="size-5" strokeWidth={3} />}
-                </button>
-              ))}
-              <Link to="/placement?from=register" className="inline-flex items-center gap-1.5 pt-1 text-sm font-bold text-flame hover:underline">Emin değilim, 3 dakikalık seviye testine gir <ArrowRight className="size-4" /></Link>
-              {nextBtn(canNext.level)}
+              <Link to="/placement?from=register" className="press flex w-full items-center gap-4 rounded-2xl border-2 border-ink px-4 py-4 text-left shadow-[0_3px_0_0_var(--ink)]">
+                <Img src={higoImg('think')} alt="" className="size-14 shrink-0 object-contain" />
+                <span className="min-w-0 flex-1">
+                  <span className="flex items-center gap-2 font-extrabold">Seviye testine gir <span className="rounded-full bg-flame px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">Önerilen</span></span>
+                  <span className="block text-sm text-ink-soft">10 dakika: seçmeli sorular, cümle kurma, dinleme. Sonuç hesabına kendiliğinden işlenir, yolun ona göre açılır.</span>
+                </span>
+                <ArrowRight className="size-5 shrink-0" />
+              </Link>
+              <button onClick={() => { up({ level: 'A1' }); next() }} className="press flex w-full items-center gap-4 rounded-2xl border-2 border-line px-4 py-4 text-left shadow-hard hover:border-ink/25">
+                <Img src={higoImg('walk')} alt="" className="size-14 shrink-0 object-contain" />
+                <span className="min-w-0 flex-1">
+                  <span className="block font-extrabold">En baştan başlıyorum</span>
+                  <span className="block text-sm text-ink-soft">İlk dersten başla. İstediğin zaman seviye testine girip ileri atlayabilirsin.</span>
+                </span>
+              </button>
+            </div>
+          )}
+
+          {key === 'hello' && (
+            <div className="space-y-5">
+              <div className="relative mx-auto w-56 sm:w-64">
+                <span aria-hidden className="absolute inset-[12%] rounded-full bg-flame/10" />
+                <HigoMotion className="relative w-full" />
+              </div>
+              <ul className="space-y-2.5">
+                {['Her gün birkaç dakikalık, sana özel bir plan', 'Takıldığında Türkçe açıklama, azar yok', 'Hikâyeler, oyunlar ve Defne ile gerçek konuşmalar'].map((t, k) => (
+                  <motion.li key={t} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 + k * 0.12 }} className="flex items-center gap-3 rounded-2xl bg-paper-2 px-4 py-3 font-bold">
+                    <span className="grid size-7 shrink-0 place-items-center rounded-full bg-mint text-white"><Check className="size-4" strokeWidth={3} /></span>{t}
+                  </motion.li>
+                ))}
+              </ul>
+              {nextBtn(true, 'Hadi tanışalım')}
             </div>
           )}
 

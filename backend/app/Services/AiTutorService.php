@@ -125,7 +125,7 @@ TXT;
 
     public function assertCanUse(User $user): void
     {
-        if (! config('dilgo.ai.enabled') || blank(config('dilgo.ai.api_key'))) {
+        if (! config('dilgo.ai.enabled') || blank(\App\Support\Integrations::get('ai.api_key'))) {
             throw new HttpException(503, 'AI öğretmen şu anda bakımda.');
         }
         if ($this->usageToday($user)['remaining'] <= 0) {
@@ -228,11 +228,11 @@ TXT;
 
     private function call(string $system, array $messages, array $schema, ?array &$usage = null): array
     {
-        $client = new Client(apiKey: config('dilgo.ai.api_key'));
+        $client = new Client(apiKey: \App\Support\Integrations::get('ai.api_key'));
 
         try {
             $message = $client->messages->create(
-                model: config('dilgo.ai.model'),
+                model: \App\Support\Integrations::get('ai.model'),
                 maxTokens: config('dilgo.ai.max_tokens'),
                 system: [['type' => 'text', 'text' => $system]],
                 messages: $messages,
