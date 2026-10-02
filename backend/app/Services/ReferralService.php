@@ -33,6 +33,7 @@ class ReferralService
         $referral->update(['status' => 'qualified', 'qualified_at' => now()]);
         $referee->increment('gems', (int) Settings::get('referral.referee_gems'));
         $referral->referrer->increment('gems', (int) Settings::get('referral.referrer_gems'));
+        app(GamificationService::class)->checkAchievements($referral->referrer->fresh());
     }
 
     /** Friend made the first purchase → inviter gets premium days. */

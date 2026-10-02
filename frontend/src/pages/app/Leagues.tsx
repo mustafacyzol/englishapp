@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from 'react-router-dom'
 import clsx from 'clsx'
@@ -10,6 +11,8 @@ import { LeagueEmblem } from '@/components/game/LeagueEmblem'
 import { SkeletonPage } from '@/components/ui/Misc'
 import { Img } from '@/components/ui/Img'
 import { UserAvatar } from '@/components/game/UserAvatar'
+import { SchoolBoard } from '@/components/game/SchoolBoard'
+import { useAuth } from '@/lib/auth'
 
 interface Standings {
   week_key: string
@@ -24,13 +27,36 @@ interface Standings {
 
 
 export default function Leagues() {
+  const { user } = useAuth()
+  const school = user?.institution_role === 'student'
+  const [view, setView] = useState<'league' | 'class' | 'school'>('league')
   const { data, isLoading } = useQuery({ queryKey: ['league'], queryFn: () => get<Standings>('/league'), refetchInterval: 30_000 })
   if (isLoading || !data) return <SkeletonPage variant="list" />
   const n = data.rows.length
 
+  const switcher = school && (
+    <div className="mb-6 grid grid-cols-3 rounded-2xl bg-paper-2 p-1 text-sm font-extrabold" role="tablist" aria-label="Lig görünümü">
+      {([['league', 'Genel lig'], ['class', 'Sınıfım'], ['school', 'Okulum']] as const).map(([k, l]) => (
+        <button key={k} role="tab" aria-selected={view === k} onClick={() => setView(k)} className={clsx('rounded-xl py-2 transition', view === k ? 'bg-card text-ink shadow-sm' : 'text-ink-soft hover:text-ink')}>{l}</button>
+      ))}
+    </div>
+  )
+
+  if (school && view !== 'league') {
+    return (
+      <div className="mx-auto max-w-2xl">
+        <Link to="/duel" className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-ink-soft hover:text-ink"><ArrowLeft className="size-4" /> Arena</Link>
+        {switcher}
+        <SchoolBoard endpoint="/me/school-league" query={`scope=${view}`} showClass={view === 'school'} />
+        <p className="mt-4 text-center text-sm text-ink-soft">Okul ligi, okulundaki arkadaşlarınla bu hafta (ya da bu ay) kazandığınız XP'ye göre sıralanır. Öğretmenin de bu tabloyu görür.</p>
+      </div>
+    )
+  }
+
   return (
     <div className="mx-auto max-w-2xl">
       <Link to="/duel" className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-ink-soft hover:text-ink"><ArrowLeft className="size-4" /> Arena</Link>
+      {switcher}
       <div className="no-scrollbar mb-6 flex items-center gap-3 overflow-x-auto px-2 py-3">
         {data.tiers.map((t, i) => (
           <div key={t} className={clsx('flex shrink-0 flex-col items-center', i === data.tier ? 'scale-110' : 'opacity-60')}>

@@ -22,6 +22,8 @@ interface Overview {
   stats: SectionStat[]
   total: { answered: number; accuracy: number | null; today: number }
   recommended: string | null
+  plan?: { daily_goal: number; done_today: number; focus: string[]; mock_every: string }
+  mock?: { questions: number; minutes: number; full_questions: number; full_minutes: number } | null
 }
 interface Question { id: number; section: string; section_label: string; cefr: string; passage: string | null; prompt: string; options: string[] }
 interface PracticeSet { exam: ExamKey; section: string; seconds_per_question: number; questions: Question[] }
@@ -36,7 +38,7 @@ const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
  */
 export default function Exam() {
   const { user } = useAuth()
-  const [run, setRun] = useState<{ section: string; n: number } | null>(null)
+  const [run, setRun] = useState<{ section: string; n: number; mock?: boolean } | null>(null)
   const { data, isLoading } = useQuery({ queryKey: ['exam'], queryFn: () => get<Overview>('/exam') })
 
   if (!user) return null
@@ -44,7 +46,7 @@ export default function Exam() {
   if (user.age_group === 'kid') return <Navigate to="/learn" replace />
   if (isLoading || !data) return <Spinner className="min-h-[50vh]" />
   if (!data.target) return <PickExam />
-  if (run) return <Runner section={run.section} n={run.n} onExit={() => setRun(null)} />
+  if (run) return <Runner section={run.section} n={run.n} mock={run.mock} onExit={() => setRun(null)} />
 
   const exam = EXAMS.find((e) => e.key === data.target)!
   const weakest = data.stats.find((s) => s.key === data.recommended)
@@ -83,9 +85,10 @@ export default function Exam() {
             </div>
           </div>
           <div className="mt-6 flex flex-wrap gap-2">
-            <Button variant="secondary" onClick={() => setRun({ section: 'mix', n: 10 })} icon={<Sparkles className="size-5" />}>Karma deneme · 10 soru</Button>
-            <Button variant="ghost" className="!text-white hover:!bg-white/15" onClick={() => setRun({ section: 'mix', n: 20 })}>Uzun deneme · 20</Button>
+            {data.mock && <Button variant="secondary" onClick={() => setRun({ section: 'mix', n: data.mock!.questions, mock: true })} icon={<Timer className="size-5" />}>Deneme sınavı · {data.mock.questions} soru · {data.mock.minutes} dk</Button>}
+            <Button variant="ghost" className="!text-white hover:!bg-white/15" onClick={() => setRun({ section: 'mix', n: 10 })} icon={<Sparkles className="size-5" />}>Karma set · 10</Button>
           </div>
+          {data.mock && <p className="mt-3 text-xs font-semibold text-white/75">Deneme, gerçek {exam.name} sınavının bölüm dağılımı ve süresiyle hazırlanır ({data.mock.full_questions} soru · {data.mock.full_minutes} dk ölçeğinde).</p>}
         </div>
 
         <div className="flex flex-col rounded-[28px] border-2 border-line bg-card p-5">
@@ -96,7 +99,13 @@ export default function Exam() {
               <p className="mt-1 font-display text-xl font-black leading-snug">{weakest ? weakest.accuracy !== null ? `${weakest.label} isabetin %${weakest.accuracy}. Bugün buna 10 dakika ver.` : `${weakest.label} bölümünü henüz denemedin, oradan başlayalım.` : 'Karma bir setle ısın.'}</p>
             </div>
           </div>
-          <p className="mt-3 text-sm text-ink-soft">Her sorudan sonra Türkçe çözüm gelir: doğru cevabın neden doğru, çeldiricilerin neden yanlış olduğu.</p>
+          {data.plan && (
+            <div className="mt-4 rounded-2xl bg-paper-2 p-3.5">
+              <div className="flex items-baseline justify-between gap-2 text-sm font-extrabold"><span>Bugünkü hedefin</span><span className="tabular-nums">{Math.min(data.plan.done_today, data.plan.daily_goal)} / {data.plan.daily_goal} soru</span></div>
+              <div className="mt-2 h-2 overflow-hidden rounded-full bg-card"><div className="h-full rounded-full transition-all" style={{ width: `${Math.min(100, (data.plan.done_today / data.plan.daily_goal) * 100)}%`, background: exam.color }} /></div>
+              <p className="mt-2 text-xs font-semibold text-ink-soft">Odak: {data.plan.focus.map((k) => data.stats.find((x) => x.key === k)?.label ?? k).join(' ve ')} · {data.plan.mock_every}</p>
+            </div>
+          )}
           {weakest && <Button className="mt-auto self-start" onClick={() => setRun({ section: weakest.key, n: 8 })} icon={<Target className="size-5" />}>{weakest.label} seti</Button>}
         </div>
       </section>
@@ -194,10 +203,13 @@ function ChangeExam({ current }: { current: ExamKey }) {
   )
 }
 
-function Runner({ section, n, onExit }: { section: string; n: number; onExit: () => void }) {
+function Runner({ section, n, mock, onExit }: { section: string; n: number; mock?: boolean; onExit: () => void }) {
   const qc = useQueryClient()
   const [seed, setSeed] = useState(0)
-  const { data, isLoading } = useQuery({ queryKey: ['exam-set', section, n, seed], queryFn: () => get<PracticeSet>(`/exam/practice?section=${section}&n=${n}`), gcTime: 0, staleTime: Infinity })
+  const { data, isLoading } = useQuery({ queryKey: ['exam-set', section, n, seed, mock], queryFn: () => (mock
+    // the mock keeps the real exam's pace: its total time spread over its questions
+    ? get<{ exam: ExamKey; minutes: number; questions: Question[] }>('/exam/mock').then((m) => ({ exam: m.exam, section: 'mix', seconds_per_question: Math.round((m.minutes * 60) / Math.max(1, m.questions.length)), questions: m.questions }))
+    : get<PracticeSet>(`/exam/practice?section=${section}&n=${n}`)), gcTime: 0, staleTime: Infinity })
   const [i, setI] = useState(0)
   const [choice, setChoice] = useState<number | null>(null)
   const [graded, setGraded] = useState<Graded | null>(null)

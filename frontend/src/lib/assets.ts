@@ -48,7 +48,8 @@ export function rewardImg(icon: string) {
 }
 
 const BADGES = ['streak', 'xp', 'lessons', 'stories', 'words', 'mastery', 'speaking', 'ai', 'perfect', 'social', 'league', 'secret']
-export const badgeImg = (category: string) => img(`badges/${BADGES.includes(category) ? category : 'xp'}.webp`)
+const BADGE_ALIAS: Record<string, string> = { units: 'lessons', levels: 'mastery', duel: 'league', balance: 'perfect' }
+export const badgeImg = (category: string) => { const c = BADGE_ALIAS[category] ?? category; return img(`badges/${BADGES.includes(c) ? c : 'xp'}.webp`) }
 export const leagueImg = (tier: number) => img(`leagues/${Math.max(0, Math.min(9, tier))}.webp`)
 export const scenarioImg = (key: string) => img(`scenarios/${key}.webp`)
 export const storyImg = (slug: string) => img(`stories/${slug}.webp`)

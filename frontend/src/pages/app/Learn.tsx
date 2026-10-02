@@ -13,7 +13,6 @@ import { Button } from '@/components/ui/Button'
 import { Modal, SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
-import { HomeworkCard } from '@/components/game/Homework'
 import { higoImg, type HigoPose } from '@/components/game/Higo'
 import { Guidebook } from '@/components/game/Guidebook'
 
@@ -85,7 +84,6 @@ export default function Learn() {
         <ContinueCard data={data} stats={stats} onJump={jump} onPick={() => setPicker(true)} away={!currentVisible ? (curAbove ? 'up' : 'down') : null} />
       </div>
 
-      <HomeworkCard />
 
       <div className="mt-8">
         {data.units.map((unit, ui) => (

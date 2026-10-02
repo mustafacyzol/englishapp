@@ -91,6 +91,8 @@ Route::prefix('v1')->group(function () {
         Route::delete('institution/assignments/{assignment}', [InstitutionController::class, 'deleteAssignment']);
         Route::get('institution/catalog', [InstitutionController::class, 'catalog']);
         Route::get('me/assignments', [InstitutionController::class, 'myAssignments']);
+        Route::get('me/school-league', [InstitutionController::class, 'myLeaderboard']);
+        Route::get('institution/leaderboard', [InstitutionController::class, 'leaderboard']);
         Route::post('me/assignments/{assignment}/done', [InstitutionController::class, 'markDone'])->middleware('throttle:30,1');
         Route::post('notifications/read', [AccountController::class, 'readNotifications']);
         Route::post('notifications/{id}/read', [AccountController::class, 'readNotification']);
@@ -169,6 +171,7 @@ Route::prefix('v1')->group(function () {
             // Sınav modu (YDS, YÖKDİL, YDT, IELTS, TOEFL)
             Route::get('exam', [ExamController::class, 'index'])->middleware('feature:exam');
             Route::get('exam/practice', [ExamController::class, 'practice'])->middleware(['feature:exam', 'throttle:60,1']);
+            Route::get('exam/mock', [ExamController::class, 'mock'])->middleware(['feature:exam', 'throttle:20,1']);
             Route::post('exam/answer', [ExamController::class, 'answer'])->middleware(['feature:exam', 'throttle:120,1']);
 
             // Billing

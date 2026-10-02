@@ -289,7 +289,8 @@ class GamificationService
     public function progressQuests(User $user, array $metrics): array
     {
         $completed = [];
-        $quests = Quest::query()->where('is_active', true)->whereIn('metric', array_keys(array_filter($metrics)))->get();
+        $metricKeys = array_keys(array_filter($metrics));
+        $quests = $this->activeQuests($user)->filter(fn (Quest $q) => in_array($q->metric, $metricKeys, true));
 
         foreach ($quests as $quest) {
             $uq = UserQuest::query()->firstOrCreate([
@@ -309,6 +310,27 @@ class GamificationService
         }
 
         return $completed;
+    }
+
+    /** How many daily quests a learner gets each day, besides the XP goal. */
+    public const DAILY_EXTRA = 2;
+
+    /**
+     * Today's quests for a learner: every weekly quest, the daily XP goal and two
+     * daily quests drawn from the pool. The draw is seeded by the date and the
+     * user, so it is stable all day, different tomorrow and different per person,
+     * with no cron job needed: a new day simply means a new period key and a new draw.
+     */
+    public function activeQuests(User $user): \Illuminate\Support\Collection
+    {
+        $all = Quest::query()->where('is_active', true)->orderBy('period')->orderBy('target')->get();
+        [$daily, $weekly] = $all->partition(fn (Quest $q) => $q->period === 'daily');
+        $anchor = $daily->firstWhere('metric', 'xp');
+        $pool = $daily->reject(fn ($q) => $anchor && $q->id === $anchor->id)->values();
+        $seed = crc32($user->id.'|'.Period::today());
+        $picked = $pool->sortBy(fn (Quest $q) => crc32($seed.'|'.$q->key))->take(self::DAILY_EXTRA);
+
+        return collect([$anchor])->filter()->concat($picked)->concat($weekly)->values();
     }
 
     public function questPeriodKey(Quest $quest): string
@@ -356,8 +378,20 @@ class GamificationService
             'duel_wins' => $user->hasMany(Duel::class)->where('result', 'win')->count(),
             'duel_trophies' => $user->duel_best,
             'skills_balanced' => $this->balancedSkillLevel($user),
+            // 1 = A2 reached, 2 = B1, 3 = B2 (placement or finishing a level)
+            'cefr_rank' => (int) array_search($user->cefr_level ?? 'A1', PathService::LEVELS, true),
+            'units_completed' => $this->unitsCompleted($user),
             default => 0,
         };
+    }
+
+    /** Units where every lesson is done. */
+    private function unitsCompleted(User $user): int
+    {
+        $done = $user->lessonProgress()->whereNotNull('completed_at')->pluck('lesson_id')->flip();
+
+        return \App\Models\Unit::query()->with('lessons:id,unit_id')->get()
+            ->filter(fn ($u) => $u->lessons->isNotEmpty() && $u->lessons->every(fn ($l) => $done->has($l->id)))->count();
     }
 
     /** @return list<array> newly unlocked achievements */

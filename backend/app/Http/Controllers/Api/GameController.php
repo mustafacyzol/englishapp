@@ -147,7 +147,7 @@ class GameController extends Controller
 
     private function questList(User $user, ?string $period = null): array
     {
-        $quests = Quest::query()->where('is_active', true)->when($period, fn ($q) => $q->where('period', $period))->orderBy('period')->orderBy('target')->get();
+        $quests = $this->game->activeQuests($user)->when($period, fn ($c) => $c->where('period', $period))->values();
 
         return $quests->map(function (Quest $q) use ($user) {
             $uq = UserQuest::query()->firstOrCreate(['user_id' => $user->id, 'quest_id' => $q->id, 'period_key' => $this->game->questPeriodKey($q)]);

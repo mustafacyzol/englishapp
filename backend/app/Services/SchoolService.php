@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Support\Period;
+
 use App\Models\Assignment;
 use App\Models\AssignmentCompletion;
 use App\Models\InstitutionMember;
@@ -155,5 +157,36 @@ class SchoolService
             ->where(fn ($q) => $q->whereNull('due_at')->orWhere('due_at', '>=', now()->subDays(7)))
             ->latest('id')->limit(30)->get()
             ->map(fn (Assignment $a) => $this->present($a) + ['done' => $this->doneBy($a, collect([$user->id]))->isNotEmpty()]);
+    }
+
+    /**
+     * The school's own league: students ranked by XP earned this week (or this
+     * month), for one class or the whole school. Students see it on the Leagues
+     * page; principals and teachers (only their classes) in the school panel.
+     *
+     * @return list<array>
+     */
+    public function leaderboard(int $institutionId, ?string $class, string $period = 'week', ?int $meId = null): array
+    {
+        $from = $period === 'month' ? Period::now()->startOfMonth() : Period::now()->startOfWeek();
+        $members = InstitutionMember::query()->where('institution_id', $institutionId)->where('role', 'student')->where('status', 'active')
+            ->when($class, fn ($q) => $q->where('class_name', $class))->whereNotNull('user_id')
+            ->with('user:id,name,username,avatar,avatar_url,frame,streak_current,league_tier')->get();
+        $xp = \App\Models\DailyActivity::query()->whereIn('user_id', $members->pluck('user_id'))->where('date', '>=', $from->toDateString())
+            ->groupBy('user_id')->selectRaw('user_id, sum(xp) as xp, sum(lessons) as lessons')->get()->keyBy('user_id');
+
+        return $members->filter(fn ($m) => $m->user)->map(fn ($m) => [
+            'user_id' => $m->user_id,
+            'name' => $m->user->name,
+            'username' => $m->user->username,
+            'avatar' => $m->user->avatar,
+            'avatar_url' => $m->user->avatar_url,
+            'frame' => $m->user->frame,
+            'class_name' => $m->class_name,
+            'streak' => (int) $m->user->streak_current,
+            'xp' => (int) ($xp[$m->user_id]->xp ?? 0),
+            'lessons' => (int) ($xp[$m->user_id]->lessons ?? 0),
+            'me' => $m->user_id === $meId,
+        ])->sortByDesc('xp')->values()->map(fn ($r, $i) => $r + ['rank' => $i + 1])->all();
     }
 }

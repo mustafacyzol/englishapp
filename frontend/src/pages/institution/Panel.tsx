@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/Toast'
 import { InviteModal, Kpi, Report, ago, type InstitutionReport, type InviteRow, type Member } from '@/components/institution/Report'
 import { InstitutionMark, useInstitution } from '@/layouts/InstitutionLayout'
 import { SchoolClassManager } from './School'
+import { SchoolBoard } from '@/components/game/SchoolBoard'
 import { BRAND } from '@/lib/brand'
 
 function useActions() {
@@ -140,7 +141,28 @@ export function InstitutionClasses() {
         })}
         {!groups.length && <p className="text-ink-soft">Henüz öğrenci yok. Davetler sayfasından ekleyebilirsin.</p>}
       </div>
+      {groups.length > 0 && <ClassLeague classes={groups.map(([n]) => n).filter((n) => n !== 'Sınıfsız')} manager={(data as { role?: string }).role === 'manager'} />}
     </div>
+  )
+}
+
+/** The class league the students see in the app, from the teacher's side. */
+function ClassLeague({ classes, manager }: { classes: string[]; manager: boolean }) {
+  const [pick, setPick] = useState<string>(manager ? '' : classes[0] ?? '')
+  return (
+    <section className="mt-10">
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="text-2xl font-extrabold">Sınıf ligi</h2>
+          <p className="text-sm text-ink-soft">Öğrencilerin uygulamada gördüğü sıralama. Haftalık ya da aylık XP'ye göre.</p>
+        </div>
+        <div className="no-scrollbar flex max-w-full gap-1.5 overflow-x-auto">
+          {manager && <button onClick={() => setPick('')} className={clsx('shrink-0 rounded-xl border-2 px-3 py-1.5 text-sm font-extrabold', pick === '' ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>Bütün okul</button>}
+          {classes.map((c) => <button key={c} onClick={() => setPick(c)} className={clsx('shrink-0 rounded-xl border-2 px-3 py-1.5 text-sm font-extrabold', pick === c ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>{c}</button>)}
+        </div>
+      </div>
+      <SchoolBoard key={pick} endpoint="/institution/leaderboard" query={pick ? `class=${encodeURIComponent(pick)}` : ''} showClass={!pick} title={pick ? `${pick} sınıfı` : 'Bütün okul'} />
+    </section>
   )
 }
 

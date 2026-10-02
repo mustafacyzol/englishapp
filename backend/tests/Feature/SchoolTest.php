@@ -55,6 +55,17 @@ class SchoolTest extends TestCase
         $this->assertSame(0, $a['done']);
         $this->actingAs($s1, 'sanctum')->getJson('/api/v1/me/assignments')->assertOk()->assertJsonPath('data.0.done', false);
         $this->actingAs($s2, 'sanctum')->getJson('/api/v1/me/assignments')->assertOk()->assertJsonCount(0, 'data');
+        // the class hears about it in their notifications, other classes don't
+        Notification::assertSentTo($s1, \App\Notifications\AssignmentGiven::class, fn ($n) => $n->toArray($s1)['kind'] === 'homework');
+        Notification::assertNotSentTo($s2, \App\Notifications\AssignmentGiven::class);
+
+        // school league: class view for students, staff only for their classes
+        \App\Models\DailyActivity::query()->create(['user_id' => $s1->id, 'date' => \App\Support\Period::today(), 'xp' => 40]);
+        $this->actingAs($s1, 'sanctum')->getJson('/api/v1/me/school-league')->assertOk()->assertJsonPath('class_name', '8-A')->assertJsonCount(1, 'data')->assertJsonPath('data.0.xp', 40)->assertJsonPath('data.0.me', true);
+        $this->actingAs($s1, 'sanctum')->getJson('/api/v1/me/school-league?scope=school')->assertOk()->assertJsonCount(2, 'data')->assertJsonPath('data.0.rank', 1);
+        $this->actingAs($teacherUser, 'sanctum')->getJson('/api/v1/institution/leaderboard?class=8-A')->assertOk()->assertJsonCount(1, 'data');
+        $this->actingAs($teacherUser, 'sanctum')->getJson('/api/v1/institution/leaderboard?class=8-B')->assertForbidden();
+        $this->actingAs($principal, 'sanctum')->getJson('/api/v1/institution/leaderboard')->assertOk()->assertJsonCount(2, 'data');
         DB::table('lesson_progress')->insert(['user_id' => $s1->id, 'lesson_id' => $lesson->id, 'best_score' => 90, 'attempts' => 1, 'completed_at' => now()->addMinute(), 'created_at' => now(), 'updated_at' => now()]);
         $this->actingAs($s1, 'sanctum')->getJson('/api/v1/me/assignments')->assertJsonPath('data.0.done', true);
         $this->actingAs($teacherUser, 'sanctum')->getJson('/api/v1/institution/assignments')->assertJsonPath('data.0.done', 1);

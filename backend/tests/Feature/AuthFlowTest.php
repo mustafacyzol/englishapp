@@ -44,7 +44,7 @@ class AuthFlowTest extends TestCase
         $this->withToken($token)->postJson('/api/v1/auth/email/verify', ['code' => $this->capturedCode()])
             ->assertOk()->assertJsonPath('user.email_verified', true);
 
-        $this->assertSame(150, $inviter->fresh()->gems);
+        $this->assertSame(200, $inviter->fresh()->gems); // referral gems + 50 for the "Elçi I" badge
         $this->assertSame(150, User::query()->where('email', 'ayse@example.com')->value('gems')); // 50 start + 100
     }
 

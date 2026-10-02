@@ -121,6 +121,8 @@ class LeagueService
                 }
                 $group->update(['is_closed' => true]);
             });
+            // podium and league badges are earned at the week's close, not on a lesson
+            $group->memberships()->with('user')->get()->each(fn ($m) => $m->user && app(GamificationService::class)->checkAchievements($m->user->fresh()));
             $closed++;
         });
 

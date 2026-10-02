@@ -1029,5 +1029,640 @@
   ],
   "answer": 0,
   "explanation": "Kuvvetli rüzgar ve yağmur bir fırtınayı (storm) anlatır. Doğal afetler ünitesi."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "dialogue",
+  "cefr": "A2",
+  "prompt": "Emre: How about going to the cinema this evening?\nMert: ----. I have a science project to finish.",
+  "options": [
+   "Sorry, I can't make it",
+   "Sure, let's meet at seven",
+   "What a great idea",
+   "I've already seen it twice"
+  ],
+  "answer": 0,
+  "explanation": "Mert'in bir projesi var, yani daveti reddediyor. Kibar ret kalıbı: Sorry, I can't make it."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "dialogue",
+  "cefr": "A2",
+  "prompt": "Zeynep: Could you help me with my English homework?\nAli: ----. Let's start with the first question.",
+  "options": [
+   "Of course, I'd be happy to",
+   "No, I don't like English",
+   "I'm sorry, I'm not free",
+   "It was very difficult"
+  ],
+  "answer": 0,
+  "explanation": "Ali ardından 'Let's start' diyor; demek ki kabul ediyor. Kabul kalıbı: Of course, I'd be happy to."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "dialogue",
+  "cefr": "A2",
+  "prompt": "Selin: I'm sorry, but I broke your pencil.\nDeniz: ----. I have another one.",
+  "options": [
+   "Never mind",
+   "Congratulations",
+   "Good luck",
+   "Help yourself"
+  ],
+  "answer": 0,
+  "explanation": "Özrü kabul edip önemsizleştirmek için 'Never mind' (önemli değil) denir."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "vocabulary",
+  "cefr": "A2",
+  "prompt": "My best friend is very ----. She always tells the truth and never breaks her promises.",
+  "options": [
+   "reliable",
+   "selfish",
+   "rude",
+   "lazy"
+  ],
+  "answer": 0,
+  "explanation": "Hep doğruyu söyleyen ve sözünü tutan biri güvenilirdir: reliable."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "vocabulary",
+  "cefr": "A2",
+  "prompt": "Before you ---- the vegetables, wash them carefully under cold water.",
+  "options": [
+   "chop",
+   "download",
+   "borrow",
+   "invite"
+  ],
+  "answer": 0,
+  "explanation": "Sebzelerle yapılan mutfak eylemi 'chop' (doğramak)."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "vocabulary",
+  "cefr": "A2",
+  "prompt": "Don't share your password with anyone. It is important for online ----.",
+  "options": [
+   "safety",
+   "weather",
+   "tourism",
+   "furniture"
+  ],
+  "answer": 0,
+  "explanation": "Şifre paylaşmamak internet güvenliğiyle ilgili: online safety."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "vocabulary",
+  "cefr": "A2",
+  "prompt": "Bungee jumping is too ---- for me. I prefer safe activities like hiking.",
+  "options": [
+   "dangerous",
+   "boring",
+   "cheap",
+   "peaceful"
+  ],
+  "answer": 0,
+  "explanation": "Güvenli aktiviteleri tercih ettiğini söylüyor; bungee jumping onun için tehlikeli: dangerous."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "grammar",
+  "cefr": "A2",
+  "prompt": "I ---- my room every Saturday, and my brother does the dishes.",
+  "options": [
+   "tidy",
+   "tidies",
+   "tidied",
+   "am tidy"
+  ],
+  "answer": 0,
+  "explanation": "Her cumartesi yapılan rutin, özne 'I': geniş zaman, yalın fiil: tidy."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "grammar",
+  "cefr": "A2",
+  "prompt": "Earthquakes are ---- than storms because we can't predict them.",
+  "options": [
+   "more dangerous",
+   "dangerouser",
+   "the most dangerous",
+   "most dangerous"
+  ],
+  "answer": 0,
+  "explanation": "İki şey karşılaştırılıyor ve 'than' var. Uzun sıfat: more dangerous."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "grammar",
+  "cefr": "A2",
+  "prompt": "Last summer we ---- to Cappadocia and took a hot air balloon ride.",
+  "options": [
+   "went",
+   "go",
+   "going",
+   "have go"
+  ],
+  "answer": 0,
+  "explanation": "'Last summer' geçmiş zaman ister: go → went."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Hi, I'm Kerem. I'm a big fan of science. Every Wednesday after school, I go to the science club. We do experiments and learn about natural forces like earthquakes and floods. Last week we built a small model of a safe house. Next month, our club is going to visit the planetarium in Ankara.",
+  "prompt": "Which of the following is TRUE according to the text?",
+  "options": [
+   "Kerem's club is going to visit a planetarium",
+   "Kerem goes to the science club every day",
+   "They built a real house last week",
+   "Kerem doesn't like science"
+  ],
+  "answer": 0,
+  "explanation": "Metnin sonunda 'Next month, our club is going to visit the planetarium' deniyor."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Hi, I'm Kerem. I'm a big fan of science. Every Wednesday after school, I go to the science club. We do experiments and learn about natural forces like earthquakes and floods. Last week we built a small model of a safe house. Next month, our club is going to visit the planetarium in Ankara.",
+  "prompt": "When does Kerem go to the science club?",
+  "options": [
+   "On Wednesdays after school",
+   "Every morning",
+   "At the weekend",
+   "Only in summer"
+  ],
+  "answer": 0,
+  "explanation": "'Every Wednesday after school' ifadesi cevabı veriyor."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Online Safety Rules\n1. Never share your home address.\n2. Use strong passwords with numbers and symbols.\n3. Don't accept friend requests from strangers.\n4. Tell an adult if something online makes you uncomfortable.",
+  "prompt": "Which rule is NOT mentioned in the poster?",
+  "options": [
+   "Turn off your computer at night",
+   "Use strong passwords",
+   "Don't accept requests from strangers",
+   "Tell an adult about problems"
+  ],
+  "answer": 0,
+  "explanation": "Afişte bilgisayarı kapatmakla ilgili bir kural yok; diğer üçü listede var."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Tourism in Turkey\nMany tourists visit Turkey every year. Antalya is famous for its beaches, Cappadocia for its fairy chimneys and Istanbul for its history. Most visitors come in summer, but winter is the best time for Erzurum because of skiing.",
+  "prompt": "Why do people visit Erzurum in winter?",
+  "options": [
+   "To go skiing",
+   "To see fairy chimneys",
+   "To swim in the sea",
+   "To visit old palaces"
+  ],
+  "answer": 0,
+  "explanation": "Metne göre Erzurum kış için en iyisi 'because of skiing'."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "dialogue",
+  "cefr": "A2",
+  "prompt": "Mom: Can you set the table, please?\nAyşe: ----. Where are the forks?",
+  "options": [
+   "Sure, no problem",
+   "I'm doing my homework",
+   "I've already eaten",
+   "It's not my turn"
+  ],
+  "answer": 0,
+  "explanation": "Ayşe çatalları soruyor; yani masayı kurmayı kabul ediyor: Sure, no problem."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "vocabulary",
+  "cefr": "B2",
+  "prompt": "Urban planners argue that green spaces can significantly ---- the stress levels of city residents.",
+  "options": [
+   "alleviate",
+   "aggravate",
+   "accumulate",
+   "allocate"
+  ],
+  "answer": 0,
+  "explanation": "Yeşil alanlar stresi azaltır: alleviate (hafifletmek). Aggravate kötüleştirir, diğerleri anlamsız."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "vocabulary",
+  "cefr": "B2",
+  "prompt": "The lecturer gave a ---- overview of the topic before discussing the details.",
+  "options": [
+   "concise",
+   "verbose",
+   "reluctant",
+   "fragile"
+  ],
+  "answer": 0,
+  "explanation": "Detaylardan önce verilen kısa özet: concise (öz)."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "vocabulary",
+  "cefr": "B2",
+  "prompt": "Remote work has become increasingly ---- since the pandemic, with many companies adopting hybrid models.",
+  "options": [
+   "prevalent",
+   "obsolete",
+   "scarce",
+   "trivial"
+  ],
+  "answer": 0,
+  "explanation": "Uzaktan çalışma yaygınlaştı: prevalent (yaygın)."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "grammar",
+  "cefr": "B2",
+  "prompt": "Had the researchers collected more data, their conclusions ---- more reliable.",
+  "options": [
+   "would have been",
+   "will be",
+   "would be being",
+   "had been"
+  ],
+  "answer": 0,
+  "explanation": "Devrik third conditional (Had + V3) → sonuç kısmı 'would have been'."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "grammar",
+  "cefr": "B2",
+  "prompt": "Not only ---- the price of housing, but it has also affected public transport.",
+  "options": [
+   "has tourism increased",
+   "tourism has increased",
+   "tourism increased",
+   "did tourism increasing"
+  ],
+  "answer": 0,
+  "explanation": "'Not only' cümle başındaysa devrik yapı gelir: has tourism increased."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "grammar",
+  "cefr": "B1",
+  "prompt": "The number of students studying abroad ---- steadily over the last decade.",
+  "options": [
+   "has risen",
+   "have risen",
+   "rose up",
+   "is rising since"
+  ],
+  "answer": 0,
+  "explanation": "'The number of' tekil özne; 'over the last decade' present perfect: has risen."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "sentence_completion",
+  "cefr": "B2",
+  "prompt": "Although the city invested heavily in cycle lanes, ----.",
+  "options": [
+   "many residents still prefer to drive to work",
+   "more people started cycling to work",
+   "the cycle lanes were very popular",
+   "it was a successful project"
+  ],
+  "answer": 0,
+  "explanation": "'Although' zıtlık kurar: yatırıma rağmen insanlar hâlâ araba kullanıyor."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "sentence_completion",
+  "cefr": "B2",
+  "prompt": "Unless governments take immediate action, ----.",
+  "options": [
+   "global temperatures will continue to rise",
+   "we reduced emissions last year",
+   "renewable energy was very cheap",
+   "the summit had been successful"
+  ],
+  "answer": 0,
+  "explanation": "'Unless' + present → sonuç gelecekte (will). Anlamca da uygun olan bu."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "reading",
+  "cefr": "B2",
+  "passage": "Sleep researchers have found that teenagers' internal clocks shift later during adolescence, making it biologically difficult for them to fall asleep before 11 pm. Schools that delayed their start times by just one hour reported improved attendance, fewer car accidents among teenage drivers and better grades in morning classes.",
+  "prompt": "What is the main idea of the passage?",
+  "options": [
+   "Later school start times can benefit teenagers",
+   "Teenagers are lazier than adults",
+   "Car accidents are caused by schools",
+   "Morning classes should be cancelled"
+  ],
+  "answer": 0,
+  "explanation": "Paragraf, gençlerin biyolojik saatinin geç kaydığını ve okulu geç başlatmanın faydalarını anlatıyor."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "reading",
+  "cefr": "B2",
+  "passage": "Sleep researchers have found that teenagers' internal clocks shift later during adolescence, making it biologically difficult for them to fall asleep before 11 pm. Schools that delayed their start times by just one hour reported improved attendance, fewer car accidents among teenage drivers and better grades in morning classes.",
+  "prompt": "According to the passage, which was NOT reported by schools that started later?",
+  "options": [
+   "Higher fees for parents",
+   "Better attendance",
+   "Fewer car accidents",
+   "Better morning grades"
+  ],
+  "answer": 0,
+  "explanation": "Ücretlerden hiç söz edilmiyor; diğer üçü metinde sayılıyor."
+ },
+ {
+  "exams": [
+   "ielts",
+   "toefl"
+  ],
+  "section": "reading",
+  "cefr": "B1",
+  "passage": "The town library has introduced a 'Library of Things'. Instead of books, members can borrow tools, sewing machines, camping equipment and even musical instruments for up to two weeks. The aim is to reduce waste and help people save money on items they rarely use.",
+  "prompt": "Why did the library start the 'Library of Things'?",
+  "options": [
+   "To reduce waste and save people money",
+   "To sell old equipment",
+   "To replace all its books",
+   "To teach people music"
+  ],
+  "answer": 0,
+  "explanation": "Son cümle amacı açıkça veriyor: reduce waste and help people save money."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "vocabulary",
+  "cefr": "B2",
+  "prompt": "The government has decided to ---- the new regulations until the economic situation becomes more stable.",
+  "options": [
+   "postpone",
+   "accelerate",
+   "illuminate",
+   "dominate",
+   "undermine"
+  ],
+  "answer": 0,
+  "explanation": "Ekonomi düzelene kadar düzenlemeleri ertelemek: postpone."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "vocabulary",
+  "cefr": "C1",
+  "prompt": "Despite the ---- evidence presented in court, the jury was not convinced of the defendant's guilt.",
+  "options": [
+   "circumstantial",
+   "conclusive",
+   "unanimous",
+   "redundant",
+   "spontaneous"
+  ],
+  "answer": 0,
+  "explanation": "'Despite' zıtlık kurar; jüri ikna olmadıysa delil dolaylıydı: circumstantial. Conclusive (kesin) zıtlığı bozar."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "grammar",
+  "cefr": "B2",
+  "prompt": "By the time the rescue team arrived, the fire ---- most of the forest.",
+  "options": [
+   "had destroyed",
+   "has destroyed",
+   "was destroying",
+   "destroys",
+   "would destroy"
+  ],
+  "answer": 0,
+  "explanation": "'By the time' + past simple → daha önce tamamlanan eylem past perfect: had destroyed."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "grammar",
+  "cefr": "B2",
+  "prompt": "---- the new drug proved effective in early trials, scientists remain cautious about its long-term effects.",
+  "options": [
+   "Even though",
+   "Because",
+   "So that",
+   "Unless",
+   "As long as"
+  ],
+  "answer": 0,
+  "explanation": "Etkili olmasına rağmen temkinliler: zıtlık bağlacı 'Even though'."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "sentence_completion",
+  "cefr": "B2",
+  "prompt": "If more funding had been allocated to early-warning systems, ----.",
+  "options": [
+   "the damage caused by the flood could have been reduced",
+   "the flood will cause less damage",
+   "the systems are working well now",
+   "people evacuate their homes quickly",
+   "the government had built new dams"
+  ],
+  "answer": 0,
+  "explanation": "Third conditional (had been allocated) → could have been reduced."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "translation",
+  "cefr": "B2",
+  "prompt": "Araştırmacılar, düzenli egzersizin yaşlı yetişkinlerde hafıza kaybını önemli ölçüde yavaşlatabileceğini öne sürüyor.",
+  "options": [
+   "Researchers suggest that regular exercise can significantly slow memory loss in older adults.",
+   "Regular exercise is suggested by older adults to researchers for memory.",
+   "Researchers have proved that older adults never lose memory if they exercise.",
+   "Memory loss in older adults is caused by a lack of regular exercise, say researchers.",
+   "Older adults who suggest exercise to researchers slow their memory loss."
+  ],
+  "answer": 0,
+  "explanation": "Özne (araştırmacılar), fiil (öne sürüyor = suggest), modal (-ebileceğini = can) ve 'önemli ölçüde' (significantly) birebir karşılanan seçenek A."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "dialogue",
+  "cefr": "B1",
+  "prompt": "Mert: I've been offered a job in Berlin, but I'm not sure whether to accept it.\nAylin: ----\nMert: The salary is great, but I'd have to leave my family behind.",
+  "options": [
+   "What's making you hesitate?",
+   "Congratulations, when do you start?",
+   "I've never been to Berlin.",
+   "Why did you reject the offer?",
+   "Is the job in Istanbul?"
+  ],
+  "answer": 0,
+  "explanation": "Mert'in cevabı tereddüdünün sebeplerini açıklıyor; soru da 'Seni tereddüde düşüren ne?' olmalı."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "cloze",
+  "cefr": "B2",
+  "passage": "Coffee was first discovered in Ethiopia, (1) ---- legend says a goat herder noticed his animals becoming energetic after eating certain berries. (2) ---- the fifteenth century, it was being grown in Yemen.",
+  "prompt": "(1) boşluğu için en uygun seçenek hangisidir?",
+  "options": [
+   "where",
+   "which",
+   "when",
+   "whose",
+   "what"
+  ],
+  "answer": 0,
+  "explanation": "Bir yer (Ethiopia) tanımlanıyor: where."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "paragraph",
+  "cefr": "B2",
+  "prompt": "Bees play a crucial role in agriculture. ---- In fact, about one third of the food we eat depends on pollination. Without bees, the prices of fruit and vegetables would rise dramatically.",
+  "options": [
+   "Many crops rely on them for pollination.",
+   "Honey has been used as medicine for centuries.",
+   "Some people are afraid of being stung.",
+   "Wasps are often confused with bees.",
+   "Beekeeping is a popular hobby in Turkey."
+  ],
+  "answer": 0,
+  "explanation": "Boşluktan sonra 'In fact … depends on pollination' geliyor; boşluk tozlaşma fikrini girmeli."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "irrelevant",
+  "cefr": "B2",
+  "prompt": "(I) Social media allows people to stay connected across long distances. (II) However, excessive use has been linked to anxiety among teenagers. (III) The first smartphone was released in 1994. (IV) Some experts therefore recommend limiting screen time. (V) Schools are also starting to teach digital wellbeing.",
+  "options": [
+   "I",
+   "II",
+   "III",
+   "IV",
+   "V"
+  ],
+  "answer": 2,
+  "explanation": "Paragraf sosyal medyanın etkileri ve önlemler hakkında; ilk akıllı telefonun tarihi (III) akışı bozuyor."
  }
 ]

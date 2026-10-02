@@ -66,6 +66,76 @@ class ExamController extends Controller
                 'today' => ExamAttempt::query()->where('user_id', $user->id)->where('created_at', '>=', now()->startOfDay())->count(),
             ],
             'recommended' => $recommended['key'] ?? null,
+            'plan' => $this->plan($user, $stats),
+            'mock' => $target ? $this->mockShape($target) : null,
+        ]);
+    }
+
+    /**
+     * The learner's exam plan: how many questions a day the time left asks for,
+     * and which two sections to lean on (weakest accuracy first, untried next).
+     */
+    private function plan($user, $stats): array
+    {
+        $days = $user->exam_date ? max(0, (int) now()->startOfDay()->diffInDays($user->exam_date, false)) : null;
+        $daily = match (true) {
+            $days === null => 15,
+            $days <= 14 => 40,
+            $days <= 45 => 30,
+            $days <= 90 => 20,
+            default => 15,
+        };
+        $focus = $stats->sortBy(fn ($s) => $s['accuracy'] ?? -1)->take(2)->pluck('key')->values();
+        $done = ExamAttempt::query()->where('user_id', $user->id)->where('created_at', '>=', now()->startOfDay())->count();
+
+        return ['daily_goal' => $daily, 'done_today' => $done, 'focus' => $focus, 'mock_every' => $days !== null && $days <= 30 ? 'Her 3 günde bir deneme' : 'Haftada bir deneme'];
+    }
+
+    /** A mock sized for one sitting, in the real exam's mix of sections and pace. */
+    private function mockShape(string $exam): array
+    {
+        $e = Exams::EXAMS[$exam];
+        $size = min($e['questions'], $exam === 'lgs' ? 10 : 20);
+        $minutes = (int) round($e['minutes'] * $size / $e['questions']);
+
+        return ['questions' => $size, 'minutes' => $minutes, 'full_questions' => $e['questions'], 'full_minutes' => $e['minutes']];
+    }
+
+    /**
+     * Deneme sınavı: a mock in the format of the learner's exam. Sections are
+     * drawn in the proportions of the real exam (its blueprint), least-seen
+     * questions first, with the real time per question.
+     */
+    public function mock(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $exam = $request->validate(['exam' => ['nullable', Rule::in(Exams::keys())]])['exam'] ?? $user->exam_target ?? 'yds';
+        $shape = $this->mockShape($exam);
+        $blueprint = Exams::EXAMS[$exam]['blueprint'];
+        $total = array_sum($blueprint);
+        $seen = ExamAttempt::query()->where('user_id', $user->id)->select('exam_question_id', DB::raw('COUNT(*) as c'))->groupBy('exam_question_id')->pluck('c', 'exam_question_id');
+        $bank = ExamQuestion::query()->where('is_active', true)->get()->filter(fn ($q) => in_array($exam, $q->exams, true));
+
+        $picked = collect();
+        foreach ($blueprint as $section => $count) {
+            $want = max(1, (int) round($count / $total * $shape['questions']));
+            $picked = $picked->concat($bank->where('section', $section)->sortBy(fn ($q) => ($seen[$q->id] ?? 0) * 1000 + random_int(0, 999))->take($want));
+        }
+        // top up from any section if the bank is thin, then trim to size
+        if ($picked->count() < $shape['questions']) {
+            $picked = $picked->concat($bank->whereNotIn('id', $picked->pluck('id'))->shuffle()->take($shape['questions'] - $picked->count()));
+        }
+        $order = array_flip(array_keys($blueprint));
+        $picked = $picked->take($shape['questions'])->sortBy(fn ($q) => [$order[$q->section] ?? 99, $q->passage ? crc32($q->passage) : 0, $q->position])->values();
+
+        return response()->json([
+            'exam' => $exam,
+            'name' => Exams::EXAMS[$exam]['name'],
+            'minutes' => max(5, (int) round($shape['minutes'] * $picked->count() / max(1, $shape['questions']))),
+            'questions' => $picked->map(fn (ExamQuestion $q) => [
+                'id' => $q->id, 'section' => $q->section, 'section_label' => Exams::SECTIONS[$q->section]['label'] ?? $q->section,
+                'cefr' => $q->cefr, 'passage' => $q->passage, 'prompt' => $q->prompt, 'options' => $q->options,
+            ]),
         ]);
     }
 

@@ -57,6 +57,24 @@ class ExamPartnerAuthTest extends TestCase
         $this->assertSame(1, $this->actingAs($user)->getJson('/api/v1/exam')->json('total.answered'));
     }
 
+    public function test_mock_follows_the_exam_format_and_plan_is_personal(): void
+    {
+        $this->seed([GameSeeder::class, ExamSeeder::class]);
+        $lgs = $this->learner(['exam_target' => 'lgs', 'exam_date' => now()->addDays(10)]);
+        $mock = $this->actingAs($lgs)->getJson('/api/v1/exam/mock')->assertOk();
+        $this->assertSame('lgs', $mock->json('exam'));
+        $this->assertCount(10, $mock->json('questions'));
+        $this->assertSame(15, $mock->json('minutes'));
+        // only LGS items, never another exam's, and no keys
+        $ids = collect($mock->json('questions'))->pluck('id');
+        $this->assertTrue(ExamQuestion::query()->whereIn('id', $ids)->get()->every(fn ($q) => in_array('lgs', $q->exams, true)));
+        $this->assertArrayNotHasKey('answer', $mock->json('questions.0'));
+
+        $overview = $this->actingAs($lgs)->getJson('/api/v1/exam')->assertOk();
+        $this->assertSame(40, $overview->json('plan.daily_goal')); // 10 days left
+        $this->assertSame(10, $overview->json('mock.questions'));
+    }
+
     public function test_seeded_answer_keys_are_not_all_the_same_letter(): void
     {
         $this->seed(ExamSeeder::class);

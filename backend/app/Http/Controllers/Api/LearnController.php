@@ -89,6 +89,10 @@ class LearnController extends Controller
         $result = $lessons->complete($request->user(), $lesson, $data['answers'], $data['seconds'] ?? 0);
         // finishing the last lesson of your level moves you up one level
         $up = app(PathService::class)->maybeLevelUp($request->user()->fresh());
+        if ($up) {
+            // a new CEFR level is a badge of its own
+            $result['reward']['achievements'] = array_merge($result['reward']['achievements'] ?? [], app(\App\Services\GamificationService::class)->checkAchievements($request->user()->fresh()));
+        }
 
         return response()->json($result + ['level_up' => $up]);
     }

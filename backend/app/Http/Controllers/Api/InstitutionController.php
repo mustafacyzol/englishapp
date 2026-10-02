@@ -200,6 +200,10 @@ class InstitutionController extends Controller
             'due_at' => $data['due_at'] ?? null,
         ]);
         Audit::log('school.assignment_created', $request->user(), $staff->institution, ['assignment' => $a->id]);
+        // every student of the class (or the whole school) hears about it in their notifications
+        $students = \App\Models\InstitutionMember::query()->where('institution_id', $staff->institution_id)->where('role', 'student')->where('status', 'active')
+            ->when($a->class_name, fn ($q) => $q->where('class_name', $a->class_name))->with('user')->get()->pluck('user')->filter();
+        \Illuminate\Support\Facades\Notification::send($students, new \App\Notifications\AssignmentGiven($a, $request->user()->name, $this->school->link($a)));
 
         return response()->json(['data' => $this->school->assignments($staff)], 201);
     }
@@ -226,6 +230,35 @@ class InstitutionController extends Controller
     }
 
     /* ---------------------------------------------------------- students */
+
+    /** The student's school league: their class or the whole school, this week or this month. */
+    public function myLeaderboard(Request $request): JsonResponse
+    {
+        $m = InstitutionMember::query()->where('user_id', $request->user()->id)->where('role', 'student')->where('status', 'active')->with('institution:id,name,logo_url')->first();
+        abort_unless($m, 404, 'Bir okula bağlı değilsin.');
+        $scope = $request->query('scope') === 'school' ? 'school' : 'class';
+        $period = $request->query('period') === 'month' ? 'month' : 'week';
+
+        return response()->json([
+            'institution' => $m->institution?->only(['name', 'logo_url']),
+            'class_name' => $m->class_name,
+            'scope' => $scope,
+            'period' => $period,
+            'data' => $this->school->leaderboard($m->institution_id, $scope === 'class' ? $m->class_name : null, $period, $request->user()->id),
+        ]);
+    }
+
+    /** Staff view of the same league; a teacher only for their own classes. */
+    public function leaderboard(Request $request): JsonResponse
+    {
+        $staff = $this->school->staff($request->user());
+        $class = $request->query('class') ?: null;
+        abort_unless($staff->role === 'manager' || $class !== null, 422, 'Bir sınıf seç.');
+        abort_unless($this->school->canSeeClass($staff, $class), 403);
+        $period = $request->query('period') === 'month' ? 'month' : 'week';
+
+        return response()->json(['class_name' => $class, 'period' => $period, 'data' => $this->school->leaderboard($staff->institution_id, $class, $period)]);
+    }
 
     public function myAssignments(Request $request): JsonResponse
     {

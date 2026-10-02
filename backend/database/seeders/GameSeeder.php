@@ -87,6 +87,7 @@ class GameSeeder extends Seeder
             ['social', 'referrals', 'users', 'Elçi', 'arkadaşını davet et', [[1, 'bronze', 50], [5, 'silver', 200, 'premium_7d'], [20, 'gold', 800, 'live_lesson']]],
             ['league', 'league_top3', 'trophy', 'Kürsü', 'kez ligde ilk 3\'e gir', [[1, 'silver', 50], [10, 'gold', 300]]],
             ['duel', 'duel_wins', 'swords', 'Düellocu', 'Gölge Düellosu kazan', [[1, 'bronze', 10], [10, 'silver', 60], [50, 'gold', 250, 'mystery_chest'], [200, 'legend', 800, 'live_lesson']]],
+            ['units', 'units_completed', 'path', 'Ünite Avcısı', 'üniteyi baştan sona bitir', [[1, 'bronze', 15], [5, 'silver', 60], [15, 'gold', 200], [33, 'legend', 600, 'live_lesson']]],
             ['balance', 'skills_balanced', 'compass', 'Dört Dörtlük', '. seviyeye dört becerinin hepsinde ulaş', [[2, 'bronze', 20], [5, 'silver', 100], [10, 'gold', 400, 'premium_7d']]],
         ];
         $roman = ['I', 'II', 'III', 'IV', 'V'];
@@ -108,6 +109,9 @@ class GameSeeder extends Seeder
                 ]);
             }
         }
+        foreach ([1 => ['A2', 'silver', 100], 2 => ['B1', 'gold', 250], 3 => ['B2', 'legend', 600]] as $rank => [$lvl, $tier, $gems]) {
+            Achievement::query()->updateOrCreate(['key' => "level_{$lvl}"], ['title' => "{$lvl} Seviyesi", 'description' => "{$lvl} seviyesine ulaş.", 'category' => 'levels', 'metric' => 'cefr_rank', 'threshold' => $rank, 'tier' => $tier, 'icon' => 'trophy', 'reward_gems' => $gems, 'position' => $pos++]);
+        }
         Achievement::query()->updateOrCreate(['key' => 'night_owl'], ['title' => 'Gece Kuşu', 'description' => 'Hedefini 30 gün tuttur.', 'category' => 'secret', 'metric' => 'goal_days', 'threshold' => 30, 'tier' => 'gold', 'icon' => 'moon', 'reward_gems' => 150, 'is_hidden' => true, 'position' => $pos++]);
         Achievement::query()->updateOrCreate(['key' => 'diamond_league'], ['title' => 'Elmas Efsane', 'description' => 'Elmas Ligi\'ne ulaş.', 'category' => 'secret', 'metric' => 'league_tier', 'threshold' => 9, 'tier' => 'legend', 'icon' => 'diamond', 'reward_gems' => 1000, 'reward_item_key' => 'live_lesson', 'is_hidden' => true, 'position' => $pos++]);
 
@@ -119,6 +123,12 @@ class GameSeeder extends Seeder
             ['key' => 'daily_review_10', 'title' => '10 kelime tekrar et', 'metric' => 'reviews', 'target' => 10, 'period' => 'daily', 'reward_gems' => 10],
             ['key' => 'weekly_story_3', 'title' => '3 hikaye bitir', 'metric' => 'stories', 'target' => 3, 'period' => 'weekly', 'reward_gems' => 60, 'reward_item_key' => 'xp_boost_15'],
             ['key' => 'daily_duel', 'title' => 'Bir Gölge Düellosu yap', 'metric' => 'duels', 'target' => 1, 'period' => 'daily', 'reward_gems' => 15],
+            ['key' => 'daily_story_1', 'title' => 'Bir hikâye oku', 'metric' => 'stories', 'target' => 1, 'period' => 'daily', 'reward_gems' => 15],
+            ['key' => 'daily_ai_5', 'title' => 'Defne ile 5 mesajlaş', 'metric' => 'ai_messages', 'target' => 5, 'period' => 'daily', 'reward_gems' => 15],
+            ['key' => 'daily_perfect_1', 'title' => 'Bir dersi hatasız bitir', 'metric' => 'perfect_lessons', 'target' => 1, 'period' => 'daily', 'reward_gems' => 20],
+            ['key' => 'daily_minutes_10', 'title' => '10 dakika çalış', 'metric' => 'minutes', 'target' => 10, 'period' => 'daily', 'reward_gems' => 10],
+            ['key' => 'daily_lessons_3', 'title' => '3 ders tamamla', 'metric' => 'lessons', 'target' => 3, 'period' => 'daily', 'reward_gems' => 20],
+            ['key' => 'daily_speak_10', 'title' => '10 cümle sesli söyle', 'metric' => 'speaking', 'target' => 10, 'period' => 'daily', 'reward_gems' => 20],
             ['key' => 'weekly_duel_wins_5', 'title' => '5 düello kazan', 'metric' => 'duel_wins', 'target' => 5, 'period' => 'weekly', 'reward_gems' => 70, 'reward_item_key' => 'mystery_chest'],
             ['key' => 'weekly_ai_20', 'title' => 'Defne ile 20 mesajlaş', 'metric' => 'ai_messages', 'target' => 20, 'period' => 'weekly', 'reward_gems' => 60],
             ['key' => 'weekly_perfect_5', 'title' => '5 hatasız ders', 'metric' => 'perfect_lessons', 'target' => 5, 'period' => 'weekly', 'reward_gems' => 80, 'reward_item_key' => 'mystery_chest'],
