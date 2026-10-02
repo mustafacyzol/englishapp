@@ -4,7 +4,8 @@ import { ArrowDown, ArrowUp, Plus, Sparkles, Trash2, Wand2 } from 'lucide-react'
 
 export interface Vocab { word: string; meaning: string; example?: string }
 export interface Para { en: string; tr?: string }
-export interface Question { q: string; options: string[]; answer: number }
+export type QuestionType = 'choice' | 'truefalse' | 'gap' | 'order'
+export interface Question { type?: QuestionType; q: string; options: string[]; answer: number | string; accept?: string[] }
 
 const cell = 'h-10 w-full rounded-xl border-2 border-line bg-card px-3 text-sm font-semibold focus:border-sky focus:outline-none'
 
@@ -115,31 +116,59 @@ export function ParagraphsField({ value, onChange }: { value: Para[]; onChange: 
   )
 }
 
-/** Comprehension questions: four options, tap the right one. Each right answer pays XP. */
+const QTYPES: { key: QuestionType; label: string; hint: string }[] = [
+  { key: 'choice', label: 'Çoktan seçmeli', hint: 'Dört seçenek, yuvarlak işaretli olan doğru.' },
+  { key: 'truefalse', label: 'Doğru / Yanlış', hint: 'Cümleyi yaz, doğru mu yanlış mı seç.' },
+  { key: 'gap', label: 'Boşluk doldurma', hint: 'Soruda ___ ile boşluk bırak. Doğru cevabı ve kabul edilen diğer yazımları gir.' },
+  { key: 'order', label: 'Cümle sıralama', hint: 'Kelimeleri doğru sırayla gir; öğrenciye karışık gösterilir.' },
+]
+
+/** Comprehension questions of four kinds. Asked after the story, in the "Anlama testi". Each right answer pays XP. */
 export function QuestionsField({ value, onChange }: { value: Question[]; onChange: (v: Question[]) => void }) {
   const list = value ?? []
   const set = (i: number, patch: Partial<Question>) => onChange(list.map((q, k) => (k === i ? { ...q, ...patch } : q)))
+  const retype = (i: number, type: QuestionType) => set(i, type === 'truefalse' ? { type, options: ['Doğru', 'Yanlış'], answer: 0 } : type === 'gap' ? { type, options: [], answer: '', accept: [] } : type === 'order' ? { type, options: ['', '', '', ''], answer: '' } : { type, options: ['', '', '', ''], answer: 0 })
   return (
     <div className="space-y-3">
-      {list.map((q, i) => (
-        <div key={i} className="rounded-2xl border-2 border-line p-3">
-          <div className="mb-2 flex items-center gap-2">
-            <span className="text-xs font-black uppercase tracking-widest text-ink-soft">Soru {i + 1}</span>
-            <button type="button" onClick={() => onChange(list.filter((_, k) => k !== i))} className="ml-auto grid size-7 place-items-center rounded-lg hover:bg-berry/10 hover:text-berry" aria-label="Soruyu sil"><Trash2 className="size-4" /></button>
+      {list.map((q, i) => {
+        const type = q.type ?? 'choice'
+        return (
+          <div key={i} className="rounded-2xl border-2 border-line p-3">
+            <div className="mb-2 flex flex-wrap items-center gap-2">
+              <span className="text-xs font-black uppercase tracking-widest text-ink-soft">Soru {i + 1}</span>
+              <select value={type} onChange={(e) => retype(i, e.target.value as QuestionType)} className="h-8 rounded-lg border-2 border-line bg-card px-2 text-xs font-bold">
+                {QTYPES.map((t) => <option key={t.key} value={t.key}>{t.label}</option>)}
+              </select>
+              <button type="button" onClick={() => onChange(list.filter((_, k) => k !== i))} className="ml-auto grid size-7 place-items-center rounded-lg hover:bg-berry/10 hover:text-berry" aria-label="Soruyu sil"><Trash2 className="size-4" /></button>
+            </div>
+            <input value={q.q} onChange={(e) => set(i, { q: e.target.value })} placeholder={type === 'gap' ? 'Örn. Mia forgot her ___ at the café.' : type === 'order' ? 'Örn. Cümleyi sırala' : type === 'truefalse' ? 'Örn. Mia was late for school.' : 'Soru'} className={cell} />
+            {(type === 'choice' || type === 'truefalse') && (
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                {q.options.map((opt, o) => (
+                  <label key={o} className={clsx('flex items-center gap-2 rounded-xl border-2 px-2', q.answer === o ? 'border-mint bg-mint/8' : 'border-line')}>
+                    <input type="radio" checked={q.answer === o} onChange={() => set(i, { answer: o })} aria-label="Doğru cevap" />
+                    <input value={opt} disabled={type === 'truefalse'} onChange={(e) => { const opts = [...q.options]; opts[o] = e.target.value; set(i, { options: opts }) }} placeholder={`Seçenek ${o + 1}`} className="h-9 w-full bg-transparent text-sm font-semibold focus:outline-none" />
+                  </label>
+                ))}
+              </div>
+            )}
+            {type === 'gap' && (
+              <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                <input value={String(q.answer ?? '')} onChange={(e) => set(i, { answer: e.target.value })} placeholder="Doğru cevap" className={cell} />
+                <input value={(q.accept ?? []).join(', ')} onChange={(e) => set(i, { accept: e.target.value.split(',').map((x) => x.trim()).filter(Boolean) })} placeholder="Kabul edilen diğer yazımlar (virgülle)" className={cell} />
+              </div>
+            )}
+            {type === 'order' && (
+              <div className="mt-2">
+                <input value={q.options.join(' ')} onChange={(e) => set(i, { options: e.target.value.split(/\s+/).filter(Boolean), answer: e.target.value.trim() })} placeholder="Doğru cümle (kelimeler boşlukla): She opened the old letter" className={cell} />
+              </div>
+            )}
+            <p className="mt-1.5 text-[11px] text-ink-soft">{QTYPES.find((t) => t.key === type)?.hint}</p>
           </div>
-          <input value={q.q} onChange={(e) => set(i, { q: e.target.value })} placeholder="Soru" className={cell} />
-          <div className="mt-2 grid gap-2 sm:grid-cols-2">
-            {[0, 1, 2, 3].map((o) => (
-              <label key={o} className={clsx('flex items-center gap-2 rounded-xl border-2 px-2', q.answer === o ? 'border-mint bg-mint/8' : 'border-line')}>
-                <input type="radio" checked={q.answer === o} onChange={() => set(i, { answer: o })} aria-label="Doğru cevap" />
-                <input value={q.options[o] ?? ''} onChange={(e) => { const opts = [...q.options]; opts[o] = e.target.value; set(i, { options: opts }) }} placeholder={`Seçenek ${o + 1}`} className="h-9 w-full bg-transparent text-sm font-semibold focus:outline-none" />
-              </label>
-            ))}
-          </div>
-        </div>
-      ))}
-      <button type="button" onClick={() => onChange([...list, { q: '', options: ['', '', '', ''], answer: 0 }])} className="inline-flex items-center gap-1.5 rounded-xl border-2 border-line px-3 py-2 text-sm font-extrabold"><Sparkles className="size-4" /> Soru ekle</button>
-      <p className="text-xs text-ink-soft">Yuvarlak işaretli seçenek doğru cevaptır. Sorular hikâyenin sonunda "Anladın mı?" bölümünde sorulur.</p>
+        )
+      })}
+      <button type="button" onClick={() => onChange([...list, { type: 'choice', q: '', options: ['', '', '', ''], answer: 0 }])} className="inline-flex items-center gap-1.5 rounded-xl border-2 border-line px-3 py-2 text-sm font-extrabold"><Sparkles className="size-4" /> Soru ekle</button>
+      <p className="text-xs text-ink-soft">Sorular hikâye bittikten sonra "Anlama testi" adıyla, tek tek sorulur.</p>
     </div>
   )
 }

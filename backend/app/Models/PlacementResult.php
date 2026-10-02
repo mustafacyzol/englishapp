@@ -38,6 +38,7 @@ class PlacementResult extends Model
     {
         if ($this->user_id === null) {
             $user->forceFill(['cefr_level' => $this->level])->save();
+            app(\App\Services\PathService::class)->applyPlacement($user, $this->level, $this->bands ?? []);
             $this->forceFill(['user_id' => $user->id, 'claimed_at' => now()])->save();
         }
     }

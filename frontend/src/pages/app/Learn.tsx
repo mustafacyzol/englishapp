@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
@@ -15,9 +15,12 @@ import { Modal, SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
 import { HomeworkCard } from '@/components/game/Homework'
+import { higoImg } from '@/components/game/Higo'
 
+type Access = 'review' | 'current' | 'locked'
 interface PathData {
-  course: { id: number; title: string; cefr_level: string; color: string; description: string }
+  course: { id: number; title: string; cefr_level: string; color: string; description: string; access?: Access }
+  courses?: { id: number; title: string; cefr_level: string; access: Access }[]
   units: PathUnit[]
 }
 interface CourseItem { id: number; title: string; cefr_level: string; color: string }
@@ -83,7 +86,10 @@ export default function Learn() {
 
       <div className="mt-8">
         {data.units.map((unit, ui) => (
-          <UnitSection key={unit.id} unit={unit} index={ui} photoIndex={courseOffset(data.course.cefr_level) + ui} onGuide={() => setGuide(unit)} openId={openId} setOpenId={setOpenId} currentRef={currentRef} />
+          <div key={unit.id}>
+            {ui > 0 && <HigoBreak index={ui} next={unit.title} done={data.units[ui - 1].progress >= 100} />}
+            <UnitSection unit={unit} index={ui} photoIndex={courseOffset(data.course.cefr_level) + ui} onGuide={() => setGuide(unit)} openId={openId} setOpenId={setOpenId} currentRef={currentRef} />
+          </div>
         ))}
       </div>
 
@@ -96,15 +102,24 @@ export default function Learn() {
 
 
       <Modal open={picker} onClose={() => setPicker(false)}>
-        <h2 className="mb-4 text-2xl font-extrabold">Kurs seç</h2>
+        <h2 className="text-2xl font-extrabold">Seviyeler</h2>
+        <p className="mb-4 mt-1 text-sm text-ink-soft">Kendi seviyende ilerlersin, alttakileri istediğin zaman tekrar edebilirsin. Üst seviye, seviyeni bitirince ya da seviye testiyle açılır.</p>
         <div className="grid gap-3">
-          {courses.data?.data.map((c) => (
-            <button key={c.id} onClick={() => { setCourseId(c.id); setPicker(false) }} className={clsx('press flex items-center gap-3 rounded-2xl border-2 p-3 text-left shadow-hard', c.id === data.course.id ? 'border-flame/50 bg-flame/5' : 'border-line bg-card')}>
-              <span className="grid size-11 place-items-center rounded-xl font-black text-white" style={{ background: c.color }}>{c.cefr_level}</span>
-              <span className="text-lg font-black">{c.title}</span>
-            </button>
-          ))}
+          {(data.courses ?? courses.data?.data.map((c) => ({ ...c, access: 'current' as Access })) ?? []).map((c) => {
+            const color = courses.data?.data.find((x) => x.id === c.id)?.color ?? '#999'
+            const locked = c.access === 'locked'
+            return (
+              <button key={c.id} disabled={locked} onClick={() => { setCourseId(c.id); setPicker(false) }} className={clsx('flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition', c.id === data.course.id ? 'border-flame/50 bg-flame/5' : 'border-line bg-card', locked ? 'cursor-not-allowed opacity-60' : 'press hover:border-ink/25')}>
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl font-black text-white" style={{ background: locked ? 'var(--ink-soft)' : color }}>{locked ? <Lock className="size-5" /> : c.cefr_level}</span>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate text-lg font-black">{c.title}</span>
+                  <span className="block text-xs font-bold text-ink-soft">{c.access === 'current' ? 'Senin seviyen' : c.access === 'review' ? 'Tekrar için açık' : 'Seviyeni bitirince açılır'}</span>
+                </span>
+              </button>
+            )
+          })}
         </div>
+        <Link to="/placement" className="mt-4 flex items-center justify-center gap-2 rounded-2xl bg-paper-2 p-3 text-sm font-extrabold hover:bg-ink/[0.06]">Seviyemi yeniden ölç: seviye testi</Link>
       </Modal>
 
       <GuidebookModal unit={guide} onClose={() => setGuide(null)} />
@@ -170,14 +185,79 @@ function ContinueCard({ data, stats, onJump, onPick, away }: { data: PathData; s
 
 /* -------------------------------------------------------------------- Path */
 
+/**
+ * The unit guidebook as a small book: the admin's markdown is split into pages
+ * (by "---" lines, or by "##" headings), and pages turn with a 3D flip. Two
+ * facing pages on wide screens, one on phones.
+ */
 function GuidebookModal({ unit, onClose }: { unit: PathUnit | null; onClose: () => void }) {
   const { data } = useQuery({ queryKey: ['guide', unit?.id], queryFn: () => get<{ guidebook: string }>(`/units/${unit!.id}/guidebook`), enabled: !!unit })
+  const [page, setPage] = useState(0)
+  const [dir, setDir] = useState(1)
+  useEffect(() => setPage(0), [unit?.id])
+  const wide = typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
+  const pages = useMemo(() => {
+    const src = (data?.guidebook ?? '').trim()
+    if (!src) return []
+    const byRule = src.split(/\n-{3,}\n/)
+    if (byRule.length > 1) return byRule.map((x) => x.trim()).filter(Boolean)
+    const parts = src.split(/\n(?=## )/)
+    return parts.map((x) => x.trim()).filter(Boolean)
+  }, [data])
+  const per = wide ? 2 : 1
+  const spreads = Math.max(1, Math.ceil(pages.length / per))
+  const turn = (d: number) => { setDir(d); setPage((p) => Math.min(spreads - 1, Math.max(0, p + d))) }
+  const color = unit?.color ?? '#e8403a'
   return (
-    <Modal open={!!unit} onClose={onClose} className="sm:max-w-2xl">
-      <p className="text-sm font-black uppercase tracking-widest text-flame">Ünite rehberi</p>
-      <h2 className="mb-4 mt-1 text-3xl">{unit?.title}</h2>
-      {data ? <Markdown source={data.guidebook ?? ''} /> : <SkeletonPage variant="path" />}
+    <Modal open={!!unit} onClose={onClose} className="sm:!max-w-4xl">
+      <div className="mb-4 flex items-center gap-3">
+        <span className="grid size-11 place-items-center rounded-xl text-white" style={{ background: color }}><BookText className="size-5" /></span>
+        <div className="min-w-0">
+          <p className="text-xs font-black uppercase tracking-widest" style={{ color }}>Ünite rehberi</p>
+          <h2 className="truncate text-2xl leading-tight">{unit?.title}</h2>
+        </div>
+      </div>
+      {!data ? <SkeletonPage variant="path" /> : (
+        <>
+          <div className="relative rounded-[20px] p-2 [perspective:1600px]" style={{ background: `color-mix(in oklab, ${color} 22%, #6b4a2e)` }}>
+            <AnimatePresence mode="wait" custom={dir} initial={false}>
+              <motion.div key={page} custom={dir} initial={{ rotateY: dir * -70, opacity: 0 }} animate={{ rotateY: 0, opacity: 1 }} exit={{ rotateY: dir * 70, opacity: 0 }} transition={{ duration: 0.38, ease: [0.22, 1, 0.36, 1] }} style={{ transformOrigin: dir > 0 ? 'left center' : 'right center' }} className={clsx('grid min-h-[52vh] gap-0 overflow-hidden rounded-[14px] bg-[#fffaf0] text-[#2a2620] shadow-inner', per === 2 && 'md:grid-cols-2')}>
+                {Array.from({ length: per }, (_, k) => {
+                  const n = page * per + k
+                  return (
+                    <div key={k} className={clsx('relative max-h-[62vh] overflow-y-auto px-6 py-7 sm:px-8', per === 2 && k === 0 && 'md:border-r md:border-[#e9dcc4]', per === 2 && k === 0 && 'md:shadow-[inset_-18px_0_24px_-24px_rgba(0,0,0,.35)]')}>
+                      {pages[n] ? <div className="prose-book"><Markdown source={pages[n]} /></div> : <div className="grid h-full place-items-center"><Img src={higoImg('read')} alt="" className="w-28 opacity-80" /></div>}
+                      <span className="absolute bottom-3 right-5 font-mono text-xs text-[#2a2620]/50">{pages[n] ? n + 1 : ''}</span>
+                    </div>
+                  )
+                })}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+          <div className="mt-4 flex items-center justify-between gap-3">
+            <Button variant="secondary" disabled={page === 0} onClick={() => turn(-1)}>Önceki sayfa</Button>
+            <span className="text-sm font-bold text-ink-soft">{page + 1} / {spreads}</span>
+            {page < spreads - 1 ? <Button onClick={() => turn(1)}>Sonraki sayfa</Button> : <Button variant="dark" onClick={onClose}>Rehberi kapat</Button>}
+          </div>
+        </>
+      )}
     </Modal>
+  )
+}
+
+/** Between two units Higo takes a break in a new pose, so the road never looks empty. */
+const BREAK_POSES = ['map', 'walk', 'scope', 'nap', 'read', 'think'] as const
+function HigoBreak({ index, next, done }: { index: number; next: string; done: boolean }) {
+  const pose = BREAK_POSES[(index - 1) % BREAK_POSES.length]
+  const line = { map: 'Yol haritasına baktım, sıradaki durak:', walk: 'Hadi, yeni konuya yürüyoruz:', scope: 'Ufukta yeni bir ünite görünüyor:', nap: 'Kısa bir mola, sonra devam:', read: 'Bir sonraki bölümde seni bekleyen:', think: 'Şimdi biraz daha zorlu bir konu:' }[pose]
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.6 }} className="relative -mt-4 mb-10 flex items-center justify-center gap-3">
+      <motion.img src={higoImg(pose)} alt="" className={clsx('w-24 drop-shadow-lg sm:w-28', !done && 'opacity-90')} animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 3.2, ease: 'easeInOut' }} />
+      <p className="relative max-w-[220px] rounded-2xl rounded-bl-md bg-card px-4 py-2.5 text-sm font-bold shadow-[0_8px_20px_-14px_rgba(31,36,51,.4)] ring-1 ring-line">
+        <span className="block text-xs text-ink-soft">{line}</span>
+        <span className="font-display font-black">{next}</span>
+      </p>
+    </motion.div>
   )
 }
 
@@ -249,6 +329,8 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
   const locked = lesson.state === 'locked'
   const done = lesson.state === 'completed'
   const current = lesson.state === 'current'
+  // open: reachable (the start of a topic, or opened by the placement test) but not where you are
+  const ajar = lesson.state === 'open'
   const Icon = lesson.kind === 'story' ? BookOpen : lesson.kind === 'ai_talk' ? MessageCircle : lesson.kind === 'checkpoint' ? Trophy : SKILL_ICON[lesson.skill] ?? Star
   const size = current ? NODE + 12 : NODE
   // Labels sit on the open side of the curve, so they never collide with the trail.
@@ -279,19 +361,13 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
     // The open node is lifted above its siblings, so its card is never painted over by later stops.
     <div ref={nodeRef} data-tour={current ? 'here' : undefined} className={clsx('absolute left-1/2', open ? 'z-40' : current ? 'z-20' : 'z-10')} style={{ top: y - (current ? 6 : 0), transform: `translateX(calc(-50% + ${x}px))`, width: size }}>
       {current && (
-        <motion.span className="absolute -top-11 left-1/2 z-20 -translate-x-1/2 whitespace-nowrap" animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 1.6 }}>
-          <span className="relative flex items-center gap-1.5 rounded-xl bg-ink px-3 py-1.5 text-xs font-black uppercase tracking-wide text-paper shadow-soft">
-            <MapPin className="size-3.5" /> Buradasın
-            <span className="absolute -bottom-[5px] left-1/2 size-2.5 -translate-x-1/2 rotate-45 bg-ink" />
-          </span>
-        </motion.span>
-      )}
-
-      {current && (
-        // The halo is centred on the whole coin (face plus its 6px edge), so it reads as one ring around the stop.
-        <span aria-hidden className="pointer-events-none absolute left-1/2 -translate-x-1/2" style={{ top: -8, width: size + 22, height: size + 22 }}>
-          <span className="absolute inset-0 rounded-full" style={{ background: `color-mix(in oklab, ${color} 14%, transparent)`, boxShadow: `inset 0 0 0 3px color-mix(in oklab, ${color} 45%, transparent)` }} />
-          <motion.span className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 0 3px ${color}` }} animate={{ scale: [1, 1.14], opacity: [0.55, 0] }} transition={{ repeat: Infinity, duration: 1.8, ease: 'easeOut' }} />
+        // where you are: a slowly turning dashed orbit and a soft breathing glow, with Higo perched on top
+        <span aria-hidden className="pointer-events-none absolute left-1/2 -translate-x-1/2" style={{ top: -14, width: size + 28, height: size + 28 }}>
+          <motion.span className="absolute inset-2 rounded-full" style={{ background: `radial-gradient(circle, color-mix(in oklab, ${color} 30%, transparent) 40%, transparent 72%)` }} animate={{ opacity: [0.55, 1, 0.55], scale: [0.96, 1.04, 0.96] }} transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut' }} />
+          <svg viewBox="0 0 100 100" className="absolute inset-0 size-full animate-[spin_14s_linear_infinite]">
+            <circle cx="50" cy="50" r="47" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" strokeDasharray="6 9" opacity=".8" />
+          </svg>
+          <motion.img src={higoImg('wave')} alt="" className="absolute -right-3 -top-5 w-11 drop-shadow-md" animate={{ y: [0, -4, 0], rotate: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
         </span>
       )}
 
@@ -300,11 +376,11 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
         whileInView={{ opacity: 1, scale: 1 }}
         viewport={{ once: true, amount: 0.5 }}
         transition={{ type: 'spring', stiffness: 260, damping: 18, delay: Math.min(index, 6) * 0.03 }}
-        onClick={() => (locked ? toast('Önceki durakları tamamlayınca açılır') : setOpenId(open ? null : lesson.id))}
+        onClick={() => (locked ? toast('Bir konunun ortasına atlanamaz. Önceki dersi bitir ya da ünitenin ilk dersinden başla.') : setOpenId(open ? null : lesson.id))}
         aria-label={`${lesson.title}${locked ? ' (kilitli)' : done ? ' (tamamlandı)' : ''}`}
         aria-expanded={open}
-        className={clsx('relative grid place-items-center rounded-full transition-transform active:translate-y-[5px]', locked ? 'text-ink-soft' : 'text-white')}
-        style={{ width: size, height: size, background: locked ? 'var(--paper-2)' : color, boxShadow: `0 6px 0 0 ${base}` }}
+        className={clsx('relative grid place-items-center rounded-full transition-transform active:translate-y-[5px]', locked ? 'text-ink-soft' : ajar ? '' : 'text-white')}
+        style={{ width: size, height: size, background: locked ? 'var(--paper-2)' : ajar ? 'var(--card)' : color, color: ajar ? color : undefined, boxShadow: ajar ? `inset 0 0 0 4px ${color}, 0 6px 0 0 ${base}` : `0 6px 0 0 ${base}` }}
       >
         {done && <span className="absolute inset-1.5 rounded-full border-2 border-white/35" />}
         {locked ? <Lock className="size-6" /> : done ? <Check className="size-8" strokeWidth={3.5} /> : <Icon className={current ? 'size-9' : 'size-7'} strokeWidth={2.5} />}
@@ -317,7 +393,7 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
       </motion.button>
 
       <p className={clsx('absolute top-1/2 w-max max-w-[118px] -translate-y-1/2 text-xs font-extrabold leading-tight sm:max-w-[168px] sm:text-[13px]', labelLeft ? 'right-[calc(100%+14px)] text-right' : 'left-[calc(100%+14px)]', locked ? 'text-ink-soft/70' : 'text-ink')}>
-        <span className="block text-[10px] font-black uppercase tracking-wider" style={{ color: locked ? undefined : color }}>{kind}</span>
+        <span className="block text-[10px] font-black uppercase tracking-wider" style={{ color: locked ? undefined : color }}>{current ? 'Kaldığın yer' : ajar ? 'Buradan başlayabilirsin' : kind}</span>
         {lesson.title}
       </p>
 

@@ -74,7 +74,7 @@ class AuthController extends Controller
             'name' => strip_tags($data['name']),
             'email' => strtolower($data['email']),
             'password' => $data['password'],
-            'cefr_level' => $data['cefr_level'] ?? 'A1',
+            'cefr_level' => 'A1', // the level only ever comes from the placement test
             'learning_goal' => $data['learning_goal'] ?? null,
             'daily_goal_xp' => $data['daily_goal_xp'] ?? 20,
             'focus_skill' => $data['focus_skill'] ?? null,
@@ -212,7 +212,7 @@ class AuthController extends Controller
                 'name' => Str::limit($name, 60, ''),
                 'email' => $claims['email'],
                 'password' => Str::password(32),
-                'cefr_level' => $data['cefr_level'] ?? 'A1',
+                'cefr_level' => 'A1', // the level only ever comes from the placement test
                 'learning_goal' => $data['learning_goal'] ?? null,
                 'daily_goal_xp' => $data['daily_goal_xp'] ?? 20,
                 'focus_skill' => $data['focus_skill'] ?? null,

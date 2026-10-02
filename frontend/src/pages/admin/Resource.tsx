@@ -33,7 +33,7 @@ const CONFIG: Record<string, Cfg> = {
   units: {
     title: 'Üniteler',
     cols: [{ key: 'title', label: 'Başlık' }, { key: 'course', label: 'Kurs', render: (r) => (r.course as { title: string })?.title }, { key: 'position', label: 'Sıra' }],
-    fields: [{ key: 'course_id', label: 'Kurs ID', type: 'number' }, { key: 'title', label: 'Başlık', type: 'text' }, { key: 'description', label: 'Kısa açıklama', type: 'text' }, { key: 'color', label: 'Renk', type: 'text' }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'guidebook', label: 'Rehber (markdown, Türkçe dilbilgisi notları)', type: 'textarea', full: true }],
+    fields: [{ key: 'course_id', label: 'Kurs ID', type: 'number' }, { key: 'title', label: 'Başlık', type: 'text' }, { key: 'description', label: 'Kısa açıklama', type: 'text' }, { key: 'color', label: 'Renk', type: 'text' }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'guidebook', label: 'Rehber (markdown). Uygulamada kitap gibi açılır: sayfaları --- satırıyla ayır ya da her sayfaya ## başlık ver.', type: 'textarea', full: true }],
     defaults: { position: 0 },
   },
   lessons: {

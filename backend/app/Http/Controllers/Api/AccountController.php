@@ -89,6 +89,11 @@ class AccountController extends Controller
             }
             $user->forceFill(['age_group_changed_at' => now()]);
         }
+        // The level moves only with the placement test or by finishing a level.
+        if (array_key_exists('cefr_level', $data) && $data['cefr_level'] !== $user->cefr_level) {
+            abort(422, 'Seviyeni değiştirmek için seviye testine gir. Seviyendeki dersleri bitirince de bir üst seviyeye kendiliğinden geçersin.');
+        }
+
         // The exam goal comes from onboarding. Switching to another exam is allowed, but
         // only once per 30 days, so progress and the AI plan are not reset on a whim.
         if (! empty($data['exam_target']) && $user->exam_target && $data['exam_target'] !== $user->exam_target) {

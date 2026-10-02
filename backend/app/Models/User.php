@@ -64,6 +64,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
+            'path_unlocks' => 'array',
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'onboarded' => 'boolean',

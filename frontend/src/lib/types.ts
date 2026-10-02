@@ -113,7 +113,7 @@ export interface PathLesson {
   story_id: number | null
   story?: { id: number; slug: string } | null
   scenario_key: string | null
-  state: 'completed' | 'current' | 'locked'
+  state: 'completed' | 'current' | 'open' | 'locked'
   crowns: number
   best_score: number
 }
@@ -150,7 +150,7 @@ export interface Story extends StoryCard {
   audio_url: string | null
   paragraphs: { en: string; tr?: string }[]
   vocabulary: { word: string; meaning: string; example?: string }[] | null
-  questions: { q: string; options: string[]; answer: number }[] | null
+  questions: { type?: 'choice' | 'truefalse' | 'gap' | 'order'; q: string; options: string[]; answer: number | string; accept?: string[] }[] | null
 }
 
 export interface RewardItem {

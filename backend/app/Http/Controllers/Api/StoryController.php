@@ -78,7 +78,7 @@ class StoryController extends Controller
         $questions = $story->questions ?? [];
         $correct = 0;
         foreach ($questions as $i => $q) {
-            if (isset($data['answers'][$i]) && (string) $data['answers'][$i] === (string) $q['answer']) {
+            if (self::isRight($q, $data['answers'][$i] ?? null)) {
                 $correct++;
             }
         }
@@ -102,6 +102,29 @@ class StoryController extends Controller
             'score' => $score, 'correct' => $correct, 'total' => count($questions), 'reward' => $summary,
             'xp_breakdown' => ['base' => $first ? (int) $x['story_first'] : (int) $x['story_repeat'], 'per_correct' => $first ? (int) $x['story_per_correct'] : (int) $x['story_repeat_per_correct'], 'first' => $first],
         ]);
+    }
+
+    /**
+     * Comprehension question types set by admins:
+     *  choice / truefalse: the picked option index;
+     *  gap: a typed word or phrase, matched loosely against `answer` and `accept`;
+     *  order: the sentence built from the shuffled words (`options` holds them in the right order).
+     */
+    public static function isRight(array $q, mixed $given): bool
+    {
+        if ($given === null || $given === '') {
+            return false;
+        }
+        $type = $q['type'] ?? 'choice';
+        $norm = [PlacementController::class, 'normalize'];
+        if ($type === 'gap') {
+            return is_string($given) && collect([(string) ($q['answer'] ?? ''), ...($q['accept'] ?? [])])->filter()->contains(fn ($a) => $norm($a) === $norm($given));
+        }
+        if ($type === 'order') {
+            return is_string($given) && $norm(implode(' ', $q['options'] ?? [])) === $norm($given);
+        }
+
+        return is_numeric($given) && (int) $given === (int) ($q['answer'] ?? -1);
     }
 
     public function bookmark(Request $request, Story $story): JsonResponse

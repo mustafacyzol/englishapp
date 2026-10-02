@@ -93,15 +93,24 @@ function reward(xp: number, extra: Json = {}, metrics: Record<string, number> = 
     quests_completed: quests, achievements: [], rewards, gems: u.stats.gems, ...extra,
   }
 }
+/** Mirrors PathService: topics go in order, any topic can be started from its first lesson. */
 function unlockNext(lessonId: number) {
   for (const k of Object.keys(db).filter((x) => x === '/path' || x.startsWith('/path/'))) {
-    const lessons = db[k].units.flatMap((u: Json) => u.lessons)
-    const i = lessons.findIndex((l: Json) => l.id === lessonId)
-    if (i < 0) continue
-    lessons[i].state = 'completed'
-    lessons[i].crowns = Math.min(5, (lessons[i].crowns ?? 0) + 1)
-    const next = lessons.find((l: Json) => l.state === 'locked' || l.state === 'current')
-    if (next && next.state === 'locked' && !lessons.some((l: Json) => l.state === 'current')) next.state = 'current'
+    const all = db[k].units.flatMap((u: Json) => u.lessons)
+    const hit = all.find((l: Json) => l.id === lessonId)
+    if (!hit) continue
+    hit.state = 'completed'
+    hit.crowns = Math.min(5, (hit.crowns ?? 0) + 1)
+    if (db[k].course?.access && db[k].course.access !== 'current') continue
+    let cur = false
+    for (const u of db[k].units) {
+      u.lessons.forEach((l: Json, i: number) => {
+        if (l.state === 'completed') return
+        l.state = i === 0 || u.lessons[i - 1].state === 'completed' ? 'open' : 'locked'
+        if (l.state === 'open' && !cur) { l.state = 'current'; cur = true }
+      })
+      u.progress = Math.round((u.lessons.filter((l: Json) => l.state === 'completed').length / Math.max(1, u.lessons.length)) * 100)
+    }
   }
 }
 

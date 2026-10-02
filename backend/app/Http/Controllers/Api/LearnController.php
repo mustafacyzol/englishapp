@@ -9,6 +9,7 @@ use App\Models\LessonProgress;
 use App\Models\Unit;
 use App\Services\HeartService;
 use App\Services\LessonService;
+use App\Services\PathService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -22,38 +23,22 @@ class LearnController extends Controller
         return response()->json(['data' => $courses]);
     }
 
-    /** The Duolingo-style path for one course, with per-lesson state. */
-    public function path(Request $request, ?Course $course = null): JsonResponse
+    /** One course of the path with per-lesson state (see PathService for the rules). */
+    public function path(Request $request, PathService $paths, ?Course $course = null): JsonResponse
     {
         $user = $request->user();
-        $course ??= Course::query()->where('is_published', true)->where('cefr_level', $user->cefr_level)->orderBy('position')->first()
-            ?? Course::query()->where('is_published', true)->orderBy('position')->firstOrFail();
-
+        $course ??= $paths->courses()->firstWhere('cefr_level', $user->cefr_level) ?? $paths->courses()->firstOrFail();
         $course->load(['units.lessons' => fn ($q) => $q->select(['id', 'unit_id', 'title', 'skill', 'kind', 'position', 'xp_reward', 'is_premium', 'story_id', 'scenario_key'])->with('story:id,slug')]);
-        $progress = LessonProgress::query()->where('user_id', $user->id)
-            ->whereIn('lesson_id', $course->units->flatMap->lessons->pluck('id'))
-            ->get()->keyBy('lesson_id');
+        $states = $paths->states($user, $course);
+        $progress = LessonProgress::query()->where('user_id', $user->id)->whereIn('lesson_id', array_keys($states))->get()->keyBy('lesson_id');
 
-        $currentFound = false;
-        $units = $course->units->map(function ($unit) use ($progress, &$currentFound, $user) {
-            $lessons = $unit->lessons->map(function (Lesson $lesson) use ($progress, &$currentFound, $user) {
-                $p = $progress->get($lesson->id);
-                if ($p?->completed_at) {
-                    $state = 'completed';
-                } elseif (! $currentFound) {
-                    $state = 'current';
-                    $currentFound = true;
-                } else {
-                    $state = 'locked';
-                }
-
-                return $lesson->toArray() + [
-                    'state' => $state,
-                    'crowns' => $p?->crowns ?? 0,
-                    'best_score' => $p?->best_score ?? 0,
-                    'premium_locked' => $lesson->is_premium && ! $user->isPremium(),
-                ];
-            });
+        $units = $course->units->map(function ($unit) use ($progress, $states, $user) {
+            $lessons = $unit->lessons->map(fn (Lesson $lesson) => $lesson->toArray() + [
+                'state' => $states[$lesson->id] ?? 'locked',
+                'crowns' => $progress->get($lesson->id)?->crowns ?? 0,
+                'best_score' => $progress->get($lesson->id)?->best_score ?? 0,
+                'premium_locked' => $lesson->is_premium && ! $user->isPremium(),
+            ]);
             $done = $lessons->where('state', 'completed')->count();
 
             return [
@@ -68,7 +53,8 @@ class LearnController extends Controller
         });
 
         return response()->json([
-            'course' => $course->only(['id', 'slug', 'title', 'description', 'cefr_level', 'color']),
+            'course' => $course->only(['id', 'slug', 'title', 'description', 'cefr_level', 'color']) + ['access' => match ($paths->relation($user, $course)) { -1 => 'review', 0 => 'current', default => 'locked' }],
+            'courses' => $paths->courses()->map(fn (Course $c) => $c->only(['id', 'title', 'cefr_level']) + ['access' => match ($paths->relation($user, $c)) { -1 => 'review', 0 => 'current', default => 'locked' }])->values(),
             'units' => $units,
         ]);
     }
@@ -82,6 +68,7 @@ class LearnController extends Controller
     {
         $user = $request->user();
         abort_if($lesson->is_premium && ! $user->isPremium(), 402, 'Bu ders Premium üyelere özel.');
+        abort_unless(app(PathService::class)->canOpen($user, $lesson), 403, 'Bu ders henüz kilitli. Önceki dersi bitir ya da bir ünitenin başından başla.');
         $heartState = $hearts->sync($user);
         abort_if(! $heartState['unlimited'] && $heartState['hearts'] <= 0, 423, 'Canın kalmadı. Biraz bekle, can yenile ya da pratik yaparak kazan.');
 
@@ -98,6 +85,11 @@ class LearnController extends Controller
             'seconds' => ['nullable', 'integer', 'min:0', 'max:7200'],
         ]);
 
-        return response()->json($lessons->complete($request->user(), $lesson, $data['answers'], $data['seconds'] ?? 0));
+        abort_unless(app(PathService::class)->canOpen($request->user(), $lesson), 403, 'Bu ders henüz kilitli.');
+        $result = $lessons->complete($request->user(), $lesson, $data['answers'], $data['seconds'] ?? 0);
+        // finishing the last lesson of your level moves you up one level
+        $up = app(PathService::class)->maybeLevelUp($request->user()->fresh());
+
+        return response()->json($result + ['level_up' => $up]);
     }
 }

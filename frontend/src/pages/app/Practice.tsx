@@ -93,14 +93,15 @@ function GamePicker({ onPick }: { onPick: (g: GameKey) => void }) {
                 onClick={() => onPick(g.key)}
                 className="press group relative flex w-[46%] shrink-0 snap-start flex-col overflow-hidden rounded-3xl border-2 border-line bg-card text-left shadow-hard-sm transition hover:border-ink/25 sm:w-auto"
               >
-                <span className={clsx('relative grid h-20 place-items-center overflow-hidden bg-gradient-to-br text-white sm:h-24', g.tone)}>
+                <span className={clsx('relative grid h-24 place-items-center overflow-hidden bg-gradient-to-br text-white sm:h-28', g.tone)}>
                   <span aria-hidden className="absolute -right-5 -top-6 size-20 rounded-full bg-white/15" />
-                  <g.icon className="size-9 drop-shadow transition duration-300 group-hover:scale-110" strokeWidth={2.2} />
+                  <GamePreview game={g.key} />
                   {g.badge && <span className="absolute left-2.5 top-2 rounded-full bg-white/90 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#1f2433]">{g.badge}</span>}
                 </span>
                 <span className="flex flex-1 flex-col p-3">
-                  <span className="font-display text-[15px] font-black leading-tight sm:text-base">{g.title}</span>
+                  <span className="flex items-center gap-1.5 font-display text-[15px] font-black leading-tight sm:text-base"><g.icon className="size-4 shrink-0 text-ink-soft" />{g.title}</span>
                   <span className="mt-0.5 line-clamp-2 text-xs text-ink-soft">{g.text}</span>
+                  <Best game={g.key} />
                 </span>
               </motion.button>
             ))}
@@ -117,6 +118,83 @@ const GROUPS: { key: Group; title: string; text: string }[] = [
   { key: 'spell', title: 'Yazım ve dinleme', text: 'Harf harf, kulakla' },
   { key: 'memory', title: 'Hafıza', text: 'Sakin ve kalıcı' },
 ]
+
+function Best({ game }: { game: GameKey }) {
+  let v = 0
+  try { v = Number(localStorage.getItem(`dilgo.best.${game}`) ?? 0) } catch { /* ignore */ }
+  return v ? <span className="mt-1.5 inline-flex w-fit items-center gap-1 rounded-full bg-butter/20 px-2 py-0.5 text-[10px] font-black text-butter-deep">En iyi skor: {v}</span> : <span className="mt-1.5 text-[10px] font-bold text-ink-soft">Henüz oynamadın</span>
+}
+
+/** A tiny looping scene per game, so each card shows how it plays. */
+function GamePreview({ game }: { game: GameKey }) {
+  const chip = 'rounded-lg bg-white px-2 py-1 font-display text-xs font-black text-[#1f2433] shadow'
+  const loop = { repeat: Infinity, ease: 'easeInOut' as const }
+  switch (game) {
+    case 'match':
+      return (
+        <span className="relative flex w-36 items-center justify-between">
+          <motion.span className={chip} animate={{ x: [0, 22, 22, 0] }} transition={{ ...loop, duration: 2.6, times: [0, 0.4, 0.7, 1] }}>apple</motion.span>
+          <motion.span className={chip} animate={{ x: [0, -22, -22, 0], backgroundColor: ['#fff', '#fff', '#c9f5df', '#fff'] }} transition={{ ...loop, duration: 2.6, times: [0, 0.4, 0.7, 1] }}>elma</motion.span>
+        </span>
+      )
+    case 'truefalse':
+      return (
+        <span className="flex flex-col items-center gap-1.5">
+          <span className={chip}>cat = kedi</span>
+          <span className="flex gap-1.5">
+            <motion.span className="grid size-7 place-items-center rounded-full bg-white/90 text-mint-deep" animate={{ scale: [1, 1.25, 1] }} transition={{ ...loop, duration: 1.6 }}><Check className="size-4" strokeWidth={3} /></motion.span>
+            <span className="grid size-7 place-items-center rounded-full bg-white/40"><X className="size-4" strokeWidth={3} /></span>
+          </span>
+        </span>
+      )
+    case 'listen':
+      return (
+        <span className="flex items-end gap-1">
+          <Headphones className="mr-2 size-8" />
+          {[0, 1, 2, 3, 4].map((k) => <motion.span key={k} className="w-1.5 rounded-full bg-white" animate={{ height: [8, 26, 12, 30, 8] }} transition={{ ...loop, duration: 1.2, delay: k * 0.12 }} />)}
+        </span>
+      )
+    case 'scramble':
+      return (
+        <span className="flex gap-1">
+          {['h', 'o', 'u', 's', 'e'].map((c, k) => <motion.span key={c} className="grid size-7 place-items-center rounded-md bg-white font-display text-sm font-black text-[#1f2433] shadow" animate={{ y: [0, k % 2 ? -8 : 8, 0], rotate: [0, k % 2 ? 10 : -10, 0] }} transition={{ ...loop, duration: 2, delay: k * 0.08 }}>{c}</motion.span>)}
+        </span>
+      )
+    case 'memory':
+      return (
+        <span className="grid grid-cols-3 gap-1">
+          {[0, 1, 2, 3, 4, 5].map((k) => <motion.span key={k} className="size-6 rounded-md bg-white/90" animate={k === 1 || k === 4 ? { rotateY: [0, 180, 180, 0], backgroundColor: ['#ffffffe6', '#fff3c4', '#fff3c4', '#ffffffe6'] } : {}} transition={{ ...loop, duration: 3 }} />)}
+        </span>
+      )
+    case 'cloze':
+      return (
+        <span className="rounded-lg bg-white px-2.5 py-1.5 font-display text-xs font-black text-[#1f2433] shadow">
+          I drink <motion.span className="inline-block min-w-10 border-b-2 border-[#1f2433] text-center" animate={{ opacity: [0.2, 1, 1, 0.2] }} transition={{ ...loop, duration: 2.4 }}>tea</motion.span> daily
+        </span>
+      )
+    case 'kelimle':
+      return (
+        <span className="flex gap-1">
+          {['#22b573', '#ffc233', '#9aa3b2', '#22b573', '#22b573'].map((c, k) => <motion.span key={k} className="grid size-7 place-items-center rounded-md font-display text-sm font-black text-white" style={{ background: c }} initial={{ rotateX: 90 }} animate={{ rotateX: [90, 0, 0, 90] }} transition={{ ...loop, duration: 3.2, delay: k * 0.15 }}>{'BREAD'[k]}</motion.span>)}
+        </span>
+      )
+    case 'search':
+      return (
+        <span className="relative grid grid-cols-5 gap-0.5 font-mono text-[11px] font-black">
+          {'CATXQ AOPLM TRSUN ZBDOG KEYIW'.replace(/ /g, '').split('').map((c, k) => <span key={k} className={clsx('grid size-[18px] place-items-center rounded', [0, 6, 12].includes(k) ? 'bg-white text-[#1f2433]' : 'text-white/80')}>{c}</span>)}
+          <motion.span className="absolute left-0 top-0 h-[3px] origin-left rounded-full bg-butter" style={{ width: 90, rotate: 45, translateY: 8, translateX: 6 }} animate={{ scaleX: [0, 1, 1, 0] }} transition={{ ...loop, duration: 2.6 }} />
+        </span>
+      )
+    case 'choice':
+      return (
+        <span className="grid grid-cols-2 gap-1">
+          {['koşmak', 'uyumak', 'yemek', 'okumak'].map((w, k) => <motion.span key={w} className="rounded-md bg-white/85 px-1.5 py-0.5 text-center text-[10px] font-black text-[#1f2433]" animate={k === 3 ? { backgroundColor: ['#ffffffd9', '#c9f5df', '#ffffffd9'], scale: [1, 1.08, 1] } : {}} transition={{ ...loop, duration: 1.8 }}>{w}</motion.span>)}
+        </span>
+      )
+    default:
+      return null
+  }
+}
 
 /** Three fanned cards hinting at the swipe gesture. */
 function SwipeArt() {
@@ -165,6 +243,9 @@ function GameRun({ game, onExit, onSwitch }: { game: GameKey; onExit: () => void
     onSuccess: (r) => {
       setResult(r)
       const known = r.outcomes.filter((o) => o.known).length
+      // personal best per game (score games keep points, the others the number of words known)
+      const mark = r.score ?? known
+      try { if (mark > Number(localStorage.getItem(`dilgo.best.${game}`) ?? 0)) localStorage.setItem(`dilgo.best.${game}`, String(mark)) } catch { /* private mode */ }
       if (r.outcomes.length && known / r.outcomes.length >= 0.8) {
         sfx.complete()
         celebrate()

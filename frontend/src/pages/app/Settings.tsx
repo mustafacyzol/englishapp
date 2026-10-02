@@ -1,5 +1,5 @@
 import { useState, type FormEvent, type ReactNode } from 'react'
-import { useSearchParams } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient, type UseMutationResult } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
@@ -185,10 +185,10 @@ function LearningTab({ save }: { save: Save }) {
       </Section>
       <Section title="Seviye ve hedef">
         <Label>Seviye</Label>
-        <div className="mb-5 grid grid-cols-6 gap-2">
-          {(['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const).map((l) => (
-            <button key={l} onClick={() => save.mutate({ cefr_level: l })} className={clsx(pill(user.cefr_level === l), 'font-mono')}>{l}</button>
-          ))}
+        <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-line bg-card p-3">
+          <span className="grid size-12 place-items-center rounded-xl bg-ink font-mono text-lg font-black text-paper">{user.cefr_level}</span>
+          <span className="min-w-0 flex-1 text-sm font-semibold text-ink-soft">Seviyen seviye testinden gelir. Seviyendeki dersleri bitirince bir üst seviyeye kendiliğinden geçersin.</span>
+          <Link to="/placement" className="rounded-xl bg-paper-2 px-3 py-2 text-sm font-extrabold hover:bg-ink/[0.06]">Seviye testine gir</Link>
         </div>
         <Label>Neden öğreniyorsun?</Label>
         <div className="flex flex-wrap gap-2">
