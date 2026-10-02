@@ -44,7 +44,7 @@ class SiteController extends Controller
             'name' => ['required', 'string', 'min:2', 'max:80'],
             'email' => ['required', 'email', 'max:190'],
             'phone' => ['nullable', 'string', 'max:30'],
-            'topic' => ['required', 'in:general,course,corporate,support,partnership'],
+            'topic' => ['required', 'in:general,course,okul,corporate,support,partnership'],
             'message' => ['required', 'string', 'min:10', 'max:3000'],
             'kvkk' => ['accepted'],
             'captcha' => ['nullable', 'string'],

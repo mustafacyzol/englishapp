@@ -238,17 +238,17 @@ function Faq() {
 /** B2B: schools, courses and companies buy seats and follow their learners. */
 function ForInstitutions() {
   const points = [
-    { icon: Building2, title: 'Koltuk bazlı anlaşma', text: 'Öğrenci sayınızı belirleyin; herkes Premium’un tamamına erişir.' },
-    { icon: Mail, title: 'E-posta ya da kodla katılım', text: 'Listeyi yapıştırın, davetler gitsin, ya da sınıfa tek bir katılım kodu verin.' },
-    { icon: BarChart3, title: 'Kurum paneli', text: 'Kim çalışıyor, hangi beceride geride, sınıf sınıf, haftalık olarak görün.' },
+    { icon: Building2, title: 'Müdür ve öğretmen panelleri', text: 'Müdür bütün okulu, her öğretmen kendi sınıflarını görür ve yönetir.' },
+    { icon: Mail, title: 'Ödev ver, takip et', text: 'Ders, hikâye ya da sınav ödevi verin; öğrenci bitirince kendiliğinden işaretlenir.' },
+    { icon: BarChart3, title: 'Sınıf karnesi', text: 'Kim çalışıyor, hangi beceride geride; sınıf sınıf, haftalık olarak görün.' },
   ]
   return (
     <section id="kurumlar" className="mx-auto max-w-6xl px-5 py-20">
       <div className="grid items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
         <Reveal>
-          <p className="mb-2 font-extrabold uppercase tracking-widest text-sage-deep dark:text-sage">Okullar, kurslar ve şirketler için</p>
-          <h2 className="text-4xl leading-tight sm:text-5xl">Öğrencileriniz için DilGO</h2>
-          <p className="mt-4 text-lg text-ink-soft">Bayrak Dil Okulları’nın müfredatı, Defne ile konuşma pratiği ve dört beceri takibi, kurumunuzun kendi paneliyle.</p>
+          <p className="mb-2 font-extrabold uppercase tracking-widest text-sage-deep dark:text-sage">Okullar için</p>
+          <h2 className="text-4xl leading-tight sm:text-5xl">Okulunuzun bütün İngilizcesi tek yerde</h2>
+          <p className="mt-4 text-lg text-ink-soft">İlkokuldan liseye; LGS ve YDT hazırlığı, Defne ile konuşma pratiği ve dört beceri takibi, okulunuzun kendi paneliyle.</p>
           <div className="mt-8 space-y-4">
             {points.map((p) => (
               <div key={p.title} className="flex gap-4">
@@ -257,12 +257,15 @@ function ForInstitutions() {
               </div>
             ))}
           </div>
-          <LinkButton to="/contact?konu=corporate" size="lg" className="mt-8">Kurumsal teklif alın</LinkButton>
+          <div className="mt-8 flex flex-wrap gap-3">
+            <LinkButton to="/okullar" size="lg">Okullar için</LinkButton>
+            <LinkButton to="/contact?konu=okul" size="lg" variant="secondary">Teklif alın</LinkButton>
+          </div>
         </Reveal>
         <Reveal delay={0.1}>
           <div className="overflow-hidden rounded-[32px] border-2 border-line bg-card shadow-soft">
             <div className="flex items-center justify-between border-b-2 border-line px-5 py-4">
-              <div><p className="text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft">Kurum paneli</p><p className="font-display text-lg font-black">10-A sınıfı</p></div>
+              <div><p className="text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft">Öğretmen paneli</p><p className="font-display text-lg font-black">8-A sınıfı</p></div>
               <span className="rounded-full bg-mint/15 px-3 py-1 text-sm font-extrabold text-mint-deep">%90 katılım</span>
             </div>
             <div className="grid grid-cols-4 gap-3 border-b-2 border-line p-5">

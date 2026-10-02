@@ -10,10 +10,11 @@ import { Alert, Modal } from '@/components/ui/Misc'
 
 export interface Member {
   id: number
+  user_id?: number | null
   name: string | null
   email: string
   class_name: string | null
-  role: 'student' | 'manager'
+  role: 'student' | 'manager' | 'teacher'
   status: 'invited' | 'active' | 'removed'
   invited_at: string | null
   joined_at: string | null
@@ -30,7 +31,12 @@ export interface InstitutionReport {
   summary: { students: number; active: number; invited: number; active_this_week: number; week_xp: number; avg_streak: number; skills: Record<SkillKey, number> }
   classes: string[]
   members: Member[]
+  /** manager = principal (whole school), teacher = their own classes */
+  role?: 'manager' | 'teacher'
+  school_classes?: SchoolClassRow[]
+  teachers?: { id: number; name: string | null; email: string; status: string; classes: string[]; last_active_at: string | null }[]
 }
+export interface SchoolClassRow { id: number; name: string; grade: number | null; students: number; teacher: { id: number; name: string } | null }
 export interface InviteRow { email: string; name?: string; class_name?: string }
 
 export const TYPE: Record<string, string> = { school: 'Okul', course: 'Kurs', company: 'Şirket' }

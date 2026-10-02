@@ -17,7 +17,7 @@ import { PageTransition } from '@/components/motion/Page'
 /** A short main menu: who we are, who it's for, what it costs, and the blog. */
 const LINKS = [
   { to: '/about', label: 'Hakkımızda' },
-  { to: '/#kurumlar', label: 'Kurumlar' },
+  { to: '/okullar', label: 'Okullar için' },
   { to: '/#paketler', label: 'Fiyatlar' },
   { to: '/blog', label: 'Blog' },
 ]

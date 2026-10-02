@@ -620,7 +620,7 @@ function CorporateCard({ c }: { c: NonNullable<NonNullable<ReturnType<typeof use
           <div className="flex items-center gap-2">
             <span className="grid size-9 place-items-center rounded-xl bg-sage/15 text-sage-deep dark:text-sage"><Building2 className="size-5" /></span>
             <p className="font-display text-xl font-black">{c.name}</p>
-            <span className="rounded-full bg-sage/15 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-sage-deep dark:text-sage">Okul ve şirket</span>
+            <span className="rounded-full bg-sage/15 px-2.5 py-1 text-[11px] font-black uppercase tracking-wider text-sage-deep dark:text-sage">Okul paneli</span>
           </div>
           {c.tagline && <p className="mt-2 text-sm text-ink-soft">{c.tagline}</p>}
           <p className="mt-3 font-display text-3xl font-black tracking-tight">{c.price}</p>

@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/Button'
 import { Modal, SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
+import { HomeworkCard } from '@/components/game/Homework'
 
 interface PathData {
   course: { id: number; title: string; cefr_level: string; color: string; description: string }
@@ -77,6 +78,8 @@ export default function Learn() {
       <div className="sticky top-[66px] z-[25] -mx-1 px-1 pb-2 pt-2">
         <ContinueCard data={data} stats={stats} onJump={jump} onPick={() => setPicker(true)} away={!currentVisible ? (curAbove ? 'up' : 'down') : null} />
       </div>
+
+      <HomeworkCard />
 
       <div className="mt-8">
         {data.units.map((unit, ui) => (

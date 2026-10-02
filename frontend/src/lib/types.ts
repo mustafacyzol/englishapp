@@ -32,7 +32,7 @@ export interface Me {
   grade?: number | null
   linked?: { google: boolean; apple: boolean }
   institution: { id: number; name: string; type: string } | null
-  institution_role: 'student' | 'manager' | null
+  institution_role: 'student' | 'manager' | 'teacher' | null
   marketing_opt_in: boolean
   two_factor_enabled: boolean
   referral_code: string

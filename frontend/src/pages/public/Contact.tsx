@@ -14,7 +14,7 @@ import { Turnstile } from '../auth/Turnstile'
 import { Img } from '@/components/ui/Img'
 import { useLocation } from 'react-router-dom'
 
-const TOPICS = ['general', 'course', 'corporate', 'support', 'partnership']
+const TOPICS = ['general', 'course', 'okul', 'corporate', 'support', 'partnership']
 
 interface Cfg { support_email: string; school_whatsapp: string | null }
 
@@ -88,6 +88,7 @@ export default function Contact() {
                 <Select id="c-topic" label="Konu" value={f.topic} onChange={set('topic')}>
                   <option value="general">Genel soru</option>
                   <option value="course">Kurs ve canlı dersler</option>
+                  <option value="okul">Okullar için (okul paneli)</option>
                   <option value="corporate">Kurumsal eğitim</option>
                   <option value="support">Üyelik ve teknik destek</option>
                   <option value="partnership">İş birliği</option>

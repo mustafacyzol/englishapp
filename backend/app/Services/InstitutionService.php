@@ -133,6 +133,7 @@ class InstitutionService
 
             return [
                 'id' => $m->id,
+                'user_id' => $u?->id,
                 'name' => $m->name ?? $u?->name,
                 'email' => $m->email,
                 'class_name' => $m->class_name,

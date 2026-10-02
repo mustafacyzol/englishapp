@@ -4,7 +4,7 @@ import { Link, NavLink, Navigate, Outlet, useLocation, useOutletContext } from '
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, Gauge, Mail, Menu, Settings, Users, UsersRound } from 'lucide-react'
+import { ArrowLeft, ClipboardList, Gauge, GraduationCap, Mail, Menu, Settings, Users, UsersRound } from 'lucide-react'
 import { get, type ApiError } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { Logo } from '@/components/game/Logo'
@@ -12,12 +12,15 @@ import { SkeletonPage } from '@/components/ui/Misc'
 import { LangSelect } from '@/components/ui/LangSelect'
 import { TYPE, type InstitutionReport } from '@/components/institution/Report'
 
-const NAV = [
+/** The menu follows the role: a principal runs the school, a teacher their classes. */
+const NAV: { to: string; label: string; icon: typeof Gauge; end?: boolean; manager?: boolean }[] = [
   { to: '/kurum', label: 'Genel bakış', icon: Gauge, end: true },
-  { to: '/kurum/ogrenciler', label: 'Öğrenciler', icon: Users },
+  { to: '/kurum/odevler', label: 'Ödevler', icon: ClipboardList },
   { to: '/kurum/siniflar', label: 'Sınıflar', icon: UsersRound },
+  { to: '/kurum/ogrenciler', label: 'Öğrenciler', icon: Users },
+  { to: '/kurum/ogretmenler', label: 'Öğretmenler', icon: GraduationCap, manager: true },
   { to: '/kurum/davetler', label: 'Davetler', icon: Mail },
-  { to: '/kurum/ayarlar', label: 'Kurum ayarları', icon: Settings },
+  { to: '/kurum/ayarlar', label: 'Okul ayarları', icon: Settings, manager: true },
 ]
 
 export const useInstitution = () => useOutletContext<{ data: InstitutionReport }>()
@@ -41,7 +44,7 @@ export default function InstitutionLayout() {
   const { user } = useAuth()
   const loc = useLocation()
   const [open, setOpen] = useState(false)
-  const allowed = user?.institution_role === 'manager'
+  const allowed = user?.institution_role === 'manager' || user?.institution_role === 'teacher'
   const { data, error } = useQuery({ queryKey: ['institution'], queryFn: () => get<InstitutionReport>('/institution'), enabled: allowed })
   useEffect(() => setOpen(false), [loc.pathname])
 
@@ -55,11 +58,11 @@ export default function InstitutionLayout() {
         {inst ? <InstitutionMark name={inst.name} logo={inst.logo_url} color={inst.brand_color} className="size-12 shrink-0 text-lg" /> : <span className="size-12 rounded-2xl bg-paper-2" />}
         <div className="min-w-0">
           <p className="truncate font-display text-lg font-black leading-tight">{inst?.name ?? 'Kurum'}</p>
-          <p className="text-xs font-bold text-ink-soft">{inst ? `${TYPE[inst.type] ?? inst.type} paneli` : 'Yükleniyor'}</p>
+          <p className="text-xs font-bold text-ink-soft">{inst ? (data?.role === 'teacher' ? 'Öğretmen paneli' : `${TYPE[inst.type] ?? inst.type} yönetimi`) : 'Yükleniyor'}</p>
         </div>
       </div>
       <nav className="flex flex-col gap-0.5" aria-label="Kurum menüsü">
-        {NAV.map((n) => (
+        {NAV.filter((n) => !n.manager || data?.role !== 'teacher').map((n) => (
           <NavLink key={n.to} to={n.to} end={n.end} className={({ isActive }) => clsx('relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[15px] font-bold transition', isActive ? 'text-ink' : 'text-ink-soft hover:bg-paper-2 hover:text-ink')}>
             {({ isActive }) => (
               <>
@@ -103,7 +106,7 @@ export default function InstitutionLayout() {
           <div className="flex h-16 items-center gap-3 px-4 sm:px-8">
             <button onClick={() => setOpen(true)} className="grid size-10 place-items-center rounded-xl hover:bg-paper-2 lg:hidden" aria-label="Menü"><Menu className="size-6" /></button>
             {inst && <span className="flex min-w-0 items-center gap-2 lg:hidden"><InstitutionMark name={inst.name} logo={inst.logo_url} color={inst.brand_color} className="size-8 shrink-0 rounded-xl text-xs" /><span className="truncate font-display font-black">{inst.name}</span></span>}
-            <p className="hidden text-sm font-bold text-ink-soft lg:block">Kurum paneli · yalnızca yöneticiler görür</p>
+            <p className="hidden text-sm font-bold text-ink-soft lg:block">{data?.role === 'teacher' ? 'Öğretmen paneli · yalnızca kendi sınıfların' : 'Okul paneli · müdür ve yöneticiler'}</p>
             <div className="ml-auto flex items-center gap-2">
               <LangSelect />
               <span className="hidden items-center gap-2 rounded-full bg-paper-2 py-1 pl-1 pr-3 text-sm font-bold sm:flex"><span className="grid size-7 place-items-center rounded-full text-xs font-black text-white" style={{ background: accent }}>{user?.name[0]}</span>{user?.name.split(' ')[0]}</span>

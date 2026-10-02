@@ -20,6 +20,7 @@ const NotFound = lazy(() => import('./pages/public/NotFound'))
 const BlogList = lazy(() => import('./pages/public/Blog').then((m) => ({ default: m.BlogList })))
 const BlogPost = lazy(() => import('./pages/public/Blog').then((m) => ({ default: m.BlogPost })))
 const Placement = lazy(() => import('./pages/public/Placement'))
+const Schools = lazy(() => import('./pages/public/Schools'))
 const Login = lazy(() => import('./pages/auth/Login'))
 const Register = lazy(() => import('./pages/auth/Register'))
 const VerifyEmail = lazy(() => import('./pages/auth/VerifyEmail'))
@@ -39,6 +40,8 @@ const InstStudents = lazy(() => import('./pages/institution/Panel').then((m) => 
 const InstClasses = lazy(() => import('./pages/institution/Panel').then((m) => ({ default: m.InstitutionClasses })))
 const InstInvites = lazy(() => import('./pages/institution/Panel').then((m) => ({ default: m.InstitutionInvites })))
 const InstSettings = lazy(() => import('./pages/institution/Panel').then((m) => ({ default: m.InstitutionSettings })))
+const SchoolHomework = lazy(() => import('./pages/institution/School').then((m) => ({ default: m.SchoolHomework })))
+const SchoolTeachers = lazy(() => import('./pages/institution/School').then((m) => ({ default: m.SchoolTeachers })))
 const InstitutionDetail = lazy(() => import('./pages/admin/InstitutionDetail'))
 const Invite = lazy(() => import('./pages/institution/Invite'))
 const AiChat = lazy(() => import('./pages/app/AiChat'))
@@ -114,6 +117,7 @@ export default function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={user ? <Navigate to="/learn" replace /> : <Landing />} />
           <Route path="/about" element={<About />} />
+          <Route path="/okullar" element={<Schools />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/newsletter/confirm/:token" element={<Newsletter action="confirm" />} />
           <Route path="/newsletter/unsubscribe/:token" element={<Newsletter action="unsubscribe" />} />
@@ -141,6 +145,8 @@ export default function App() {
           <Route path="siniflar" element={<InstClasses />} />
           <Route path="davetler" element={<InstInvites />} />
           <Route path="ayarlar" element={<InstSettings />} />
+          <Route path="odevler" element={<SchoolHomework />} />
+          <Route path="ogretmenler" element={<SchoolTeachers />} />
         </Route>
         <Route element={<Guard><AppLayout /></Guard>}>
           <Route path="/learn" element={<Learn />} />

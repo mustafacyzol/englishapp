@@ -120,10 +120,10 @@ export default function AppLayout() {
               </div>
             </div>
           ))}
-          {user.institution_role === 'manager' && (
+          {(user.institution_role === 'manager' || user.institution_role === 'teacher') && (
             <div>
               <p className="mb-1.5 px-3 text-[11px] font-black uppercase tracking-[0.14em] text-ink-soft/80">{user.institution?.name ?? 'Kurum'}</p>
-              <SideLink item={{ to: '/kurum', label: 'Kurum paneli', icon: IconSchool, tone: 'sage' }} path={loc.pathname} />
+              <SideLink item={{ to: '/kurum', label: user.institution_role === 'teacher' ? 'Öğretmen paneli' : 'Okul paneli', icon: IconSchool, tone: 'sage' }} path={loc.pathname} />
             </div>
           )}
           {user.is_staff && (
@@ -193,7 +193,7 @@ export default function AppLayout() {
         </div>
       </nav>
 
-      <MoreSheet open={more} onClose={() => setMore(false)} staff={!!user.is_staff} manager={user.institution_role === 'manager'} exam={on('exam')} />
+      <MoreSheet open={more} onClose={() => setMore(false)} staff={!!user.is_staff} manager={user.institution_role === 'manager' || user.institution_role === 'teacher'} exam={on('exam')} />
       <CoachMarks />
       <PlacementReveal />
     </div>
@@ -277,7 +277,7 @@ function MoreSheet({ open, onClose, staff, manager, exam }: { open: boolean; onC
   ]
   const rows: Item[] = [
     { to: '/settings', label: 'Ayarlar', icon: IconSliders, tone: 'ink' },
-    ...(manager ? [{ to: '/kurum', label: 'Kurum paneli', icon: IconSchool, tone: 'sage' }] : []),
+    ...(manager ? [{ to: '/kurum', label: 'Okul paneli', icon: IconSchool, tone: 'sage' }] : []),
     ...(staff ? [{ to: '/admin', label: 'Yönetim paneli', icon: IconShield, tone: 'ink' }] : []),
   ]
   if (!user) return null

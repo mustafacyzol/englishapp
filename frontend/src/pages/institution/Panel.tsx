@@ -11,6 +11,7 @@ import { PageHeader } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { InviteModal, Kpi, Report, ago, type InstitutionReport, type InviteRow, type Member } from '@/components/institution/Report'
 import { InstitutionMark, useInstitution } from '@/layouts/InstitutionLayout'
+import { SchoolClassManager } from './School'
 
 function useActions() {
   const qc = useQueryClient()
@@ -99,6 +100,7 @@ export function InstitutionClasses() {
   return (
     <div className="mx-auto max-w-6xl">
       <PageHeader kicker="Sınıflar" title="Sınıf karnesi" />
+      <SchoolClassManager />
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {groups.map(([name, list]) => {
           const act = list.filter((m) => m.status === 'active')

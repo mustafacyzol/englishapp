@@ -46,13 +46,13 @@ class Settings
         'features.leagues' => true,
         // The corporate card shown next to the plans on the pricing section.
         'corporate.enabled' => true,
-        'corporate.name' => 'Kurumsal',
-        'corporate.tagline' => 'Okullar, dershaneler ve şirketler için',
+        'corporate.name' => 'Okullar için',
+        'corporate.tagline' => 'İlkokuldan liseye; müdür, öğretmen ve öğrenci panelleriyle',
         'corporate.price' => 'Teklif alın',
         'corporate.note' => 'Öğrenci sayısına göre fiyatlandırılır',
-        'corporate.features' => "Kendi logonuzla kurum paneli\nSınıf ve ekip bazında ilerleme raporu\nE-posta ya da kodla toplu katılım\nTüm öğrencilere Premium özellikler\nÖncelikli destek",
-        'corporate.cta' => 'Kurumsal teklif al',
-        'corporate.url' => '/contact?konu=corporate',
+        'corporate.features' => "Müdür ve öğretmen panelleri\nSınıflar, ödev verme ve takip\nLGS ve YKS-YDT hazırlığı\nTüm öğrencilere Premium özellikler\nOkulunuzun logosu ve rengi",
+        'corporate.cta' => 'Okulunuz için teklif alın',
+        'corporate.url' => '/okullar',
         // Economy
         'gamification.daily_chest' => true,
         'auth.remember_days' => 'dilgo.security.token_ttl_days',
