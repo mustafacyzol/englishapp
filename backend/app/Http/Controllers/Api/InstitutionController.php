@@ -186,6 +186,11 @@ class InstitutionController extends Controller
         if ($data['kind'] === 'lesson') {
             abort_unless(\App\Models\Lesson::query()->whereKey((int) ($data['target'] ?? 0))->exists(), 422, 'Ders bulunamadı.');
         }
+        if ($data['kind'] === 'words') {
+            // only ready-made sets, public ones or the teacher's own can be assigned
+            $set = \App\Models\WordSet::query()->find((int) ($data['target'] ?? 0));
+            abort_unless($set && $set->isVisibleTo($request->user()), 422, 'Kelime seti bulunamadı.');
+        }
         if ($data['kind'] === 'story') {
             abort_unless(\App\Models\Story::query()->where('slug', $data['target'] ?? '')->exists(), 422, 'Hikâye bulunamadı.');
         }
@@ -223,9 +228,10 @@ class InstitutionController extends Controller
         $this->school->staff($request->user());
 
         return response()->json([
-            'lessons' => \App\Models\Lesson::query()->with('unit.course:id,cefr_level')->orderBy('unit_id')->orderBy('position')->limit(300)->get(['id', 'title', 'unit_id'])
+            'lessons' => \App\Models\Lesson::query()->with('unit.course:id,cefr_level')->orderBy('unit_id')->orderBy('position')->limit(600)->get(['id', 'title', 'unit_id'])
                 ->map(fn ($l) => ['id' => $l->id, 'title' => $l->title, 'level' => $l->unit?->course?->cefr_level]),
             'stories' => \App\Models\Story::query()->where('is_published', true)->orderBy('cefr_level')->get(['slug', 'title', 'cefr_level']),
+            'word_sets' => \App\Models\WordSet::query()->visibleTo($request->user())->orderByRaw('CASE WHEN user_id IS NULL THEN 0 ELSE 1 END')->orderBy('level')->limit(300)->get(['id', 'title', 'level', 'exam', 'words_count']),
         ]);
     }
 

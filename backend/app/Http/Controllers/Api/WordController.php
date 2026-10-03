@@ -75,6 +75,14 @@ class WordController extends Controller
     {
         $n = min(30, max(6, (int) $request->query('n', 16)));
         $user = $request->user();
+        // a word set: any ready-made, public or own set, in every game
+        if ($setId = (int) $request->query('set')) {
+            $set = \App\Models\WordSet::query()->findOrFail($setId);
+            abort_unless($set->isVisibleTo($user), 404);
+            $deck = $set->items->map(fn ($i) => ['id' => null, 'word' => $i->word, 'translation' => $i->translation, 'example' => $i->example, 'interval_days' => 0]);
+
+            return response()->json(['data' => $deck->shuffle()->take($n)->values(), 'saved' => 0, 'set' => $set->only(['id', 'title'])]);
+        }
         // a "words" node on the path plays with that unit's own vocabulary
         if ($lessonId = (int) $request->query('lesson')) {
             $lesson = \App\Models\Lesson::query()->findOrFail($lessonId);

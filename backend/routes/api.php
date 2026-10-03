@@ -127,6 +127,17 @@ Route::prefix('v1')->group(function () {
             Route::delete('words/{word}', [WordController::class, 'destroy']);
             Route::get('review', [WordController::class, 'queue']);
             Route::get('words/deck', [WordController::class, 'deck']);
+            Route::get('word-sets', [\App\Http\Controllers\Api\WordSetController::class, 'index']);
+            Route::get('word-sets/{set}', [\App\Http\Controllers\Api\WordSetController::class, 'show']);
+            Route::middleware('throttle:60,1')->group(function () {
+                Route::post('word-sets', [\App\Http\Controllers\Api\WordSetController::class, 'store']);
+                Route::put('word-sets/{set}', [\App\Http\Controllers\Api\WordSetController::class, 'update']);
+                Route::delete('word-sets/{set}', [\App\Http\Controllers\Api\WordSetController::class, 'destroy']);
+                Route::post('word-sets/{set}/save', [\App\Http\Controllers\Api\WordSetController::class, 'save']);
+                Route::post('word-sets/{set}/copy', [\App\Http\Controllers\Api\WordSetController::class, 'copy']);
+                Route::post('word-sets/{set}/learn', [\App\Http\Controllers\Api\WordSetController::class, 'learn']);
+                Route::post('word-sets/{set}/played', [\App\Http\Controllers\Api\WordSetController::class, 'played']);
+            });
             Route::post('review', [WordController::class, 'review'])->middleware('throttle:30,1');
 
             // AI teacher (speaking + writing)

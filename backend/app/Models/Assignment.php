@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Assignment extends Model
 {
-    public const KINDS = ['lesson', 'story', 'practice', 'exam', 'ai', 'custom'];
+    public const KINDS = ['lesson', 'story', 'words', 'practice', 'exam', 'ai', 'custom'];
 
     protected $guarded = ['id'];
 

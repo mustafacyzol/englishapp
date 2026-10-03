@@ -90,6 +90,7 @@ class SchoolService
         $manual = AssignmentCompletion::query()->where('assignment_id', $a->id)->whereIn('user_id', $userIds)->pluck('user_id');
         $auto = match ($a->kind) {
             'lesson' => DB::table('lesson_progress')->where('lesson_id', (int) $a->target)->whereIn('user_id', $userIds)->where('completed_at', '>=', $a->created_at)->pluck('user_id'),
+            'words' => DB::table('word_set_plays')->where('word_set_id', (int) $a->target)->whereIn('user_id', $userIds)->where('created_at', '>=', $a->created_at)->distinct()->pluck('user_id'),
             'story' => DB::table('story_reads')->where('story_id', Story::query()->where('slug', $a->target)->value('id'))->whereIn('user_id', $userIds)->where('completed_at', '>=', $a->created_at)->pluck('user_id'),
             default => collect(),
         };
@@ -124,6 +125,7 @@ class SchoolService
         return match ($a->kind) {
             'lesson' => "/lesson/{$a->target}",
             'story' => "/stories/{$a->target}",
+            'words' => "/practice/sets/{$a->target}",
             'exam' => '/exam',
             'ai' => '/ai',
             'practice' => '/practice',
@@ -137,6 +139,7 @@ class SchoolService
         return match ($kind) {
             'lesson' => 'Ders: '.(Lesson::query()->find((int) $target)?->title ?? 'Yol haritasından bir ders'),
             'story' => 'Hikâye: '.(Story::query()->where('slug', $target)->value('title') ?? 'Bir hikâye'),
+            'words' => 'Kelime seti: '.(\App\Models\WordSet::query()->find((int) $target)?->title ?? 'Kelime seti'),
             'exam' => 'Sınav modunda 10 soru',
             'ai' => 'Defne ile 5 dakikalık konuşma',
             'practice' => '20 kelime tekrarı',
