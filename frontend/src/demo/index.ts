@@ -260,6 +260,39 @@ const usage = () => ({ used: 3, limit: 20, remaining: 17 })
 const AREAS_ALL = ['users', 'sales', 'content', 'blog', 'gamification', 'institutions', 'marketing', 'desk', 'settings', 'audit']
 const ROLE_DEFAULT: Record<string, string[]> = { support: ['users', 'marketing', 'desk'], editor: ['content', 'blog'] }
 
+
+// --- word sets: an in-memory store seeded from the recorded set details
+let wsStore: Record<number, Json> | null = null
+let wsNext = 5000
+function sets(): Record<number, Json> {
+  if (!wsStore) {
+    wsStore = {}
+    for (const [k, v] of Object.entries(db)) if (/^\/word-sets\/\d+$/.test(k)) wsStore[v.data.id] = v.data
+  }
+  return wsStore
+}
+const wsCard = (s: Json) => { const { items, plays, ...c } = s; void items; void plays; return c }
+function wsList(params: URLSearchParams): Json {
+  const scope = params.get('scope') ?? 'explore'
+  const q = params.get('q')?.toLocaleLowerCase('tr')
+  let all = Object.values(sets())
+  all = scope === 'mine' ? all.filter((s) => s.mine) : scope === 'saved' ? all.filter((s) => s.saved) : all.filter((s) => s.official || s.is_public || s.mine)
+  if (params.get('level')) all = all.filter((s) => s.level === params.get('level'))
+  if (params.get('exam')) all = all.filter((s) => s.exam === params.get('exam'))
+  if (q) all = all.filter((s) => `${s.title} ${s.description ?? ''} ${s.exam ?? ''} ${(s.items ?? []).map((i: Json) => `${i.word} ${i.translation}`).join(' ')}`.toLocaleLowerCase('tr').includes(q))
+  all.sort((a, b) => Number(!a.official) - Number(!b.official) || String(a.level ?? '').localeCompare(String(b.level ?? '')) || b.id - a.id)
+  return { data: all.map(wsCard) }
+}
+function wsWrite(target: Json | null, body: Json): Json {
+  const seen = new Set<string>()
+  const items = (body.items ?? []).filter((i: Json) => i.word && !seen.has(i.word.toLowerCase()) && seen.add(i.word.toLowerCase())).map((i: Json, n: number) => ({ id: wsNext + 100 + n, word: i.word, translation: i.translation, example: i.example ?? null, in_library: false }))
+  if (items.length < 2) throw new DemoError(422, 'Bir sette en az 2 kelime olmalı.')
+  const s = target ?? { id: wsNext++, official: false, mine: true, saved: false, saves_count: 0, plays: 0, category: 'mine', owner: { name: me().name, username: me().username } }
+  Object.assign(s, { title: body.title, description: body.description ?? null, level: body.level ?? null, exam: body.exam ?? null, cover: body.cover ?? 'daily', is_public: !!body.is_public, items, words_count: items.length })
+  sets()[s.id] = s
+  return { data: s }
+}
+
 function getRoute(path: string, admin: boolean): Json {
   if (path === '/coupons') return db['/coupons'] ?? { data: [] }
   if (path === '/arena/lobby') {
@@ -280,6 +313,18 @@ function getRoute(path: string, admin: boolean): Json {
     const t = (Date.now() - liveStart) / 1000
     const i = Math.min(12, Math.floor(t / 5.2))
     return { rival: { i, score: Math.round(i * 128), finished: i >= 12, connected: true } }
+  }
+  if (path.startsWith('/word-sets')) {
+    const [b, q = ''] = path.split('?')
+    if (b === '/word-sets') return wsList(new URLSearchParams(q))
+    const s = sets()[+b.split('/')[2]]
+    if (!s) throw new DemoError(404, 'Set bulunamadı.')
+    return { data: s }
+  }
+  if (path.startsWith('/words/deck') && /[?&]set=\d+/.test(path)) {
+    const s = sets()[+path.match(/[?&]set=(\d+)/)![1]]
+    const deck = [...(s?.items ?? [])].sort(() => Math.random() - 0.5).slice(0, 24).map((i: Json) => ({ id: null, word: i.word, translation: i.translation, example: i.example, interval_days: 0 }))
+    return { data: deck, saved: 0, set: s ? { id: s.id, title: s.title } : null }
   }
   if (db[path] !== undefined) return db[path]
   const [base, qs = ''] = path.split('?')
@@ -378,6 +423,20 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   if (path === '/contact') return ok('Mesajın bize ulaştı. En geç 1 iş günü içinde dönüş yapacağız.')
   if (path === '/placement') return { token: 'demo-placement', answered: 37, total: 40 }
   if (path === '/placement/band') return { passed: true }
+  if (path === '/word-sets' && method === 'POST') return wsWrite(null, body)
+  if ((m = path.match(/^\/word-sets\/(\d+)(?:\/(save|copy|learn|played))?$/))) {
+    const s = sets()[+m[1]]
+    if (!s) throw new DemoError(404, 'Set bulunamadı.')
+    if (!m[2] && method === 'PUT') return wsWrite(s, body)
+    if (!m[2] && method === 'DELETE') { delete sets()[s.id]; return { ok: true } }
+    if (m[2] === 'save') { s.saved = !s.saved; s.saves_count += s.saved ? 1 : -1; return { saved: s.saved, saves_count: s.saves_count } }
+    if (m[2] === 'copy') return wsWrite(null, { ...s, title: `${s.title} (benim)`, is_public: false })
+    if (m[2] === 'played') { s.plays = (s.plays ?? 0) + 1; return { ok: true } }
+    const fresh = s.items.filter((i: Json) => !i.in_library)
+    fresh.forEach((i: Json) => { i.in_library = true; db['/words?']?.data.unshift({ id: nextMsg++, word: i.word, translation: i.translation, example: i.example, source: 'set', interval_days: 0, repetitions: 0, due_at: new Date().toISOString() }) })
+    if (db['/words?']) db['/words?'].stats.total += fresh.length
+    return { added: fresh.length, message: fresh.length ? `${fresh.length} kelime kütüphanene eklendi.` : 'Bu setin bütün kelimeleri zaten kütüphanende.' }
+  }
   if (path === '/placement/claim') return { result: { level: 'B1', score: 64, skills: { vocabulary: 72, grammar: 66, reading: 70, listening: 48 }, bands: {}, activities: { choice: { total: 30, correct: 19 }, order: { total: 5, correct: 3 }, gap: { total: 3, correct: 1 }, dictation: { total: 2, correct: 1 } } }, user: me() }
 
   // --- learning

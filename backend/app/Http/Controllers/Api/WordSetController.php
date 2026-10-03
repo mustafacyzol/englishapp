@@ -48,7 +48,7 @@ class WordSetController extends Controller
             ->when($f['category'] ?? null, fn ($x, $v) => $x->where('category', $v))
             ->when($f['q'] ?? null, function ($x, $v) {
                 $like = '%'.addcslashes($v, '%_\\').'%';
-                $x->where(fn ($w) => $w->where('title', 'like', $like)->orWhere('description', 'like', $like)
+                $x->where(fn ($w) => $w->where('title', 'like', $like)->orWhere('description', 'like', $like)->orWhere('exam', mb_strtolower(trim($v)))
                     ->orWhereExists(fn ($s) => $s->from('word_set_items')->whereColumn('word_set_items.word_set_id', 'word_sets.id')->where(fn ($i) => $i->where('word', 'like', $like)->orWhere('translation', 'like', $like))));
             })
             // ready-made first (level order), then the most saved, then the newest

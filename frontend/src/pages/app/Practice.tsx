@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, BookmarkPlus, Brain, Check, Heart, Grid3x3, Headphones, Layers, Puzzle, Search, Shuffle, TextCursorInput, Timer, Trash2, Volume2, X, Zap } from 'lucide-react'
+import { ArrowRight, BookmarkPlus, Sparkles, Brain, Check, Heart, Grid3x3, Headphones, Layers, Puzzle, Search, Shuffle, TextCursorInput, Timer, Trash2, Volume2, X, Zap } from 'lucide-react'
 import { del, get, post } from '@/lib/api'
 import { speak } from '@/lib/speech'
 import { celebrate, sfx } from '@/lib/fx'
@@ -12,10 +12,11 @@ import { Button } from '@/components/ui/Button'
 import { Empty, PageHeader, SkeletonPage, Spinner, Tabs } from '@/components/ui/Misc'
 import { useReward } from '@/components/game/RewardProvider'
 import { useEconomy, XpGuide } from '@/components/game/XpGuide'
-import { Cloze, Kelimle, ListenType, Memory, QuickChoice, WordSearch, Restart, Scramble, SpeedMatch, SwipeDeck, TrueFalse, type DeckWord, type Outcome } from './games/WordGames'
+import { SetBrowser } from './WordSets'
+import { BalloonPop, Cloze, Kelimle, ListenType, Memory, QuickChoice, WordSearch, Restart, Scramble, SpeedMatch, SwipeDeck, TrueFalse, type DeckWord, type Outcome } from './games/WordGames'
 
 interface Word { id: number; word: string; translation: string | null; example: string | null; interval_days: number; due_at: string | null; source: string | null }
-type GameKey = 'swipe' | 'match' | 'truefalse' | 'listen' | 'scramble' | 'memory' | 'cloze' | 'choice' | 'kelimle' | 'search'
+type GameKey = 'balloon' | 'swipe' | 'match' | 'truefalse' | 'listen' | 'scramble' | 'memory' | 'cloze' | 'choice' | 'kelimle' | 'search'
 
 type Group = 'quick' | 'memory' | 'spell'
 const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; tone: string; badge?: string; group: Group; rules: string[] }[] = [
@@ -28,29 +29,35 @@ const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; t
   { group: 'spell', key: 'cloze', title: 'Cümlede boşluk', text: 'Kelimeyi kendi örnek cümlesinde yerine koy.', icon: TextCursorInput, tone: 'from-sage to-mint', rules: ['Örnek cümledeki boşluğa gelen kelimeyi seç.', 'Dört seçenekten doğrusunu seç.', 'Yanlış seçimde doğru cümleyi görürsün.'] },
   { group: 'spell', key: 'kelimle', title: 'Kelimle', text: 'Türkçe ipucundan İngilizce kelimeyi 6 denemede bul.', icon: Grid3x3, tone: 'from-mint to-sky', badge: 'Yeni', rules: ['Türkçe ipucuna bakıp İngilizce kelimeyi tahmin et, her kelime için 6 hakkın var.', 'Yeşil: harf doğru yerde. Sarı: harf kelimede var ama başka yerde. Gri: kelimede yok.', 'Üç kelime çözersin; 5 denemede bulduğun kelime "biliyorum" sayılır.'] },
   { group: 'memory', key: 'search', title: 'Kelime avı', text: 'Harf tablosunda saklı 5 kelimeyi 2 dakikada bul.', icon: Search, tone: 'from-lilac to-berry', badge: 'Yeni', rules: ['Harf tablosunda 5 kelime saklı: yatay, dikey ya da çapraz.', 'Kelimenin ilk harfine, sonra son harfine dokun.', '2 dakikan var. Bulamadıkların tekrar listene girer.'] },
+  { group: 'quick', key: 'balloon', title: 'Balon patlat', text: 'Doğru anlamın balonunu kaçmadan patlat.', icon: Sparkles, tone: 'from-sky to-lilac', badge: 'Yeni', rules: ['Üstte Türkçe anlam yazar, aşağıdan İngilizce kelimeli balonlar yükselir.', 'Doğru balona dokun ve patlat. Balonlar giderek hızlanır.', 'Yanlış balon ya da kaçan doğru balon bir hak götürür. 3 hakkın var.'] },
   { group: 'quick', key: 'choice', title: 'Hızlı anlam', text: 'On kelime, dört seçenek. Klavyede 1-4.', icon: Zap, tone: 'from-flame to-butter', rules: ['On kelime, her birinde dört seçenek.', 'Doğru anlamı seç; klavyede 1-4 tuşları da çalışır.', 'Art arda doğrular seri yapar; yanlışlar tekrar listene girer.'] },
 ]
 
 export default function Practice() {
-  const [tab, setTab] = useState<'games' | 'words'>('games')
   const [params, setParams] = useSearchParams()
+  const [tab, setTabState] = useState<'games' | 'sets' | 'words'>(() => (['sets', 'words'].includes(params.get('tab') ?? '') ? (params.get('tab') as 'sets' | 'words') : 'games'))
+  const setTab = (t: 'games' | 'sets' | 'words') => { setTabState(t); setParams(t === 'games' ? {} : { tab: t }, { replace: true }) }
   const nav = useNavigate()
+  const set = Number(params.get('set')) || null
   // a "word game" stop on the learning path opens straight into its game, with that unit's words
   const lesson = Number(params.get('lesson')) || null
   const [game, setGame] = useState<GameKey | null>(() => (GAMES.some((g) => g.key === params.get('game')) ? (params.get('game') as GameKey) : null))
   const exit = () => {
     if (lesson) return nav('/learn')
+    if (set) return nav(`/practice/sets/${set}`)
     setGame(null)
     if (params.get('game')) setParams({}, { replace: true })
   }
-  if (game) return <GameRun key={`${game}-${lesson}`} game={game} lesson={lesson} onExit={exit} onSwitch={setGame} />
+  if (game) return <GameRun key={`${game}-${lesson}-${set}`} game={game} lesson={lesson} set={set} onExit={exit} onSwitch={setGame} />
   return (
     <div className="mx-auto max-w-4xl">
-      <PageHeader kicker="Aralıklı tekrar + oyunlar" title="Kelime pratiği" />
-      <div className="mb-6">
-        <Tabs value={tab} onChange={setTab} items={[{ value: 'games', label: 'Oyunlar' }, { value: 'words', label: 'Kelime defterim' }]} />
+      <PageHeader kicker="Oyunlar, setler, aralıklı tekrar" title="Kelime pratiği" />
+      <div className="mb-6 grid grid-cols-3 gap-1 rounded-2xl border-2 border-line bg-paper-2 p-1 sm:inline-grid sm:min-w-[420px]">
+        {([['games', 'Oyunlar'], ['sets', 'Kelime setleri'], ['words', 'Defterim']] as const).map(([k, l]) => (
+          <button key={k} onClick={() => setTab(k)} aria-pressed={tab === k} className={clsx('rounded-xl px-2 py-2 text-sm font-extrabold transition', tab === k ? 'bg-card text-ink shadow-hard-sm' : 'text-ink-soft hover:text-ink')}>{l}</button>
+        ))}
       </div>
-      {tab === 'games' ? <GamePicker onPick={setGame} /> : <WordList />}
+      {tab === 'games' ? <GamePicker onPick={setGame} /> : tab === 'sets' ? <SetBrowser /> : <WordList />}
     </div>
   )
 }
@@ -194,6 +201,17 @@ function GamePreview({ game }: { game: GameKey }) {
           <motion.span className="absolute left-0 top-0 h-[3px] origin-left rounded-full bg-butter" style={{ width: 90, rotate: 45, translateY: 8, translateX: 6 }} animate={{ scaleX: [0, 1, 1, 0] }} transition={{ ...loop, duration: 2.6 }} />
         </span>
       )
+    case 'balloon':
+      return (
+        <span className="flex items-end gap-2">
+          {['#ff8a5b', '#ffd25b', '#7be0a8'].map((c, k) => (
+            <motion.span key={c} className="relative block h-12 w-9 rounded-[50%] shadow-[inset_-4px_-6px_0_rgba(0,0,0,0.12)]" style={{ background: c }} animate={{ y: [6, -10, 6] }} transition={{ ...loop, duration: 2.2, delay: k * 0.3 }}>
+              <span className="absolute left-2 top-2 h-3 w-2 rounded-full bg-white/60" />
+              <span className="absolute -bottom-3 left-1/2 h-3 w-px bg-white/70" />
+            </motion.span>
+          ))}
+        </span>
+      )
     case 'choice':
       return (
         <span className="grid grid-cols-2 gap-1">
@@ -227,13 +245,13 @@ function Stat({ v, l, c }: { v: number; l: string; c?: string }) {
   )
 }
 
-function GameRun({ game, lesson, onExit, onSwitch }: { game: GameKey; lesson?: number | null; onExit: () => void; onSwitch: (g: GameKey) => void }) {
+function GameRun({ game, lesson, set, onExit, onSwitch }: { game: GameKey; lesson?: number | null; set?: number | null; onExit: () => void; onSwitch: (g: GameKey) => void }) {
   const qc = useQueryClient()
   const showReward = useReward()
   const [round, setRound] = useState(0)
   const [started, setStarted] = useState(false)
   const [result, setResult] = useState<{ outcomes: Outcome[]; score?: number; saved: number } | null>(null)
-  const { data, isLoading } = useQuery({ queryKey: ['deck', game, round], queryFn: () => get<{ data: DeckWord[] }>(`/words/deck?n=${game === 'match' ? 24 : 16}${lesson ? `&lesson=${lesson}` : ''}`), gcTime: 0, staleTime: Infinity })
+  const { data, isLoading } = useQuery({ queryKey: ['deck', game, round, set], queryFn: () => get<{ data: DeckWord[]; set?: { id: number; title: string } }>(`/words/deck?n=${game === 'match' ? 24 : 16}${lesson ? `&lesson=${lesson}` : ''}${set ? `&set=${set}` : ''}`), gcTime: 0, staleTime: Infinity })
   const meta = GAMES.find((g) => g.key === game)!
 
   const submit = useMutation({
@@ -246,6 +264,8 @@ function GameRun({ game, lesson, onExit, onSwitch }: { game: GameKey; lesson?: n
       const r = reviews.length || played ? await post<{ reward: RewardSummary }>('/review', { reviews, played }).catch(() => null) : null
       // Practice also refills hearts (5+ right answers earn one back).
       const correct = outcomes.filter((o) => o.known).length
+      // a word-set game counts towards homework that assigned the set
+      if (set && outcomes.length) await post(`/word-sets/${set}/played`, { game, correct, total: outcomes.length }).catch(() => null)
       if (correct >= 5) await post('/hearts/earn', { correct }).catch(() => null)
       // played from the path: half the unit's words right completes the stop
       let path: { reward?: RewardSummary; level_up?: string | null } | null = null
@@ -278,7 +298,7 @@ function GameRun({ game, lesson, onExit, onSwitch }: { game: GameKey; lesson?: n
     <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-center gap-3">
         <button onClick={onExit} aria-label="Oyunlardan çık" className="grid size-10 place-items-center rounded-xl text-ink-soft hover:bg-paper-2"><X className="size-6" /></button>
-        <p className="font-display text-xl font-black">{meta.title}</p>
+        <p className="min-w-0 font-display text-xl font-black leading-tight">{meta.title}{data?.set && <span className="block truncate text-sm font-bold text-ink-soft">{data.set.title}</span>}</p>
       </div>
       {isLoading || !data ? (
         <Spinner className="min-h-[40vh]" />
@@ -293,6 +313,7 @@ function GameRun({ game, lesson, onExit, onSwitch }: { game: GameKey; lesson?: n
       ) : (
         <AnimatePresence mode="wait">
           <motion.div key={`${game}-${round}`} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}>
+            {game === 'balloon' && <BalloonPop deck={data.data} onFinish={finish} />}
             {game === 'swipe' && <SwipeDeck deck={data.data} onFinish={finish} />}
             {game === 'match' && <SpeedMatch deck={data.data} onFinish={finish} />}
             {game === 'truefalse' && <TrueFalse deck={data.data} onFinish={finish} />}

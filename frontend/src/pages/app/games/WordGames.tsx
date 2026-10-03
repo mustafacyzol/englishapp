@@ -795,6 +795,147 @@ export function WordSearch({ deck, onFinish }: { deck: DeckWord[]; onFinish: Fin
   )
 }
 
+// ---------------------------------------------------------------------------
+// Balloon pop: the Turkish meaning sits on top, four balloons float up with
+// English words. Pop the right one before it drifts away. Ten rounds, faster
+// as you go, combo multiplies the points.
+// ---------------------------------------------------------------------------
+const BALLOON_TONES = [
+  ['#ff8a5b', '#e5532a'], ['#5bb8ff', '#2a7fe5'], ['#7be0a8', '#22b573'], ['#c49bff', '#8a5be5'], ['#ffd25b', '#e5a92a'], ['#ff7aa8', '#e53f78'],
+]
+
+export function BalloonPop({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finish }) {
+  const ROUNDS = Math.min(10, deck.length)
+  const rounds = useMemo(() => shuffle(deck).slice(0, ROUNDS).map((w) => {
+    const others = shuffle(deck.filter((x) => x.word !== w.word)).slice(0, 3)
+    return { w, options: shuffle([w, ...others]), tones: shuffle(BALLOON_TONES).slice(0, 4), lanes: shuffle([0, 1, 2, 3]).map((l) => l + (Math.random() - 0.5) * 0.25) }
+  }), [deck, ROUNDS])
+  const [i, setI] = useState(0)
+  const [score, setScore] = useState(0)
+  const [combo, setCombo] = useState(0)
+  const [popped, setPopped] = useState<string | null>(null)
+  const [wrong, setWrong] = useState<string | null>(null)
+  const [lives, setLives] = useState(3)
+  const log = useRef<Outcome[]>([])
+  const busy = useRef(false)
+  const r = rounds[i]
+  // rise time shrinks from 7s to 4s across the game
+  const rise = 7 - (3 * i) / Math.max(1, ROUNDS - 1)
+
+  const next = useCallback((ok: boolean, sc: number, lv: number) => {
+    log.current.push({ w: r.w, known: ok })
+    setTimeout(() => {
+      busy.current = false
+      setPopped(null)
+      setWrong(null)
+      if (i + 1 >= rounds.length || lv <= 0) {
+        // anything not reached counts as "again"
+        rounds.slice(i + 1).forEach((x) => log.current.push({ w: x.w, known: false }))
+        return onFinish(log.current, sc)
+      }
+      setI(i + 1)
+    }, ok ? 650 : 900)
+  }, [r, i, rounds, onFinish])
+
+  const tap = (w: DeckWord) => {
+    if (busy.current || !r) return
+    busy.current = true
+    if (w.word === r.w.word) {
+      const c = combo + 1
+      const sc = score + 10 * Math.min(4, c) + Math.round(rise)
+      setCombo(c)
+      setScore(sc)
+      setPopped(w.word)
+      sfx.correct(c)
+      speak(w.word)
+      next(true, sc, lives)
+    } else {
+      setCombo(0)
+      setWrong(w.word)
+      setPopped(r.w.word)
+      sfx.wrong()
+      setLives(lives - 1)
+      next(false, score, lives - 1)
+    }
+  }
+  const escaped = () => {
+    if (busy.current || !r) return
+    busy.current = true
+    setCombo(0)
+    setPopped(r.w.word)
+    sfx.wrong()
+    setLives(lives - 1)
+    next(false, score, lives - 1)
+  }
+
+  if (!r) return null
+  return (
+    <div className="mx-auto max-w-lg">
+      <div className="mb-3 flex items-center gap-3">
+        <span className="flex gap-1" aria-label={`${lives} hak`}>{[0, 1, 2].map((k) => <span key={k} className={clsx('text-xl transition', k < lives ? '' : 'opacity-20 grayscale')}>🎈</span>)}</span>
+        <div className="h-2.5 flex-1 overflow-hidden rounded-full bg-paper-2"><motion.div className="h-full rounded-full bg-sky" animate={{ width: `${(i / rounds.length) * 100}%` }} /></div>
+        <AnimatePresence>{combo >= 2 && <motion.span key={combo} initial={{ scale: 1.6 }} animate={{ scale: 1 }} className="flex items-center gap-0.5 rounded-full bg-butter px-2 py-0.5 text-xs font-black text-[#1f2433]"><Zap className="size-3.5" />x{Math.min(4, combo)}</motion.span>}</AnimatePresence>
+        <span className="w-14 text-right font-display text-xl font-black tabular-nums">{score}</span>
+      </div>
+      <div className="relative h-[min(460px,62dvh)] overflow-hidden rounded-[28px] border-2 border-line bg-gradient-to-b from-[#bfe6ff] via-[#e3f4ff] to-[#fff6e3] dark:from-[#1d3557] dark:via-[#22304a] dark:to-[#2d2a3a]">
+        <span aria-hidden className="absolute left-[8%] top-[18%] h-6 w-20 rounded-full bg-white/70 blur-[1px] dark:bg-white/10" />
+        <span aria-hidden className="absolute right-[10%] top-[34%] h-5 w-14 rounded-full bg-white/60 blur-[1px] dark:bg-white/10" />
+        <div className="absolute inset-x-0 top-0 z-10 flex justify-center p-3">
+          <AnimatePresence mode="wait">
+            <motion.p key={i} initial={{ y: -16, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -16, opacity: 0 }} className="max-w-[90%] rounded-2xl bg-white px-4 py-2 text-center font-display text-xl font-black text-[#1f2433] shadow-hard-sm sm:text-2xl">
+              {r.w.translation}
+            </motion.p>
+          </AnimatePresence>
+        </div>
+        {r.options.map((w, k) => {
+          const isPop = popped === w.word
+          const isWrong = wrong === w.word
+          const [c1, c2] = r.tones[k]
+          return (
+            <motion.button
+              key={`${i}-${w.word}`}
+              onClick={() => tap(w)}
+              aria-label={w.word}
+              className="absolute w-[25%] max-w-[124px] -translate-x-1/2 focus:outline-none"
+              style={{ left: `${12.5 + r.lanes[k] * 25}%` }}
+              initial={{ top: '102%' }}
+              animate={{ top: '-42%', x: [0, 8, -8, 0] }}
+              transition={{ top: { duration: rise + k * 0.35, ease: 'linear' }, x: { duration: 2.4, repeat: Infinity, ease: 'easeInOut' } }}
+              onAnimationComplete={() => { if (w.word === r.w.word && !isPop) escaped() }}
+            >
+              <AnimatePresence>
+                {!isPop ? (
+                  <motion.span key="b" className="relative block" exit={{ scale: 1.5, opacity: 0 }} transition={{ duration: 0.18 }} animate={isWrong ? { rotate: [0, -12, 12, -8, 0] } : {}}>
+                    <svg viewBox="0 0 80 120" className="w-full drop-shadow-[0_6px_6px_rgba(0,0,0,0.15)]">
+                      <defs>
+                        <radialGradient id={`bg${i}${k}`} cx="35%" cy="30%" r="75%"><stop offset="0%" stopColor="#fff" stopOpacity="0.9" /><stop offset="18%" stopColor={c1} /><stop offset="100%" stopColor={c2} /></radialGradient>
+                      </defs>
+                      <path d="M40 88 C 38 98, 44 104, 40 118" stroke="#8a8f9c" strokeWidth="1.5" fill="none" />
+                      <ellipse cx="40" cy="44" rx="34" ry="40" fill={`url(#bg${i}${k})`} />
+                      <path d="M35 83 L45 83 L40 90 Z" fill={c2} />
+                      <ellipse cx="27" cy="26" rx="7" ry="11" fill="#fff" opacity="0.45" transform="rotate(-25 27 26)" />
+                    </svg>
+                    <span className={clsx('absolute inset-x-0 top-[22%] flex h-[34%] items-center justify-center px-1 text-center font-display font-black leading-[1.05] text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]', w.word.length <= 6 ? 'text-[15px] sm:text-lg' : w.word.length <= 9 ? 'text-[12px] sm:text-[15px]' : 'text-[10px] sm:text-[13px]')}>{w.word}</span>
+                  </motion.span>
+                ) : (
+                  <motion.span key="p" className="relative block aspect-[2/3]">
+                    {[...Array(8)].map((_, j) => (
+                      <motion.span key={j} className="absolute left-1/2 top-[36%] size-2.5 rounded-full" style={{ background: wrong ? '#9aa3b2' : c1 }} initial={{ x: 0, y: 0, opacity: 1 }} animate={{ x: Math.cos((j / 8) * Math.PI * 2) * 46, y: Math.sin((j / 8) * Math.PI * 2) * 46, opacity: 0 }} transition={{ duration: 0.5 }} />
+                    ))}
+                    <motion.span className="absolute inset-x-0 top-[28%] text-center font-display text-sm font-black text-mint-deep" initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>{w.word}</motion.span>
+                  </motion.span>
+                )}
+              </AnimatePresence>
+            </motion.button>
+          )
+        })}
+        <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-mint/40 to-transparent" />
+      </div>
+      <p className="mt-3 text-center text-sm font-bold text-ink-soft">Doğru balonu kaçmadan patlat. 3 hakkın var.</p>
+    </div>
+  )
+}
+
 function GameBar({ time, total, score, combo }: { time: number; total: number; score: number; combo: number }) {
   return (
     <div className="mb-6 flex items-center gap-3">

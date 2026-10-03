@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { BookOpen, CalendarClock, Check, ClipboardList, GraduationCap, MessageCircle, Pencil, Plus, Target, Trash2, UserPlus, Users } from 'lucide-react'
+import { BookOpen, CalendarClock, Layers, Check, ClipboardList, GraduationCap, MessageCircle, Pencil, Plus, Target, Trash2, UserPlus, Users } from 'lucide-react'
 import { ApiError, del, get, patch, post } from '@/lib/api'
 import { dateTR } from '@/lib/format'
 import { Button } from '@/components/ui/Button'
@@ -17,7 +17,8 @@ interface Assignment { id: number; title: string; kind: string; target: string |
 const KINDS = [
   { key: 'lesson', label: 'Ders', icon: BookOpen, text: 'Yol haritasından bir ders. Bitirince kendiliğinden işaretlenir.' },
   { key: 'story', label: 'Hikâye', icon: BookOpen, text: 'Bir hikâye ve soruları. Okuyunca kendiliğinden işaretlenir.' },
-  { key: 'practice', label: 'Kelime', icon: Target, text: 'Kelime tekrarı ya da oyun.' },
+  { key: 'words', label: 'Kelime seti', icon: Layers, text: 'Hazır ya da kendi setin. Öğrenci setle bir oyun bitirince işaretlenir.' },
+  { key: 'practice', label: 'Tekrar', icon: Target, text: 'Kelime defterinden serbest tekrar.' },
   { key: 'exam', label: 'Sınav', icon: GraduationCap, text: 'Sınav modunda soru çözümü (LGS, YDT...).' },
   { key: 'ai', label: 'Konuşma', icon: MessageCircle, text: 'Defne ile konuşma pratiği.' },
   { key: 'custom', label: 'Serbest', icon: ClipboardList, text: 'Kendi yazdığın bir görev.' },
@@ -177,7 +178,7 @@ export function SchoolHomework() {
       {items.length ? (
         <div className="grid gap-3">
           {items.map((a) => {
-            const K = KINDS.find((k) => k.key === a.kind) ?? KINDS[5]
+            const K = KINDS.find((k) => k.key === a.kind) ?? KINDS[KINDS.length - 1]
             const pct = a.students ? Math.round((a.done / a.students) * 100) : 0
             const late = a.due_at && new Date(a.due_at) < new Date()
             return (
@@ -236,13 +237,13 @@ function NewHomework({ open, onClose, data, onDone }: { open: boolean; onClose: 
   const toast = useToast()
   const classes = (data.school_classes ?? []).map((c) => c.name).concat(data.classes.filter((c) => !(data.school_classes ?? []).some((s) => s.name === c)))
   const [f, setF] = useState({ class_name: classes[0] ?? '', kind: 'lesson', target: '', title: '', note: '', due_at: '' })
-  const catalog = useQuery({ queryKey: ['inst-catalog'], queryFn: () => get<{ lessons: { id: number; title: string; level?: string }[]; stories: { slug: string; title: string; cefr_level: string }[] }>('/institution/catalog'), enabled: open })
+  const catalog = useQuery({ queryKey: ['inst-catalog'], queryFn: () => get<{ lessons: { id: number; title: string; level?: string }[]; stories: { slug: string; title: string; cefr_level: string }[]; word_sets?: { id: number; title: string; level: string | null; exam: string | null; words_count: number }[] }>('/institution/catalog'), enabled: open })
   const create = useMutation({
     mutationFn: () => post<{ data: Assignment[] }>('/institution/assignments', { ...f, class_name: f.class_name || null, target: f.target || null, title: f.title || null, note: f.note || null, due_at: f.due_at ? new Date(f.due_at).toISOString() : null }),
     onSuccess: onDone,
     onError: (e: ApiError) => toast(e.first(), 'error'),
   })
-  const needsTarget = f.kind === 'lesson' || f.kind === 'story'
+  const needsTarget = f.kind === 'lesson' || f.kind === 'story' || f.kind === 'words'
   return (
     <Modal open={open} onClose={onClose} className="sm:max-w-xl">
       <h2 className="mb-4 text-2xl">Yeni ödev</h2>
@@ -256,9 +257,9 @@ function NewHomework({ open, onClose, data, onDone }: { open: boolean; onClose: 
         </label>
         <div>
           <span className="mb-1.5 block text-sm font-bold">Ödev türü</span>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-4 gap-2">
             {KINDS.map((k) => (
-              <button type="button" key={k.key} onClick={() => setF({ ...f, kind: k.key, target: '' })} aria-pressed={f.kind === k.key} className={clsx('flex flex-col items-center gap-1 rounded-2xl border-2 p-2.5 text-xs font-extrabold transition', f.kind === k.key ? 'border-ink bg-paper-2' : 'border-line hover:border-ink/30')}>
+              <button type="button" key={k.key} onClick={() => setF({ ...f, kind: k.key, target: '' })} aria-pressed={f.kind === k.key} className={clsx('flex flex-col items-center gap-1 rounded-2xl border-2 p-2 text-center text-[11px] font-extrabold leading-tight transition sm:text-xs', f.kind === k.key ? 'border-ink bg-paper-2' : 'border-line hover:border-ink/30')}>
                 <k.icon className="size-5" />{k.label}
               </button>
             ))}
@@ -268,10 +269,10 @@ function NewHomework({ open, onClose, data, onDone }: { open: boolean; onClose: 
         <AnimatePresence initial={false}>
           {needsTarget && (
             <motion.label key={f.kind} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="block overflow-hidden">
-              <span className="mb-1.5 block text-sm font-bold">{f.kind === 'lesson' ? 'Ders' : 'Hikâye'}</span>
+              <span className="mb-1.5 block text-sm font-bold">{f.kind === 'lesson' ? 'Ders' : f.kind === 'words' ? 'Kelime seti' : 'Hikâye'}</span>
               <select required value={f.target} onChange={(e) => setF({ ...f, target: e.target.value })} className="h-12 w-full rounded-2xl border-2 border-line bg-card px-3 font-semibold">
                 <option value="">Seç…</option>
-                {f.kind === 'lesson' ? catalog.data?.lessons.map((l) => <option key={l.id} value={l.id}>{l.level ? `${l.level} · ` : ''}{l.title}</option>) : catalog.data?.stories.map((s) => <option key={s.slug} value={s.slug}>{s.cefr_level} · {s.title}</option>)}
+                {f.kind === 'lesson' ? catalog.data?.lessons.map((l) => <option key={l.id} value={l.id}>{l.level ? `${l.level} · ` : ''}{l.title}</option>) : f.kind === 'words' ? catalog.data?.word_sets?.map((w) => <option key={w.id} value={w.id}>{[w.exam?.toUpperCase(), w.level].filter(Boolean).join(' · ') || 'Set'} · {w.title} ({w.words_count})</option>) : catalog.data?.stories.map((s) => <option key={s.slug} value={s.slug}>{s.cefr_level} · {s.title}</option>)}
               </select>
             </motion.label>
           )}
