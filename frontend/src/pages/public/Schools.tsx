@@ -244,7 +244,7 @@ const FEATURES = [
   { icon: ClipboardList, t: 'Ödev ve takip', d: 'Ders, hikâye, sınav ya da serbest görev; son tarihli. Kim yaptı, kim başlamadı, tek bakışta.', c: 'text-sky' },
   { icon: BarChart3, t: 'Dört beceri karnesi', d: 'Okuma, dinleme, konuşma, yazma dengesi; haftalık XP ve seri. Sınıfın en zayıf becerisi için öneri.', c: 'text-lilac' },
   { icon: Trophy, t: 'Sınıf ve okul ligi', d: 'Haftalık ve aylık XP sıralaması. Öğrenci kendi sınıfını, öğretmen sınıflarını, müdür bütün okulu görür.', c: 'text-butter-deep' },
-  { icon: BookOpenCheck, t: 'LGS ve YDT hazırlığı', d: 'Gerçek formatta denemeler, Türkçe çözümler ve sınav tarihine göre günlük plan.', c: 'text-flame' },
+  { icon: BookOpenCheck, t: 'Sınava hazırlık', d: 'Gerçek formatta denemeler, Türkçe çözümler ve sınav tarihine göre günlük plan.', c: 'text-flame' },
   { icon: MessageCircle, t: 'Defne ile konuşma', d: 'Her öğrenci yapay zekâ öğretmenle sesli konuşur; yaşına uygun, güvenli içerikle.', c: 'text-sage-deep dark:text-sage' },
   { icon: KeyRound, t: 'Kolay katılım', d: 'Okul koduyla ya da e-posta davetiyle saniyeler içinde; doğru sınıfa kendiliğinden yerleşir.', c: 'text-mint-deep' },
   { icon: Palette, t: 'Okulunuzun kimliği', d: 'Panel okulunuzun logosu ve rengiyle açılır, öğrenciler kendi okullarını görür.', c: 'text-berry' },
@@ -264,9 +264,9 @@ const LADDER = [
 /* -------------------------------------------------------------- form */
 
 const TYPES: [string, string][] = [['ilkokul', 'İlkokul'], ['ortaokul', 'Ortaokul'], ['lise', 'Lise'], ['kurs', 'Kurs / Dershane'], ['diger', 'Diğer']]
-const ROLE_OPTS: [string, string][] = [['mudur', 'Müdür'], ['mudur_yrd', 'Müdür yardımcısı'], ['ogretmen', 'Öğretmen'], ['diger', 'Diğer']]
-const INTERESTS: [string, string][] = [['odev', 'Ödev ve takip'], ['rapor', 'Karne ve raporlar'], ['konusma', 'Konuşma pratiği'], ['lgs', 'LGS hazırlığı'], ['ydt', 'YDT hazırlığı'], ['premium', 'Tüm öğrencilere Premium']]
-const SIZES = [50, 150, 300, 600, 1000]
+const ROLE_OPTS: [string, string][] = [['mudur', 'Müdür'], ['ogretmen', 'Öğretmen'], ['diger', 'Diğer']]
+const INTERESTS: [string, string][] = [['odev', 'Ödev takibi'], ['sinav', 'Sınava hazırlık'], ['konusma', 'Konuşma pratiği'], ['rapor', 'Raporlar']]
+const SIZES: [number, string][] = [[100, '1-100'], [300, '100-300'], [600, '300-600'], [1000, '600+']]
 
 function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
   return (
@@ -277,15 +277,15 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
 }
 
 function ApplyForm() {
-  const blank = { school_name: '', city: '', district: '', school_type: 'ortaokul', students: '', grades: [] as number[], contact_name: '', contact_role: 'mudur', email: '', phone: '', interests: ['odev'] as string[], message: '', kvkk: false }
+  const blank = { school_name: '', city: '', district: '', school_type: 'ortaokul', students: '300', grades: [] as number[], contact_name: '', contact_role: 'mudur', email: '', phone: '', interests: ['odev'] as string[], message: '', kvkk: false }
   const [f, setF] = useState(blank)
   const [captcha, setCaptcha] = useState('')
+  const [note, setNote] = useState(false)
   const m = useMutation({ mutationFn: () => post<{ message: string }>('/schools/apply', { ...f, students: Number(f.students) || 0, district: f.district || null, message: f.message || null, captcha }) })
   const err = m.error as ApiError | null
   const e = (k: string) => err?.errors?.[k]?.[0]
   const set = <K extends keyof typeof blank>(k: K, v: (typeof blank)[K]) => setF((x) => ({ ...x, [k]: v }))
   const toggle = <T,>(list: T[], v: T) => (list.includes(v) ? list.filter((x) => x !== v) : [...list, v])
-  const gradeRange = f.school_type === 'ilkokul' ? [1, 2, 3, 4] : f.school_type === 'ortaokul' ? [5, 6, 7, 8] : f.school_type === 'lise' ? [9, 10, 11, 12] : [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 
   if (m.isSuccess)
     return (
@@ -298,53 +298,47 @@ function ApplyForm() {
     )
 
   return (
-    <form className="grid gap-6" onSubmit={(ev: FormEvent) => { ev.preventDefault(); m.mutate() }}>
+    <form className="grid gap-5" onSubmit={(ev: FormEvent) => { ev.preventDefault(); m.mutate() }}>
       {err && <Alert tone="error">{err.first()}</Alert>}
-
-      <fieldset className="grid gap-4">
-        <legend className="mb-3 flex items-center gap-2 font-display text-lg font-black"><span className="grid size-7 place-items-center rounded-full bg-flame text-sm text-white">1</span> Okulunuz</legend>
-        <Input label="Okul adı" value={f.school_name} onChange={(x) => set('school_name', x.target.value)} required error={e('school_name')} placeholder="ör. Atatürk Ortaokulu" />
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Input label="İl" value={f.city} onChange={(x) => set('city', x.target.value)} required error={e('city')} />
-          <Input label="İlçe (isteğe bağlı)" value={f.district} onChange={(x) => set('district', x.target.value)} />
-        </div>
-        <div>
-          <p className="mb-2 text-sm font-bold">Okul türü</p>
-          <div className="flex flex-wrap gap-2">{TYPES.map(([v, l]) => <Chip key={v} on={f.school_type === v} onClick={() => setF((x) => ({ ...x, school_type: v, grades: [] }))}>{l}</Chip>)}</div>
-        </div>
-        <div>
-          <p className="mb-2 text-sm font-bold">Hangi sınıflar? <span className="font-normal text-ink-soft">(isteğe bağlı)</span></p>
-          <div className="flex flex-wrap gap-1.5">{gradeRange.map((g) => <Chip key={g} on={f.grades.includes(g)} onClick={() => set('grades', toggle(f.grades, g))}>{g}. sınıf</Chip>)}</div>
-        </div>
-        <div>
-          <Input label="Yaklaşık öğrenci sayısı" type="number" inputMode="numeric" min={1} value={f.students} onChange={(x) => set('students', x.target.value)} required error={e('students')} />
-          <div className="mt-2 flex flex-wrap gap-1.5">{SIZES.map((n) => <Chip key={n} on={Number(f.students) === n} onClick={() => set('students', String(n))}>{n === 1000 ? '1000+' : n}</Chip>)}</div>
-        </div>
-      </fieldset>
-
-      <fieldset className="grid gap-4">
-        <legend className="mb-3 flex items-center gap-2 font-display text-lg font-black"><span className="grid size-7 place-items-center rounded-full bg-flame text-sm text-white">2</span> Size nasıl ulaşalım?</legend>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Input label="Adınız soyadınız" value={f.contact_name} onChange={(x) => set('contact_name', x.target.value)} required error={e('contact_name')} />
-          <div>
-            <p className="mb-1.5 text-sm font-bold">Göreviniz</p>
-            <div className="flex flex-wrap gap-1.5">{ROLE_OPTS.map(([v, l]) => <Chip key={v} on={f.contact_role === v} onClick={() => set('contact_role', v)}>{l}</Chip>)}</div>
-          </div>
-          <Input label="E-posta" type="email" value={f.email} onChange={(x) => set('email', x.target.value)} required error={e('email')} placeholder="ad@okul.k12.tr" />
-          <Input label="Telefon" type="tel" inputMode="tel" value={f.phone} onChange={(x) => set('phone', x.target.value)} required error={e('phone')} placeholder="05xx xxx xx xx" />
-        </div>
-      </fieldset>
-
-      <fieldset className="grid gap-4">
-        <legend className="mb-3 flex items-center gap-2 font-display text-lg font-black"><span className="grid size-7 place-items-center rounded-full bg-flame text-sm text-white">3</span> En çok neye ihtiyacınız var?</legend>
+      <Input label="Okul adı" value={f.school_name} onChange={(x) => set('school_name', x.target.value)} required error={e('school_name')} placeholder="ör. Atatürk Ortaokulu" />
+      <div className="grid grid-cols-2 gap-3">
+        <Input label="İl" value={f.city} onChange={(x) => set('city', x.target.value)} required error={e('city')} />
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-bold">Okul türü</span>
+          <select value={f.school_type} onChange={(x) => set('school_type', x.target.value)} className="h-12 w-full rounded-2xl border-2 border-line bg-card px-3 font-semibold">
+            {TYPES.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+        </label>
+      </div>
+      <div>
+        <p className="mb-2 text-sm font-bold">Öğrenci sayısı</p>
+        <div className="grid grid-cols-4 gap-1.5">{SIZES.map(([n, l]) => <button type="button" key={n} onClick={() => set('students', String(n))} aria-pressed={Number(f.students) === n} className={clsx('rounded-xl border-2 px-1 py-2 text-xs font-extrabold transition sm:text-sm', Number(f.students) === n ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink-soft hover:text-ink')}>{l}</button>)}</div>
+        {e('students') && <p className="mt-1 text-sm font-semibold text-berry">Lütfen bir aralık seçin.</p>}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Input label="Adınız soyadınız" value={f.contact_name} onChange={(x) => set('contact_name', x.target.value)} required error={e('contact_name')} />
+        <label className="block">
+          <span className="mb-1.5 block text-sm font-bold">Göreviniz</span>
+          <select value={f.contact_role} onChange={(x) => set('contact_role', x.target.value)} className="h-12 w-full rounded-2xl border-2 border-line bg-card px-3 font-semibold">
+            {ROLE_OPTS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+          </select>
+        </label>
+        <Input label="E-posta" type="email" value={f.email} onChange={(x) => set('email', x.target.value)} required error={e('email')} placeholder="ad@okul.k12.tr" />
+        <Input label="Telefon" type="tel" inputMode="tel" value={f.phone} onChange={(x) => set('phone', x.target.value)} required error={e('phone')} placeholder="05xx xxx xx xx" />
+      </div>
+      <div>
+        <p className="mb-2 text-sm font-bold">Neye ihtiyacınız var? <span className="font-normal text-ink-soft">(birden çok seçebilirsiniz)</span></p>
         <div className="flex flex-wrap gap-2">{INTERESTS.map(([v, l]) => <Chip key={v} on={f.interests.includes(v)} onClick={() => set('interests', toggle(f.interests, v))}>{l}</Chip>)}</div>
-        <Textarea label="Eklemek istedikleriniz (isteğe bağlı)" rows={3} value={f.message} onChange={(x) => set('message', x.target.value)} />
-      </fieldset>
-
+      </div>
+      {note ? (
+        <Textarea label="Notunuz (isteğe bağlı)" rows={3} value={f.message} onChange={(x) => set('message', x.target.value)} />
+      ) : (
+        <button type="button" onClick={() => setNote(true)} className="-mt-1 w-fit text-sm font-bold text-ink-soft underline-offset-2 hover:text-ink hover:underline">+ Not eklemek istiyorum</button>
+      )}
       <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden />
       <label className="flex gap-3 text-sm">
         <input type="checkbox" checked={f.kvkk} onChange={(x) => set('kvkk', x.target.checked)} className="mt-0.5 size-5 shrink-0 accent-[#e8403a]" required />
-        <span><Link to="/privacy" className="font-bold underline">KVKK aydınlatma metnini</Link> okudum; başvurumun değerlendirilmesi ve benimle iletişime geçilmesi için bilgilerimin işlenmesini kabul ediyorum.</span>
+        <span><Link to="/privacy" className="font-bold underline">KVKK metnini</Link> okudum, benimle iletişime geçilmesini kabul ediyorum.</span>
       </label>
       {e('kvkk') && <p className="-mt-4 text-sm font-semibold text-berry">{e('kvkk')}</p>}
       <Turnstile onToken={setCaptcha} />
@@ -491,7 +485,7 @@ export default function Schools() {
           <div className="lg:sticky lg:top-28 lg:self-start">
             <Kicker>Başvuru</Kicker>
             <h2 className="mt-2 font-display text-[clamp(2rem,4vw,3rem)] font-black leading-tight">Okulunuz için teklif alın</h2>
-            <p className="mt-3 text-lg text-ink-soft">İki dakikalık form. Bir iş günü içinde sizi arayıp okulunuza özel teklifi ve demo panelini paylaşıyoruz.</p>
+            <p className="mt-3 text-lg text-ink-soft">Bir dakikalık form. Bir iş günü içinde arayıp teklifi ve demo paneli paylaşıyoruz.</p>
             <ul className="mt-6 space-y-3">
               {[[Phone, 'Sizi arayan bir okul danışmanı'], [ShieldCheck, 'Bağlayıcı değil, ücretsiz demo'], [Users, 'Öğretmenlerinize kurulum eğitimi']].map(([I, t]) => {
                 const Icon = I as typeof Phone

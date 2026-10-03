@@ -550,6 +550,16 @@ export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, ha
   const perMonth = (p: Plan) => Number(p.price) / Math.max(1, Math.round(p.duration_days / 30))
   const saving = (p: Plan) => (monthly && p !== monthly ? Math.round((1 - perMonth(p) / Number(monthly.price)) * 100) : 0)
   const cards = (embedded ? 0 : 1) + plans.length
+  const items: { key: string; props: Parameters<typeof PriceCard>[0] }[] = [
+    ...(embedded ? [] : [{ key: 'free', props: { name: 'Ücretsiz', tagline: 'Her zaman', price: '₺0', note: 'Kredi kartı gerekmez', features: FREE, cta: <LinkButton to="/register" block variant="secondary">Ücretsiz başla</LinkButton> } }]),
+    ...plans.map((p) => ({ key: String(p.id), props: {
+      featured: p.is_featured, name: p.name, tagline: p.tagline ?? '', price: tl(p.price), was: p.compare_at_price ? tl(p.compare_at_price) : undefined,
+      note: p !== monthly ? `ayda ${tl(String(Math.round(perMonth(p))))}` : 'otomatik yenilenmez',
+      badge: p.is_featured ? 'En popüler' : saving(p) > 0 ? `%${saving(p)} tasarruf` : undefined, features: p.features ?? [],
+      cta: cta ? cta(p) : <LinkButton to="/register" block variant={p.is_featured ? 'primary' : 'dark'}>{p.is_featured ? 'Premium’a başla' : 'Seç'}</LinkButton>,
+    } })),
+  ]
+  const [pick, setPick] = useState(() => Math.max(0, items.findIndex((i) => i.props.featured)))
   return (
     <section id={embedded ? undefined : 'paketler'} className={clsx('relative', embedded ? 'py-4' : 'py-24')}>
       <div className="mx-auto max-w-6xl px-5">
@@ -559,22 +569,27 @@ export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, ha
           <p className="mt-4 text-lg text-ink-soft">{sub}</p>
         </div>
 
-        <div className={clsx('grid items-stretch gap-5 md:grid-cols-2', cards >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3')}>
-          {!embedded && <PriceCard name="Ücretsiz" tagline="Her zaman" price="₺0" note="Kredi kartı gerekmez" features={FREE} cta={<LinkButton to="/register" block variant="secondary">Ücretsiz başla</LinkButton>} />}
-          {plans.map((p) => (
-            <PriceCard
-              key={p.id}
-              featured={p.is_featured}
-              name={p.name}
-              tagline={p.tagline ?? ''}
-              price={tl(p.price)}
-              was={p.compare_at_price ? tl(p.compare_at_price) : undefined}
-              note={p !== monthly ? `ayda ${tl(String(Math.round(perMonth(p))))}` : 'otomatik yenilenmez'}
-              badge={p.is_featured ? 'En popüler' : saving(p) > 0 ? `%${saving(p)} tasarruf` : undefined}
-              features={p.features ?? []}
-              cta={cta ? cta(p) : <LinkButton to="/register" block variant={p.is_featured ? 'primary' : 'dark'}>{p.is_featured ? 'Premium’a başla' : 'Seç'}</LinkButton>}
-            />
-          ))}
+        {/* phones: one plan at a time behind a switcher, instead of a long stack */}
+        <div className="md:hidden">
+          <div className="mx-auto mb-5 grid max-w-md gap-1 rounded-2xl border-2 border-line bg-paper-2 p-1" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
+            {items.map((it, i) => (
+              <button key={it.key} onClick={() => setPick(i)} aria-pressed={pick === i} className={clsx('relative rounded-xl px-1 py-2 text-[13px] font-extrabold leading-tight transition', pick === i ? 'bg-card text-ink shadow-hard-sm' : 'text-ink-soft')}>
+                {it.props.name}
+                {it.props.featured && <span className="absolute -top-1.5 right-1 size-2.5 rounded-full bg-flame ring-2 ring-paper-2" />}
+              </button>
+            ))}
+          </div>
+          <div className="mx-auto max-w-md pt-6">
+            <AnimatePresence mode="wait">
+              <motion.div key={items[pick]?.key} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.18 }}>
+                {items[pick] && <PriceCard {...items[pick].props} />}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        </div>
+
+        <div className={clsx('hidden items-stretch gap-5 md:grid md:grid-cols-2', cards >= 4 ? 'lg:grid-cols-4' : 'lg:grid-cols-3')}>
+          {items.map((it) => <PriceCard key={it.key} {...it.props} />)}
         </div>
 
         {showCorp && <CorporateCard c={corp!} />}

@@ -45,6 +45,7 @@ export default function AiHub() {
     }
   }, [params, start])
 
+  const [all, setAll] = useState(false)
   const interests = useMemo(() => user?.interests ?? [], [user?.interests])
   const forYou = useMemo(() => new Set(interests.flatMap((i) => INTEREST_CAT[i] ?? [])), [interests])
   const scenarios = useMemo(() => {
@@ -57,42 +58,42 @@ export default function AiHub() {
   const usagePct = data.usage.limit ? data.usage.remaining / data.usage.limit : 0
 
   return (
-    <div className="space-y-12">
+    <div className="space-y-8 sm:space-y-12">
       {/* ---------------------------------------------------------- Call hero */}
       <section className="relative overflow-hidden rounded-[28px] bg-[#141a24] text-white">
         <div className="grid items-stretch md:grid-cols-[1.15fr_0.85fr]">
-          <div className="relative z-10 order-2 flex flex-col justify-center gap-5 p-6 sm:p-9 md:order-1">
+          <div className="relative z-10 order-2 -mt-10 flex flex-col justify-center gap-4 p-5 sm:mt-0 sm:gap-5 sm:p-9 md:order-1">
             <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-white/60">
               <span className="relative flex size-2"><span className="absolute inset-0 animate-ping rounded-full bg-mint/70" /><span className="relative size-2 rounded-full bg-mint" /></span>
               {TUTOR.role} · çevrim içi
             </p>
             <div>
-              <h1 className="text-4xl leading-[1.05] sm:text-5xl">{TUTOR.name} ile konuş</h1>
-              <p className="mt-3 max-w-md text-[17px] leading-relaxed text-white/75">{TUTOR.tagline}</p>
+              <h1 className="text-3xl leading-[1.05] sm:text-5xl">{TUTOR.name} ile konuş</h1>
+              <p className="mt-2 max-w-md text-[15px] leading-relaxed text-white/75 sm:mt-3 sm:text-[17px]">{TUTOR.tagline}</p>
             </div>
-            <div className="flex flex-wrap gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:gap-3">
               <button
                 onClick={() => start.mutate({ mode: 'speaking', call: true })}
                 disabled={start.isPending}
-                className="press flex h-14 items-center gap-2.5 rounded-2xl bg-sage px-6 font-display font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_0_var(--color-sage-deep)] disabled:opacity-60"
+                className="press col-span-2 flex h-14 items-center justify-center gap-2.5 rounded-2xl bg-sage px-6 font-display font-extrabold uppercase tracking-wide text-white shadow-[0_4px_0_0_var(--color-sage-deep)] disabled:opacity-60"
               >
                 <Phone className="size-5" /> Sesli aramayı başlat
               </button>
               <button
                 onClick={() => start.mutate({ mode: 'chat' })}
                 disabled={start.isPending}
-                className="press flex h-14 items-center gap-2 rounded-2xl border-2 border-white/15 bg-white/5 px-5 font-display font-extrabold uppercase tracking-wide text-white hover:bg-white/10"
+                className="press flex h-12 items-center justify-center gap-2 rounded-2xl border-2 border-white/15 bg-white/5 px-3 font-display text-sm font-extrabold uppercase tracking-wide text-white hover:bg-white/10 sm:h-14 sm:px-5 sm:text-base"
               >
                 <MessageSquareText className="size-5" /> Yazışarak
               </button>
               <Link
                 to="/ai/writing"
-                className="press flex h-14 items-center gap-2 rounded-2xl border-2 border-white/15 bg-white/5 px-5 font-display font-extrabold uppercase tracking-wide text-white hover:bg-white/10"
+                className="press flex h-12 items-center justify-center gap-2 rounded-2xl border-2 border-white/15 bg-white/5 px-3 font-display text-sm font-extrabold uppercase tracking-wide text-white hover:bg-white/10 sm:h-14 sm:px-5 sm:text-base"
               >
-                <PenLine className="size-5" /> Yazma atölyesi
+                <PenLine className="size-5" /> Yazma
               </Link>
             </div>
-            <dl className="grid max-w-md grid-cols-3 gap-3 border-t border-white/10 pt-5 text-sm">
+            <dl className="grid max-w-md grid-cols-3 gap-3 border-t border-white/10 pt-4 text-sm sm:pt-5">
               <div><dt className="text-white/50">Seviyen</dt><dd className="font-display text-xl font-black">{user?.cefr_level}</dd></div>
               <div>
                 <dt className="text-white/50">Bugün kalan</dt>
@@ -102,72 +103,19 @@ export default function AiHub() {
               <div><dt className="text-white/50">Konular</dt><dd className="truncate font-bold">{interests.length ? interests.slice(0, 2).map((i) => INTEREST_TR[i] ?? i).join(', ') : 'Serbest'}</dd></div>
             </dl>
           </div>
-          <div className="relative order-1 aspect-[4/3] md:order-2 md:aspect-auto md:min-h-full">
+          <div className="relative order-1 aspect-[16/10] md:order-2 md:aspect-auto md:min-h-full">
             <video src={TUTOR.video.idle} poster={TUTOR.portrait} muted loop autoPlay playsInline className="absolute inset-0 size-full object-cover object-[50%_20%]" />
             <div className="absolute inset-0 bg-gradient-to-t from-[#141a24] via-transparent to-transparent md:bg-gradient-to-r" />
           </div>
         </div>
       </section>
 
-      {/* ---------------------------------------------------------- Missions */}
-      <section>
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h2 className="text-2xl">Rol yapma görevleri</h2>
-            <p className="text-ink-soft">Gerçek hayattan sahneler. {forYou.size > 0 && 'İlgi alanlarına uyanlar önde.'}</p>
-          </div>
-          <div className="flex max-w-full flex-wrap gap-1.5">
-            {cats.map((c) => (
-              <button key={c} onClick={() => setCat(c)} className={clsx('shrink-0 rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', cat === c ? 'border-ink bg-ink text-paper' : 'border-line text-ink-soft hover:text-ink')}>
-                {c === 'all' ? 'Tümü' : CAT[c] ?? c}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
-          {scenarios.map((s, i) => (
-            <motion.button
-              key={s.key}
-              layout
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(i, 6) * 0.03 }}
-              onClick={() => (s.locked ? nav('/premium') : start.mutate({ mode: 'roleplay', scenario_key: s.key, call: true }))}
-              className="group overflow-hidden rounded-3xl border-2 border-line bg-card text-left transition hover:-translate-y-1 hover:shadow-soft"
-            >
-              <div className="relative aspect-[16/10] overflow-hidden">
-                <Img src={scenarioImg(s.key)} alt="" loading="lazy" className={clsx('photo transition duration-700 group-hover:scale-105', s.locked && 'grayscale-[40%]')} />
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/55 to-transparent" />
-                <div className="absolute left-3 top-3 flex gap-1.5">
-                  <span className="rounded-lg bg-card/95 px-2 py-0.5 text-xs font-black">{s.cefr_min}+</span>
-                  {forYou.has(s.category) && <span className="rounded-lg bg-sage px-2 py-0.5 text-xs font-black text-white">Sana özel</span>}
-                </div>
-                {s.is_premium && (
-                  <span className="absolute right-3 top-3 flex items-center gap-1 rounded-lg bg-butter px-2 py-0.5 text-xs font-black text-[#1f2433]">
-                    {s.locked ? <Lock className="size-3.5" /> : <Img src={rewardImg('crown')} alt="" className="size-4" />} Premium
-                  </span>
-                )}
-                <p className="absolute bottom-3 left-4 text-xs font-extrabold uppercase tracking-wider text-white/90">{CAT[s.category] ?? s.category}</p>
-              </div>
-              <div className="flex items-center gap-3 p-5">
-                <div className="min-w-0 flex-1">
-                  <p className="text-lg font-black leading-tight">{s.title}</p>
-                  <p className="mt-1 line-clamp-2 text-sm text-ink-soft">{s.description}</p>
-                  <p className="mt-2.5 flex items-center gap-1.5 text-xs font-extrabold text-sage-deep dark:text-sage"><Phone className="size-3.5" /> Sesli · {s.goals?.length ?? 0} görev</p>
-                </div>
-                <ChevronRight className="size-5 shrink-0 text-ink-soft transition group-hover:translate-x-1" />
-              </div>
-            </motion.button>
-          ))}
-        </div>
-      </section>
-
       {/* ---------------------------------------------------------- History */}
       {!!convs.data?.data.length && (
         <section>
-          <h2 className="mb-3 text-xl">Kaldığın sohbetler</h2>
+          <h2 className="mb-3 text-xl">Kaldığın yerden devam et</h2>
           <div className="grid gap-2 sm:grid-cols-2">
-            {convs.data.data.slice(0, 6).map((c) => {
+            {convs.data.data.slice(0, 4).map((c) => {
               const Icon = MODE_ICON[c.mode] ?? MessageSquareText
               return (
                 <Link key={c.id} to={`/ai/${c.id}`} className="group flex items-center gap-3 rounded-2xl border-2 border-line bg-card px-4 py-3 transition hover:border-ink/20">
@@ -183,6 +131,60 @@ export default function AiHub() {
           </div>
         </section>
       )}
+      {/* ---------------------------------------------------------- Missions */}
+      <section>
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-2xl">Rol yapma görevleri</h2>
+            <p className="text-ink-soft">Gerçek hayattan sahneler. {forYou.size > 0 && 'İlgi alanlarına uyanlar önde.'}</p>
+          </div>
+          <div className="flex max-w-full flex-wrap gap-1.5">
+            {cats.map((c) => (
+              <button key={c} onClick={() => setCat(c)} className={clsx('shrink-0 rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', cat === c ? 'border-ink bg-ink text-paper' : 'border-line text-ink-soft hover:text-ink')}>
+                {c === 'all' ? 'Tümü' : CAT[c] ?? c}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 sm:gap-5 xl:grid-cols-3">
+          {scenarios.slice(0, all ? undefined : 8).map((s, i) => (
+            <motion.button
+              key={s.key}
+              layout
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: Math.min(i, 6) * 0.03 }}
+              onClick={() => (s.locked ? nav('/premium') : start.mutate({ mode: 'roleplay', scenario_key: s.key, call: true }))}
+              className="group flex overflow-hidden rounded-3xl border-2 border-line bg-card text-left transition hover:-translate-y-1 hover:shadow-soft sm:block"
+            >
+              <div className="relative w-28 shrink-0 overflow-hidden sm:aspect-[16/10] sm:w-auto">
+                <Img src={scenarioImg(s.key)} alt="" loading="lazy" className={clsx('photo absolute inset-0 size-full object-cover transition duration-700 group-hover:scale-105 sm:static', s.locked && 'grayscale-[40%]')} />
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/55 to-transparent" />
+                <div className="absolute left-2 top-2 flex flex-col items-start gap-1 sm:left-3 sm:top-3 sm:flex-row sm:gap-1.5">
+                  <span className="rounded-lg bg-card/95 px-2 py-0.5 text-xs font-black">{s.cefr_min}+</span>
+                  {forYou.has(s.category) && <span className="rounded-lg bg-sage px-2 py-0.5 text-xs font-black text-white">Sana özel</span>}
+                </div>
+                {s.is_premium && (
+                  <span className="absolute bottom-2 left-2 flex items-center gap-1 rounded-lg bg-butter sm:bottom-auto sm:left-auto sm:right-3 sm:top-3 px-2 py-0.5 text-xs font-black text-[#1f2433]">
+                    {s.locked ? <Lock className="size-3.5" /> : <Img src={rewardImg('crown')} alt="" className="size-4" />} Premium
+                  </span>
+                )}
+                <p className="absolute bottom-3 left-4 hidden text-xs font-extrabold uppercase tracking-wider text-white/90 sm:block">{CAT[s.category] ?? s.category}</p>
+              </div>
+              <div className="flex min-w-0 flex-1 items-center gap-3 p-3.5 sm:p-5">
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-black leading-tight sm:text-lg">{s.title}</p>
+                  <p className="mt-1 line-clamp-2 text-sm text-ink-soft">{s.description}</p>
+                  <p className="mt-2.5 flex items-center gap-1.5 text-xs font-extrabold text-sage-deep dark:text-sage"><Phone className="size-3.5" /> Sesli · {s.goals?.length ?? 0} görev</p>
+                </div>
+                <ChevronRight className="size-5 shrink-0 text-ink-soft transition group-hover:translate-x-1" />
+              </div>
+            </motion.button>
+          ))}
+        </div>
+        {!all && scenarios.length > 8 && <button onClick={() => setAll(true)} className="mt-4 w-full rounded-2xl border-2 border-line bg-card py-3 text-sm font-extrabold text-ink-soft hover:text-ink">Tüm görevleri göster ({scenarios.length})</button>}
+      </section>
+
     </div>
   )
 }

@@ -179,41 +179,48 @@ export default function Duel() {
       </AnimatePresence>
 
       {/* ------------------------------------------------------ Ghost report */}
-      {data.defenses.length > 0 && (
-        <section>
-          <h2 className="mb-3 text-xl">Sen yokken gölgen</h2>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {data.defenses.map((d) => (
-              <div key={d.id} className={clsx('flex min-w-0 items-center gap-3 rounded-2xl border-2 p-4', d.held ? 'border-mint/40 bg-mint/8' : 'border-berry/30 bg-berry/6')}>
-                <span className={clsx('grid size-11 shrink-0 place-items-center rounded-xl text-white', d.held ? 'bg-mint' : 'bg-berry')}>{d.held ? <Shield className="size-6" /> : <ShieldAlert className="size-6" />}</span>
-                <div className="min-w-0">
-                  <p className="font-black leading-tight">{d.held ? 'Gölgen seni savundu' : 'Gölgen yenildi'}</p>
-                  <p className="truncate text-sm text-ink-soft">{d.challenger} meydan okudu</p>
-                </div>
+      {data.defenses.length > 0 && (() => {
+        const held = data.defenses.filter((d) => d.held).length
+        const lost = data.defenses.length - held
+        return (
+          <section className="rounded-3xl border-2 border-line bg-card p-4">
+            <div className="flex items-center gap-3">
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-ink text-paper"><Shield className="size-6" /></span>
+              <div className="min-w-0 flex-1">
+                <p className="font-black leading-tight">Sen yokken gölgen oynadı</p>
+                <p className="text-xs text-ink-soft">Gölgen, senin kayıtlı turların. Başkaları ona meydan okuyabilir.</p>
               </div>
-            ))}
-          </div>
-        </section>
-      )}
+              <div className="flex shrink-0 gap-1.5 text-center">
+                <span className="rounded-xl bg-mint/12 px-2.5 py-1"><span className="block font-display text-lg font-black leading-none text-mint-deep">{held}</span><span className="text-[10px] font-bold text-ink-soft">savundu</span></span>
+                <span className="rounded-xl bg-berry/10 px-2.5 py-1"><span className="block font-display text-lg font-black leading-none text-berry">{lost}</span><span className="text-[10px] font-bold text-ink-soft">yenildi</span></span>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {data.defenses.slice(0, 6).map((d) => (
+                <span key={d.id} className={clsx('inline-flex max-w-full items-center gap-1 truncate rounded-full px-2.5 py-1 text-xs font-bold', d.held ? 'bg-mint/12 text-mint-deep' : 'bg-berry/10 text-berry')}>
+                  {d.held ? <Shield className="size-3.5 shrink-0" /> : <ShieldAlert className="size-3.5 shrink-0" />}<span className="truncate">{d.challenger}</span>
+                </span>
+              ))}
+            </div>
+          </section>
+        )
+      })()}
 
       <div className="grid gap-8 xl:grid-cols-[1.2fr_1fr] [&>*]:min-w-0">
         <div className="space-y-8">
           {/* ------------------------------------------------ Four-skill record */}
           <section>
-            <h2 className="mb-4 text-xl">Düello karnesi</h2>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <h2 className="mb-3 text-xl">Beceri karnen</h2>
+            <div className="grid grid-cols-4 divide-x-2 divide-line overflow-hidden rounded-2xl border-2 border-line bg-card">
               {SKILLS.map((k) => {
                 const s = data.skills.find((x) => x.key === k)
                 const pct = s && s.total ? Math.round((s.correct / s.total) * 100) : null
                 const S = SKILL[k]
                 return (
-                  <div key={k} className="rounded-2xl border-2 border-line bg-card p-4">
-                    <div className="flex items-center gap-2">
-                      <span className={clsx('grid size-8 place-items-center rounded-lg text-white', S.bg)}><S.icon className="size-4" /></span>
-                      <span className="font-extrabold">{S.label}</span>
-                    </div>
-                    <p className="mt-3 font-display text-3xl font-black tabular-nums">{pct === null ? '-' : `%${pct}`}</p>
-                    <p className="text-xs text-ink-soft">{s?.total ? `${s.correct}/${s.total} doğru` : 'Henüz tur yok'}</p>
+                  <div key={k} className="flex flex-col items-center px-1 py-3 text-center" title={s?.total ? `${s.correct}/${s.total} doğru` : 'Henüz tur yok'}>
+                    <span className={clsx('grid size-8 place-items-center rounded-lg text-white', S.bg)}><S.icon className="size-4" /></span>
+                    <span className="mt-1.5 font-display text-xl font-black tabular-nums sm:text-2xl">{pct === null ? '-' : `%${pct}`}</span>
+                    <span className="text-[11px] font-bold text-ink-soft sm:text-xs">{S.label}</span>
                   </div>
                 )
               })}
@@ -224,12 +231,12 @@ export default function Duel() {
             <section>
               <h2 className="mb-3 text-xl">Son düellolar</h2>
               <div className="divide-y-2 divide-line overflow-hidden rounded-2xl border-2 border-line bg-card">
-                {data.recent.map((r) => (
+                {data.recent.slice(0, 5).map((r) => (
                   <div key={r.id} className="flex items-center gap-3 px-4 py-3">
                     <span className={clsx('grid size-9 place-items-center rounded-xl text-sm font-black text-white', r.result === 'win' ? 'bg-mint' : r.result === 'loss' ? 'bg-berry' : 'bg-ink-soft')}>{r.result === 'win' ? 'G' : r.result === 'loss' ? 'M' : 'B'}</span>
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-bold">{r.ghost_name}’in gölgesi</span>
-                      <span className="block text-xs tabular-nums text-ink-soft">{r.score}, {r.ghost_score}</span>
+                      <span className="block truncate font-bold">{r.ghost_name}</span>
+                      <span className="block text-xs tabular-nums text-ink-soft">Sen {r.score} · Rakip {r.ghost_score}</span>
                     </span>
                     <span className={clsx('rounded-full px-2.5 py-1 text-xs font-black', r.result === 'win' ? 'bg-mint/15 text-mint-deep' : r.result === 'loss' ? 'bg-berry/10 text-berry' : 'bg-paper-2 text-ink-soft')}>{r.result === 'win' ? 'Kazandın' : r.result === 'loss' ? 'Kaybettin' : 'Berabere'}</span>
                   </div>
