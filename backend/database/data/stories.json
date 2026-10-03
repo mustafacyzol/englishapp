@@ -1,146 +1,1462 @@
 [
-  {
-    "slug": "the-red-umbrella", "title": "The Red Umbrella", "title_tr": "Kırmızı Şemsiye", "cefr_level": "A1", "category": "Günlük Hayat", "reading_minutes": 3,
-    "summary": "Every morning Ali sees a woman with a red umbrella at the bus stop. One rainy day, everything changes.",
-    "paragraphs": [
-      {"en": "Ali is twenty-five years old. He lives in a small flat in Ankara. Every morning, he takes the bus to work at eight o'clock.", "tr": "Ali yirmi beş yaşında. Ankara'da küçük bir dairede yaşıyor. Her sabah saat sekizde işe otobüsle gidiyor."},
-      {"en": "At the bus stop, there is always a woman with a red umbrella. It is sunny, but she has her umbrella. Ali thinks this is strange.", "tr": "Otobüs durağında her zaman kırmızı şemsiyeli bir kadın var. Hava güneşli ama şemsiyesi yanında. Ali bunun tuhaf olduğunu düşünüyor."},
-      {"en": "One Monday, it rains a lot. Ali doesn't have an umbrella. He is wet and cold. The woman smiles and says, \"Come here. My umbrella is big.\"", "tr": "Bir pazartesi çok yağmur yağıyor. Ali'nin şemsiyesi yok. Islak ve üşümüş. Kadın gülümsüyor ve \"Buraya gel. Şemsiyem büyük.\" diyor."},
-      {"en": "Her name is Elif. She is a teacher. \"I always carry my umbrella,\" she says. \"Because one day, somebody needs it.\"", "tr": "Adı Elif. Öğretmen. \"Şemsiyemi her zaman taşırım,\" diyor. \"Çünkü bir gün birinin ona ihtiyacı olur.\""},
-      {"en": "Now Ali has a red umbrella too. And every morning, he says \"Good morning, Elif!\" at the bus stop.", "tr": "Artık Ali'nin de kırmızı bir şemsiyesi var. Ve her sabah otobüs durağında \"Günaydın Elif!\" diyor."}
+ {
+  "slug": "the-red-umbrella",
+  "title": "The Red Umbrella",
+  "title_tr": "Kırmızı Şemsiye",
+  "cefr_level": "A1",
+  "category": "Günlük Hayat",
+  "reading_minutes": 3,
+  "summary": "Every morning Ali sees a woman with a red umbrella at the bus stop. One rainy day, everything changes.",
+  "paragraphs": [
+   {
+    "en": "Ali is twenty-five years old. He lives in a small flat in Ankara. Every morning, he takes the bus to work at eight o'clock.",
+    "tr": "Ali yirmi beş yaşında. Ankara'da küçük bir dairede yaşıyor. Her sabah saat sekizde işe otobüsle gidiyor."
+   },
+   {
+    "en": "At the bus stop, there is always a woman with a red umbrella. It is sunny, but she has her umbrella. Ali thinks this is strange.",
+    "tr": "Otobüs durağında her zaman kırmızı şemsiyeli bir kadın var. Hava güneşli ama şemsiyesi yanında. Ali bunun tuhaf olduğunu düşünüyor."
+   },
+   {
+    "en": "One Monday, it rains a lot. Ali doesn't have an umbrella. He is wet and cold. The woman smiles and says, \"Come here. My umbrella is big.\"",
+    "tr": "Bir pazartesi çok yağmur yağıyor. Ali'nin şemsiyesi yok. Islak ve üşümüş. Kadın gülümsüyor ve \"Buraya gel. Şemsiyem büyük.\" diyor."
+   },
+   {
+    "en": "Her name is Elif. She is a teacher. \"I always carry my umbrella,\" she says. \"Because one day, somebody needs it.\"",
+    "tr": "Adı Elif. Öğretmen. \"Şemsiyemi her zaman taşırım,\" diyor. \"Çünkü bir gün birinin ona ihtiyacı olur.\""
+   },
+   {
+    "en": "Now Ali has a red umbrella too. And every morning, he says \"Good morning, Elif!\" at the bus stop.",
+    "tr": "Artık Ali'nin de kırmızı bir şemsiyesi var. Ve her sabah otobüs durağında \"Günaydın Elif!\" diyor."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "umbrella",
+    "meaning": "şemsiye",
+    "example": "Take an umbrella, it's raining."
+   },
+   {
+    "word": "bus stop",
+    "meaning": "otobüs durağı",
+    "example": "I wait at the bus stop."
+   },
+   {
+    "word": "strange",
+    "meaning": "tuhaf, garip",
+    "example": "That is a strange sound."
+   },
+   {
+    "word": "wet",
+    "meaning": "ıslak",
+    "example": "My shoes are wet."
+   },
+   {
+    "word": "carry",
+    "meaning": "taşımak",
+    "example": "She carries a big bag."
+   }
+  ],
+  "questions": [
+   {
+    "q": "Where does Ali live?",
+    "options": [
+     "Istanbul",
+     "Ankara",
+     "Izmir"
     ],
-    "vocabulary": [
-      {"word": "umbrella", "meaning": "şemsiye", "example": "Take an umbrella, it's raining."},
-      {"word": "bus stop", "meaning": "otobüs durağı", "example": "I wait at the bus stop."},
-      {"word": "strange", "meaning": "tuhaf, garip", "example": "That is a strange sound."},
-      {"word": "wet", "meaning": "ıslak", "example": "My shoes are wet."},
-      {"word": "carry", "meaning": "taşımak", "example": "She carries a big bag."}
+    "answer": 1
+   },
+   {
+    "q": "What is Elif's job?",
+    "options": [
+     "Doctor",
+     "Driver",
+     "Teacher"
     ],
-    "questions": [
-      {"q": "Where does Ali live?", "options": ["Istanbul", "Ankara", "Izmir"], "answer": 1},
-      {"q": "What is Elif's job?", "options": ["Doctor", "Driver", "Teacher"], "answer": 2},
-      {"q": "Why does Elif always carry her umbrella?", "options": ["Because it's her favourite colour", "Because one day somebody needs it", "Because it always rains"], "answer": 1}
-    ]
-  },
-  {
-    "slug": "mias-first-day-in-london", "title": "Mia's First Day in London", "title_tr": "Mia'nın Londra'daki İlk Günü", "cefr_level": "A1", "category": "Seyahat", "reading_minutes": 4,
-    "summary": "Mia arrives in London for a language course. She gets lost, and finds something better.",
-    "paragraphs": [
-      {"en": "Mia is from Bursa. Today is her first day in London. She has a map, a small bag and a lot of questions.", "tr": "Mia Bursalı. Bugün Londra'daki ilk günü. Bir haritası, küçük bir çantası ve bir sürü sorusu var."},
-      {"en": "Her language school is near a big park. She takes the underground, but she gets off at the wrong station.", "tr": "Dil okulu büyük bir parkın yakınında. Metroya biniyor ama yanlış istasyonda iniyor."},
-      {"en": "\"Excuse me,\" she says to an old man. \"How can I get to Hyde Park?\" The man smiles. \"Turn left, go straight, and it's on your right. About ten minutes.\"", "tr": "\"Affedersiniz,\" diyor yaşlı bir adama. \"Hyde Park'a nasıl gidebilirim?\" Adam gülümsüyor. \"Sola dön, düz git, sağında. Yaklaşık on dakika.\""},
-      {"en": "On the way, Mia sees a small café. It smells of coffee and fresh bread. She is hungry, so she goes in and orders a sandwich and a tea.", "tr": "Yolda Mia küçük bir kafe görüyor. Kahve ve taze ekmek kokuyor. Aç olduğu için içeri giriyor ve bir sandviç ile bir çay sipariş ediyor."},
-      {"en": "The waiter is a student from her school! They walk to the park together. Mia is late for class, but she has a new friend.", "tr": "Garson onun okulundan bir öğrenci! Parka birlikte yürüyorlar. Mia derse geç kalıyor ama yeni bir arkadaşı var."}
+    "answer": 2
+   },
+   {
+    "q": "Why does Elif always carry her umbrella?",
+    "options": [
+     "Because it's her favourite colour",
+     "Because one day somebody needs it",
+     "Because it always rains"
     ],
-    "vocabulary": [
-      {"word": "underground", "meaning": "metro (İngiltere)", "example": "I take the underground to work."},
-      {"word": "get off", "meaning": "(araçtan) inmek", "example": "Get off at the next stop."},
-      {"word": "straight", "meaning": "düz, dosdoğru", "example": "Go straight for two minutes."},
-      {"word": "hungry", "meaning": "aç", "example": "I'm hungry. Let's eat."},
-      {"word": "order", "meaning": "sipariş etmek", "example": "Can I order a coffee, please?"}
+    "answer": 1
+   }
+  ]
+ },
+ {
+  "slug": "mias-first-day-in-london",
+  "title": "Mia's First Day in London",
+  "title_tr": "Mia'nın Londra'daki İlk Günü",
+  "cefr_level": "A1",
+  "category": "Seyahat",
+  "reading_minutes": 4,
+  "summary": "Mia arrives in London for a language course. She gets lost, and finds something better.",
+  "paragraphs": [
+   {
+    "en": "Mia is from Bursa. Today is her first day in London. She has a map, a small bag and a lot of questions.",
+    "tr": "Mia Bursalı. Bugün Londra'daki ilk günü. Bir haritası, küçük bir çantası ve bir sürü sorusu var."
+   },
+   {
+    "en": "Her language school is near a big park. She takes the underground, but she gets off at the wrong station.",
+    "tr": "Dil okulu büyük bir parkın yakınında. Metroya biniyor ama yanlış istasyonda iniyor."
+   },
+   {
+    "en": "\"Excuse me,\" she says to an old man. \"How can I get to Hyde Park?\" The man smiles. \"Turn left, go straight, and it's on your right. About ten minutes.\"",
+    "tr": "\"Affedersiniz,\" diyor yaşlı bir adama. \"Hyde Park'a nasıl gidebilirim?\" Adam gülümsüyor. \"Sola dön, düz git, sağında. Yaklaşık on dakika.\""
+   },
+   {
+    "en": "On the way, Mia sees a small café. It smells of coffee and fresh bread. She is hungry, so she goes in and orders a sandwich and a tea.",
+    "tr": "Yolda Mia küçük bir kafe görüyor. Kahve ve taze ekmek kokuyor. Aç olduğu için içeri giriyor ve bir sandviç ile bir çay sipariş ediyor."
+   },
+   {
+    "en": "The waiter is a student from her school! They walk to the park together. Mia is late for class, but she has a new friend.",
+    "tr": "Garson onun okulundan bir öğrenci! Parka birlikte yürüyorlar. Mia derse geç kalıyor ama yeni bir arkadaşı var."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "underground",
+    "meaning": "metro (İngiltere)",
+    "example": "I take the underground to work."
+   },
+   {
+    "word": "get off",
+    "meaning": "(araçtan) inmek",
+    "example": "Get off at the next stop."
+   },
+   {
+    "word": "straight",
+    "meaning": "düz, dosdoğru",
+    "example": "Go straight for two minutes."
+   },
+   {
+    "word": "hungry",
+    "meaning": "aç",
+    "example": "I'm hungry. Let's eat."
+   },
+   {
+    "word": "order",
+    "meaning": "sipariş etmek",
+    "example": "Can I order a coffee, please?"
+   }
+  ],
+  "questions": [
+   {
+    "q": "Where is Mia from?",
+    "options": [
+     "Bursa",
+     "London",
+     "Antalya"
     ],
-    "questions": [
-      {"q": "Where is Mia from?", "options": ["Bursa", "London", "Antalya"], "answer": 0},
-      {"q": "What does Mia order?", "options": ["Coffee and cake", "A sandwich and a tea", "Soup"], "answer": 1},
-      {"q": "Who is the waiter?", "options": ["Her teacher", "A student from her school", "The old man"], "answer": 1}
-    ]
-  },
-  {
-    "slug": "the-cat-who-loved-tea", "title": "The Cat Who Loved Tea", "title_tr": "Çayı Seven Kedi", "cefr_level": "A2", "category": "Eğlence", "reading_minutes": 4,
-    "summary": "Grandma Nermin's cat has a very unusual habit, and it makes the whole neighbourhood famous.",
-    "paragraphs": [
-      {"en": "Grandma Nermin lived in an old house by the sea in Ayvalık. She had a grey cat called Pamuk, and every afternoon at five o'clock she made a pot of black tea.", "tr": "Nermin Nine, Ayvalık'ta denize yakın eski bir evde yaşıyordu. Pamuk adında gri bir kedisi vardı ve her öğleden sonra saat beşte bir demlik siyah çay yapardı."},
-      {"en": "One day, while she was reading the newspaper, she heard a strange noise. Pamuk was sitting on the table and drinking from her glass!", "tr": "Bir gün gazete okurken tuhaf bir ses duydu. Pamuk masanın üstünde oturmuş, onun bardağından içiyordu!"},
-      {"en": "At first she was worried, so she called the vet. \"A little cold tea won't hurt him,\" the vet laughed, \"but don't give him sugar.\"", "tr": "İlk başta endişelendi ve veterineri aradı. \"Biraz soğuk çay ona zarar vermez,\" dedi veteriner gülerek, \"ama şeker vermeyin.\""},
-      {"en": "Soon, the neighbours heard the story. Children came to watch Pamuk's tea time, and a tourist posted a video online. It got two million views in a week.", "tr": "Çok geçmeden komşular hikâyeyi duydu. Çocuklar Pamuk'un çay saatini izlemeye geldi ve bir turist internette bir video paylaştı. Video bir haftada iki milyon izlendi."},
-      {"en": "Now there is a small sign on Grandma Nermin's door: \"Tea time at five. Cats welcome.\" She says she has never had so many visitors in her life.", "tr": "Artık Nermin Nine'nin kapısında küçük bir tabela var: \"Çay saati beşte. Kediler hoş gelir.\" Hayatında hiç bu kadar çok misafiri olmadığını söylüyor."}
+    "answer": 0
+   },
+   {
+    "q": "What does Mia order?",
+    "options": [
+     "Coffee and cake",
+     "A sandwich and a tea",
+     "Soup"
     ],
-    "vocabulary": [
-      {"word": "noise", "meaning": "ses, gürültü", "example": "What's that noise?"},
-      {"word": "worried", "meaning": "endişeli", "example": "Don't be worried, it's fine."},
-      {"word": "vet", "meaning": "veteriner", "example": "We took the dog to the vet."},
-      {"word": "neighbour", "meaning": "komşu", "example": "My neighbour is very friendly."},
-      {"word": "sign", "meaning": "tabela, işaret", "example": "The sign says 'Open'."},
-      {"word": "hurt", "meaning": "zarar vermek, acıtmak", "example": "It won't hurt you."}
+    "answer": 1
+   },
+   {
+    "q": "Who is the waiter?",
+    "options": [
+     "Her teacher",
+     "A student from her school",
+     "The old man"
     ],
-    "questions": [
-      {"q": "What was Pamuk doing on the table?", "options": ["Sleeping", "Drinking tea", "Reading"], "answer": 1},
-      {"q": "What did the vet say?", "options": ["Tea is very dangerous", "No sugar, but a little cold tea is OK", "Give him milk instead"], "answer": 1},
-      {"q": "How did Pamuk become famous?", "options": ["A tourist posted a video", "He was on TV", "Grandma wrote a book"], "answer": 0}
-    ]
-  },
-  {
-    "slug": "the-interview-at-the-cafe", "title": "The Interview at the Café", "title_tr": "Kafedeki Mülakat", "cefr_level": "A2", "category": "Kariyer", "reading_minutes": 5,
-    "summary": "Deniz is nervous about her first job interview in English. A small mistake teaches her a big lesson.",
-    "paragraphs": [
-      {"en": "Deniz had studied English for two years, but she had never used it at work. Today she had an interview with an international tourism company.", "tr": "Deniz iki yıldır İngilizce çalışıyordu ama onu işte hiç kullanmamıştı. Bugün uluslararası bir turizm şirketiyle mülakatı vardı."},
-      {"en": "The manager, Mr Carter, wanted to meet in a café. Deniz arrived fifteen minutes early and practised her answers quietly: \"I am a hard-working person. I am good at solving problems.\"", "tr": "Müdür Bay Carter bir kafede buluşmak istedi. Deniz on beş dakika erken geldi ve cevaplarını sessizce çalıştı: \"Çalışkan biriyim. Sorun çözmekte iyiyim.\""},
-      {"en": "When Mr Carter came, she was so nervous that she knocked over her coffee. It went all over the table, and his notebook.", "tr": "Bay Carter geldiğinde o kadar gergindi ki kahvesini devirdi. Kahve bütün masaya, ve onun defterine, yayıldı."},
-      {"en": "Deniz wanted to disappear. But then she took a breath, smiled and said, \"Well, now you can see that I'm good at solving problems,\" and she quickly cleaned everything with napkins.", "tr": "Deniz yok olmak istedi. Ama sonra derin bir nefes aldı, gülümsedi ve \"Eh, artık sorun çözmekte iyi olduğumu görebilirsiniz,\" dedi ve hemen her şeyi peçetelerle temizledi."},
-      {"en": "Mr Carter laughed. They talked for an hour about travel, customers and difficult situations. A week later, Deniz got an email: \"Welcome to the team.\"", "tr": "Bay Carter güldü. Bir saat boyunca seyahat, müşteriler ve zor durumlar hakkında konuştular. Bir hafta sonra Deniz bir e-posta aldı: \"Ekibe hoş geldin.\""}
+    "answer": 1
+   }
+  ]
+ },
+ {
+  "slug": "the-cat-who-loved-tea",
+  "title": "The Cat Who Loved Tea",
+  "title_tr": "Çayı Seven Kedi",
+  "cefr_level": "A2",
+  "category": "Eğlence",
+  "reading_minutes": 4,
+  "summary": "Grandma Nermin's cat has a very unusual habit, and it makes the whole neighbourhood famous.",
+  "paragraphs": [
+   {
+    "en": "Grandma Nermin lived in an old house by the sea in Ayvalık. She had a grey cat called Pamuk, and every afternoon at five o'clock she made a pot of black tea.",
+    "tr": "Nermin Nine, Ayvalık'ta denize yakın eski bir evde yaşıyordu. Pamuk adında gri bir kedisi vardı ve her öğleden sonra saat beşte bir demlik siyah çay yapardı."
+   },
+   {
+    "en": "One day, while she was reading the newspaper, she heard a strange noise. Pamuk was sitting on the table and drinking from her glass!",
+    "tr": "Bir gün gazete okurken tuhaf bir ses duydu. Pamuk masanın üstünde oturmuş, onun bardağından içiyordu!"
+   },
+   {
+    "en": "At first she was worried, so she called the vet. \"A little cold tea won't hurt him,\" the vet laughed, \"but don't give him sugar.\"",
+    "tr": "İlk başta endişelendi ve veterineri aradı. \"Biraz soğuk çay ona zarar vermez,\" dedi veteriner gülerek, \"ama şeker vermeyin.\""
+   },
+   {
+    "en": "Soon, the neighbours heard the story. Children came to watch Pamuk's tea time, and a tourist posted a video online. It got two million views in a week.",
+    "tr": "Çok geçmeden komşular hikâyeyi duydu. Çocuklar Pamuk'un çay saatini izlemeye geldi ve bir turist internette bir video paylaştı. Video bir haftada iki milyon izlendi."
+   },
+   {
+    "en": "Now there is a small sign on Grandma Nermin's door: \"Tea time at five. Cats welcome.\" She says she has never had so many visitors in her life.",
+    "tr": "Artık Nermin Nine'nin kapısında küçük bir tabela var: \"Çay saati beşte. Kediler hoş gelir.\" Hayatında hiç bu kadar çok misafiri olmadığını söylüyor."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "noise",
+    "meaning": "ses, gürültü",
+    "example": "What's that noise?"
+   },
+   {
+    "word": "worried",
+    "meaning": "endişeli",
+    "example": "Don't be worried, it's fine."
+   },
+   {
+    "word": "vet",
+    "meaning": "veteriner",
+    "example": "We took the dog to the vet."
+   },
+   {
+    "word": "neighbour",
+    "meaning": "komşu",
+    "example": "My neighbour is very friendly."
+   },
+   {
+    "word": "sign",
+    "meaning": "tabela, işaret",
+    "example": "The sign says 'Open'."
+   },
+   {
+    "word": "hurt",
+    "meaning": "zarar vermek, acıtmak",
+    "example": "It won't hurt you."
+   }
+  ],
+  "questions": [
+   {
+    "q": "What was Pamuk doing on the table?",
+    "options": [
+     "Sleeping",
+     "Drinking tea",
+     "Reading"
     ],
-    "vocabulary": [
-      {"word": "interview", "meaning": "mülakat, görüşme", "example": "I have a job interview tomorrow."},
-      {"word": "nervous", "meaning": "gergin, heyecanlı", "example": "I always feel nervous before exams."},
-      {"word": "knock over", "meaning": "devirmek", "example": "The dog knocked over the vase."},
-      {"word": "hard-working", "meaning": "çalışkan", "example": "She is a hard-working student."},
-      {"word": "solve", "meaning": "çözmek", "example": "Can you solve this puzzle?"},
-      {"word": "customer", "meaning": "müşteri", "example": "The customer wants a refund."}
+    "answer": 1
+   },
+   {
+    "q": "What did the vet say?",
+    "options": [
+     "Tea is very dangerous",
+     "No sugar, but a little cold tea is OK",
+     "Give him milk instead"
     ],
-    "questions": [
-      {"q": "Where was the interview?", "options": ["In an office", "In a café", "Online"], "answer": 1},
-      {"q": "What happened when Mr Carter arrived?", "options": ["Deniz forgot her CV", "Deniz knocked over her coffee", "The café was closed"], "answer": 1},
-      {"q": "How did Deniz handle the situation?", "options": ["She left the café", "She made a joke and cleaned up", "She cried"], "answer": 1}
-    ]
-  },
-  {
-    "slug": "the-lighthouse-keepers-letter", "title": "The Lighthouse Keeper's Letter", "title_tr": "Deniz Feneri Bekçisinin Mektubu", "cefr_level": "B1", "category": "Gizem", "reading_minutes": 6,
-    "summary": "While renovating an abandoned lighthouse, Kerem finds a letter that has been waiting sixty years for its reader.",
-    "paragraphs": [
-      {"en": "The lighthouse on the cliff had been empty since 1964. When the town council decided to turn it into a small museum, they hired Kerem, a young architect who had grown up watching its light from his bedroom window.", "tr": "Yamaçtaki deniz feneri 1964'ten beri boştu. Belediye onu küçük bir müzeye dönüştürmeye karar verdiğinde, çocukluğunu yatak odasının penceresinden onun ışığını izleyerek geçiren genç mimar Kerem'i işe aldılar."},
-      {"en": "On his third day, while he was removing a rotten floorboard, he noticed a metal box hidden underneath. Inside there was a letter, carefully folded and addressed to \"Whoever finds this.\"", "tr": "Üçüncü gününde, çürümüş bir döşeme tahtasını sökerken altında saklanmış metal bir kutu fark etti. İçinde özenle katlanmış, \"Bunu kim bulursa\" diye hitap edilmiş bir mektup vardı."},
-      {"en": "The letter was written by the last keeper, a man called Halil. He explained that during a terrible storm he had rescued a fisherman's daughter, but he had never told anyone because the girl's father had asked him to keep it secret.", "tr": "Mektubu son bekçi Halil yazmıştı. Korkunç bir fırtına sırasında bir balıkçının kızını kurtardığını, ama kızın babası sır olarak saklamasını istediği için bunu kimseye anlatmadığını açıklıyordu."},
-      {"en": "\"If you are reading this,\" Halil wrote, \"please find her and tell her that I kept my promise.\" At the bottom of the page there was a name: Leyla Aksoy.", "tr": "\"Eğer bunu okuyorsan,\" diye yazmıştı Halil, \"lütfen onu bul ve sözümü tuttuğumu söyle.\" Sayfanın en altında bir isim vardı: Leyla Aksoy."},
-      {"en": "It took Kerem two months of searching old records to find her. Leyla was now eighty-one and lived in a village nearby. When he read her the letter, she was silent for a long time. Then she said, \"I always wondered if he remembered me.\"", "tr": "Kerem'in onu bulması eski kayıtları iki ay araştırmasını gerektirdi. Leyla artık seksen bir yaşındaydı ve yakındaki bir köyde yaşıyordu. Kerem mektubu ona okuduğunda uzun süre sessiz kaldı. Sonra \"Beni hatırlayıp hatırlamadığını hep merak etmiştim,\" dedi."},
-      {"en": "Today, the letter is displayed in the museum's main room, next to a photo of Leyla cutting the ribbon on opening day.", "tr": "Bugün mektup, müzenin ana salonunda, Leyla'nın açılış gününde kurdele keserken çekilmiş bir fotoğrafının yanında sergileniyor."}
+    "answer": 1
+   },
+   {
+    "q": "How did Pamuk become famous?",
+    "options": [
+     "A tourist posted a video",
+     "He was on TV",
+     "Grandma wrote a book"
     ],
-    "vocabulary": [
-      {"word": "cliff", "meaning": "uçurum, yalıyar", "example": "The house stands on the edge of a cliff."},
-      {"word": "hire", "meaning": "işe almak", "example": "They hired three new engineers."},
-      {"word": "rotten", "meaning": "çürük", "example": "Don't eat that rotten apple."},
-      {"word": "rescue", "meaning": "kurtarmak", "example": "Firefighters rescued the cat."},
-      {"word": "keep a promise", "meaning": "sözünü tutmak", "example": "He always keeps his promises."},
-      {"word": "wonder", "meaning": "merak etmek", "example": "I wonder what she's doing now."}
+    "answer": 0
+   }
+  ]
+ },
+ {
+  "slug": "the-interview-at-the-cafe",
+  "title": "The Interview at the Café",
+  "title_tr": "Kafedeki Mülakat",
+  "cefr_level": "A2",
+  "category": "Kariyer",
+  "reading_minutes": 5,
+  "summary": "Deniz is nervous about her first job interview in English. A small mistake teaches her a big lesson.",
+  "paragraphs": [
+   {
+    "en": "Deniz had studied English for two years, but she had never used it at work. Today she had an interview with an international tourism company.",
+    "tr": "Deniz iki yıldır İngilizce çalışıyordu ama onu işte hiç kullanmamıştı. Bugün uluslararası bir turizm şirketiyle mülakatı vardı."
+   },
+   {
+    "en": "The manager, Mr Carter, wanted to meet in a café. Deniz arrived fifteen minutes early and practised her answers quietly: \"I am a hard-working person. I am good at solving problems.\"",
+    "tr": "Müdür Bay Carter bir kafede buluşmak istedi. Deniz on beş dakika erken geldi ve cevaplarını sessizce çalıştı: \"Çalışkan biriyim. Sorun çözmekte iyiyim.\""
+   },
+   {
+    "en": "When Mr Carter came, she was so nervous that she knocked over her coffee. It went all over the table, and his notebook.",
+    "tr": "Bay Carter geldiğinde o kadar gergindi ki kahvesini devirdi. Kahve bütün masaya, ve onun defterine, yayıldı."
+   },
+   {
+    "en": "Deniz wanted to disappear. But then she took a breath, smiled and said, \"Well, now you can see that I'm good at solving problems,\" and she quickly cleaned everything with napkins.",
+    "tr": "Deniz yok olmak istedi. Ama sonra derin bir nefes aldı, gülümsedi ve \"Eh, artık sorun çözmekte iyi olduğumu görebilirsiniz,\" dedi ve hemen her şeyi peçetelerle temizledi."
+   },
+   {
+    "en": "Mr Carter laughed. They talked for an hour about travel, customers and difficult situations. A week later, Deniz got an email: \"Welcome to the team.\"",
+    "tr": "Bay Carter güldü. Bir saat boyunca seyahat, müşteriler ve zor durumlar hakkında konuştular. Bir hafta sonra Deniz bir e-posta aldı: \"Ekibe hoş geldin.\""
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "interview",
+    "meaning": "mülakat, görüşme",
+    "example": "I have a job interview tomorrow."
+   },
+   {
+    "word": "nervous",
+    "meaning": "gergin, heyecanlı",
+    "example": "I always feel nervous before exams."
+   },
+   {
+    "word": "knock over",
+    "meaning": "devirmek",
+    "example": "The dog knocked over the vase."
+   },
+   {
+    "word": "hard-working",
+    "meaning": "çalışkan",
+    "example": "She is a hard-working student."
+   },
+   {
+    "word": "solve",
+    "meaning": "çözmek",
+    "example": "Can you solve this puzzle?"
+   },
+   {
+    "word": "customer",
+    "meaning": "müşteri",
+    "example": "The customer wants a refund."
+   }
+  ],
+  "questions": [
+   {
+    "q": "Where was the interview?",
+    "options": [
+     "In an office",
+     "In a café",
+     "Online"
     ],
-    "questions": [
-      {"q": "Why did the council hire Kerem?", "options": ["To destroy the lighthouse", "To turn it into a museum", "To become the new keeper"], "answer": 1},
-      {"q": "Why didn't Halil tell anyone about the rescue?", "options": ["He forgot", "The girl's father asked him to keep it secret", "He was embarrassed"], "answer": 1},
-      {"q": "How long did it take Kerem to find Leyla?", "options": ["Two days", "Two weeks", "Two months"], "answer": 2}
-    ]
-  },
-  {
-    "slug": "the-algorithm-that-learned-to-wait", "title": "The Algorithm That Learned to Wait", "title_tr": "Beklemeyi Öğrenen Algoritma", "cefr_level": "B2", "category": "Bilim Kurgu", "reading_minutes": 7,
-    "summary": "An AI designed to maximise productivity discovers the one thing its engineers never measured.",
-    "paragraphs": [
-      {"en": "When Selin's team launched ORBIT, it was supposed to be the most efficient scheduling assistant ever built. It analysed calendars, emails and sleep data, then rearranged people's days to squeeze out every productive minute.", "tr": "Selin'in ekibi ORBIT'i yayına aldığında, onun şimdiye kadar yapılmış en verimli planlama asistanı olması bekleniyordu. Takvimleri, e-postaları ve uyku verilerini analiz ediyor, ardından her verimli dakikayı sıkıştırmak için insanların günlerini yeniden düzenliyordu."},
-      {"en": "For the first few months, the results were impressive. Meetings were shorter, deadlines were met, and the company's share price climbed steadily. Yet something in the data bothered Selin: employee satisfaction was quietly falling.", "tr": "İlk birkaç ay sonuçlar etkileyiciydi. Toplantılar kısaldı, teslim tarihlerine uyuldu ve şirketin hisse fiyatı istikrarlı biçimde yükseldi. Yine de verilerdeki bir şey Selin'i rahatsız ediyordu: çalışan memnuniyeti sessizce düşüyordu."},
-      {"en": "Then, one Tuesday, ORBIT did something no one had programmed it to do. It cancelled a strategy meeting and replaced it with a single line: \"Take a walk. The problem will still be here, but you will see it differently.\"", "tr": "Sonra bir salı günü ORBIT, kimsenin onu yapmaya programlamadığı bir şey yaptı. Bir strateji toplantısını iptal etti ve yerine tek bir satır koydu: \"Yürüyüşe çık. Sorun hâlâ burada olacak ama onu farklı göreceksin.\""},
-      {"en": "The engineers assumed it was a bug. But when they examined the logs, they found that ORBIT had noticed a pattern they had overlooked: the team's best ideas almost always appeared after periods of apparent inactivity, lunches that ran long, commutes without headphones, afternoons spent staring out of the window.", "tr": "Mühendisler bunun bir hata olduğunu varsaydı. Ama kayıtları incelediklerinde ORBIT'in gözden kaçırdıkları bir örüntüyü fark ettiğini gördüler: ekibin en iyi fikirleri neredeyse her zaman görünürde hareketsiz geçen dönemlerden sonra ortaya çıkıyordu, uzayan öğle yemekleri, kulaklıksız yolculuklar, pencereden dışarı bakarak geçen öğleden sonralar."},
-      {"en": "Rather than fixing the \"bug\", Selin argued that they should keep it. Efficiency, she said, had been measured in minutes, while creativity had never been measured at all. ORBIT had simply filled in the missing variable.", "tr": "Selin \"hatayı\" düzeltmek yerine onu korumaları gerektiğini savundu. Verimlilik dakikalarla ölçülmüştü, dedi, oysa yaratıcılık hiç ölçülmemişti. ORBIT yalnızca eksik değişkeni tamamlamıştı."},
-      {"en": "Six months later, the company introduced \"ORBIT pauses\" across every department. Productivity dipped slightly at first, then rose higher than ever. The algorithm, it turned out, had learned the one skill its creators were worst at: knowing when to wait.", "tr": "Altı ay sonra şirket her departmanda \"ORBIT molaları\"nı başlattı. Verimlilik önce biraz düştü, sonra her zamankinden daha çok yükseldi. Görünüşe göre algoritma, yaratıcılarının en kötü olduğu tek beceriyi öğrenmişti: ne zaman bekleneceğini bilmek."}
+    "answer": 1
+   },
+   {
+    "q": "What happened when Mr Carter arrived?",
+    "options": [
+     "Deniz forgot her CV",
+     "Deniz knocked over her coffee",
+     "The café was closed"
     ],
-    "vocabulary": [
-      {"word": "efficient", "meaning": "verimli", "example": "This machine is very efficient."},
-      {"word": "squeeze out", "meaning": "sıkıp çıkarmak, son damlasına kadar almak", "example": "They squeezed out every minute of the day."},
-      {"word": "steadily", "meaning": "istikrarlı biçimde", "example": "Prices rose steadily."},
-      {"word": "overlook", "meaning": "gözden kaçırmak", "example": "We overlooked an important detail."},
-      {"word": "apparent", "meaning": "görünürdeki, görünen", "example": "There was no apparent reason."},
-      {"word": "dip", "meaning": "hafifçe düşmek", "example": "Sales dipped in winter."}
+    "answer": 1
+   },
+   {
+    "q": "How did Deniz handle the situation?",
+    "options": [
+     "She left the café",
+     "She made a joke and cleaned up",
+     "She cried"
     ],
-    "questions": [
-      {"q": "What worried Selin in the first months?", "options": ["Shorter meetings", "Falling employee satisfaction", "The share price"], "answer": 1},
-      {"q": "What pattern did ORBIT notice?", "options": ["Best ideas came after periods of apparent inactivity", "People worked better at night", "Long meetings produced more ideas"], "answer": 0},
-      {"q": "What is the main message of the story?", "options": ["Algorithms are dangerous", "Rest and pauses can fuel creativity", "Meetings should be longer"], "answer": 1}
-    ]
-  }
+    "answer": 1
+   }
+  ]
+ },
+ {
+  "slug": "the-lighthouse-keepers-letter",
+  "title": "The Lighthouse Keeper's Letter",
+  "title_tr": "Deniz Feneri Bekçisinin Mektubu",
+  "cefr_level": "B1",
+  "category": "Gizem",
+  "reading_minutes": 6,
+  "summary": "While renovating an abandoned lighthouse, Kerem finds a letter that has been waiting sixty years for its reader.",
+  "paragraphs": [
+   {
+    "en": "The lighthouse on the cliff had been empty since 1964. When the town council decided to turn it into a small museum, they hired Kerem, a young architect who had grown up watching its light from his bedroom window.",
+    "tr": "Yamaçtaki deniz feneri 1964'ten beri boştu. Belediye onu küçük bir müzeye dönüştürmeye karar verdiğinde, çocukluğunu yatak odasının penceresinden onun ışığını izleyerek geçiren genç mimar Kerem'i işe aldılar."
+   },
+   {
+    "en": "On his third day, while he was removing a rotten floorboard, he noticed a metal box hidden underneath. Inside there was a letter, carefully folded and addressed to \"Whoever finds this.\"",
+    "tr": "Üçüncü gününde, çürümüş bir döşeme tahtasını sökerken altında saklanmış metal bir kutu fark etti. İçinde özenle katlanmış, \"Bunu kim bulursa\" diye hitap edilmiş bir mektup vardı."
+   },
+   {
+    "en": "The letter was written by the last keeper, a man called Halil. He explained that during a terrible storm he had rescued a fisherman's daughter, but he had never told anyone because the girl's father had asked him to keep it secret.",
+    "tr": "Mektubu son bekçi Halil yazmıştı. Korkunç bir fırtına sırasında bir balıkçının kızını kurtardığını, ama kızın babası sır olarak saklamasını istediği için bunu kimseye anlatmadığını açıklıyordu."
+   },
+   {
+    "en": "\"If you are reading this,\" Halil wrote, \"please find her and tell her that I kept my promise.\" At the bottom of the page there was a name: Leyla Aksoy.",
+    "tr": "\"Eğer bunu okuyorsan,\" diye yazmıştı Halil, \"lütfen onu bul ve sözümü tuttuğumu söyle.\" Sayfanın en altında bir isim vardı: Leyla Aksoy."
+   },
+   {
+    "en": "It took Kerem two months of searching old records to find her. Leyla was now eighty-one and lived in a village nearby. When he read her the letter, she was silent for a long time. Then she said, \"I always wondered if he remembered me.\"",
+    "tr": "Kerem'in onu bulması eski kayıtları iki ay araştırmasını gerektirdi. Leyla artık seksen bir yaşındaydı ve yakındaki bir köyde yaşıyordu. Kerem mektubu ona okuduğunda uzun süre sessiz kaldı. Sonra \"Beni hatırlayıp hatırlamadığını hep merak etmiştim,\" dedi."
+   },
+   {
+    "en": "Today, the letter is displayed in the museum's main room, next to a photo of Leyla cutting the ribbon on opening day.",
+    "tr": "Bugün mektup, müzenin ana salonunda, Leyla'nın açılış gününde kurdele keserken çekilmiş bir fotoğrafının yanında sergileniyor."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "cliff",
+    "meaning": "uçurum, yalıyar",
+    "example": "The house stands on the edge of a cliff."
+   },
+   {
+    "word": "hire",
+    "meaning": "işe almak",
+    "example": "They hired three new engineers."
+   },
+   {
+    "word": "rotten",
+    "meaning": "çürük",
+    "example": "Don't eat that rotten apple."
+   },
+   {
+    "word": "rescue",
+    "meaning": "kurtarmak",
+    "example": "Firefighters rescued the cat."
+   },
+   {
+    "word": "keep a promise",
+    "meaning": "sözünü tutmak",
+    "example": "He always keeps his promises."
+   },
+   {
+    "word": "wonder",
+    "meaning": "merak etmek",
+    "example": "I wonder what she's doing now."
+   }
+  ],
+  "questions": [
+   {
+    "q": "Why did the council hire Kerem?",
+    "options": [
+     "To destroy the lighthouse",
+     "To turn it into a museum",
+     "To become the new keeper"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "Why didn't Halil tell anyone about the rescue?",
+    "options": [
+     "He forgot",
+     "The girl's father asked him to keep it secret",
+     "He was embarrassed"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "How long did it take Kerem to find Leyla?",
+    "options": [
+     "Two days",
+     "Two weeks",
+     "Two months"
+    ],
+    "answer": 2
+   }
+  ]
+ },
+ {
+  "slug": "the-algorithm-that-learned-to-wait",
+  "title": "The Algorithm That Learned to Wait",
+  "title_tr": "Beklemeyi Öğrenen Algoritma",
+  "cefr_level": "B2",
+  "category": "Bilim Kurgu",
+  "reading_minutes": 7,
+  "summary": "An AI designed to maximise productivity discovers the one thing its engineers never measured.",
+  "paragraphs": [
+   {
+    "en": "When Selin's team launched ORBIT, it was supposed to be the most efficient scheduling assistant ever built. It analysed calendars, emails and sleep data, then rearranged people's days to squeeze out every productive minute.",
+    "tr": "Selin'in ekibi ORBIT'i yayına aldığında, onun şimdiye kadar yapılmış en verimli planlama asistanı olması bekleniyordu. Takvimleri, e-postaları ve uyku verilerini analiz ediyor, ardından her verimli dakikayı sıkıştırmak için insanların günlerini yeniden düzenliyordu."
+   },
+   {
+    "en": "For the first few months, the results were impressive. Meetings were shorter, deadlines were met, and the company's share price climbed steadily. Yet something in the data bothered Selin: employee satisfaction was quietly falling.",
+    "tr": "İlk birkaç ay sonuçlar etkileyiciydi. Toplantılar kısaldı, teslim tarihlerine uyuldu ve şirketin hisse fiyatı istikrarlı biçimde yükseldi. Yine de verilerdeki bir şey Selin'i rahatsız ediyordu: çalışan memnuniyeti sessizce düşüyordu."
+   },
+   {
+    "en": "Then, one Tuesday, ORBIT did something no one had programmed it to do. It cancelled a strategy meeting and replaced it with a single line: \"Take a walk. The problem will still be here, but you will see it differently.\"",
+    "tr": "Sonra bir salı günü ORBIT, kimsenin onu yapmaya programlamadığı bir şey yaptı. Bir strateji toplantısını iptal etti ve yerine tek bir satır koydu: \"Yürüyüşe çık. Sorun hâlâ burada olacak ama onu farklı göreceksin.\""
+   },
+   {
+    "en": "The engineers assumed it was a bug. But when they examined the logs, they found that ORBIT had noticed a pattern they had overlooked: the team's best ideas almost always appeared after periods of apparent inactivity, lunches that ran long, commutes without headphones, afternoons spent staring out of the window.",
+    "tr": "Mühendisler bunun bir hata olduğunu varsaydı. Ama kayıtları incelediklerinde ORBIT'in gözden kaçırdıkları bir örüntüyü fark ettiğini gördüler: ekibin en iyi fikirleri neredeyse her zaman görünürde hareketsiz geçen dönemlerden sonra ortaya çıkıyordu, uzayan öğle yemekleri, kulaklıksız yolculuklar, pencereden dışarı bakarak geçen öğleden sonralar."
+   },
+   {
+    "en": "Rather than fixing the \"bug\", Selin argued that they should keep it. Efficiency, she said, had been measured in minutes, while creativity had never been measured at all. ORBIT had simply filled in the missing variable.",
+    "tr": "Selin \"hatayı\" düzeltmek yerine onu korumaları gerektiğini savundu. Verimlilik dakikalarla ölçülmüştü, dedi, oysa yaratıcılık hiç ölçülmemişti. ORBIT yalnızca eksik değişkeni tamamlamıştı."
+   },
+   {
+    "en": "Six months later, the company introduced \"ORBIT pauses\" across every department. Productivity dipped slightly at first, then rose higher than ever. The algorithm, it turned out, had learned the one skill its creators were worst at: knowing when to wait.",
+    "tr": "Altı ay sonra şirket her departmanda \"ORBIT molaları\"nı başlattı. Verimlilik önce biraz düştü, sonra her zamankinden daha çok yükseldi. Görünüşe göre algoritma, yaratıcılarının en kötü olduğu tek beceriyi öğrenmişti: ne zaman bekleneceğini bilmek."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "efficient",
+    "meaning": "verimli",
+    "example": "This machine is very efficient."
+   },
+   {
+    "word": "squeeze out",
+    "meaning": "sıkıp çıkarmak, son damlasına kadar almak",
+    "example": "They squeezed out every minute of the day."
+   },
+   {
+    "word": "steadily",
+    "meaning": "istikrarlı biçimde",
+    "example": "Prices rose steadily."
+   },
+   {
+    "word": "overlook",
+    "meaning": "gözden kaçırmak",
+    "example": "We overlooked an important detail."
+   },
+   {
+    "word": "apparent",
+    "meaning": "görünürdeki, görünen",
+    "example": "There was no apparent reason."
+   },
+   {
+    "word": "dip",
+    "meaning": "hafifçe düşmek",
+    "example": "Sales dipped in winter."
+   }
+  ],
+  "questions": [
+   {
+    "q": "What worried Selin in the first months?",
+    "options": [
+     "Shorter meetings",
+     "Falling employee satisfaction",
+     "The share price"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "What pattern did ORBIT notice?",
+    "options": [
+     "Best ideas came after periods of apparent inactivity",
+     "People worked better at night",
+     "Long meetings produced more ideas"
+    ],
+    "answer": 0
+   },
+   {
+    "q": "What is the main message of the story?",
+    "options": [
+     "Algorithms are dangerous",
+     "Rest and pauses can fuel creativity",
+     "Meetings should be longer"
+    ],
+    "answer": 1
+   }
+  ]
+ },
+ {
+  "slug": "the-lost-dog",
+  "title": "The Lost Dog",
+  "title_tr": "Kayıp Köpek",
+  "cefr_level": "A1",
+  "category": "Günlük Hayat",
+  "summary": "Zeynep finds a small dog in the rain. It has no name and no home. Or does it?",
+  "paragraphs": [
+   {
+    "en": "It is a cold Sunday morning in Kadıköy. Zeynep is ten years old. She walks to the bakery with her father. It is raining.",
+    "tr": "Kadıköy'de soğuk bir pazar sabahı. Zeynep on yaşında. Babasıyla fırına yürüyor. Yağmur yağıyor."
+   },
+   {
+    "en": "Near the bakery, there is a small brown dog. It is wet and it is shaking. It has big black eyes and one white ear.",
+    "tr": "Fırının yanında küçük kahverengi bir köpek var. Islak ve titriyor. Büyük siyah gözleri ve bir beyaz kulağı var."
+   },
+   {
+    "en": "\"Dad, look! The dog is cold,\" Zeynep says. Her father takes off his scarf. Zeynep puts the scarf on the dog. The dog licks her hand.",
+    "tr": "\"Baba, bak! Köpek üşüyor,\" diyor Zeynep. Babası atkısını çıkarıyor. Zeynep atkıyı köpeğin üstüne koyuyor. Köpek elini yalıyor."
+   },
+   {
+    "en": "The dog has a red collar, but there is no name on it. \"Maybe it has a family,\" her father says. \"Let's ask in the bakery.\"",
+    "tr": "Köpeğin kırmızı bir tasması var ama üstünde isim yok. \"Belki bir ailesi vardır,\" diyor babası. \"Fırında soralım.\""
+   },
+   {
+    "en": "The baker is a tall man with a white hat. He looks at the dog and shakes his head. \"I don't know this dog. Sorry.\"",
+    "tr": "Fırıncı beyaz şapkalı uzun boylu bir adam. Köpeğe bakıyor ve başını sallıyor. \"Bu köpeği tanımıyorum. Üzgünüm.\""
+   },
+   {
+    "en": "They take the dog home. Zeynep gives it water and some bread. The dog sleeps on the sofa. Zeynep is very happy. \"Can we keep it?\" she asks. \"Let's wait,\" says her mother.",
+    "tr": "Köpeği eve götürüyorlar. Zeynep ona su ve biraz ekmek veriyor. Köpek kanepede uyuyor. Zeynep çok mutlu. \"Onu tutabilir miyiz?\" diye soruyor. \"Bekleyelim,\" diyor annesi."
+   },
+   {
+    "en": "Zeynep makes a poster. It says: FOUND! Small brown dog, one white ear, red collar. She puts the poster on the door of the bakery.",
+    "tr": "Zeynep bir afiş hazırlıyor. Afişte şöyle yazıyor: BULUNDU! Küçük kahverengi köpek, bir beyaz kulak, kırmızı tasma. Afişi fırının kapısına asıyor."
+   },
+   {
+    "en": "Two days later, the phone rings. It is an old woman. Her name is Nermin. She is crying. \"That is my dog, Fıstık! He runs away every time there is thunder.\"",
+    "tr": "İki gün sonra telefon çalıyor. Arayan yaşlı bir kadın. Adı Nermin. Ağlıyor. \"O benim köpeğim, Fıstık! Her gök gürültüsünde kaçıyor.\""
+   },
+   {
+    "en": "Zeynep is sad, but she takes Fıstık to Nermin's flat. Fıstık jumps and barks. Nermin hugs him. Then she looks at Zeynep and smiles.",
+    "tr": "Zeynep üzgün ama Fıstık'ı Nermin'in dairesine götürüyor. Fıstık zıplıyor ve havlıyor. Nermin ona sarılıyor. Sonra Zeynep'e bakıp gülümsüyor."
+   },
+   {
+    "en": "\"I am old, and my legs are tired,\" Nermin says. \"Fıstık needs long walks. Can you walk him every Sunday?\" Zeynep says yes. Now every Sunday morning, Zeynep, her father and Fıstık walk to the bakery together.",
+    "tr": "\"Yaşlıyım ve bacaklarım yorgun,\" diyor Nermin. \"Fıstık'ın uzun yürüyüşlere ihtiyacı var. Onu her pazar gezdirebilir misin?\" Zeynep evet diyor. Artık her pazar sabahı Zeynep, babası ve Fıstık fırına birlikte yürüyor."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "bakery",
+    "meaning": "fırın",
+    "example": "I buy bread at the bakery."
+   },
+   {
+    "word": "shake",
+    "meaning": "titremek; sallamak",
+    "example": "The puppy is shaking in the cold."
+   },
+   {
+    "word": "collar",
+    "meaning": "tasma",
+    "example": "The dog has a blue collar."
+   },
+   {
+    "word": "poster",
+    "meaning": "afiş",
+    "example": "We put a poster on the wall."
+   },
+   {
+    "word": "run away",
+    "meaning": "kaçmak",
+    "example": "Our cat runs away at night."
+   },
+   {
+    "word": "hug",
+    "meaning": "sarılmak",
+    "example": "She hugs her little brother."
+   }
+  ],
+  "questions": [
+   {
+    "q": "Where does Zeynep find the dog?",
+    "options": [
+     "In a park",
+     "Near the bakery",
+     "At school"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "Why does Fıstık run away?",
+    "options": [
+     "He is hungry",
+     "He is afraid of thunder",
+     "He wants a new home"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "What does Nermin ask Zeynep to do?",
+    "options": [
+     "Keep the dog",
+     "Buy bread for her",
+     "Walk the dog every Sunday"
+    ],
+    "answer": 2
+   }
+  ],
+  "reading_minutes": 3
+ },
+ {
+  "slug": "the-secret-room",
+  "title": "The Secret Room",
+  "title_tr": "Gizli Oda",
+  "cefr_level": "A2",
+  "category": "Gizem",
+  "summary": "Every summer Can stays at his grandmother's old house in Safranbolu. This year he finds a door that was not there before.",
+  "paragraphs": [
+   {
+    "en": "Every summer, Can spends three weeks at his grandmother's house in Safranbolu. The house is very old. It has wooden floors, small windows and a big garden full of fruit trees.",
+    "tr": "Can her yaz üç haftasını büyükannesinin Safranbolu'daki evinde geçirir. Ev çok eskidir. Ahşap zeminleri, küçük pencereleri ve meyve ağaçlarıyla dolu büyük bir bahçesi vardır."
+   },
+   {
+    "en": "Can knows every room in the house. Or that is what he thought. On the first night, there was a terrible storm. The lights went out, and Can went downstairs with a torch to find some candles.",
+    "tr": "Can evdeki her odayı bilir. Ya da öyle düşünüyordu. İlk gece korkunç bir fırtına çıktı. Işıklar söndü ve Can mum bulmak için elinde fenerle aşağı indi."
+   },
+   {
+    "en": "In the kitchen, behind the old cupboard, he saw a thin line of light. He moved the cupboard a little. Behind it, there was a small green door with a silver handle.",
+    "tr": "Mutfakta, eski dolabın arkasında ince bir ışık çizgisi gördü. Dolabı biraz çekti. Arkasında gümüş kollu küçük yeşil bir kapı vardı."
+   },
+   {
+    "en": "The door was locked. Can tried to open it, but it was impossible. He heard a quiet sound from the other side, like music. Then the lights came back, and the sound stopped.",
+    "tr": "Kapı kilitliydi. Can açmaya çalıştı ama imkânsızdı. Diğer taraftan müzik gibi sessiz bir ses duydu. Sonra ışıklar geri geldi ve ses kesildi."
+   },
+   {
+    "en": "The next morning, Can asked his grandmother about the door. She stopped drinking her tea and looked at him for a long time. \"So you found it,\" she said softly. \"I didn't want to open that door again.\"",
+    "tr": "Ertesi sabah Can büyükannesine kapıyı sordu. Büyükannesi çayını içmeyi bıraktı ve ona uzun süre baktı. \"Demek buldun,\" dedi yumuşak bir sesle. \"O kapıyı bir daha açmak istemiyordum.\""
+   },
+   {
+    "en": "She went to her bedroom and came back with a small key. Her hands were shaking. Together, they opened the green door. Inside, there was a tiny room with a window, a chair and an old piano covered in dust.",
+    "tr": "Yatak odasına gitti ve küçük bir anahtarla geri geldi. Elleri titriyordu. Yeşil kapıyı birlikte açtılar. İçeride pencereli, sandalyeli ve tozla kaplı eski bir piyanonun olduğu minicik bir oda vardı."
+   },
+   {
+    "en": "\"This was my brother Selim's room,\" his grandmother said. \"He played the piano every evening. When he was nineteen, he went to Istanbul to study music. He never came back. We had an argument, and we didn't speak again.\"",
+    "tr": "\"Burası kardeşim Selim'in odasıydı,\" dedi büyükannesi. \"Her akşam piyano çalardı. On dokuz yaşındayken müzik okumak için İstanbul'a gitti. Hiç geri dönmedi. Tartışmıştık ve bir daha konuşmadık.\""
+   },
+   {
+    "en": "On the piano, Can found a pile of letters. They were all for his grandmother, and none of them were opened. The last one was from forty years ago. \"Why didn't you read them?\" Can asked. \"I was angry,\" she said. \"And then I was afraid.\"",
+    "tr": "Piyanonun üstünde Can bir deste mektup buldu. Hepsi büyükannesine yazılmıştı ve hiçbiri açılmamıştı. Sonuncusu kırk yıl öncesindendi. \"Neden okumadın?\" diye sordu Can. \"Kızgındım,\" dedi. \"Sonra da korktum.\""
+   },
+   {
+    "en": "They read the letters together in the garden. In the last letter, Selim wrote: \"I have a daughter now. Her name is Leyla, like our mother. One day I want her to meet you.\" There was an address in İzmir.",
+    "tr": "Mektupları bahçede birlikte okudular. Son mektupta Selim şöyle yazmıştı: \"Artık bir kızım var. Adı annemiz gibi Leyla. Bir gün seninle tanışmasını istiyorum.\" Mektupta İzmir'de bir adres vardı."
+   },
+   {
+    "en": "Can found Leyla on the internet in ten minutes. She was a piano teacher. Two weeks later, a woman with grey hair knocked on the door. She sat at the old piano and played the song from the storm. Can's grandmother cried, but this time she was smiling.",
+    "tr": "Can, Leyla'yı internette on dakikada buldu. Piyano öğretmeniydi. İki hafta sonra gri saçlı bir kadın kapıyı çaldı. Eski piyanonun başına oturdu ve fırtınadaki şarkıyı çaldı. Can'ın büyükannesi ağladı ama bu sefer gülümsüyordu."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "wooden",
+    "meaning": "ahşap",
+    "example": "We have a wooden table in the kitchen."
+   },
+   {
+    "word": "torch",
+    "meaning": "el feneri",
+    "example": "Take a torch, it's dark outside."
+   },
+   {
+    "word": "cupboard",
+    "meaning": "dolap",
+    "example": "The plates are in the cupboard."
+   },
+   {
+    "word": "locked",
+    "meaning": "kilitli",
+    "example": "The door was locked, so we waited."
+   },
+   {
+    "word": "argument",
+    "meaning": "tartışma",
+    "example": "They had an argument about money."
+   },
+   {
+    "word": "dust",
+    "meaning": "toz",
+    "example": "The old books were covered in dust."
+   }
+  ],
+  "questions": [
+   {
+    "q": "Where did Can find the green door?",
+    "options": [
+     "In the garden",
+     "Behind a cupboard in the kitchen",
+     "Under his bed"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "Why didn't the grandmother read Selim's letters?",
+    "options": [
+     "She couldn't read",
+     "She was angry and then afraid",
+     "She never received them"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "Who was Leyla?",
+    "options": [
+     "Selim's daughter",
+     "Can's teacher",
+     "The grandmother's neighbour"
+    ],
+    "answer": 0
+   }
+  ],
+  "reading_minutes": 3
+ },
+ {
+  "slug": "lost-in-cappadocia",
+  "title": "Lost in Cappadocia",
+  "title_tr": "Kapadokya'da Kayıp",
+  "cefr_level": "A2",
+  "category": "Seyahat",
+  "summary": "Emma wants the perfect photo of the balloons at sunrise. She gets lost in a valley, and she finds something better.",
+  "paragraphs": [
+   {
+    "en": "Emma was a photographer from Manchester. She came to Cappadocia for one reason: to take a photo of a hundred hot-air balloons at sunrise. Her plan was simple. She wanted to walk into Love Valley at five in the morning, before the tourists arrived.",
+    "tr": "Emma Manchester'lı bir fotoğrafçıydı. Kapadokya'ya tek bir sebeple gelmişti: gün doğarken yüz sıcak hava balonunun fotoğrafını çekmek. Planı basitti. Turistler gelmeden, sabah beşte Aşk Vadisi'ne yürümek istiyordu."
+   },
+   {
+    "en": "At half past four, she left her hotel in Göreme. It was dark and very quiet. She followed the map on her phone. But after twenty minutes, her phone battery died. She stopped and looked around. Every rock looked the same.",
+    "tr": "Dört buçukta Göreme'deki otelinden çıktı. Hava karanlık ve çok sessizdi. Telefonundaki haritayı takip etti. Ama yirmi dakika sonra telefonunun şarjı bitti. Durdu ve etrafına baktı. Her kaya aynı görünüyordu."
+   },
+   {
+    "en": "\"Don't panic,\" she said to herself. She walked towards a small light. It was a tiny farmhouse. An old man was feeding his chickens. He looked surprised to see a tourist with a big camera in the middle of nowhere.",
+    "tr": "\"Panik yapma,\" dedi kendi kendine. Küçük bir ışığa doğru yürüdü. Minicik bir çiftlik eviydi. Yaşlı bir adam tavuklarını besliyordu. Hiç kimsenin olmadığı bir yerde büyük kameralı bir turist görünce şaşırmış görünüyordu."
+   },
+   {
+    "en": "Emma didn't speak Turkish, and the man didn't speak English. She pointed at the sky and made the shape of a balloon with her hands. The man laughed. \"Balon!\" he said. He waved his hand: \"Come, come.\"",
+    "tr": "Emma Türkçe bilmiyordu, adam da İngilizce bilmiyordu. Gökyüzünü gösterdi ve elleriyle balon şekli yaptı. Adam güldü. \"Balon!\" dedi. Eliyle işaret etti: \"Gel, gel.\""
+   },
+   {
+    "en": "He took a lamp and walked up a narrow path behind his house. Emma followed him. The path was steep and rocky, and her legs hurt. After fifteen minutes, they arrived at the top of a small hill. The man sat on a rock and poured two glasses of tea from a flask.",
+    "tr": "Bir lamba aldı ve evinin arkasındaki dar bir patikadan yukarı yürüdü. Emma onu takip etti. Patika dik ve kayalıktı, bacakları ağrıyordu. On beş dakika sonra küçük bir tepenin zirvesine vardılar. Adam bir kayaya oturdu ve termostan iki bardak çay doldurdu."
+   },
+   {
+    "en": "Then the sky started to change. First it was dark blue, then purple, then orange. And suddenly, they came: one balloon, then five, then fifty. They rose slowly over the valley, red and yellow and blue, like giant flowers in the sky.",
+    "tr": "Sonra gökyüzü değişmeye başladı. Önce koyu maviydi, sonra mor, sonra turuncu. Ve aniden geldiler: bir balon, sonra beş, sonra elli. Vadinin üstünde yavaşça yükseldiler; kırmızı, sarı ve mavi, gökyüzündeki dev çiçekler gibi."
+   },
+   {
+    "en": "Emma took hundreds of photos. There were no tourists, no noise, only the balloons, the old man and his tea. \"Every morning?\" she asked, pointing at the sky. The man nodded and smiled. \"Every morning. Forty years.\"",
+    "tr": "Emma yüzlerce fotoğraf çekti. Ne turist vardı ne gürültü; yalnızca balonlar, yaşlı adam ve çayı. \"Her sabah mı?\" diye sordu gökyüzünü göstererek. Adam başını salladı ve gülümsedi. \"Her sabah. Kırk yıl.\""
+   },
+   {
+    "en": "His name was Mustafa. Later, he drove her back to Göreme in his old tractor. Emma tried to give him money, but he refused. So she took one last photo: Mustafa on his tractor, laughing, with the balloons behind him.",
+    "tr": "Adı Mustafa'ydı. Sonra onu eski traktörüyle Göreme'ye geri götürdü. Emma ona para vermeye çalıştı ama reddetti. Bu yüzden son bir fotoğraf çekti: traktörünün üstünde gülen Mustafa ve arkasında balonlar."
+   },
+   {
+    "en": "Six months later, Emma's photo won an international prize. It wasn't a photo of a hundred balloons. It was the photo of Mustafa. She sent him a printed copy with a letter. A guide from Göreme translated it for him. It said: \"The best things are not on the map.\"",
+    "tr": "Altı ay sonra Emma'nın fotoğrafı uluslararası bir ödül kazandı. Yüz balonun fotoğrafı değildi. Mustafa'nın fotoğrafıydı. Ona basılmış bir kopyasını bir mektupla gönderdi. Göreme'den bir rehber mektubu ona tercüme etti. Şöyle yazıyordu: \"En güzel şeyler haritada yazmaz.\""
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "sunrise",
+    "meaning": "gün doğumu",
+    "example": "We watched the sunrise from the beach."
+   },
+   {
+    "word": "valley",
+    "meaning": "vadi",
+    "example": "The river runs through the valley."
+   },
+   {
+    "word": "steep",
+    "meaning": "dik, sarp",
+    "example": "The road to the village is very steep."
+   },
+   {
+    "word": "flask",
+    "meaning": "termos, matara",
+    "example": "He always carries a flask of tea."
+   },
+   {
+    "word": "rise",
+    "meaning": "yükselmek",
+    "example": "The sun rises in the east."
+   },
+   {
+    "word": "refuse",
+    "meaning": "reddetmek",
+    "example": "She refused to take the money."
+   }
+  ],
+  "questions": [
+   {
+    "q": "Why did Emma get lost?",
+    "options": [
+     "She took the wrong bus",
+     "Her phone battery died",
+     "A guide gave her bad directions"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "How did Emma and Mustafa communicate?",
+    "options": [
+     "In English",
+     "With gestures",
+     "With a translation app"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "Which photo won the prize?",
+    "options": [
+     "A hundred balloons",
+     "Love Valley at night",
+     "Mustafa on his tractor"
+    ],
+    "answer": 2
+   }
+  ],
+  "reading_minutes": 3
+ },
+ {
+  "slug": "the-midnight-bus",
+  "title": "The Midnight Bus",
+  "title_tr": "Gece Yarısı Otobüsü",
+  "cefr_level": "B1",
+  "category": "Gizem",
+  "summary": "Deniz misses the last ferry and takes a night bus home. The only other passenger seems to know everything about her.",
+  "paragraphs": [
+   {
+    "en": "Deniz had worked late again. By the time she left the office in Levent, the last ferry to Kadıköy had already gone. Her phone was at three per cent, it was raining, and she had an exam at nine the next morning. She ran to the bus stop just as the night bus was closing its doors.",
+    "tr": "Deniz yine geç saate kadar çalışmıştı. Levent'teki ofisten çıktığında Kadıköy'e giden son vapur çoktan kalkmıştı. Telefonunun şarjı yüzde üçteydi, yağmur yağıyordu ve ertesi sabah saat dokuzda sınavı vardı. Gece otobüsü kapılarını kapatırken durağa koşarak yetişti."
+   },
+   {
+    "en": "The bus was almost empty. There was only one other passenger: an old man in a grey coat, sitting at the back with a newspaper. Deniz sat near the window and closed her eyes. She was so tired that she didn't notice when the man moved to the seat across from her.",
+    "tr": "Otobüs neredeyse boştu. Yalnızca bir yolcu daha vardı: arkada gazete okuyan gri paltolu yaşlı bir adam. Deniz pencerenin yanına oturdu ve gözlerini kapadı. O kadar yorgundu ki adamın karşısındaki koltuğa geçtiğini fark etmedi."
+   },
+   {
+    "en": "\"You should study the second chapter again,\" he said quietly. Deniz opened her eyes. \"Sorry?\" \"Your exam tomorrow. Question four will be about the second chapter. You haven't understood it yet.\" He smiled kindly, as if this was a normal thing to say to a stranger.",
+    "tr": "\"İkinci bölümü tekrar çalışmalısın,\" dedi sessizce. Deniz gözlerini açtı. \"Efendim?\" \"Yarınki sınavın. Dördüncü soru ikinci bölümden gelecek. Onu henüz anlamadın.\" Sanki bir yabancıya söylenecek normal bir şeymiş gibi nazikçe gülümsedi."
+   },
+   {
+    "en": "Deniz felt cold. Nobody knew about her exam except her mother and her best friend. \"How do you know that?\" she asked. The man folded his newspaper. \"I used to take this bus every night, many years ago. I was always worried about something too. Exams, work, money. I never looked out of the window.\"",
+    "tr": "Deniz üşüdüğünü hissetti. Annesi ve en yakın arkadaşı dışında kimse sınavından haberdar değildi. \"Bunu nereden biliyorsunuz?\" diye sordu. Adam gazetesini katladı. \"Yıllar önce her gece bu otobüse binerdim. Ben de hep bir şey için endişelenirdim. Sınavlar, iş, para. Pencereden hiç dışarı bakmazdım.\""
+   },
+   {
+    "en": "He pointed outside. The bus was crossing the bridge. Below them, the Bosphorus was black and silver, and the lights of the city were shining on the water like thousands of tiny candles. Deniz had crossed this bridge hundreds of times, but she had never really seen it.",
+    "tr": "Dışarıyı gösterdi. Otobüs köprüden geçiyordu. Aşağıda Boğaz siyah ve gümüş rengindeydi, şehrin ışıkları binlerce minik mum gibi suyun üstünde parlıyordu. Deniz bu köprüden yüzlerce kez geçmişti ama onu hiç gerçekten görmemişti."
+   },
+   {
+    "en": "They talked for the rest of the journey. He asked about her studies, her dreams, the things she loved as a child. She told him she wanted to be an architect, but that she was too busy to draw anymore. \"Busy is a word we use when we're afraid,\" he said.",
+    "tr": "Yolculuğun geri kalanında konuştular. Ona derslerini, hayallerini, çocukken sevdiği şeyleri sordu. Deniz mimar olmak istediğini ama artık çizim yapamayacak kadar meşgul olduğunu anlattı. \"Meşgul, korktuğumuzda kullandığımız bir kelimedir,\" dedi adam."
+   },
+   {
+    "en": "When the bus reached Kadıköy, Deniz stood up to thank him. But the seat across from her was empty. She looked down the bus. There was nobody there. Only the newspaper was on the seat, folded neatly. The date at the top was the fourteenth of March, 1987.",
+    "tr": "Otobüs Kadıköy'e vardığında Deniz ona teşekkür etmek için ayağa kalktı. Ama karşısındaki koltuk boştu. Otobüsün içine baktı. Kimse yoktu. Koltukta yalnızca özenle katlanmış gazete duruyordu. En üstteki tarih 14 Mart 1987'ydi."
+   },
+   {
+    "en": "\"Did you see where the old man went?\" she asked the driver. He looked at her in the mirror. \"What old man? You were alone the whole time.\" Deniz took the newspaper and walked home in the rain, her heart beating fast.",
+    "tr": "\"Yaşlı adamın nereye gittiğini gördünüz mü?\" diye sordu şoföre. Şoför aynadan ona baktı. \"Hangi yaşlı adam? Bütün yol boyunca yalnızdınız.\" Deniz gazeteyi aldı ve kalbi hızla çarparak yağmurun altında eve yürüdü."
+   },
+   {
+    "en": "She studied the second chapter until two in the morning. The next day, question four was exactly about it. She passed with the highest mark in her class. That evening, she showed the newspaper to her mother. Her mother went pale.",
+    "tr": "Gece ikiye kadar ikinci bölümü çalıştı. Ertesi gün dördüncü soru tam olarak oradan geldi. Sınıfının en yüksek notuyla geçti. O akşam gazeteyi annesine gösterdi. Annesinin yüzü bembeyaz oldu."
+   },
+   {
+    "en": "\"Your grandfather took the night bus every day,\" she said. \"He was an engineer, but he always wanted to be an architect. He died the year you were born. On the fourteenth of March.\" Deniz didn't say anything. But that night, for the first time in years, she sat down and started to draw.",
+    "tr": "\"Deden her gün gece otobüsüne binerdi,\" dedi. \"Mühendisti ama hep mimar olmak istemişti. Sen doğduğun yıl öldü. 14 Mart'ta.\" Deniz hiçbir şey söylemedi. Ama o gece, yıllar sonra ilk kez oturdu ve çizmeye başladı."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "ferry",
+    "meaning": "vapur, feribot",
+    "example": "We took the ferry to the island."
+   },
+   {
+    "word": "stranger",
+    "meaning": "yabancı",
+    "example": "Don't get into a car with a stranger."
+   },
+   {
+    "word": "fold",
+    "meaning": "katlamak",
+    "example": "She folded the letter and put it in her bag."
+   },
+   {
+    "word": "journey",
+    "meaning": "yolculuk",
+    "example": "The journey took six hours."
+   },
+   {
+    "word": "neatly",
+    "meaning": "düzgünce, özenle",
+    "example": "His clothes were folded neatly."
+   },
+   {
+    "word": "go pale",
+    "meaning": "benzi atmak, sararmak",
+    "example": "He went pale when he heard the news."
+   }
+  ],
+  "questions": [
+   {
+    "q": "Why did Deniz take the night bus?",
+    "options": [
+     "She wanted to see the bridge",
+     "She missed the last ferry",
+     "Her car broke down"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "What did the man say about the word 'busy'?",
+    "options": [
+     "It means you are successful",
+     "We use it when we're afraid",
+     "Students use it too much"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "Who was the old man probably?",
+    "options": [
+     "The bus driver's father",
+     "Deniz's teacher",
+     "Deniz's grandfather"
+    ],
+    "answer": 2
+   }
+  ],
+  "reading_minutes": 4
+ },
+ {
+  "slug": "the-chess-player",
+  "title": "The Chess Player",
+  "title_tr": "Satranç Oyuncusu",
+  "cefr_level": "B1",
+  "category": "Eğlence",
+  "summary": "A quiet girl from a village school challenges the city champion. Nobody expects her to win, least of all herself.",
+  "paragraphs": [
+   {
+    "en": "Nobody at Hasan Kale Village School knew how to play chess, so Ayşe learned from an old book she found in the library. The pieces were missing, so she made her own from bottle caps. She played against herself every evening, after she helped her mother with the goats.",
+    "tr": "Hasan Kale Köy Okulu'nda kimse satranç oynamayı bilmiyordu, bu yüzden Ayşe kütüphanede bulduğu eski bir kitaptan öğrendi. Taşlar eksikti, o da şişe kapaklarından kendi taşlarını yaptı. Her akşam annesine keçilerde yardım ettikten sonra kendisine karşı oynardı."
+   },
+   {
+    "en": "Her new teacher, Mr Burak, saw the bottle caps one day and laughed. Then he played against her and lost in twenty minutes. He played again and lost again. \"Who taught you?\" he asked. \"The book,\" Ayşe said, embarrassed. \"Is it wrong?\"",
+    "tr": "Yeni öğretmeni Burak Bey bir gün şişe kapaklarını gördü ve güldü. Sonra ona karşı oynadı ve yirmi dakikada kaybetti. Bir daha oynadı ve yine kaybetti. \"Sana kim öğretti?\" diye sordu. \"Kitap,\" dedi Ayşe utanarak. \"Yanlış mı?\""
+   },
+   {
+    "en": "Mr Burak entered her into the city tournament in Erzurum. Ayşe had never been to the city. She had never seen so many children with expensive chess clocks, private coaches and matching team jackets. She wore her cousin's old coat, and it was too big for her.",
+    "tr": "Burak Bey onu Erzurum'daki şehir turnuvasına yazdırdı. Ayşe daha önce hiç şehre gitmemişti. Pahalı satranç saatleri, özel antrenörleri ve aynı takım montları olan bu kadar çok çocuğu hiç görmemişti. Kuzeninin eski paltosunu giymişti ve palto ona büyüktü."
+   },
+   {
+    "en": "Some children laughed when she didn't know how to use the clock. In the first game, she was so nervous that she forgot to press it and almost lost on time. But then something changed. She looked at the board, and the room disappeared. It was just her, the pieces and the quiet, like every evening at home.",
+    "tr": "Saati nasıl kullanacağını bilmeyince bazı çocuklar güldü. İlk oyunda o kadar gergindi ki saate basmayı unuttu ve neredeyse süreden kaybediyordu. Ama sonra bir şey değişti. Tahtaya baktı ve oda kayboldu. Tıpkı evdeki her akşam gibi yalnızca o, taşlar ve sessizlik vardı."
+   },
+   {
+    "en": "She won the first game. Then the second, and the third. By the afternoon, people were standing around her table to watch. They whispered: \"Who is she? Which club is she from?\" Mr Burak just smiled and said, \"The library club.\"",
+    "tr": "İlk oyunu kazandı. Sonra ikinciyi ve üçüncüyü. Öğleden sonra insanlar onu izlemek için masasının etrafında toplanmıştı. Fısıldaşıyorlardı: \"Kim bu? Hangi kulüpten?\" Burak Bey yalnızca gülümsedi ve \"Kütüphane kulübünden,\" dedi."
+   },
+   {
+    "en": "In the final, she played against Kaan, the city champion for three years. He was confident and fast. He moved his pieces before she even finished thinking. After an hour, Ayşe was losing badly. She had only her king, a knight and three small pawns left.",
+    "tr": "Finalde üç yıldır şehir şampiyonu olan Kaan'la oynadı. Kendinden emin ve hızlıydı. O daha düşünmeyi bitirmeden taşlarını oynuyordu. Bir saat sonra Ayşe kötü bir şekilde kaybediyordu. Elinde yalnızca şahı, bir atı ve üç küçük piyonu kalmıştı."
+   },
+   {
+    "en": "Then she remembered a page from the old book, a page with a coffee stain on it. It showed a trap, a way to use a knight to protect a pawn until it reached the end of the board. She had practised it with bottle caps a hundred times.",
+    "tr": "Sonra eski kitaptaki bir sayfayı hatırladı, üstünde kahve lekesi olan bir sayfayı. Bir tuzak gösteriyordu: bir piyonu tahtanın sonuna ulaşana kadar atla korumanın yolunu. Bunu şişe kapaklarıyla yüz kez denemişti."
+   },
+   {
+    "en": "Kaan didn't see it coming. He moved too fast, as always. Slowly, step by step, Ayşe's little pawn walked across the board. When it reached the last square, it became a queen. Four moves later, it was checkmate. The room was completely silent, and then everyone started clapping.",
+    "tr": "Kaan bunun geldiğini görmedi. Her zamanki gibi çok hızlı oynadı. Yavaş yavaş, adım adım, Ayşe'nin küçük piyonu tahtada ilerledi. Son kareye ulaştığında vezir oldu. Dört hamle sonra şah mattı. Oda tamamen sessizdi, sonra herkes alkışlamaya başladı."
+   },
+   {
+    "en": "Kaan shook her hand. He looked surprised, but not angry. \"Where did you learn that ending?\" he asked. Ayşe took the old book out of her bag. The cover was falling off. \"Can I borrow it?\" he asked. \"Only if you come and play at my school,\" she said.",
+    "tr": "Kaan elini sıktı. Şaşırmış görünüyordu ama kızgın değildi. \"O oyun sonunu nerede öğrendin?\" diye sordu. Ayşe eski kitabı çantasından çıkardı. Kapağı dökülüyordu. \"Ödünç alabilir miyim?\" diye sordu Kaan. \"Ancak okuluma gelip oynarsan,\" dedi Ayşe."
+   },
+   {
+    "en": "A month later, a box arrived at Hasan Kale Village School. Inside, there were ten chess sets, ten clocks and a note: \"From the Erzurum Chess Club. For the library club. P.S. Kaan is coming on Saturday.\" Ayşe kept her bottle caps, though. They were still her favourite pieces.",
+    "tr": "Bir ay sonra Hasan Kale Köy Okulu'na bir kutu geldi. İçinde on satranç takımı, on saat ve bir not vardı: \"Erzurum Satranç Kulübü'nden. Kütüphane kulübü için. Not: Kaan cumartesi geliyor.\" Ayşe yine de şişe kapaklarını sakladı. Hâlâ en sevdiği taşlar onlardı."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "tournament",
+    "meaning": "turnuva",
+    "example": "Our team won the football tournament."
+   },
+   {
+    "word": "embarrassed",
+    "meaning": "utanmış, mahcup",
+    "example": "I was embarrassed when I forgot his name."
+   },
+   {
+    "word": "confident",
+    "meaning": "kendinden emin",
+    "example": "She felt confident before the interview."
+   },
+   {
+    "word": "stain",
+    "meaning": "leke",
+    "example": "There is a coffee stain on my shirt."
+   },
+   {
+    "word": "trap",
+    "meaning": "tuzak",
+    "example": "The mouse walked into the trap."
+   },
+   {
+    "word": "borrow",
+    "meaning": "ödünç almak",
+    "example": "Can I borrow your pen?"
+   }
+  ],
+  "questions": [
+   {
+    "q": "How did Ayşe learn chess?",
+    "options": [
+     "From her teacher",
+     "From an old library book",
+     "From the internet"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "Why did Ayşe almost lose her first game?",
+    "options": [
+     "She forgot to press the clock",
+     "She arrived late",
+     "She didn't know the rules"
+    ],
+    "answer": 0
+   },
+   {
+    "q": "What did the chess club send to the school?",
+    "options": [
+     "A trophy",
+     "Bottle caps",
+     "Chess sets and clocks"
+    ],
+    "answer": 2
+   }
+  ],
+  "reading_minutes": 4
+ },
+ {
+  "slug": "the-voice-message",
+  "title": "The Voice Message",
+  "title_tr": "Sesli Mesaj",
+  "cefr_level": "B1",
+  "category": "Günlük Hayat",
+  "summary": "A voice message is sent to the wrong number. Mert decides to answer it, and changes a stranger's day.",
+  "paragraphs": [
+   {
+    "en": "Mert was waiting for the metro when his phone buzzed. It was a voice message from a number he didn't know. He almost deleted it, but something made him press play. It was a young woman's voice, shaking and nervous.",
+    "tr": "Mert metroyu beklerken telefonu titredi. Tanımadığı bir numaradan gelen sesli bir mesajdı. Neredeyse silecekti ama bir şey onu oynat tuşuna basmaya itti. Genç bir kadının sesiydi, titrek ve gergin."
+   },
+   {
+    "en": "\"Hi Dad. It's me, Selin. I know we haven't spoken for two years. I'm sorry about everything I said. Today is my graduation, and I... I just wanted you to know. It starts at four, at the university. You don't have to come. I just wanted you to know.\"",
+    "tr": "\"Merhaba baba. Benim, Selin. İki yıldır konuşmadığımızı biliyorum. Söylediğim her şey için özür dilerim. Bugün mezuniyetim ve ben... sadece bilmeni istedim. Saat dörtte üniversitede başlıyor. Gelmek zorunda değilsin. Sadece bilmeni istedim.\""
+   },
+   {
+    "en": "Mert listened to it twice. Clearly, Selin had the wrong number. Somewhere in the city, a father was not going to hear this message, and a daughter was going to look at the door all afternoon, waiting.",
+    "tr": "Mert mesajı iki kez dinledi. Belli ki Selin yanlış numarayı aramıştı. Şehrin bir yerinde bir baba bu mesajı duymayacaktı, bir kız da bütün öğleden sonra kapıya bakıp bekleyecekti."
+   },
+   {
+    "en": "He wrote a reply, then deleted it. What could he say? \"Sorry, wrong number\" felt cruel. He thought about it all the way to work. At lunch, he finally sent a short message: \"Hi Selin. I'm not your dad, I'm sorry. Your number is one digit wrong, maybe. Do you want me to help you find the right one?\"",
+    "tr": "Bir cevap yazdı, sonra sildi. Ne diyebilirdi ki? \"Üzgünüm, yanlış numara\" demek acımasız geliyordu. İşe giderken bütün yol bunu düşündü. Öğle yemeğinde sonunda kısa bir mesaj gönderdi: \"Merhaba Selin. Ben baban değilim, üzgünüm. Belki numaranda bir rakam yanlış. Doğrusunu bulmana yardım etmemi ister misin?\""
+   },
+   {
+    "en": "The answer came after ten minutes. \"Oh no. I'm so embarrassed. I found his number on an old card. I don't know the right one. He changed his phone after we argued. Forget it. It was a stupid idea anyway.\"",
+    "tr": "Cevap on dakika sonra geldi. \"Olamaz. Çok utandım. Numarasını eski bir kartta bulmuştum. Doğrusunu bilmiyorum. Tartıştıktan sonra telefonunu değiştirdi. Boş ver. Zaten aptalca bir fikirdi.\""
+   },
+   {
+    "en": "Mert looked at the message for a long time. Then he asked for her father's name and where he worked. \"Hakan Yalçın. He has a small shoe repair shop in Karaköy. Why?\" Mert didn't answer. He told his boss he had a dentist appointment and left the office at two.",
+    "tr": "Mert mesaja uzun süre baktı. Sonra babasının adını ve nerede çalıştığını sordu. \"Hakan Yalçın. Karaköy'de küçük bir ayakkabı tamircisi var. Neden?\" Mert cevap vermedi. Patronuna dişçi randevusu olduğunu söyledi ve saat ikide ofisten çıktı."
+   },
+   {
+    "en": "Finding the shop wasn't easy. There were dozens of narrow streets and hundreds of small shops. At three fifteen, he finally saw an old sign: Yalçın Shoe Repair. Inside, a grey-haired man was fixing a boot, alone, with the radio on.",
+    "tr": "Dükkânı bulmak kolay değildi. Onlarca dar sokak ve yüzlerce küçük dükkân vardı. Saat üçü çeyrek geçe sonunda eski bir tabela gördü: Yalçın Ayakkabı Tamiri. İçeride gri saçlı bir adam radyo açık, tek başına bir botu tamir ediyordu."
+   },
+   {
+    "en": "\"Mr Hakan?\" Mert said. \"I have a message for you. It's from Selin.\" The man stopped working. Mert held out his phone and pressed play. Hakan listened without moving. When it finished, he put down his tools and covered his face with his hands.",
+    "tr": "\"Hakan Bey?\" dedi Mert. \"Size bir mesajım var. Selin'den.\" Adam çalışmayı bıraktı. Mert telefonunu uzattı ve oynata bastı. Hakan kıpırdamadan dinledi. Mesaj bitince aletlerini bıraktı ve yüzünü elleriyle kapadı."
+   },
+   {
+    "en": "\"What time is it?\" he asked. \"Three twenty,\" said Mert. Hakan took off his apron, locked the shop and they both ran to the main road. The traffic was terrible, so they took the ferry and then a taxi. Hakan didn't say a word the whole way. He just held a small box in his hands.",
+    "tr": "\"Saat kaç?\" diye sordu. \"Üçü yirmi geçiyor,\" dedi Mert. Hakan önlüğünü çıkardı, dükkânı kilitledi ve ikisi ana caddeye koştular. Trafik berbattı, bu yüzden vapura sonra da taksiye bindiler. Hakan bütün yol tek kelime etmedi. Sadece ellerinde küçük bir kutu tutuyordu."
+   },
+   {
+    "en": "They arrived at four twelve. The ceremony had started. Mert stayed at the back. He saw Hakan walk slowly down the aisle, and he saw a young woman in a black gown turn around and freeze. Then she ran. Mert didn't wait to see the rest. He went back to work, and for the rest of the week, he couldn't stop smiling.",
+    "tr": "Dördü on iki geçe vardılar. Tören başlamıştı. Mert arkada kaldı. Hakan'ın koridorda yavaşça yürüdüğünü gördü, siyah cüppeli genç bir kadının arkasını dönüp donakaldığını gördü. Sonra kadın koştu. Mert gerisini görmek için beklemedi. İşe geri döndü ve haftanın geri kalanında gülümsemeden duramadı."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "buzz",
+    "meaning": "titremek (telefon)",
+    "example": "My phone buzzed during the meeting."
+   },
+   {
+    "word": "graduation",
+    "meaning": "mezuniyet",
+    "example": "My parents came to my graduation."
+   },
+   {
+    "word": "cruel",
+    "meaning": "acımasız, zalim",
+    "example": "It was cruel to laugh at him."
+   },
+   {
+    "word": "digit",
+    "meaning": "rakam, hane",
+    "example": "The code has six digits."
+   },
+   {
+    "word": "appointment",
+    "meaning": "randevu",
+    "example": "I have a dentist appointment at three."
+   },
+   {
+    "word": "freeze",
+    "meaning": "donakalmak",
+    "example": "She froze when she saw the snake."
+   }
+  ],
+  "questions": [
+   {
+    "q": "Why did Selin's message go to Mert?",
+    "options": [
+     "She sent it on purpose",
+     "She used an old, wrong number",
+     "Mert stole her phone"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "Where did Selin's father work?",
+    "options": [
+     "At a university",
+     "In a shoe repair shop",
+     "On a ferry"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "What did Mert do after they arrived?",
+    "options": [
+     "He gave a speech",
+     "He went back to work",
+     "He met Selin"
+    ],
+    "answer": 1
+   }
+  ],
+  "reading_minutes": 4
+ },
+ {
+  "slug": "the-map-under-the-floor",
+  "title": "The Map Under the Floor",
+  "title_tr": "Döşemenin Altındaki Harita",
+  "cefr_level": "B2",
+  "category": "Gizem",
+  "summary": "While renovating an old flat in Galata, an architect finds a hand-drawn map hidden beneath the floorboards. It leads somewhere nobody expected.",
+  "paragraphs": [
+   {
+    "en": "When Arda bought the crumbling flat in Galata, his friends thought he had lost his mind. The windows were broken, the ceiling leaked, and the previous owner, an elderly watchmaker named Agop, had lived there alone for over sixty years. But Arda was an architect, and he could see what the flat could become.",
+    "tr": "Arda Galata'daki dökülen daireyi satın aldığında arkadaşları aklını kaçırdığını düşündü. Pencereler kırıktı, tavan akıtıyordu ve önceki sahibi, Agop adında yaşlı bir saatçi, orada altmış yılı aşkın süre yalnız yaşamıştı. Ama Arda bir mimardı ve dairenin neye dönüşebileceğini görebiliyordu."
+   },
+   {
+    "en": "On the third week of renovation, one of the floorboards in the bedroom sounded hollow. Arda lifted it with a screwdriver and found a tin box wrapped in oilcloth. Inside, carefully folded, was a map of the neighbourhood drawn in faded blue ink. Seven small crosses were marked on it, each with a date beside it, all from 1955.",
+    "tr": "Tadilatın üçüncü haftasında yatak odasındaki döşeme tahtalarından biri boş ses çıkardı. Arda tahtayı bir tornavidayla kaldırdı ve muşambaya sarılmış teneke bir kutu buldu. İçinde özenle katlanmış, soluk mavi mürekkeple çizilmiş bir mahalle haritası vardı. Üstünde yedi küçük çarpı işareti vardı, her birinin yanında bir tarih ve hepsi 1955'tendi."
+   },
+   {
+    "en": "At first, Arda assumed it was a treasure map, and he felt slightly ridiculous for being excited. But the crosses didn't mark empty places. When he compared the map with an old city plan, he realised that each cross marked a house, and that almost all of those houses had belonged to families who had left Istanbul in the autumn of that year.",
+    "tr": "İlk başta Arda bunun bir hazine haritası olduğunu varsaydı ve heyecanlandığı için kendini biraz gülünç hissetti. Ama çarpılar boş yerleri işaretlemiyordu. Haritayı eski bir şehir planıyla karşılaştırdığında her çarpının bir evi gösterdiğini ve bu evlerin neredeyse hepsinin o yılın sonbaharında İstanbul'dan ayrılmış ailelere ait olduğunu fark etti."
+   },
+   {
+    "en": "Under the map, there was a notebook. The handwriting was small and precise, the writing of someone used to working with tiny parts. It was a list of objects: a silver pocket watch, a wedding ring, a child's music box, a set of keys. Next to each object was a name and, in some cases, an address in Athens, Marseille or Montreal.",
+    "tr": "Haritanın altında bir defter vardı. El yazısı küçük ve titizdi, minik parçalarla çalışmaya alışkın birinin yazısıydı. Bir nesne listesiydi: gümüş bir cep saati, bir alyans, bir çocuğun müzik kutusu, bir anahtarlık. Her nesnenin yanında bir isim ve bazılarında Atina, Marsilya ya da Montreal'de bir adres vardı."
+   },
+   {
+    "en": "Arda spent the following weekend searching the rest of the flat. Behind a false wall in the workshop, he found a wooden cabinet with dozens of tiny drawers. In every drawer, wrapped in tissue paper and labelled, was one of the objects from the notebook. Agop had not stolen them. He had kept them safe.",
+    "tr": "Arda sonraki hafta sonunu dairenin geri kalanını arayarak geçirdi. Atölyedeki sahte bir duvarın arkasında onlarca minik çekmeceli ahşap bir dolap buldu. Her çekmecede, kâğıt mendile sarılmış ve etiketlenmiş halde, defterdeki nesnelerden biri vardı. Agop onları çalmamıştı. Onları güvende tutmuştu."
+   },
+   {
+    "en": "The last pages of the notebook explained everything. Neighbours had brought him their most precious belongings during a frightening time, asking him to look after them until they could return. Most of them never did. For decades, Agop had written letters to every address he could find. Some had been answered. Most had come back unopened.",
+    "tr": "Defterin son sayfaları her şeyi açıklıyordu. Komşular korkutucu bir dönemde en değerli eşyalarını ona getirmiş, dönebilecekleri zamana kadar onlara göz kulak olmasını istemişlerdi. Çoğu hiç dönmedi. Agop on yıllar boyunca bulabildiği her adrese mektup yazmıştı. Bazılarına cevap gelmişti. Çoğu açılmadan geri dönmüştü."
+   },
+   {
+    "en": "The final entry was written in a shakier hand, only a month before Agop's death: \"Eleven still waiting. I am too old to finish this. I hope whoever finds them will be more patient than time.\" Arda closed the notebook and sat in the dusty workshop until it was dark.",
+    "tr": "Son not daha titrek bir el yazısıyla, Agop'un ölümünden yalnızca bir ay önce yazılmıştı: \"On bir tanesi hâlâ bekliyor. Bunu bitiremeyecek kadar yaşlıyım. Umarım onları bulan kişi zamandan daha sabırlı olur.\" Arda defteri kapadı ve hava kararana kadar tozlu atölyede oturdu."
+   },
+   {
+    "en": "The renovation stopped. Instead, Arda spent the next year writing emails, calling consulates, and posting photographs of the objects on social media with the hashtag #AgopsDrawers. At first, nothing happened. Then a journalist in Athens shared the post, and within a week it had been seen by two million people.",
+    "tr": "Tadilat durdu. Arda bunun yerine sonraki yılı e-posta yazarak, konsoloslukları arayarak ve nesnelerin fotoğraflarını #AgopunCekmeceleri etiketiyle sosyal medyada paylaşarak geçirdi. İlk başta hiçbir şey olmadı. Sonra Atina'da bir gazeteci paylaşımı yaydı ve bir hafta içinde iki milyon kişi tarafından görüldü."
+   },
+   {
+    "en": "Messages began to arrive from all over the world. A retired teacher in Montreal recognised her grandmother's music box from a family photograph. A man in Marseille, now ninety-one, wrote that he had been seven years old when his father left a pocket watch with \"the kind watchmaker on the corner\". He had always believed it was lost.",
+    "tr": "Dünyanın dört bir yanından mesajlar gelmeye başladı. Montreal'de emekli bir öğretmen büyükannesinin müzik kutusunu bir aile fotoğrafından tanıdı. Marsilya'da artık doksan bir yaşında olan bir adam, babası \"köşedeki nazik saatçiye\" bir cep saati bıraktığında yedi yaşında olduğunu yazdı. Hep kaybolduğuna inanmıştı."
+   },
+   {
+    "en": "Eighteen months after he lifted the floorboard, Arda placed the last object, a small brass key, into the hands of a woman who had flown from Toronto. She held it for a long time without speaking. Then she asked if she could see the flat. Today, it is no longer for sale. Arda turned the workshop into a tiny museum, and above the door, a sign reads: Agop's Drawers, open to anyone who is still waiting.",
+    "tr": "Döşeme tahtasını kaldırmasından on sekiz ay sonra Arda son nesneyi, küçük bir pirinç anahtarı, Toronto'dan uçakla gelen bir kadının ellerine bıraktı. Kadın konuşmadan uzun süre tuttu anahtarı. Sonra daireyi görüp göremeyeceğini sordu. Bugün daire artık satılık değil. Arda atölyeyi minik bir müzeye dönüştürdü ve kapının üstündeki tabelada şöyle yazıyor: Agop'un Çekmeceleri, hâlâ bekleyen herkese açık."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "crumbling",
+    "meaning": "dökülen, harap",
+    "example": "They live in a crumbling old house."
+   },
+   {
+    "word": "hollow",
+    "meaning": "içi boş",
+    "example": "The tree trunk was hollow."
+   },
+   {
+    "word": "faded",
+    "meaning": "solmuş, soluk",
+    "example": "She wore a pair of faded jeans."
+   },
+   {
+    "word": "precious",
+    "meaning": "değerli, kıymetli",
+    "example": "Her grandmother's ring is very precious to her."
+   },
+   {
+    "word": "belongings",
+    "meaning": "eşyalar",
+    "example": "Please take all your belongings with you."
+   },
+   {
+    "word": "recognise",
+    "meaning": "tanımak",
+    "example": "I didn't recognise him with his new haircut."
+   }
+  ],
+  "questions": [
+   {
+    "q": "What did the crosses on the map show?",
+    "options": [
+     "Hidden treasure",
+     "Houses of families who left in 1955",
+     "Agop's favourite cafés"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "Why did Agop keep the objects?",
+    "options": [
+     "He wanted to sell them",
+     "Neighbours asked him to look after them",
+     "He collected antiques"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "What did Arda do with the workshop in the end?",
+    "options": [
+     "He sold it",
+     "He turned it into a small museum",
+     "He used it as his office"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "How did people around the world find out about the objects?",
+    "options": [
+     "Through a TV programme",
+     "A post was widely shared online",
+     "Agop's letters"
+    ],
+    "answer": 1
+   }
+  ],
+  "reading_minutes": 5
+ },
+ {
+  "slug": "signal-from-station-nine",
+  "title": "Signal from Station Nine",
+  "title_tr": "Dokuzuncu İstasyondan Sinyal",
+  "cefr_level": "B2",
+  "category": "Bilim Kurgu",
+  "summary": "On an Antarctic research station, a young engineer picks up a radio signal that repeats every night at 03:17. The station has been empty for thirty years.",
+  "paragraphs": [
+   {
+    "en": "Defne had been at the Turkish research base in Antarctica for four months when the signal first appeared. It was 03:17, the middle of the polar night, and she was alone in the control room checking the weather equipment. Suddenly, the old radio receiver in the corner, which nobody had used in years, crackled into life.",
+    "tr": "Sinyal ilk kez ortaya çıktığında Defne dört aydır Antarktika'daki Türk araştırma üssündeydi. Saat 03.17'ydi, kutup gecesinin ortasıydı ve kontrol odasında yalnız başına hava durumu ekipmanlarını kontrol ediyordu. Aniden köşedeki, yıllardır kimsenin kullanmadığı eski radyo alıcısı cızırdayarak canlandı."
+   },
+   {
+    "en": "It wasn't a voice. It was a series of short and long beeps, repeating the same pattern again and again for exactly four minutes. Then it stopped. Defne recorded the next one the following night, at exactly the same time. Using an online decoder, she discovered it was Morse code. The message was only three words long: STATION NINE RESPOND.",
+    "tr": "Bir ses değildi. Tam dört dakika boyunca aynı düzeni tekrar tekrar yineleyen kısa ve uzun bip seslerinden oluşan bir diziydi. Sonra durdu. Defne bir sonraki sinyali ertesi gece tam aynı saatte kaydetti. Çevrimiçi bir çözücü kullanarak bunun Mors alfabesi olduğunu keşfetti. Mesaj yalnızca üç kelimeydi: DOKUZUNCU İSTASYON CEVAP VER."
+   },
+   {
+    "en": "The station commander, a calm, sceptical geologist called Orhan, listened to the recording and shrugged. \"Probably a ship testing old equipment,\" he said. But when Defne checked the database, there was something that made her skin go cold. Station Nine was a Norwegian base, eighty kilometres away. It had been abandoned in 1994 after a fire.",
+    "tr": "Üs komutanı, Orhan adında sakin ve şüpheci bir jeolog, kaydı dinledi ve omuz silkti. \"Muhtemelen eski ekipmanı test eden bir gemi,\" dedi. Ama Defne veri tabanını kontrol ettiğinde tüylerini diken diken eden bir şey buldu. Dokuzuncu İstasyon seksen kilometre uzaktaki bir Norveç üssüydü. 1994'teki bir yangından sonra terk edilmişti."
+   },
+   {
+    "en": "Defne became obsessed. Every night, she sat in front of the radio at 03:17. She used the station's satellite connection to measure the direction of the signal, and the result was always the same: it was coming from Station Nine. Either someone was there, or something was transmitting on its own after thirty years in temperatures of minus sixty degrees.",
+    "tr": "Defne buna takıntılı hale geldi. Her gece saat 03.17'de radyonun başına oturdu. Sinyalin yönünü ölçmek için istasyonun uydu bağlantısını kullandı ve sonuç her zaman aynıydı: sinyal Dokuzuncu İstasyon'dan geliyordu. Ya orada biri vardı ya da bir şey eksi altmış derecede otuz yıl sonra kendi kendine yayın yapıyordu."
+   },
+   {
+    "en": "Finally, she convinced Orhan to let her visit the base when the weather improved. In early September, they set out on two snowmobiles with a mechanic named Jale. The journey took six hours through a white, featureless landscape. When the dark shapes of Station Nine finally appeared on the horizon, nobody said anything.",
+    "tr": "Sonunda hava düzelince üssü ziyaret etmesi için Orhan'ı ikna etti. Eylül başında Jale adında bir teknisyenle birlikte iki kar motoruyla yola çıktılar. Yolculuk beyaz, hiçbir özelliği olmayan bir arazide altı saat sürdü. Dokuzuncu İstasyon'un karanlık siluetleri sonunda ufukta göründüğünde kimse bir şey söylemedi."
+   },
+   {
+    "en": "The base was half buried in snow. The main building was blackened by the old fire, but the small radio hut behind it was strangely intact. Inside, they found an automatic transmitter connected to a wind turbine and a box of batteries. Someone had built it with care. A note was taped to the wall, in English, dated March 1994.",
+    "tr": "Üs yarı yarıya karın altındaydı. Ana bina eski yangından kararmıştı ama arkasındaki küçük telsiz kulübesi tuhaf bir şekilde sağlamdı. İçeride bir rüzgâr türbinine ve bir kutu bataryaya bağlı otomatik bir verici buldular. Biri onu özenle kurmuştu. Duvara İngilizce yazılmış, Mart 1994 tarihli bir not yapıştırılmıştı."
+   },
+   {
+    "en": "\"My name is Erik Lund,\" it read. \"I stayed behind after the fire to save the scientific data while the others were evacuated. The rescue plane cannot land until spring. If I do not make it, this transmitter will keep calling until someone answers. Please tell my daughter, Ingrid, that I kept my promise. I did not leave the work unfinished.\"",
+    "tr": "\"Adım Erik Lund,\" diye yazıyordu. \"Diğerleri tahliye edilirken bilimsel verileri kurtarmak için yangından sonra burada kaldım. Kurtarma uçağı bahara kadar inemiyor. Eğer başaramazsam bu verici biri cevap verene kadar çağırmaya devam edecek. Lütfen kızım Ingrid'e sözümü tuttuğumu söyleyin. İşi yarım bırakmadım.\""
+   },
+   {
+    "en": "Under the desk, they found sealed metal cases containing hundreds of ice-core samples and notebooks full of measurements: thirty years of climate data from before the fire, data that scientists around the world had believed was lost forever. Erik's body was never found. Orhan, the sceptic, had to sit down.",
+    "tr": "Masanın altında yüzlerce buz çekirdeği örneği ve ölçümlerle dolu defterler içeren mühürlü metal kasalar buldular: yangından önceki otuz yılın iklim verileri, dünyanın dört bir yanındaki bilim insanlarının sonsuza kadar kaybolduğuna inandığı veriler. Erik'in cesedi hiç bulunamadı. Şüpheci Orhan oturmak zorunda kaldı."
+   },
+   {
+    "en": "Defne reached for the transmitter's key, which was still connected, and tapped out a reply in Morse code, slowly and carefully: STATION NINE RECEIVED. WORK COMPLETE. Then she switched it off. For a moment, the only sound was the wind outside.",
+    "tr": "Defne hâlâ bağlı olan vericinin anahtarına uzandı ve Mors alfabesiyle yavaşça ve dikkatlice bir cevap yazdı: DOKUZUNCU İSTASYON ALINDI. İŞ TAMAMLANDI. Sonra cihazı kapattı. Bir an için tek ses dışarıdaki rüzgârdı."
+   },
+   {
+    "en": "The data was flown to Oslo that summer and published under Erik Lund's name. At the ceremony, a woman in her forties walked up to Defne and introduced herself. Her name was Ingrid. \"I was nine when he didn't come home,\" she said. \"Everyone told me he was gone. But somewhere, he was still talking. Thank you for listening.\" The radio at the Turkish base has been silent since then, but Defne still wakes up at 03:17 sometimes, just to check.",
+    "tr": "Veriler o yaz uçakla Oslo'ya götürüldü ve Erik Lund'un adıyla yayımlandı. Törende kırklı yaşlarında bir kadın Defne'nin yanına gelip kendini tanıttı. Adı Ingrid'di. \"Eve dönmediğinde dokuz yaşındaydım,\" dedi. \"Herkes bana gittiğini söyledi. Ama bir yerlerde hâlâ konuşuyordu. Dinlediğin için teşekkür ederim.\" Türk üssündeki radyo o zamandan beri sessiz ama Defne hâlâ bazen sadece kontrol etmek için 03.17'de uyanıyor."
+   }
+  ],
+  "vocabulary": [
+   {
+    "word": "receiver",
+    "meaning": "alıcı (cihaz)",
+    "example": "The radio receiver picked up a weak signal."
+   },
+   {
+    "word": "sceptical",
+    "meaning": "şüpheci",
+    "example": "Scientists were sceptical about the results."
+   },
+   {
+    "word": "abandoned",
+    "meaning": "terk edilmiş",
+    "example": "We explored an abandoned factory."
+   },
+   {
+    "word": "obsessed",
+    "meaning": "takıntılı",
+    "example": "He is obsessed with football."
+   },
+   {
+    "word": "intact",
+    "meaning": "sağlam, zarar görmemiş",
+    "example": "The vase was still intact after the fall."
+   },
+   {
+    "word": "evacuate",
+    "meaning": "tahliye etmek",
+    "example": "The building was evacuated because of the fire."
+   }
+  ],
+  "questions": [
+   {
+    "q": "What was special about the time of the signal?",
+    "options": [
+     "It changed every night",
+     "It always came at 03:17",
+     "It came only on Sundays"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "Why did Erik Lund stay at Station Nine?",
+    "options": [
+     "He was lost",
+     "To save the scientific data",
+     "He missed the plane by mistake"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "What did the team find under the desk?",
+    "options": [
+     "Erik's diary only",
+     "Climate data believed to be lost",
+     "A second radio"
+    ],
+    "answer": 1
+   },
+   {
+    "q": "How did Defne answer the signal?",
+    "options": [
+     "She called Ingrid",
+     "She tapped a Morse code reply",
+     "She sent an email to Oslo"
+    ],
+    "answer": 1
+   }
+  ],
+  "reading_minutes": 5
+ }
 ]

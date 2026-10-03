@@ -1664,5 +1664,390 @@
   ],
   "answer": 2,
   "explanation": "Paragraf sosyal medyanın etkileri ve önlemler hakkında; ilk akıllı telefonun tarihi (III) akışı bozuyor."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Hi Ece,\nThanks for inviting me to your birthday party on Saturday! I'd love to come, but I have a piano exam at 11 a.m. It usually takes two hours. Can I come after that? I'll bring the board games we played last time. By the way, is it OK if my cousin Mert comes with me? He is staying with us this week.\nSee you soon,\nDuru",
+  "prompt": "Why can't Duru arrive at the party early?",
+  "options": [
+   "She has to look after her cousin.",
+   "She has a piano exam in the morning.",
+   "She doesn't like birthday parties.",
+   "She has to buy some board games."
+  ],
+  "answer": 1,
+  "explanation": "Metinde 'I have a piano exam at 11 a.m.' diyor. Sınav iki saat sürdüğü için partiye sonra gelecek. Kuzen ve oyunlar dikkat dağıtan ayrıntılar."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Hi Ece,\nThanks for inviting me to your birthday party on Saturday! I'd love to come, but I have a piano exam at 11 a.m. It usually takes two hours. Can I come after that? I'll bring the board games we played last time. By the way, is it OK if my cousin Mert comes with me? He is staying with us this week.\nSee you soon,\nDuru",
+  "prompt": "Which of the following is TRUE according to the message?",
+  "options": [
+   "Duru refuses the invitation.",
+   "Mert is Ece's cousin.",
+   "Duru wants to bring someone with her.",
+   "The party is on Sunday."
+  ],
+  "answer": 2,
+  "explanation": "Duru 'is it OK if my cousin Mert comes with me?' diye soruyor. Mert, Ece'nin değil Duru'nun kuzeni; parti cumartesi."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Teen Survey: How do you spend your free time?\nWe asked 200 students at Atatürk Middle School.\n- Playing online games: 35%\n- Doing sports: 25%\n- Hanging out with friends: 20%\n- Reading books: 12%\n- Watching TV series: 8%\nMost students said they spend more than two hours a day online. Only a few students said they read books every day.",
+  "prompt": "According to the survey, which activity is the second most popular?",
+  "options": [
+   "Reading books",
+   "Hanging out with friends",
+   "Doing sports",
+   "Playing online games"
+  ],
+  "answer": 2,
+  "explanation": "Yüzdeleri sıralayınca: oyun %35, spor %25. İkinci sıradaki etkinlik spor."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Teen Survey: How do you spend your free time?\nWe asked 200 students at Atatürk Middle School.\n- Playing online games: 35%\n- Doing sports: 25%\n- Hanging out with friends: 20%\n- Reading books: 12%\n- Watching TV series: 8%\nMost students said they spend more than two hours a day online. Only a few students said they read books every day.",
+  "prompt": "Which statement can be made from the survey?",
+  "options": [
+   "Most students prefer watching TV series to reading.",
+   "Fewer students read books than do sports.",
+   "Hanging out with friends is the least popular activity.",
+   "Nobody spends time online."
+  ],
+  "answer": 1,
+  "explanation": "Kitap okuma %12, spor %25; kitap okuyanlar daha az. TV dizisi %8 ile kitaptan düşük, bu yüzden A yanlış."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Science Museum Rules\n- Please don't touch the exhibits unless there is a green hand sign.\n- Taking photos is allowed, but you mustn't use a flash.\n- Food and drinks are only allowed in the café.\n- Children under 12 must stay with an adult.\n- The 3D cinema show starts every hour. Tickets are sold at the entrance.",
+  "prompt": "Elif is 10 years old and wants to visit the museum alone. What should she know?",
+  "options": [
+   "She can visit the museum without an adult.",
+   "She must come with an adult.",
+   "She can eat her sandwich next to the exhibits.",
+   "She can't take any photos."
+  ],
+  "answer": 1,
+  "explanation": "'Children under 12 must stay with an adult.' Elif 10 yaşında olduğu için yanında bir yetişkin olmalı."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Science Museum Rules\n- Please don't touch the exhibits unless there is a green hand sign.\n- Taking photos is allowed, but you mustn't use a flash.\n- Food and drinks are only allowed in the café.\n- Children under 12 must stay with an adult.\n- The 3D cinema show starts every hour. Tickets are sold at the entrance.",
+  "prompt": "Which of the following is NOT allowed in the museum?",
+  "options": [
+   "Taking photos without a flash",
+   "Touching exhibits with a green hand sign",
+   "Using a flash while taking photos",
+   "Buying a ticket for the 3D cinema"
+  ],
+  "answer": 2,
+  "explanation": "'You mustn't use a flash.' Fotoğraf serbest ama flaş yasak. Yeşil el işaretli nesnelere dokunmak serbest."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Kerem: I'm thinking of making a short film about recycling for the school festival. Do you want to join me?\nSelin: Sounds great! But we don't have a good camera.\nKerem: No problem. My brother can lend us his. Can you write the script?\nSelin: Sure. I'm better at writing than acting anyway. Who will be in the film?\nKerem: Let's ask Arda and Zeynep. They love acting.",
+  "prompt": "What will Selin do for the film?",
+  "options": [
+   "She will act in it.",
+   "She will lend a camera.",
+   "She will write the script.",
+   "She will choose the festival."
+  ],
+  "answer": 2,
+  "explanation": "Kerem 'Can you write the script?' diye soruyor, Selin 'Sure' diyor. Oyunculuk Arda ve Zeynep'e kalıyor."
+ },
+ {
+  "exams": [
+   "lgs"
+  ],
+  "section": "reading",
+  "cefr": "A2",
+  "passage": "Kerem: I'm thinking of making a short film about recycling for the school festival. Do you want to join me?\nSelin: Sounds great! But we don't have a good camera.\nKerem: No problem. My brother can lend us his. Can you write the script?\nSelin: Sure. I'm better at writing than acting anyway. Who will be in the film?\nKerem: Let's ask Arda and Zeynep. They love acting.",
+  "prompt": "What is the film going to be about?",
+  "options": [
+   "A school festival",
+   "Recycling",
+   "Acting lessons",
+   "Kerem's brother"
+  ],
+  "answer": 1,
+  "explanation": "İlk cümle: 'a short film about recycling'. Festival, filmin gösterileceği yer."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "ielts",
+   "toefl",
+   "proficiency"
+  ],
+  "section": "reading",
+  "cefr": "B2",
+  "passage": "Sleep was long regarded as a passive state in which the brain simply switched off. Research over the past two decades has overturned this view. During deep sleep, the brain actively replays and strengthens the memories formed during the day, a process known as consolidation. At the same time, a network of channels around blood vessels, sometimes called the glymphatic system, clears away waste proteins that accumulate while we are awake. Some of these proteins have been linked to neurodegenerative diseases such as Alzheimer's. Consequently, chronic sleep deprivation may do more than leave us tired; it could, over many years, compromise the brain's ability to maintain itself. Nevertheless, researchers caution that most of the evidence so far comes from animal studies, and that the precise relationship between poor sleep and disease in humans remains to be established.",
+  "prompt": "According to the passage, the traditional view of sleep was that ----.",
+  "options": [
+   "it strengthened memories formed during the day",
+   "the brain was largely inactive during it",
+   "it caused neurodegenerative diseases",
+   "it removed waste proteins from the brain",
+   "it was mainly studied in animals"
+  ],
+  "answer": 1,
+  "explanation": "İlk cümle: 'regarded as a passive state in which the brain simply switched off'. Diğer seçenekler yeni araştırmaların bulguları."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "ielts",
+   "toefl",
+   "proficiency"
+  ],
+  "section": "reading",
+  "cefr": "B2",
+  "passage": "Sleep was long regarded as a passive state in which the brain simply switched off. Research over the past two decades has overturned this view. During deep sleep, the brain actively replays and strengthens the memories formed during the day, a process known as consolidation. At the same time, a network of channels around blood vessels, sometimes called the glymphatic system, clears away waste proteins that accumulate while we are awake. Some of these proteins have been linked to neurodegenerative diseases such as Alzheimer's. Consequently, chronic sleep deprivation may do more than leave us tired; it could, over many years, compromise the brain's ability to maintain itself. Nevertheless, researchers caution that most of the evidence so far comes from animal studies, and that the precise relationship between poor sleep and disease in humans remains to be established.",
+  "prompt": "The word 'compromise' in the passage is closest in meaning to ----.",
+  "options": [
+   "improve",
+   "weaken",
+   "measure",
+   "replace",
+   "delay"
+  ],
+  "answer": 1,
+  "explanation": "Compromise burada 'zayıflatmak, zarar vermek' anlamında. Bağlam uykusuzluğun beynin kendini koruma yeteneğine zarar vermesinden söz ediyor."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "ielts",
+   "toefl",
+   "proficiency"
+  ],
+  "section": "reading",
+  "cefr": "C1",
+  "passage": "Sleep was long regarded as a passive state in which the brain simply switched off. Research over the past two decades has overturned this view. During deep sleep, the brain actively replays and strengthens the memories formed during the day, a process known as consolidation. At the same time, a network of channels around blood vessels, sometimes called the glymphatic system, clears away waste proteins that accumulate while we are awake. Some of these proteins have been linked to neurodegenerative diseases such as Alzheimer's. Consequently, chronic sleep deprivation may do more than leave us tired; it could, over many years, compromise the brain's ability to maintain itself. Nevertheless, researchers caution that most of the evidence so far comes from animal studies, and that the precise relationship between poor sleep and disease in humans remains to be established.",
+  "prompt": "What can be inferred from the last sentence of the passage?",
+  "options": [
+   "The link between poor sleep and disease in humans has been fully proven.",
+   "Animal studies are of no value in sleep research.",
+   "Further research on humans is needed before firm conclusions can be drawn.",
+   "Researchers no longer believe that sleep affects memory.",
+   "The glymphatic system exists only in animals."
+  ],
+  "answer": 2,
+  "explanation": "'Remains to be established' henüz kanıtlanmadığını gösterir; yani insanlarda daha fazla araştırma gerekir. A seçeneği tam tersini söylüyor."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "ielts",
+   "toefl",
+   "proficiency"
+  ],
+  "section": "reading",
+  "cefr": "B2",
+  "passage": "Urban heat islands are areas within cities that are significantly warmer than the surrounding countryside. The phenomenon occurs because materials such as asphalt and concrete absorb solar radiation during the day and release it slowly at night, while the lack of vegetation reduces natural cooling through evaporation. In some large cities, night-time temperatures can be as much as ten degrees higher than in nearby rural areas. This is not merely a matter of comfort: during heatwaves, elevated temperatures increase the risk of heat-related illness, particularly among the elderly. To address the problem, a number of cities have introduced 'cool roofs' painted in reflective colours, expanded parks and planted trees along streets. Although such measures cannot eliminate the effect entirely, studies suggest they can lower local temperatures by several degrees.",
+  "prompt": "According to the passage, one reason cities are warmer than rural areas is that ----.",
+  "options": [
+   "rural areas receive less solar radiation",
+   "there are fewer elderly people in the countryside",
+   "urban materials store heat and release it slowly",
+   "cool roofs absorb more heat than asphalt",
+   "evaporation increases in cities"
+  ],
+  "answer": 2,
+  "explanation": "'Asphalt and concrete absorb solar radiation during the day and release it slowly at night.' E seçeneği tersini söylüyor: bitki azlığı buharlaşmayı azaltır."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "ielts",
+   "toefl",
+   "proficiency"
+  ],
+  "section": "reading",
+  "cefr": "B2",
+  "passage": "Urban heat islands are areas within cities that are significantly warmer than the surrounding countryside. The phenomenon occurs because materials such as asphalt and concrete absorb solar radiation during the day and release it slowly at night, while the lack of vegetation reduces natural cooling through evaporation. In some large cities, night-time temperatures can be as much as ten degrees higher than in nearby rural areas. This is not merely a matter of comfort: during heatwaves, elevated temperatures increase the risk of heat-related illness, particularly among the elderly. To address the problem, a number of cities have introduced 'cool roofs' painted in reflective colours, expanded parks and planted trees along streets. Although such measures cannot eliminate the effect entirely, studies suggest they can lower local temperatures by several degrees.",
+  "prompt": "The author mentions the elderly in order to ----.",
+  "options": [
+   "show that urban heat islands are only a comfort problem",
+   "illustrate a group especially vulnerable to high temperatures",
+   "explain why cities build cool roofs",
+   "argue that rural areas are healthier",
+   "suggest that parks are mainly used by older people"
+  ],
+  "answer": 1,
+  "explanation": "'This is not merely a matter of comfort' cümlesinden sonra yaşlılar risk grubu örneği olarak veriliyor."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "ielts",
+   "toefl",
+   "proficiency"
+  ],
+  "section": "reading",
+  "cefr": "C1",
+  "passage": "Urban heat islands are areas within cities that are significantly warmer than the surrounding countryside. The phenomenon occurs because materials such as asphalt and concrete absorb solar radiation during the day and release it slowly at night, while the lack of vegetation reduces natural cooling through evaporation. In some large cities, night-time temperatures can be as much as ten degrees higher than in nearby rural areas. This is not merely a matter of comfort: during heatwaves, elevated temperatures increase the risk of heat-related illness, particularly among the elderly. To address the problem, a number of cities have introduced 'cool roofs' painted in reflective colours, expanded parks and planted trees along streets. Although such measures cannot eliminate the effect entirely, studies suggest they can lower local temperatures by several degrees.",
+  "prompt": "Which of the following best describes the author's attitude towards the measures cities have taken?",
+  "options": [
+   "Completely dismissive",
+   "Cautiously positive",
+   "Highly critical",
+   "Indifferent",
+   "Overly enthusiastic"
+  ],
+  "answer": 1,
+  "explanation": "'Cannot eliminate the effect entirely' (sınırlı) ama 'can lower local temperatures by several degrees' (faydalı): temkinli olumlu."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "ielts",
+   "toefl",
+   "proficiency"
+  ],
+  "section": "reading",
+  "cefr": "B2",
+  "passage": "The term 'bilingual advantage' refers to the claim that people who regularly use two languages perform better on tasks requiring attention control, such as ignoring irrelevant information or switching between rules. Early studies in the 2000s reported striking differences between bilingual and monolingual children. More recent large-scale studies, however, have frequently failed to replicate these results, and some researchers now argue that the original findings were influenced by small sample sizes and differences in the participants' social backgrounds. This does not mean that learning a second language has no benefits. Its cultural, social and economic advantages are well documented. The debate concerns only whether bilingualism produces a general improvement in cognitive control beyond language itself.",
+  "prompt": "According to the passage, recent large-scale studies ----.",
+  "options": [
+   "have confirmed the bilingual advantage",
+   "have often not found the same results as early studies",
+   "were based on very small samples",
+   "only studied monolingual children",
+   "show that a second language has no benefits"
+  ],
+  "answer": 1,
+  "explanation": "'Have frequently failed to replicate these results': yeni çalışmalar eski bulguları çoğu zaman tekrarlayamamış. Küçük örneklem eski çalışmaların sorunu."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "ielts",
+   "toefl",
+   "proficiency"
+  ],
+  "section": "reading",
+  "cefr": "B2",
+  "passage": "The term 'bilingual advantage' refers to the claim that people who regularly use two languages perform better on tasks requiring attention control, such as ignoring irrelevant information or switching between rules. Early studies in the 2000s reported striking differences between bilingual and monolingual children. More recent large-scale studies, however, have frequently failed to replicate these results, and some researchers now argue that the original findings were influenced by small sample sizes and differences in the participants' social backgrounds. This does not mean that learning a second language has no benefits. Its cultural, social and economic advantages are well documented. The debate concerns only whether bilingualism produces a general improvement in cognitive control beyond language itself.",
+  "prompt": "The word 'replicate' is closest in meaning to ----.",
+  "options": [
+   "reject",
+   "repeat",
+   "publish",
+   "explain",
+   "exaggerate"
+  ],
+  "answer": 1,
+  "explanation": "Replicate = bir deneyi tekrarlayıp aynı sonucu elde etmek (repeat)."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "ielts",
+   "toefl",
+   "proficiency"
+  ],
+  "section": "reading",
+  "cefr": "C1",
+  "passage": "The term 'bilingual advantage' refers to the claim that people who regularly use two languages perform better on tasks requiring attention control, such as ignoring irrelevant information or switching between rules. Early studies in the 2000s reported striking differences between bilingual and monolingual children. More recent large-scale studies, however, have frequently failed to replicate these results, and some researchers now argue that the original findings were influenced by small sample sizes and differences in the participants' social backgrounds. This does not mean that learning a second language has no benefits. Its cultural, social and economic advantages are well documented. The debate concerns only whether bilingualism produces a general improvement in cognitive control beyond language itself.",
+  "prompt": "It is clear from the passage that the debate is NOT about ----.",
+  "options": [
+   "whether bilinguals have better attention control",
+   "the reliability of early studies",
+   "the social and economic value of learning languages",
+   "the effect of sample size on results",
+   "whether bilingualism improves general cognition"
+  ],
+  "answer": 2,
+  "explanation": "Metin kültürel, sosyal ve ekonomik faydaların 'well documented' olduğunu ve tartışmanın 'only' bilişsel kontrolle ilgili olduğunu söylüyor."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "paragraph",
+  "cefr": "B2",
+  "passage": "Coral reefs cover less than one per cent of the ocean floor. ---- . They provide food and shelter for fish, protect coastlines from storms and support the livelihoods of millions of people. Yet rising sea temperatures are causing widespread bleaching, a process in which corals expel the algae that give them their colour and much of their energy.",
+  "prompt": "Choose the sentence that best completes the paragraph.",
+  "options": [
+   "Nevertheless, they are home to roughly a quarter of all marine species",
+   "Most tourists visit reefs during the summer months",
+   "Therefore, they are of little importance to marine life",
+   "Algae can also be found in fresh water",
+   "Storms have become less frequent in recent years"
+  ],
+  "answer": 0,
+  "explanation": "Boşluktan önce 'çok küçük alan', sonra 'pek çok fayda' var. 'Nevertheless' ile gelen zıtlık ve 'quarter of all marine species' paragrafın akışına uyuyor."
+ },
+ {
+  "exams": [
+   "yds",
+   "yokdil",
+   "ydt",
+   "proficiency"
+  ],
+  "section": "irrelevant",
+  "cefr": "B2",
+  "passage": "(I) The printing press, developed by Gutenberg around 1440, transformed the spread of knowledge in Europe. (II) Books, which had previously been copied by hand, could now be produced quickly and cheaply. (III) Paper was first invented in China many centuries earlier. (IV) As a result, literacy rates rose and new ideas circulated more widely. (V) Some historians even link the press to the Reformation and the Scientific Revolution.",
+  "prompt": "Which sentence is irrelevant to the flow of the passage?",
+  "options": [
+   "I",
+   "II",
+   "III",
+   "IV",
+   "V"
+  ],
+  "answer": 2,
+  "explanation": "Paragraf matbaanın bilginin yayılmasına etkisini anlatıyor. III. cümle kâğıdın icadına geçiyor ve akışı bozuyor."
  }
 ]
