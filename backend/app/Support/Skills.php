@@ -16,9 +16,9 @@ class Skills
     public const STEP = 60;
 
     private const BY_TYPE = [
-        'choice' => 'reading', 'fill' => 'reading', 'spot_error' => 'reading', 'sequence' => 'reading', 'match' => 'reading',
+        'choice' => 'reading', 'read' => 'reading', 'fill' => 'reading', 'spot_error' => 'reading', 'sequence' => 'reading', 'match' => 'reading',
         'listen_choice' => 'listening', 'listen_type' => 'listening', 'dialogue' => 'listening',
-        'speak' => 'speaking',
+        'speak' => 'speaking', 'pronounce' => 'speaking',
         'translate' => 'writing', 'order' => 'writing',
     ];
 

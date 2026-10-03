@@ -33,6 +33,7 @@ export function isCorrect(ex: Exercise, v: Answer): boolean {
     case 'choice':
     case 'fill':
     case 'listen_choice':
+    case 'read':
       return v === ex.answer
     case 'translate':
       return typeof v === 'string' && [ex.answer, ...(ex.alternatives ?? [])].some((a) => normalize(a) === normalize(v))
@@ -40,6 +41,8 @@ export function isCorrect(ex: Exercise, v: Answer): boolean {
       return typeof v === 'string' && normalize(v) === normalize(ex.answer)
     case 'speak':
       return typeof v === 'string' && similarity(v, ex.text) >= 0.6
+    case 'pronounce':
+      return typeof v === 'string' && similarity(v, ex.text) >= 0.7
     case 'match':
       return v === true
     case 'spot_error':
@@ -60,12 +63,12 @@ export const correctText = (ex: Exercise) => {
   if (ex.type === 'sequence') return ex.answer.map((i) => ex.items[i]).join(' → ')
   if ('options' in ex && typeof ex.answer === 'number') return ex.options[ex.answer]
   if (ex.type === 'translate' || ex.type === 'listen_type') return ex.answer
-  if (ex.type === 'speak') return ex.text
+  if (ex.type === 'speak' || ex.type === 'pronounce') return ex.text
   return ''
 }
 
 /** Which of the four skills each drill trains (mirrors App\\Support\\Skills on the server). */
-const SKILL_OF: Record<Exercise['type'], SkillKey> = { choice: 'reading', fill: 'reading', spot_error: 'reading', sequence: 'reading', match: 'reading', listen_choice: 'listening', listen_type: 'listening', dialogue: 'listening', speak: 'speaking', translate: 'writing' }
+const SKILL_OF: Record<Exercise['type'], SkillKey> = { choice: 'reading', fill: 'reading', spot_error: 'reading', sequence: 'reading', match: 'reading', listen_choice: 'listening', listen_type: 'listening', dialogue: 'listening', speak: 'speaking', pronounce: 'speaking', read: 'reading', translate: 'writing' }
 
 /** Each drill gets its own name, colour and kicker so a lesson feels like a set of scenes. */
 const DRILL: Record<Exercise['type'], { label: string; title: string; accent: string; tint: string }> = {
@@ -79,6 +82,8 @@ const DRILL: Record<Exercise['type'], { label: string; title: string; accent: st
   spot_error: { label: 'Hata avı', title: 'Bu cümlede bir hata var. Yakala.', accent: 'text-berry', tint: 'from-berry/12' },
   dialogue: { label: 'Sahne', title: 'Sıra sende. Ne dersin?', accent: 'text-flame', tint: 'from-flame/10' },
   sequence: { label: 'Sıralama', title: 'Doğru sıraya diz', accent: 'text-mint-deep', tint: 'from-mint/10' },
+  read: { label: 'Okuma', title: 'Metni oku, soruyu cevapla', accent: 'text-butter-deep', tint: 'from-butter/14' },
+  pronounce: { label: 'Telaffuz', title: 'Sesli söyle, Higo dinlesin', accent: 'text-flame', tint: 'from-flame/12' },
 }
 
 export default function LessonPlayer() {
@@ -158,7 +163,7 @@ export default function LessonPlayer() {
     const ok = isCorrect(ex, value)
     setChecked(ok)
     // first attempt is what the server grades
-    if (answers[current] === undefined) setAnswers((a) => ({ ...a, [current]: ex.type === 'speak' && ok ? ex.text : value }))
+    if (answers[current] === undefined) setAnswers((a) => ({ ...a, [current]: (ex.type === 'speak' || ex.type === 'pronounce') && ok ? ex.text : value }))
     setCombo((c) => (ok ? c + 1 : 0))
     if (ok) sfx.correct(combo + 1)
     else {
@@ -257,7 +262,7 @@ export default function LessonPlayer() {
             </motion.div>
           )}
           <div className="flex gap-3 sm:ml-auto">
-            {checked === null && ex.type === 'speak' && (
+            {checked === null && (ex.type === 'speak' || ex.type === 'pronounce') && (
               <Button variant="ghost" onClick={() => { setValue(ex.text); }}>Şu an konuşamıyorum</Button>
             )}
             {checked === null ? (
@@ -338,9 +343,11 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
         <span className={clsx('text-xs font-black uppercase tracking-[0.2em]', d.accent)}>{d.label}</span>
       </p>
       <h1 className="mb-7 text-2xl font-extrabold sm:text-3xl">{d.title}</h1>
-      {(ex.type === 'choice' || ex.type === 'fill' || ex.type === 'listen_choice') && (
+      {(ex.type === 'choice' || ex.type === 'fill' || ex.type === 'listen_choice' || ex.type === 'read') && (
         <>
-          {ex.type === 'listen_choice' ? (
+          {ex.type === 'read' ? (
+            <ReadingCard ex={ex} ttsRate={ttsRate} />
+          ) : ex.type === 'listen_choice' ? (
             <div className="mb-8"><SpeakerButton text={ex.audio} rate={ttsRate} big /></div>
           ) : (
             <div className="mb-8 flex items-center gap-3">
@@ -396,6 +403,7 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
         </div>
       )}
       {ex.type === 'speak' && <SpeakExercise ex={ex} setValue={setValue} locked={locked} value={value} ttsRate={ttsRate} />}
+      {ex.type === 'pronounce' && <PronounceExercise ex={ex} setValue={setValue} locked={locked} value={value} ttsRate={ttsRate} />}
       {ex.type === 'match' && <MatchGame ex={ex} onDone={() => setValue(true)} />}
       {ex.type === 'spot_error' && <SpotError ex={ex} value={value} setValue={setValue} locked={locked} />}
       {ex.type === 'dialogue' && <DialogueScene ex={ex} value={value} setValue={setValue} locked={locked} ttsRate={ttsRate} />}
@@ -709,6 +717,133 @@ function SpeakExercise({ ex, setValue, locked, value, ttsRate }: { ex: Extract<E
       )}
 
       {(partial || value) && <p className="mt-4 text-center font-semibold text-ink-soft">“{(value as string) || partial}”</p>}
+      {err && <p className="mt-3 text-center font-bold text-berry">{err}</p>}
+    </div>
+  )
+}
+
+/** A short text to read, collapsible once read, with the question under it. */
+function ReadingCard({ ex, ttsRate }: { ex: Extract<Exercise, { type: 'read' }>; ttsRate?: number }) {
+  return (
+    <div className="mb-6">
+      <article className="relative max-h-[42dvh] overflow-y-auto rounded-3xl border-2 border-line bg-card p-5 shadow-hard sm:max-h-none sm:p-6">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <p className="font-display text-lg font-black">{ex.title}</p>
+          <SpeakerButton text={ex.passage} rate={ttsRate} />
+        </div>
+        <p className="text-[17px] leading-relaxed sm:text-lg">{ex.passage}</p>
+      </article>
+      <p className="mt-5 text-xl font-extrabold sm:text-2xl">{ex.prompt}</p>
+    </div>
+  )
+}
+
+/**
+ * Sounds Turkish speakers most often miss, and how to fix them: shown under a word
+ * that wasn't recognised, like a teacher pointing at the tricky bit.
+ */
+const SOUND_TIPS: [RegExp, string][] = [
+  [/th/i, '"th": dilinin ucunu üst dişlerinin arasına hafifçe koy, öyle üfle.'],
+  [/w/i, '"w": dudaklarını yuvarla, "v" gibi alt dudağı ısırma.'],
+  [/(^|[^aeiou])r/i, '"r": dilin damağa değmesin, Türkçedeki gibi titretme.'],
+  [/ed$/i, '"-ed" çoğu zaman tek bir "t" ya da "d" sesidir: worked = "workt".'],
+  [/(sh|ch|tion)/i, '"sh / ch / -tion": "ş" ve "ç" sesine yakın ama dudaklar öne çıkar.'],
+  [/(ee|ea)/i, '"ee / ea": uzun bir "i" sesi: "iii".'],
+  [/[aeiou]{2}/i, 'İki ünlü yan yana: harf harf değil, tek bir akıcı ses gibi söyle.'],
+  [/(ng)$/i, '"-ng": sondaki "g"yi ayrıca okuma, sesi burnundan bitir.'],
+]
+const tipFor = (word: string) => SOUND_TIPS.find(([re]) => re.test(word))?.[1] ?? 'Önce dinle, sonra yavaşça ve heceleyerek tekrar et.'
+
+/**
+ * Pronunciation check: Higo listens, every word lights up green when it was heard
+ * clearly or red when it wasn't, a score appears, and the first missed word gets a
+ * one-line tip about the sound. Three tries, then it is checked.
+ */
+function PronounceExercise({ ex, setValue, locked, value, ttsRate }: { ex: Extract<Exercise, { type: 'pronounce' }>; setValue: (v: Answer) => void; locked: boolean; value: Answer; ttsRate?: number }) {
+  const [heard, setHeard] = useState('')
+  const [tries, setTries] = useState(0)
+  const [listening, setListening] = useState(false)
+  const [partial, setPartial] = useState('')
+  const [err, setErr] = useState('')
+  const [mic, setMic] = useState<MicState>('unknown')
+  const stop = useRef<() => void>(() => {})
+  useEffect(() => {
+    let alive = true
+    readMicState().then((s) => { if (alive) { setMic(s); if (s !== 'granted' && s !== 'denied') ensureMic().then((r) => alive && setMic(r)) } })
+    return () => { alive = false; stop.current() }
+  }, [ex])
+
+  const target = ex.text.split(/\s+/)
+  const said = new Set(normalize(heard || partial).split(' ').filter(Boolean))
+  const ok = (w: string) => said.has(normalize(w))
+  const score = heard ? Math.round(similarity(heard, ex.text) * 100) : null
+  const missed = heard ? target.filter((w) => !ok(w)) : []
+  const good = score !== null && score >= 70
+
+  const toggle = async () => {
+    if (listening) return stop.current()
+    setErr(''); setPartial('')
+    const state = await ensureMic()
+    setMic(state)
+    if (state === 'denied') return
+    setListening(true)
+    stop.current = listen({
+      onPartial: setPartial,
+      onFinal: (t) => {
+        setHeard(t)
+        const n = tries + 1
+        setTries(n)
+        // a good try, or the third one, is the answer that gets checked
+        if (similarity(t, ex.text) >= 0.7 || n >= 3) setValue(t)
+      },
+      onError: (e) => {
+        if (e === 'not-allowed') setMic('denied')
+        else setErr(e === 'unsupported' ? 'Bu cihaz konuşma tanımayı desteklemiyor.' : 'Seni duyamadım, tekrar dene.')
+      },
+      onEnd: () => setListening(false),
+    })
+  }
+
+  return (
+    <div>
+      <div className="mb-6 flex items-center gap-4 rounded-3xl border-2 border-line bg-card p-5 shadow-hard">
+        <SpeakerButton text={ex.text} rate={ttsRate} big />
+        <div className="min-w-0">
+          <p className="text-2xl font-black leading-snug sm:text-3xl">
+            {target.map((w, i) => (
+              <motion.span key={i} animate={heard ? { y: [0, -4, 0] } : {}} transition={{ delay: i * 0.05 }} className={clsx('mr-2 inline-block rounded-lg px-1 transition-colors', heard && (ok(w) ? 'bg-mint/15 text-mint-deep' : 'bg-berry/12 text-berry'))}>{w}</motion.span>
+            ))}
+          </p>
+          {ex.translation && <p className="mt-1 text-ink-soft">{ex.translation}</p>}
+        </div>
+      </div>
+
+      {score !== null && (
+        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} className={clsx('mb-5 flex items-start gap-3 rounded-2xl p-4', good ? 'bg-mint/12' : 'bg-butter/20')}>
+          <img src={higoImg(good ? 'cheer' : 'think')} alt="" className="size-14 shrink-0 object-contain" />
+          <div className="min-w-0">
+            <p className="font-display text-xl font-black">{good ? 'Çok net!' : 'Biraz daha'} <span className="tabular-nums">%{score}</span></p>
+            {missed.length > 0 ? (
+              <p className="text-sm text-ink-soft"><b className="text-ink">{missed[0]}</b>: {tipFor(missed[0])}</p>
+            ) : (
+              <p className="text-sm text-ink-soft">Bütün kelimeler anlaşıldı.</p>
+            )}
+            {!good && !locked && tries < 3 && <p className="mt-1 text-xs font-bold text-ink-soft">{3 - tries} deneme hakkın kaldı.</p>}
+          </div>
+        </motion.div>
+      )}
+
+      {mic === 'denied' ? (
+        <MicBlocked onRetry={async () => setMic(await ensureMic())} />
+      ) : canListen() ? (
+        <button disabled={locked || value !== null} onClick={toggle} className={clsx('press relative mx-auto flex w-full max-w-sm items-center justify-center gap-3 overflow-hidden rounded-2xl border-2 py-6 text-lg font-black uppercase disabled:opacity-50', listening ? 'border-flame bg-flame text-white shadow-[0_4px_0_0_var(--color-flame-deep)]' : 'border-line bg-card text-sky shadow-hard')}>
+          {listening && <span aria-hidden className="absolute inset-0 animate-ping rounded-2xl bg-white/20" />}
+          {listening ? <><MicOff className="relative size-6" /> Dinliyorum…</> : <><Mic className="size-6 text-flame" /> {tries ? 'Tekrar dene' : 'Konuşmak için dokun'}</>}
+        </button>
+      ) : (
+        <p className="rounded-2xl border-2 border-dashed border-line/40 p-4 text-center text-sm text-ink-soft">Bu tarayıcı konuşma tanımayı desteklemiyor. Chrome ya da uygulamamızı kullan veya “Şu an konuşamıyorum”a bas.</p>
+      )}
+      {partial && !heard && <p className="mt-4 text-center font-semibold text-ink-soft">“{partial}”</p>}
       {err && <p className="mt-3 text-center font-bold text-berry">{err}</p>}
     </div>
   )

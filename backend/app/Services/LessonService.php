@@ -47,12 +47,14 @@ class LessonService
     public static function gradeOne(array $ex, mixed $given): bool
     {
         return match ($ex['type'] ?? '') {
-            'choice', 'fill', 'listen_choice', 'dialogue' => (string) $given === (string) ($ex['answer'] ?? ''),
+            'choice', 'fill', 'listen_choice', 'dialogue', 'read' => (string) $given === (string) ($ex['answer'] ?? ''),
             // "Hata avı": the answer carries both the word tapped and the fix chosen.
             'spot_error' => is_string($given) && $given === ($ex['error_index'] ?? '').':'.($ex['answer'] ?? ''),
             'sequence' => is_array($given) && array_map('intval', array_values($given)) === array_map('intval', array_values($ex['answer'] ?? [])),
             'translate', 'listen_type', 'order' => is_string($given) && TextMatch::equals($given, array_merge([(string) ($ex['answer'] ?? '')], $ex['alternatives'] ?? [])),
             'speak' => is_string($given) && TextMatch::similarity($given, (string) ($ex['text'] ?? '')) >= 0.6,
+            // pronunciation drills ask for a closer match than free speaking
+            'pronounce' => is_string($given) && TextMatch::similarity($given, (string) ($ex['text'] ?? '')) >= 0.7,
             'match' => $given === true,
             default => true,
         };
@@ -81,7 +83,7 @@ class LessonService
             $xp += config('dilgo.gamification.perfect_lesson_bonus_xp');
         }
 
-        $speaking = collect($lesson->exercises ?? [])->where('type', 'speak')->count();
+        $speaking = collect($lesson->exercises ?? [])->whereIn('type', ['speak', 'pronounce'])->count();
         $summary = $this->game->record($user, $xp, 'lesson', $lesson->id, array_filter([
             'lessons' => $passed ? 1 : 0,
             'perfect_lessons' => $perfect ? 1 : 0,

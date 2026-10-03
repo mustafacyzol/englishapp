@@ -50,7 +50,7 @@ class CourseSeeder extends Seeder
         }
     }
 
-    /** The six nodes of a unit, in path order. */
+    /** The nine nodes of a unit, in path order. */
     private function lessons(array $u, string $level, int $ui, ?int $storyId, ?AiScenario $scenario): array
     {
         $v = $u['vocab'];
@@ -86,16 +86,72 @@ class CourseSeeder extends Seeder
         ]));
 
         $story = $storyId ? Story::query()->find($storyId) : null;
+        $reading = $this->reading($level, $ui);
 
         return array_values(array_filter([
             ['title' => 'Kelimeler', 'skill' => 'vocabulary', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $words],
             ['title' => 'Dilbilgisi', 'skill' => 'grammar', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $grammar],
+            $reading ? ['title' => 'Okuma: '.$reading['title'], 'skill' => 'reading', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $reading['exercises']] : null,
             ['title' => 'Kelime oyunu', 'skill' => 'vocabulary', 'kind' => 'words', 'xp_reward' => $xp, 'exercises' => [],
                 'meta' => $this->wordGame($u)],
             ['title' => 'Dinle ve konuş', 'skill' => 'listening', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $listening],
+            ['title' => 'Telaffuz', 'skill' => 'speaking', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $this->pronunciation($u)],
             $story ? ['title' => 'Oku: '.$story->title, 'skill' => 'reading', 'kind' => 'story', 'story_id' => $story->id, 'xp_reward' => $xp + 5, 'is_premium' => $story->is_premium, 'exercises' => []] : null,
+            ['title' => 'Pratik', 'skill' => 'vocabulary', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $this->review($v, $ui)],
             $scenario ? ['title' => 'Defne ile: '.$scenario->title, 'skill' => 'speaking', 'kind' => 'ai_talk', 'scenario_key' => $scenario->key, 'xp_reward' => $xp + 5, 'is_premium' => (bool) $scenario->is_premium, 'exercises' => []] : null,
         ]));
+    }
+
+    /** A short text in the unit's language with comprehension questions (curriculum/readings.json). */
+    private function reading(string $level, int $ui): ?array
+    {
+        static $all = null;
+        $all ??= json_decode(file_get_contents(database_path('data/curriculum/readings.json')), true, flags: JSON_THROW_ON_ERROR);
+        $r = $all[$level][$ui] ?? null;
+        if (! $r) {
+            return null;
+        }
+
+        return ['title' => $r['title'], 'exercises' => array_map(fn ($q) => [
+            'type' => 'read', 'title' => $r['title'], 'passage' => $r['text'], 'prompt' => $q[0], 'options' => $q[1], 'answer' => $q[2],
+        ], $r['q'])];
+    }
+
+    /**
+     * Pronunciation: three of the unit's single words, then three of its sentences,
+     * each checked against what the learner says, with feedback on the sounds missed.
+     */
+    private function pronunciation(array $u): array
+    {
+        $single = array_values(array_filter($u['vocab'], fn ($p) => preg_match('/^[A-Za-z-]+$/', $p[0])));
+        $words = array_slice($single, 0, 3);
+        $sentences = array_slice(array_values(array_unique(array_merge([$u['vs'][0][0]], array_column($u['sp'], 0)))), 0, 3);
+
+        return [
+            ...array_map(fn ($p) => ['type' => 'pronounce', 'prompt' => 'Kelimeyi söyle', 'text' => $p[0], 'translation' => $p[1]], $words),
+            ...array_map(fn ($t) => ['type' => 'pronounce', 'prompt' => 'Cümleyi söyle', 'text' => rtrim($t)], $sentences),
+        ];
+    }
+
+    /** The unit's words once more, Duolingo style: pairs, listening and meaning, mixed. */
+    private function review(array $v, int $seed): array
+    {
+        $listen = function (int $i) use ($v, $seed) {
+            $opts = $this->shuffle([$v[$i][0], $v[($i + 3) % 10][0], $v[($i + 5) % 10][0], $v[($i + 7) % 10][0]], $seed + $i);
+
+            return $this->listen($v[$i][0], $opts);
+        };
+
+        return [
+            $this->match(array_slice($this->shuffle($v, $seed), 0, 5)),
+            $listen(1),
+            $this->meaning($v, 2, $seed + 1),
+            $this->reverse($v, 4, $seed + 2),
+            $listen(6),
+            $this->type($v[9][0]),
+            $this->match(array_slice($this->shuffle($v, $seed + 7), 0, 5)),
+            $this->meaning($v, 0, $seed + 3),
+        ];
     }
 
     /**

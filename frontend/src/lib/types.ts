@@ -96,6 +96,8 @@ export type Exercise =
   | { type: 'translate'; prompt: string; answer: string; alternatives: string[]; tiles: string[] }
   | { type: 'listen_type'; prompt: string; audio: string; answer: string }
   | { type: 'speak'; prompt: string; text: string; translation?: string }
+  | { type: 'pronounce'; prompt: string; text: string; translation?: string }
+  | { type: 'read'; prompt: string; title: string; passage: string; options: string[]; answer: number }
   | { type: 'match'; prompt: string; pairs: [string, string][] }
   // DilGO-specific drills, built around the mistakes Turkish speakers actually make.
   | { type: 'spot_error'; prompt: string; words: string[]; error_index: number; options: string[]; answer: number; explanation_tr: string; audio?: string }
