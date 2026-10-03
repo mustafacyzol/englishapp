@@ -407,6 +407,7 @@
   "tiles": [
    "had",
    "If",
+   "I",
    "known,",
    "I",
    "would",
@@ -534,11 +535,10 @@
   "level": "C1",
   "skill": "vocabulary",
   "prompt": "Boşluğa uygun kelimeyi yaz.",
-  "passage": "Her argument was so ____ that even the sceptics were convinced. (ikna edici, c ile başlar)",
+  "passage": "Because the speaker was ill, the conference had to be ____ until next month. (ertelemek, p ile başlar)",
   "answer": [
-   "compelling",
-   "convincing",
-   "cogent"
+   "postponed",
+   "put off"
   ]
  }
 ]

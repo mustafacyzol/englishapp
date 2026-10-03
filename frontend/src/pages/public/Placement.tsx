@@ -46,6 +46,7 @@ export default function Placement() {
   const [built, setBuilt] = useState<number[]>([])
   const [typed, setTyped] = useState('')
   const [answers, setAnswers] = useState<Record<number, Given>>({})
+  const [checking, setChecking] = useState(false)
   const submit = useMutation({
     mutationFn: (a: Record<number, Given>) => post<{ token: string; answered: number; total: number }>('/placement', { answers: a }),
     onSuccess: async (r) => { await storage.set(PLACEMENT_TOKEN, r.token) },
@@ -58,14 +59,23 @@ export default function Placement() {
   const kind: Kind = q.type ?? 'choice'
   const ready = kind === 'choice' ? pick !== null : kind === 'order' ? built.length === (q.tiles?.length ?? 0) : typed.trim().length > 0
   const current = (): Given => (kind === 'choice' ? pick! : kind === 'order' ? built.map((t) => q.tiles![t]).join(' ') : typed.trim())
-  const next = (opt: Given) => {
+  const next = async (opt: Given) => {
     const a = { ...answers, [q.id]: opt }
     setAnswers(a)
     setPick(null)
     setBuilt([])
     setTyped('')
-    if (i + 1 < qs.length) setI(i + 1)
-    else submit.mutate(a)
+    if (i + 1 >= qs.length) return submit.mutate(a)
+    // Adaptive: at the end of each band, ask whether it was passed. Someone who can't do the
+    // easier band won't do the harder ones, so the test ends here instead of dragging on.
+    if (qs[i + 1].level !== q.level) {
+      setChecking(true)
+      const band = Object.fromEntries(qs.filter((x) => x.level === q.level).map((x) => [x.id, a[x.id] ?? -1]))
+      const r = await post<{ passed: boolean }>('/placement/band', { level: q.level, answers: band }).catch(() => ({ passed: true }))
+      setChecking(false)
+      if (!r.passed) return submit.mutate(a)
+    }
+    setI(i + 1)
   }
 
   if (!started) return <Intro total={qs.length} exit={exit} onStart={() => setStarted(true)} />
@@ -132,8 +142,8 @@ export default function Placement() {
           )}
 
           <div className="mt-auto flex items-center justify-between gap-3 pt-8">
-            <button className="text-sm font-bold text-ink-soft hover:text-ink" onClick={() => next(-1)}>Bilmiyorum, geç</button>
-            <Button onClick={() => ready && next(current())} disabled={!ready} className="min-w-40 gap-2">{i + 1 < qs.length ? 'Devam' : 'Testi bitir'} <ArrowRight className="size-4" /></Button>
+            <button className="text-sm font-bold text-ink-soft hover:text-ink" disabled={checking} onClick={() => next(-1)}>Bilmiyorum, geç</button>
+            <Button onClick={() => ready && next(current())} disabled={!ready} loading={checking} className="min-w-40 gap-2">{i + 1 < qs.length ? 'Devam' : 'Testi bitir'} <ArrowRight className="size-4" /></Button>
           </div>
         </motion.div>
       </AnimatePresence>
@@ -150,7 +160,7 @@ function Intro({ total, exit, onStart }: { total: number; exit: string; onStart:
         <motion.img initial={{ scale: 0.6, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }} src={higoImg('read')} alt="" className="mb-4 w-24" />
         <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Seviye tespit sınavı</p>
         <h1 className="mt-2 font-display text-[clamp(2rem,6vw,2.8rem)] font-black leading-[1.05]">Nereden başlaman gerektiğini bulalım.</h1>
-        <p className="mt-3 text-[17px] text-ink-soft">Kolaydan zora {total} görev: seçmeli sorular, kelimelerle cümle kurma, boşluğa yazma ve dinleyip yazma. Bilmediğini geçebilirsin; tahmin etmek yerine “Bilmiyorum” demek sonucu daha doğru yapar.</p>
+        <p className="mt-3 text-[17px] text-ink-soft">Kolaydan zora en fazla {total} görev. Bir bölümü geçemezsen test orada biter, seni yormaz. Bilmediğini geçebilirsin; tahmin yerine “Bilmiyorum” demek sonucu daha doğru yapar.</p>
 
         <div className="mt-6 grid grid-cols-2 gap-2.5">
           {parts.map((k) => {
@@ -160,7 +170,7 @@ function Intro({ total, exit, onStart }: { total: number; exit: string; onStart:
         </div>
 
         <ul className="mt-5 space-y-2 text-sm font-semibold text-ink-soft">
-          <li className="flex items-center gap-2"><Clock className="size-4 text-flame" /> Yaklaşık 10-12 dakika</li>
+          <li className="flex items-center gap-2"><Clock className="size-4 text-flame" /> 3 ile 12 dakika arası</li>
           <li className="flex items-center gap-2"><Volume2 className="size-4 text-mint-deep" /> Dinleme soruları için sesin açık olsun</li>
           <li className="flex items-center gap-2"><Lock className="size-4 text-lilac" /> Sonucun hesabına işlenir ve ders yolun ona göre açılır</li>
         </ul>

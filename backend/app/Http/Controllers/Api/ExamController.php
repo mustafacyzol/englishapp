@@ -115,11 +115,18 @@ class ExamController extends Controller
         $total = array_sum($blueprint);
         $seen = ExamAttempt::query()->where('user_id', $user->id)->select('exam_question_id', DB::raw('COUNT(*) as c'))->groupBy('exam_question_id')->pluck('c', 'exam_question_id');
         $bank = ExamQuestion::query()->where('is_active', true)->get()->filter(fn ($q) => in_array($exam, $q->exams, true));
+        [$target, $missed] = $this->adaptive($user);
 
         $picked = collect();
         foreach ($blueprint as $section => $count) {
             $want = max(1, (int) round($count / $total * $shape['questions']));
-            $picked = $picked->concat($bank->where('section', $section)->sortBy(fn ($q) => ($seen[$q->id] ?? 0) * 1000 + random_int(0, 999))->take($want));
+            $pool = $bank->where('section', $section);
+            // up to a quarter of each section: questions the learner got wrong before, to check they stuck
+            $again = $pool->whereIn('id', $missed)->shuffle()->take(max(0, (int) floor($want / 4)));
+            // the rest at the learner's working difficulty: near the target level first, harder only
+            // once the easier ones are done (someone who misses the easy ones won't get the hard ones)
+            $rest = $pool->whereNotIn('id', $again->pluck('id'))->sortBy(fn ($q) => abs(self::rank($q->cefr) - $target) * 100000 + (self::rank($q->cefr) > $target ? 50000 : 0) + ($seen[$q->id] ?? 0) * 1000 + random_int(0, 999))->take($want - $again->count());
+            $picked = $picked->concat($again)->concat($rest);
         }
         // top up from any section if the bank is thin, then trim to size
         if ($picked->count() < $shape['questions']) {
@@ -137,6 +144,37 @@ class ExamController extends Controller
                 'cefr' => $q->cefr, 'passage' => $q->passage, 'prompt' => $q->prompt, 'options' => $q->options,
             ]),
         ]);
+    }
+
+    private const RANKS = ['A1' => 0, 'A2' => 1, 'B1' => 2, 'B2' => 3, 'C1' => 4, 'C2' => 5];
+
+    private static function rank(?string $cefr): int
+    {
+        return self::RANKS[$cefr ?? 'B1'] ?? 2;
+    }
+
+    /**
+     * [target difficulty, ids answered wrong before]. The target is the easiest level
+     * where the learner is still below 70% (from their last 200 answers), or their
+     * own level when there isn't enough history yet.
+     */
+    private function adaptive($user): array
+    {
+        $rows = ExamAttempt::query()->where('exam_attempts.user_id', $user->id)->latest('exam_attempts.id')->limit(200)
+            ->join('exam_questions', 'exam_questions.id', '=', 'exam_attempts.exam_question_id')
+            ->get(['exam_attempts.exam_question_id as qid', 'exam_attempts.correct', 'exam_questions.cefr']);
+        $target = self::rank($user->cefr_level ?? 'B1');
+        $by = $rows->groupBy(fn ($r) => self::rank($r->cefr));
+        foreach (range(0, 5) as $r) {
+            $g = $by->get($r);
+            if ($g && $g->count() >= 3 && $g->where('correct', true)->count() / $g->count() < 0.7) {
+                $target = $r;
+                break;
+            }
+        }
+        $last = $rows->groupBy('qid')->map(fn ($g) => (bool) $g->first()->correct);
+
+        return [$target, $last->filter(fn ($ok) => ! $ok)->keys()->all()];
     }
 
     public function practice(Request $request): JsonResponse

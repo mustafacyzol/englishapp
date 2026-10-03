@@ -229,4 +229,34 @@ class LearningLoopTest extends TestCase
         \Illuminate\Support\Facades\Notification::assertSentToTimes($away, \App\Notifications\ComeBack::class, 1);
         $this->assertSame(2, $away->fresh()->preferences['comeback_stage']);
     }
+
+    public function test_placement_stops_at_the_first_failed_band(): void
+    {
+        $bank = json_decode(file_get_contents(database_path('data/placement.json')), true);
+        $right = fn ($q) => ($q['type'] ?? 'choice') === 'choice' ? $q['answer'] : (is_array($q['answer']) ? $q['answer'][0] : $q['answer']);
+        $answers = [];
+        foreach ($bank as $i => $q) {
+            if ($q['level'] === 'A1') $answers[$i] = $right($q);
+            if ($q['level'] === 'A2') $answers[$i] = -1; // cannot do A2
+        }
+        $a1 = collect($answers)->filter(fn ($v, $i) => $bank[$i]['level'] === 'A1')->all();
+        $a2 = collect($answers)->filter(fn ($v, $i) => $bank[$i]['level'] === 'A2')->all();
+        $this->postJson('/api/v1/placement/band', ['level' => 'A1', 'answers' => $a1])->assertOk()->assertJsonPath('passed', true);
+        $this->postJson('/api/v1/placement/band', ['level' => 'A2', 'answers' => $a2])->assertOk()->assertJsonPath('passed', false);
+        // the app submits right away: everything after A2 is unanswered, the level is A2
+        $token = $this->postJson('/api/v1/placement', ['answers' => $answers])->assertCreated()->json('token');
+        $this->assertSame('A2', \App\Models\PlacementResult::query()->where('token', $token)->value('level'));
+    }
+
+    public function test_every_order_task_has_exactly_the_tiles_its_answer_needs(): void
+    {
+        $norm = fn ($s) => array_count_values(preg_split('/\s+/', trim(preg_replace("/[^\\p{L}\\p{N}' ]+/u", ' ', mb_strtolower($s)))));
+        foreach (json_decode(file_get_contents(database_path('data/placement.json')), true) as $n => $q) {
+            if (($q['type'] ?? 'choice') !== 'order') continue;
+            foreach ((array) $q['answer'] as $a) {
+                $this->assertEquals($norm(implode(' ', $q['tiles'])), $norm($a), 'placement task '.($n + 1));
+            }
+        }
+    }
 }
+

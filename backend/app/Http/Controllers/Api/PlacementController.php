@@ -78,6 +78,21 @@ class PlacementController extends Controller
         return response()->json(['token' => $result->token, 'answered' => $answered, 'total' => count($bank)], 201);
     }
 
+    /**
+     * Adaptive stop: after each band the app asks whether it was passed (60%).
+     * Someone who cannot do the easier band will not do the harder ones, so the
+     * test ends there instead of dragging through questions far above their level.
+     * Only pass/fail for the whole band is returned, never which answers were right.
+     */
+    public function band(Request $request): JsonResponse
+    {
+        $data = $request->validate(['level' => ['required', 'in:A1,A2,B1,B2,C1'], 'answers' => ['required', 'array', 'max:20']]);
+        $items = collect($this->bank())->filter(fn ($q) => $q['level'] === $data['level']);
+        $correct = $items->filter(fn ($q, $i) => self::grade($q, $data['answers'][$i] ?? null)[1])->count();
+
+        return response()->json(['passed' => $correct / max(1, $items->count()) >= 0.6]);
+    }
+
     /** Apply a finished test to the signed-in learner and return the result to reveal. */
     public function claim(Request $request): JsonResponse
     {

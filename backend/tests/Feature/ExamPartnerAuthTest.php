@@ -70,6 +70,14 @@ class ExamPartnerAuthTest extends TestCase
         $this->assertTrue(ExamQuestion::query()->whereIn('id', $ids)->get()->every(fn ($q) => in_array('lgs', $q->exams, true)));
         $this->assertArrayNotHasKey('answer', $mock->json('questions.0'));
 
+        // adaptive: questions missed before come back in the next mock
+        $missed = ExamQuestion::query()->whereIn('id', $ids)->take(4)->get();
+        foreach ($missed as $q) {
+            \App\Models\ExamAttempt::query()->create(['user_id' => $lgs->id, 'exam_question_id' => $q->id, 'exam' => 'lgs', 'section' => $q->section, 'correct' => false, 'ms' => 1000, 'created_at' => now()]);
+        }
+        $again = collect($this->actingAs($lgs)->getJson('/api/v1/exam/mock')->json('questions'))->pluck('id');
+        $this->assertNotEmpty($again->intersect($missed->pluck('id')));
+
         $overview = $this->actingAs($lgs)->getJson('/api/v1/exam')->assertOk();
         $this->assertSame(40, $overview->json('plan.daily_goal')); // 10 days left
         $this->assertSame(10, $overview->json('mock.questions'));
