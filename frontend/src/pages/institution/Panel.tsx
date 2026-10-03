@@ -156,7 +156,7 @@ function ClassLeague({ classes, manager }: { classes: string[]; manager: boolean
           <h2 className="text-2xl font-extrabold">Sınıf ligi</h2>
           <p className="text-sm text-ink-soft">Öğrencilerin uygulamada gördüğü sıralama. Haftalık ya da aylık XP'ye göre.</p>
         </div>
-        <div className="no-scrollbar flex max-w-full gap-1.5 overflow-x-auto">
+        <div className="flex max-w-full flex-wrap gap-1.5">
           {manager && <button onClick={() => setPick('')} className={clsx('shrink-0 rounded-xl border-2 px-3 py-1.5 text-sm font-extrabold', pick === '' ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>Bütün okul</button>}
           {classes.map((c) => <button key={c} onClick={() => setPick(c)} className={clsx('shrink-0 rounded-xl border-2 px-3 py-1.5 text-sm font-extrabold', pick === c ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>{c}</button>)}
         </div>

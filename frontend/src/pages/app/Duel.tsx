@@ -182,9 +182,9 @@ export default function Duel() {
       {data.defenses.length > 0 && (
         <section>
           <h2 className="mb-3 text-xl">Sen yokken gölgen</h2>
-          <div className="no-scrollbar -mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
+          <div className="grid gap-3 sm:grid-cols-2">
             {data.defenses.map((d) => (
-              <div key={d.id} className={clsx('flex min-w-[260px] items-center gap-3 rounded-2xl border-2 p-4', d.held ? 'border-mint/40 bg-mint/8' : 'border-berry/30 bg-berry/6')}>
+              <div key={d.id} className={clsx('flex min-w-0 items-center gap-3 rounded-2xl border-2 p-4', d.held ? 'border-mint/40 bg-mint/8' : 'border-berry/30 bg-berry/6')}>
                 <span className={clsx('grid size-11 shrink-0 place-items-center rounded-xl text-white', d.held ? 'bg-mint' : 'bg-berry')}>{d.held ? <Shield className="size-6" /> : <ShieldAlert className="size-6" />}</span>
                 <div className="min-w-0">
                   <p className="font-black leading-tight">{d.held ? 'Gölgen seni savundu' : 'Gölgen yenildi'}</p>

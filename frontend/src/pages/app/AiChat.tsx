@@ -155,7 +155,7 @@ export default function AiChat() {
         </header>
 
         {goals.length > 0 && (
-          <div className="no-scrollbar flex gap-2 overflow-x-auto border-b-2 border-line/10 px-4 py-2 lg:hidden">
+          <div className="flex flex-wrap gap-1.5 border-b-2 border-line/10 px-4 py-2 lg:hidden">
             {goals.map((g, i) => (
               <span key={i} className={clsx('flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-bold', goalsDone.includes(i) ? 'bg-mint/15 text-mint-deep' : 'bg-paper-2 text-ink-soft')}>
                 {goalsDone.includes(i) ? <CheckCircle2 className="size-3.5" /> : <Circle className="size-3.5" />} {g}

@@ -193,19 +193,26 @@ const SIDE_POSES: HigoPose[] = ['map', 'walk', 'scope', 'read', 'think', 'nap', 
 const SIDE_LINES: Record<string, string> = { map: 'Rotayı çizdim!', walk: 'Az kaldı, yürü!', scope: 'Sıradakini gördüm', read: 'Rehbere göz at', think: 'Hmm, zor bir konu', nap: 'Mola mı? 5 dk!', point: 'İşte şuradan!', thumbs: 'Harika gidiyorsun' }
 
 function SideHigo({ pose, x, y, side }: { pose: HigoPose; x: number; y: number; side: 'left' | 'right' }) {
+  // Positioned by a plain wrapper: the entrance animation lives on the inner element, so it can
+  // never overwrite the offset (that is what used to drop Higo into the middle of the trail).
+  // He sits on the outer side of a far-swinging stop, where no label goes, and shrinks to the room left.
+  const gap = Math.abs(x) + NODE / 2 + 18
+  const pos: React.CSSProperties = side === 'right'
+    ? { left: `calc(50% + ${gap}px)`, width: `min(96px, calc(50% - ${gap}px))` }
+    : { right: `calc(50% + ${gap}px)`, width: `min(96px, calc(50% - ${gap}px))` }
   return (
-    <motion.div
-      aria-hidden
-      initial={{ opacity: 0, scale: 0.6, y: 12 }}
-      whileInView={{ opacity: 1, scale: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.6 }}
-      transition={{ type: 'spring', stiffness: 220, damping: 16 }}
-      className="pointer-events-none absolute left-1/2 z-[5] flex w-[68px] flex-col items-center sm:w-24"
-      style={{ top: y, transform: side === 'right' ? `translateX(${x + NODE / 2 + 10}px)` : `translateX(calc(${x - NODE / 2 - 10}px - 100%))` }}
-    >
-      <motion.img src={higoImg(pose)} alt="" className="w-full drop-shadow-[0_10px_12px_rgba(31,36,51,.22)]" animate={{ y: [0, -5, 0], rotate: side === 'right' ? [0, 3, 0] : [0, -3, 0] }} transition={{ repeat: Infinity, duration: 3.4, ease: 'easeInOut' }} />
-      <span className="mt-1 hidden whitespace-nowrap rounded-full bg-card px-2.5 py-1 text-[11px] font-extrabold shadow-[0_6px_14px_-8px_rgba(31,36,51,.4)] ring-1 ring-line sm:block">{SIDE_LINES[pose]}</span>
-    </motion.div>
+    <div aria-hidden className="pointer-events-none absolute z-[5]" style={{ top: y, ...pos }}>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.6, y: 12 }}
+        whileInView={{ opacity: 1, scale: 1, y: 0 }}
+        viewport={{ once: true, amount: 0.6 }}
+        transition={{ type: 'spring', stiffness: 220, damping: 16 }}
+        className={clsx('flex flex-col', side === 'right' ? 'items-start' : 'items-end')}
+      >
+        <motion.img src={higoImg(pose)} alt="" className="w-full max-w-[96px] drop-shadow-[0_10px_12px_rgba(31,36,51,.22)]" style={{ transform: side === 'left' ? 'scaleX(-1)' : undefined }} animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 3.4, ease: 'easeInOut' }} />
+        <span className="mt-1 hidden max-w-full rounded-2xl bg-card px-2.5 py-1 text-center text-[11px] font-extrabold leading-tight shadow-[0_6px_14px_-8px_rgba(31,36,51,.4)] ring-1 ring-line sm:block">{SIDE_LINES[pose]}</span>
+      </motion.div>
+    </div>
   )
 }
 
@@ -218,8 +225,9 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
   const endY = count * (NODE + GAP) + 30
   const lastDone = unit.lessons.reduce((acc, l, i) => (l.state === 'completed' ? i : acc), -1)
   // one Higo by a far-swinging stop in the middle of the unit, a second one on long units
-  const swing = pts.map((p, i) => ({ i, d: Math.abs(p.x) })).filter((p) => p.i > 0 && p.i < count - 1 && p.d > 40)
-  const picks = count >= 6 ? [swing.find((p) => p.i >= 1), swing.find((p) => p.i >= 4)] : [swing[0]]
+  const swing = pts.map((p, i) => ({ i, d: Math.abs(p.x) })).filter((p) => p.d >= 50)
+  const half = Math.ceil(count / 2)
+  const picks = count >= 5 ? [swing.find((p) => p.i < half), swing.find((p) => p.i >= half)] : [swing[0]]
   const higoSpots = picks.filter((p, k, a): p is { i: number; d: number } => !!p && a.findIndex((q) => q?.i === p.i) === k).map((p, k) => ({ i: p.i, pose: SIDE_POSES[(index * 2 + k) % SIDE_POSES.length] }))
   const seg = (a: { x: number; y: number }, b: { x: number; y: number }) => `M ${a.x} ${a.y} C ${a.x} ${(a.y + b.y) / 2}, ${b.x} ${(a.y + b.y) / 2}, ${b.x} ${b.y}`
 
@@ -263,7 +271,7 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
 
         {/* Higo beside the trail: by the stops that swing furthest out, on their free side */}
         {higoSpots.map(({ i, pose }) => (
-          <SideHigo key={i} pose={pose} x={pts[i].x} y={pts[i].y - NODE / 2 - 8} side={pts[i].x > 0 ? 'right' : 'left'} />
+          <SideHigo key={i} pose={pose} x={pts[i].x} y={pts[i].y - NODE / 2 - 10} side={pts[i].x > 0 ? 'right' : 'left'} />
         ))}
 
         {/* unit trophy, the visible finish line of this unit */}
@@ -316,17 +324,17 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
   return (
     // The open node is lifted above its siblings, so its card is never painted over by later stops.
     <div ref={nodeRef} data-tour={current ? 'here' : undefined} className={clsx('absolute left-1/2', open ? 'z-40' : current ? 'z-20' : 'z-10')} style={{ top: y - (current ? 6 : 0), transform: `translateX(calc(-50% + ${x}px))`, width: size }}>
-      {current && (
-        // where you are: a slowly turning dashed orbit and a soft breathing glow, with Higo perched on top
-        <span aria-hidden className="pointer-events-none absolute left-1/2 -translate-x-1/2" style={{ top: -14, width: size + 28, height: size + 28 }}>
-          <motion.span className="absolute inset-2 rounded-full" style={{ background: `radial-gradient(circle, color-mix(in oklab, ${color} 30%, transparent) 40%, transparent 72%)` }} animate={{ opacity: [0.55, 1, 0.55], scale: [0.96, 1.04, 0.96] }} transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut' }} />
-          <svg viewBox="0 0 100 100" className="absolute inset-0 size-full animate-[spin_14s_linear_infinite]">
-            <circle cx="50" cy="50" r="47" fill="none" stroke={color} strokeWidth="2.4" strokeLinecap="round" pathLength={100} strokeDasharray="2.5 2.5" opacity=".8" />
-          </svg>
-          <motion.img src={higoImg('wave')} alt="" className="absolute -right-3 -top-5 w-11 drop-shadow-md" animate={{ y: [0, -4, 0], rotate: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
-        </span>
-      )}
-
+      <div className="relative" style={{ width: size, height: size }}>
+        {current && (
+          // where you are: a slowly turning dashed orbit centred on the button face, a soft glow, Higo perched on top
+          <span aria-hidden className="pointer-events-none absolute -inset-[14px] translate-y-[3px]">
+            <motion.span className="absolute inset-1 rounded-full" style={{ background: `radial-gradient(circle, color-mix(in oklab, ${color} 30%, transparent) 40%, transparent 72%)` }} animate={{ opacity: [0.55, 1, 0.55] }} transition={{ repeat: Infinity, duration: 2.8, ease: 'easeInOut' }} />
+            <svg viewBox="0 0 100 100" className="absolute inset-0 size-full origin-center animate-[spin_16s_linear_infinite] [transform-box:fill-box]">
+              <circle cx="50" cy="50" r="48" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" pathLength={100} strokeDasharray="2.5 2.5" opacity=".85" />
+            </svg>
+            <motion.img src={higoImg('wave')} alt="" className="absolute -right-4 -top-6 w-11 drop-shadow-md" animate={{ y: [0, -4, 0], rotate: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
+          </span>
+        )}
       <motion.button
         initial={{ opacity: 0, scale: 0.7 }}
         whileInView={{ opacity: 1, scale: 1 }}
@@ -347,6 +355,7 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
           </span>
         )}
       </motion.button>
+      </div>
 
       <p className={clsx('absolute top-1/2 w-max max-w-[118px] -translate-y-1/2 text-xs font-extrabold leading-tight sm:max-w-[168px] sm:text-[13px]', labelLeft ? 'right-[calc(100%+14px)] text-right' : 'left-[calc(100%+14px)]', locked ? 'text-ink-soft/70' : 'text-ink')}>
         <span className="block text-[10px] font-black uppercase tracking-wider" style={{ color: locked ? undefined : color }}>{current ? 'Kaldığın yer' : ajar ? 'Buradan başlayabilirsin' : kind}</span>

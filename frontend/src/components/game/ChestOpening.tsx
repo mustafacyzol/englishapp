@@ -104,23 +104,25 @@ export function ChestOpening({ chest, odds, onOpen, onClose }: { chest: RewardIt
   const glow = prize && stage === 'reveal' ? RARITY_COLOR[prize.rarity] : legendary ? '#ffc233' : '#ffb347'
 
   return createPortal(
-    <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden p-4" role="dialog" aria-modal="true" aria-label={chest.name}>
-      <motion.div className="absolute inset-0 bg-[#07090f]/88 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={stage === 'ready' || stage === 'reveal' ? onClose : undefined} />
+    // Scrolls when the odds list makes it taller than the screen; `my-auto` on the content centres
+    // it when there is room and never cuts its top off when there isn't.
+    <div className="fixed inset-0 z-[80] flex items-start justify-center overflow-y-auto overflow-x-hidden overscroll-contain p-4" role="dialog" aria-modal="true" aria-label={chest.name}>
+      <motion.div className="fixed inset-0 bg-[#07090f]/88 backdrop-blur-sm" initial={{ opacity: 0 }} animate={{ opacity: 1 }} onClick={stage === 'ready' || stage === 'reveal' ? onClose : undefined} />
 
       {/* light rays behind the chest */}
       <motion.div
         aria-hidden
-        className="pointer-events-none absolute left-1/2 top-1/2 size-[140vmax] -translate-x-1/2 -translate-y-1/2"
+        className="pointer-events-none fixed left-1/2 top-1/2 size-[140vmax] -translate-x-1/2 -translate-y-1/2"
         style={{ background: `repeating-conic-gradient(from 0deg, ${glow}22 0deg 8deg, transparent 8deg 22deg)`, maskImage: 'radial-gradient(circle, #000 0%, transparent 42%)', WebkitMaskImage: 'radial-gradient(circle, #000 0%, transparent 42%)' }}
         animate={{ rotate: 360, opacity: stage === 'reveal' ? 1 : stage === 'open' ? 0.6 : 0.25 }}
         transition={{ rotate: { duration: 40, ease: 'linear', repeat: Infinity }, opacity: { duration: 0.6 } }}
       />
 
-      <button onClick={onClose} aria-label="Kapat" className={clsx('absolute right-4 top-4 z-10 grid size-11 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20', stage !== 'ready' && stage !== 'reveal' && 'invisible')}>
+      <button onClick={onClose} aria-label="Kapat" className={clsx('fixed right-4 top-4 z-20 grid size-11 place-items-center rounded-full bg-white/10 text-white transition hover:bg-white/20', stage !== 'ready' && stage !== 'reveal' && 'invisible')}>
         <X className="size-5" />
       </button>
 
-      <div className="relative z-10 flex w-full max-w-md flex-col items-center text-center text-white">
+      <div className="relative z-10 my-auto flex w-full max-w-md flex-col items-center py-8 text-center text-white">
         <p className="mb-1 text-xs font-black uppercase tracking-[0.25em] text-white/60">{stage === 'reveal' ? 'Sandıktan çıktı' : chest.name}</p>
 
         {/* the stage: chest, key, glow */}
@@ -285,8 +287,11 @@ function PartnerTicket({ p }: { p: Prize }) {
 
 function Odds({ odds }: { odds: ChestOdds[] }) {
   const [open, setOpen] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  // bring the list into view once it has opened
+  useEffect(() => { if (open) setTimeout(() => ref.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), 320) }, [open])
   return (
-    <div className="mt-4 text-left">
+    <div ref={ref} className="mt-4 text-left">
       <button onClick={() => setOpen((o) => !o)} className="mx-auto block text-sm font-bold text-white/70 underline-offset-4 hover:text-white hover:underline">{open ? 'Olasılıkları gizle' : 'Neler çıkabilir? Olasılıklar'}</button>
       <AnimatePresence>
         {open && (

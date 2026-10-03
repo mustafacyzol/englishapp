@@ -34,7 +34,9 @@ export function bannerOf(key?: string | null) {
 export function ProfileBanner({ banner, className }: { banner?: string | null; className?: string }) {
   const b = bannerOf(banner)
   return (
-    <div aria-hidden className={clsx('relative overflow-hidden', className)} style={{ background: b.bg }}>
+    // `relative` only when the caller hasn't positioned it: "relative" beats "absolute" in the
+    // stylesheet order, which collapsed shop covers to zero height and left only the card colour.
+    <div aria-hidden className={clsx(!/\b(absolute|fixed|sticky)\b/.test(className ?? '') && 'relative', 'overflow-hidden', className)} style={{ background: b.bg }}>
       {b.url ? (
         <img src={b.url} alt="" decoding="async" className="absolute inset-0 size-full object-cover" style={{ objectPosition: b.pos }} />
       ) : (

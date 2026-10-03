@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation, useOutlet, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { AnimatePresence, motion } from 'motion/react'
+import { AnimatePresence, motion, useDragControls } from 'motion/react'
 import clsx from 'clsx'
 import { Bell, Settings } from 'lucide-react'
 import { IconBag, IconBook, IconCards, IconExam, IconGhost, IconGift, IconPath, IconProfile, IconQuest, IconSchool, IconShield, IconSliders, IconTicket, IconTalk, type NavIcon } from '@/components/ui/NavIcons'
@@ -279,6 +279,9 @@ function HubTabs({ tabs, path }: { tabs: (typeof HUBS)[number]['tabs']; path: st
 function MoreSheet({ open, onClose, staff, manager, exam }: { open: boolean; onClose: () => void; staff: boolean; manager: boolean; exam: boolean }) {
   const { t } = useLang()
   const { user } = useAuth()
+  const drag = useDragControls()
+  const [full, setFull] = useState(false)
+  useEffect(() => { if (!open) setFull(false) }, [open])
   if (!user) return null
   const lvl = user.stats
   const pct = Math.round(((lvl.xp_total - lvl.level_floor) / Math.max(1, lvl.level_ceil - lvl.level_floor)) * 100)
@@ -301,22 +304,32 @@ function MoreSheet({ open, onClose, staff, manager, exam }: { open: boolean; onC
       {open && (
         <div className="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true" aria-label="Ben">
           <motion.button aria-label="Kapat" onClick={onClose} className="absolute inset-0 bg-black/40" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} />
+          {/* A real bottom sheet: grab the handle (or the cover) and pull it up to full height,
+              down to half, further down to close. The list inside scrolls on its own. */}
           <motion.div
-            className="safe-bottom absolute inset-x-0 bottom-0 max-h-[90dvh] overflow-y-auto rounded-t-[28px] bg-card pb-6"
+            className="safe-bottom absolute inset-x-0 bottom-0 flex flex-col overflow-hidden rounded-t-[28px] bg-card"
             initial={{ y: '100%' }}
-            animate={{ y: 0 }}
+            animate={{ y: 0, height: full ? '94dvh' : '72dvh' }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', stiffness: 380, damping: 38 }}
             drag="y"
+            dragListener={false}
+            dragControls={drag}
             dragConstraints={{ top: 0, bottom: 0 }}
-            dragElastic={{ top: 0, bottom: 0.6 }}
-            onDragEnd={(_, i) => i.offset.y > 90 && onClose()}
+            dragElastic={{ top: 0.25, bottom: 0.7 }}
+            onDragEnd={(_, i) => {
+              if (i.offset.y < -50 || i.velocity.y < -500) setFull(true)
+              else if (i.offset.y > 80 || i.velocity.y > 500) { if (full) setFull(false); else onClose() }
+            }}
           >
+            <div onPointerDown={(e) => drag.start(e)} className="absolute inset-x-0 top-0 z-20 flex h-8 cursor-grab touch-none justify-center pt-2 active:cursor-grabbing" aria-label="Sürükle">
+              <span className="h-1.5 w-12 rounded-full bg-white/80 shadow" />
+            </div>
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6">
             {/* you, on your own cover */}
             <Link to="/profile" className="relative block overflow-hidden rounded-t-[28px]">
               <ProfileBanner banner={user.banner} className="h-28" />
               <span aria-hidden className="absolute inset-0 bg-gradient-to-t from-card via-card/40 to-transparent" />
-              <span className="absolute left-1/2 top-2 h-1.5 w-12 -translate-x-1/2 rounded-full bg-white/70" />
               <span className="relative -mt-12 flex items-end gap-3 px-5">
                 <UserAvatar name={user.name} avatar={user.avatar} frame={user.frame} className="size-[72px]" />
                 <span className="min-w-0 flex-1 pb-1">
@@ -352,6 +365,7 @@ function MoreSheet({ open, onClose, staff, manager, exam }: { open: boolean; onC
                 <span className="text-sm font-extrabold">{t('Dil')}</span>
                 <LangSelect />
               </div>
+            </div>
             </div>
           </motion.div>
         </div>

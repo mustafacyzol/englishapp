@@ -15,7 +15,7 @@ export interface Sequence { dir: string; count: number; w: number; h: number; fp
 export const HIGO_HELLO: Sequence = { dir: 'higo/anim/hello', count: 76, w: 560, h: 560, fps: 15 }
 export const HIGO_DAY: Sequence = { dir: 'higo/anim/day', count: 81, w: 680, h: 632, fps: 8 }
 /** The same frames as a calm idle loop at a natural speed, played forwards and back so it never jumps. */
-export const HIGO_DAY_LOOP: Sequence = { ...HIGO_DAY, fps: 15, pingpong: true }
+export const HIGO_DAY_LOOP: Sequence = { ...HIGO_DAY, fps: 10, pingpong: true }
 
 const frameUrl = (s: Sequence, i: number) => img(`${s.dir}/${String(i + 1).padStart(2, '0')}.webp`)
 

@@ -191,10 +191,11 @@ function Heatmap({ days }: { days: { date: string; xp: number; goal_met: boolean
   }
   const level = (xp: number) => (xp === 0 ? 'bg-paper-2' : xp < 20 ? 'bg-butter/50' : xp < 50 ? 'bg-butter' : xp < 100 ? 'bg-flame/70' : 'bg-flame')
   return (
-    <div className="no-scrollbar overflow-x-auto">
-      <div className="grid w-max grid-flow-col grid-rows-7 gap-1">
+    <div>
+      {/* the weeks share the card width, so the year view never needs sideways scrolling */}
+      <div className="grid grid-flow-col grid-rows-7 gap-[3px] sm:gap-1" style={{ gridTemplateColumns: `repeat(${Math.ceil(cells.length / 7)}, minmax(0, 1fr))` }}>
         {cells.map((c) => (
-          <span key={c.date} title={`${c.date}: ${c.d?.xp ?? 0} XP`} className={clsx('size-3.5 rounded-[4px] border border-line/25', c.d?.freeze_used ? 'bg-sky/60' : level(c.d?.xp ?? 0), c.d?.goal_met && 'border-line')} />
+          <span key={c.date} title={`${c.date}: ${c.d?.xp ?? 0} XP`} className={clsx('aspect-square w-full max-w-4 rounded-[3px] border border-line/25', c.d?.freeze_used ? 'bg-sky/60' : level(c.d?.xp ?? 0), c.d?.goal_met && 'border-line')} />
         ))}
       </div>
       <div className="mt-3 flex items-center gap-2 text-xs font-bold text-ink-soft">

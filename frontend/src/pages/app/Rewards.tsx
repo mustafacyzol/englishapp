@@ -102,7 +102,7 @@ function Vault() {
       {!list.length ? (
         <Empty icon={<Img src={rewardImg('chest')} alt="" className="size-12 object-contain opacity-60" />} title="Kasan şimdilik boş" text="Günlük hedefini tamamla, serini sürdür, görevleri bitir. Kartlar burada birikecek." />
       ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
           {list.map((e, i) => {
             const f = flipped[e.id]
             return (
@@ -124,13 +124,13 @@ function Vault() {
                     )
                   }
                 />
-                <div className="mt-4 min-h-12">
+                <div className="mt-3 min-h-12">
                   {e.status === 'available' && e.item.type !== 'streak_freeze' && !f && (
                     <Button block variant="butter" loading={activate.isPending && activate.variables?.id === e.id} onClick={() => (e.item.type === 'chest' ? setChest(e) : activate.mutate(e))}>
                       {e.item.type === 'chest' ? 'Sandığı aç' : 'Kartı kullan'}
                     </Button>
                   )}
-                  {e.item.type === 'streak_freeze' && e.status === 'available' && <p className="text-center text-sm font-bold text-sky">Hazır bekliyor · bir gün kaçırırsan serini otomatik korur</p>}
+                  {e.item.type === 'streak_freeze' && e.status === 'available' && <p className="text-center text-xs font-bold text-sky sm:text-sm">Otomatik korur</p>}
                   {e.status === 'active' && e.code && <p className="text-center text-sm font-bold">Kodun: <span className="font-mono">{e.code}</span>{e.expires_at && <span className="text-ink-soft"> · {dateTR(e.expires_at)} tarihine kadar</span>}</p>}
                   {e.status === 'active' && !e.code && e.expires_at && <p className="text-center text-sm font-bold text-mint-deep">Aktif · {new Date(e.expires_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}'e kadar</p>}
                 </div>
@@ -193,14 +193,14 @@ function Roadmap({ onVault }: { onVault: () => void }) {
         <span>Toplamana gerek yok: serin o güne ulaştığı an ödül <b>kendiliğinden Kasana</b> düşer ve bildirim gelir. Kasadan açıp kullanırsın.{got.length > 0 && <> <button onClick={onVault} className="font-extrabold text-flame underline underline-offset-2">Kasama git</button></>}</span>
       </p>
 
-      <div className="no-scrollbar -mx-4 overflow-x-auto px-4 pb-2">
-        <ol className="flex min-w-max items-stretch gap-3">
+      <div className="pb-2">
+        <ol className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
           {data.milestones.map((m, i) => {
             const reached = data.streak >= m.days
             const isNext = m === next
             return (
               <motion.li key={m.days} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}
-                className={clsx('relative flex w-40 flex-col items-center rounded-3xl border-2 p-4 text-center', m.claimed ? 'border-mint/50 bg-mint/8' : isNext ? 'border-flame bg-flame/5 shadow-[0_0_0_4px_rgba(255,90,54,.12)]' : 'border-line bg-card')}>
+                className={clsx('relative flex w-full flex-col items-center rounded-3xl border-2 p-4 text-center', m.claimed ? 'border-mint/50 bg-mint/8' : isNext ? 'border-flame bg-flame/5 shadow-[0_0_0_4px_rgba(255,90,54,.12)]' : 'border-line bg-card')}>
                 <p className="font-display text-3xl font-black leading-none">{m.days}</p>
                 <p className="text-xs font-bold text-ink-soft">gün</p>
                 <Img src={rewardImg(m.icon)} alt="" className={clsx('my-3 size-16 object-contain', !reached && !isNext && 'opacity-40 grayscale')} />

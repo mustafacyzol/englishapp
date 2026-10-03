@@ -65,9 +65,9 @@ export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolea
         </div>
       </div>
 
-      <div role="tablist" className="no-scrollbar mt-4 flex gap-1 overflow-x-auto rounded-2xl bg-paper-2 p-1">
+      <div role="tablist" className="mt-4 grid auto-cols-fr grid-flow-col gap-1 rounded-2xl bg-paper-2 p-1">
         {TABS.map(([k, l]) => (
-          <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={clsx('relative flex-1 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-extrabold transition', tab === k ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
+          <button key={k} role="tab" aria-selected={tab === k} onClick={() => setTab(k)} className={clsx('relative min-w-0 truncate rounded-xl px-1.5 py-2 text-[13px] font-extrabold transition sm:px-3 sm:text-sm', tab === k ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
             {tab === k && <motion.span layoutId="studio-tab" className="absolute inset-0 rounded-xl bg-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
             <span className="relative">{l}</span>
           </button>

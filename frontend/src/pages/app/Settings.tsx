@@ -64,9 +64,9 @@ export default function Settings() {
   const tabs: { key: Tab; label: string; text: string; icon: typeof User }[] = [
     { key: 'hesap', label: 'Hesap', text: 'Ad, yaş grubu, kurum', icon: User },
     { key: 'ogrenme', label: 'Öğrenme', text: 'Hedef, seviye, ilgi alanı', icon: GraduationCap },
-    ...(kid ? [] : [{ key: 'sinav' as Tab, label: 'Sınav modu', text: examOn(user) ? 'Açık' : 'İsteğe bağlı', icon: Target }]),
-    { key: 'gorunum', label: 'Görünüm ve ses', text: 'Tema, dil, okuma hızı', icon: Palette },
-    { key: 'bildirim', label: 'Bildirimler', text: 'Hatırlatma, e-posta', icon: Bell },
+    ...(kid ? [] : [{ key: 'sinav' as Tab, label: 'Sınav', text: examOn(user) ? 'Açık' : 'İsteğe bağlı', icon: Target }]),
+    { key: 'gorunum', label: 'Görünüm', text: 'Tema, dil, okuma hızı', icon: Palette },
+    { key: 'bildirim', label: 'Bildirim', text: 'Hatırlatma, e-posta', icon: Bell },
     { key: 'abonelik', label: 'Abonelik', text: user.premium.active ? 'Premium' : 'Ücretsiz', icon: Crown },
     { key: 'guvenlik', label: 'Güvenlik', text: 'Şifre, oturumlar', icon: Shield },
   ]
@@ -78,15 +78,16 @@ export default function Settings() {
     <div className="mx-auto max-w-5xl">
       <PageHeader title="Ayarlar" />
       <div className="lg:grid lg:grid-cols-[240px_1fr] lg:gap-8">
-        <nav aria-label="Ayar bölümleri" className="no-scrollbar -mx-4 mb-5 flex gap-2 overflow-x-auto px-4 lg:sticky lg:top-24 lg:mx-0 lg:mb-0 lg:flex-col lg:self-start lg:overflow-visible lg:px-0">
+        {/* Phones: every section visible at once as a tile grid (nothing hidden off to the side). */}
+        <nav aria-label="Ayar bölümleri" className="mb-5 grid grid-cols-4 gap-1.5 sm:grid-cols-7 lg:sticky lg:top-24 lg:mb-0 lg:flex lg:flex-col lg:gap-2 lg:self-start">
           {tabs.map((t) => {
             const on = t.key === tab
             return (
-              <button key={t.key} onClick={() => go(t.key)} aria-current={on ? 'page' : undefined} className={clsx('relative flex shrink-0 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-left transition lg:py-3', on ? 'text-paper' : 'text-ink hover:bg-ink/[0.05]')}>
+              <button key={t.key} onClick={() => go(t.key)} aria-current={on ? 'page' : undefined} className={clsx('relative flex min-w-0 flex-col items-center gap-1 rounded-2xl border-2 px-1.5 py-2 text-center transition lg:flex-row lg:gap-3 lg:border-0 lg:px-3.5 lg:py-3 lg:text-left', on ? 'border-ink text-paper' : 'border-line bg-card text-ink hover:bg-ink/[0.05] lg:bg-transparent')}>
                 {on && <motion.span layoutId="set-tab" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className="absolute inset-0 rounded-2xl bg-ink" />}
                 <t.icon className="relative size-[18px] shrink-0" />
-                <span className="relative">
-                  <span className="block whitespace-nowrap text-sm font-extrabold">{t.label}</span>
+                <span className="relative min-w-0 max-w-full">
+                  <span className="block truncate text-xs font-extrabold sm:text-sm">{t.label}</span>
                   <span className={clsx('hidden text-xs lg:block', on ? 'text-paper/70' : 'text-ink-soft')}>{t.text}</span>
                 </span>
               </button>

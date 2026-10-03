@@ -57,9 +57,9 @@ export default function Leagues() {
     <div className="mx-auto max-w-2xl">
       <Link to="/duel" className="mb-4 inline-flex items-center gap-1.5 text-sm font-bold text-ink-soft hover:text-ink"><ArrowLeft className="size-4" /> Arena</Link>
       {switcher}
-      <div className="no-scrollbar mb-6 flex items-center gap-3 overflow-x-auto px-2 py-3">
+      <div className="mb-6 grid grid-cols-5 place-items-center gap-2 py-3 sm:grid-cols-10">
         {data.tiers.map((t, i) => (
-          <div key={t} className={clsx('flex shrink-0 flex-col items-center', i === data.tier ? 'scale-110' : 'opacity-60')}>
+          <div key={t} className={clsx('flex flex-col items-center', i === data.tier ? 'scale-110' : 'opacity-60')}>
             <LeagueEmblem tier={i} size={i === data.tier ? 60 : 42} dim={i > data.tier} />
           </div>
         ))}

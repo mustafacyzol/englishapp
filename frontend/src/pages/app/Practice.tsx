@@ -92,7 +92,7 @@ function GamePicker({ onPick }: { onPick: (g: GameKey) => void }) {
             <h3 className="font-display text-lg font-black">{grp.title}</h3>
             <span className="text-xs font-bold text-ink-soft">{grp.text}</span>
           </div>
-          <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             {GAMES.filter((g) => g.group === grp.key && g.key !== 'swipe').map((g, i) => (
               <motion.button
                 key={g.key}
