@@ -65,16 +65,68 @@ class InstitutionController extends Controller
         abort_unless($staff->role === 'manager', 403, 'Okul ayarlarını yönetici düzenler.');
         $inst = $staff->institution;
         $data = $request->validate([
+            'name' => ['sometimes', 'string', 'min:3', 'max:160'],
+            'city' => ['sometimes', 'nullable', 'string', 'max:80'],
             'logo_url' => ['sometimes', 'nullable', 'url:https', 'max:500'],
             'brand_color' => ['sometimes', 'nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
             'contact_name' => ['sometimes', 'nullable', 'string', 'max:120'],
             'contact_email' => ['sometimes', 'nullable', 'email', 'max:190'],
             'contact_phone' => ['sometimes', 'nullable', 'string', 'max:40'],
+            'complete_setup' => ['sometimes', 'boolean'],
         ]);
+        if (! empty($data['complete_setup'])) {
+            $data['setup_completed_at'] = $inst->setup_completed_at ?? now();
+        }
+        unset($data['complete_setup']);
+        foreach (['name', 'city', 'contact_name'] as $k) {
+            if (isset($data[$k])) {
+                $data[$k] = strip_tags($data[$k]);
+            }
+        }
         $inst->update($data);
         Audit::log('institution.updated', $request->user(), $inst, ['keys' => array_keys($data)]);
 
         return response()->json($this->service->report($inst->fresh()) + ['role' => 'manager', 'school_classes' => $this->school->classes($staff), 'teachers' => $this->school->teachers($staff)]);
+    }
+
+    /**
+     * Logo upload from the device: PNG, JPG or WebP up to 1 MB and 64-2000 px. SVG is
+     * refused on purpose (it can carry scripts). The file gets a random name on the
+     * public disk and the previous uploaded logo is deleted.
+     */
+    public function uploadLogo(Request $request): JsonResponse
+    {
+        $staff = $this->school->staff($request->user());
+        abort_unless($staff->role === 'manager', 403, 'Okul logosunu yönetici değiştirir.');
+        $request->validate(['logo' => ['required', 'file', 'image', 'mimes:png,jpg,jpeg,webp', 'max:1024', 'dimensions:min_width=64,min_height=64,max_width=2000,max_height=2000']], [
+            'logo.mimes' => 'Logo PNG, JPG ya da WebP olmalı.',
+            'logo.max' => 'Logo en fazla 1 MB olabilir.',
+            'logo.dimensions' => 'Logo 64 ile 2000 piksel arasında olmalı.',
+        ]);
+        $inst = $staff->institution;
+        $this->deleteStoredLogo($inst->logo_url);
+        $path = $request->file('logo')->store('logos', 'public');
+        $inst->update(['logo_url' => \Illuminate\Support\Facades\Storage::disk('public')->url($path)]);
+        Audit::log('institution.logo', $request->user(), $inst);
+
+        return response()->json(['logo_url' => $inst->logo_url]);
+    }
+
+    public function deleteLogo(Request $request): JsonResponse
+    {
+        $staff = $this->school->staff($request->user());
+        abort_unless($staff->role === 'manager', 403);
+        $this->deleteStoredLogo($staff->institution->logo_url);
+        $staff->institution->update(['logo_url' => null]);
+
+        return response()->json(['logo_url' => null]);
+    }
+
+    private function deleteStoredLogo(?string $url): void
+    {
+        if ($url && preg_match('#/storage/(logos/[A-Za-z0-9._-]+)$#', $url, $m)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($m[1]);
+        }
     }
 
     /** Principals invite teachers and students; teachers invite students into their own classes. */

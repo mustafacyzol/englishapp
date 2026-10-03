@@ -11,6 +11,7 @@ import { Logo } from '@/components/game/Logo'
 import { SkeletonPage } from '@/components/ui/Misc'
 import { LangSelect } from '@/components/ui/LangSelect'
 import { TYPE, type InstitutionReport } from '@/components/institution/Report'
+import { SetupWizard } from '@/components/institution/Setup'
 
 /** The menu follows the role: a principal runs the school, a teacher their classes. */
 const NAV: { to: string; label: string; icon: typeof Gauge; end?: boolean; manager?: boolean }[] = [
@@ -47,6 +48,9 @@ export default function InstitutionLayout() {
   const allowed = user?.institution_role === 'manager' || user?.institution_role === 'teacher'
   const { data, error } = useQuery({ queryKey: ['institution'], queryFn: () => get<InstitutionReport>('/institution'), enabled: allowed })
   useEffect(() => setOpen(false), [loc.pathname])
+  // first open for a principal: a short setup instead of a blank panel
+  const [later, setLater] = useState(() => { try { return sessionStorage.getItem('dilgo.inst.setup.later') === '1' } catch { return false } })
+  const showSetup = data?.role === 'manager' && data.institution.setup_done === false && !later
 
   if (!allowed) return <Navigate to="/learn" replace />
   const inst = data?.institution
@@ -90,6 +94,7 @@ export default function InstitutionLayout() {
 
   return (
     <div className="flex min-h-dvh bg-paper" style={{ ['--inst' as string]: accent }}>
+      <AnimatePresence>{showSetup && data && <SetupWizard data={data} onClose={() => { setLater(true); try { sessionStorage.setItem('dilgo.inst.setup.later', '1') } catch { /* private mode */ } }} />}</AnimatePresence>
       <aside className="sticky top-0 hidden h-dvh w-[264px] shrink-0 border-r-2 border-line bg-card/50 px-3 py-5 lg:block">{side}</aside>
 
       <AnimatePresence>

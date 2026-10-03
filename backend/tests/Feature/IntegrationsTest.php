@@ -60,4 +60,27 @@ class IntegrationsTest extends TestCase
         $this->getJson('/api/v1/admin/integrations')->assertOk();
         $this->putJson('/api/v1/admin/integrations', ['payments.gateway' => 'iyzico'])->assertForbidden();
     }
+
+    public function test_smtp_settings_are_encrypted_applied_and_testable(): void
+    {
+        $this->staff('super_admin');
+        $data = $this->putJson('/api/v1/admin/integrations', [
+            'mail.host' => 'smtp.example.com', 'mail.port' => 465, 'mail.encryption' => 'ssl',
+            'mail.username' => 'noreply@example.com', 'mail.password' => 'smtp-secret-99', 'mail.from_address' => 'noreply@example.com',
+        ])->assertOk()->json('data');
+        $this->assertSame(['set' => true, 'hint' => '••••t-99'], $data['mail.password']);
+        $this->assertNotSame('smtp-secret-99', Setting::query()->find('int.mail.password')->value);
+
+        Integrations::applyMail();
+        $this->assertSame('smtp', config('mail.default'));
+        $this->assertSame('smtp.example.com', config('mail.mailers.smtp.host'));
+        $this->assertSame('smtps', config('mail.mailers.smtp.scheme'));
+        $this->assertSame('smtp-secret-99', config('mail.mailers.smtp.password'));
+
+        $this->putJson('/api/v1/admin/integrations', ['mail.host' => 'bad host;rm'])->assertUnprocessable();
+        // the test button reports the transport error instead of a blank 500
+        config(['mail.default' => 'array']);
+        $this->mock(\Illuminate\Mail\MailManager::class, fn ($m) => $m->shouldReceive('raw')->andThrow(new \RuntimeException('Connection refused')));
+        $this->postJson('/api/v1/admin/integrations/test-mail', ['to' => 'me@example.com'])->assertStatus(422)->assertJsonPath('ok', false);
+    }
 }

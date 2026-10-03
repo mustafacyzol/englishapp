@@ -13,7 +13,7 @@ class Institution extends Model
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean', 'starts_at' => 'date', 'ends_at' => 'date', 'seats' => 'integer'];
+        return ['is_active' => 'boolean', 'starts_at' => 'date', 'ends_at' => 'date', 'seats' => 'integer', 'setup_completed_at' => 'datetime'];
     }
 
     protected static function booted(): void

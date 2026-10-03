@@ -716,8 +716,16 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     return { correct, answer: key?.answer ?? 0, explanation: key?.explanation ?? null, xp: r.xp_gained ?? (correct ? 4 : 1) }
   }
   if (path === '/institution' && method === 'PATCH') {
-    Object.assign(db['/institution'].institution, body)
+    const { complete_setup, ...rest } = body
+    Object.assign(db['/institution'].institution, rest, complete_setup ? { setup_done: true } : {})
     return db['/institution']
+  }
+  if (path === '/institution/logo') {
+    const inst = db['/institution'].institution
+    if (method === 'DELETE') { inst.logo_url = null; return { logo_url: null } }
+    const file = body instanceof FormData ? (body.get('logo') as File | null) : null
+    inst.logo_url = file ? URL.createObjectURL(file) : inst.logo_url
+    return { logo_url: inst.logo_url }
   }
   // --- school: classes and homework
   if ((m = path.match(/^\/institution\/classes(?:\/(\d+))?$/))) {

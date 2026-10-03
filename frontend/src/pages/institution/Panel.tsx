@@ -11,6 +11,7 @@ import { PageHeader } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { InviteModal, Kpi, Report, ago, type InstitutionReport, type InviteRow, type Member } from '@/components/institution/Report'
 import { InstitutionMark, useInstitution } from '@/layouts/InstitutionLayout'
+import { LogoPicker, SWATCHES } from '@/components/institution/Setup'
 import { SchoolClassManager } from './School'
 import { SchoolBoard } from '@/components/game/SchoolBoard'
 import { BRAND } from '@/lib/brand'
@@ -210,7 +211,6 @@ export function InstitutionInvites() {
   )
 }
 
-const SWATCHES = ['#e8403a', '#2f7cf6', '#22b573', '#8f7cf8', '#d99a00', '#0f766e', '#1f2433', '#c93460']
 
 /** Branding and contact details the manager can keep current; contract terms stay with DilGO. */
 export function InstitutionSettings() {
@@ -220,7 +220,7 @@ export function InstitutionSettings() {
   const inst = data.institution
   const [f, setF] = useState({ logo_url: inst.logo_url ?? '', brand_color: inst.brand_color ?? '#4f8a6e', contact_name: inst.contact_name ?? '', contact_email: inst.contact_email ?? '', contact_phone: inst.contact_phone ?? '' })
   const save = useMutation({
-    mutationFn: () => patch<InstitutionReport>('/institution', { ...f, logo_url: f.logo_url || null, contact_name: f.contact_name || null, contact_email: f.contact_email || null, contact_phone: f.contact_phone || null }),
+    mutationFn: () => patch<InstitutionReport>('/institution', { brand_color: f.brand_color, contact_name: f.contact_name || null, contact_email: f.contact_email || null, contact_phone: f.contact_phone || null }),
     onSuccess: (r) => { qc.setQueryData(['institution'], r); toast('Kurum bilgileri kaydedildi', 'success') },
     onError: (e: ApiError) => toast(e.first(), 'error'),
   })
@@ -230,7 +230,7 @@ export function InstitutionSettings() {
       <PageHeader kicker="Kurum ayarları" title="Panelin görünümü ve iletişim" />
       <div className="grid gap-5 lg:grid-cols-[1fr_300px] [&>*]:min-w-0">
         <form onSubmit={(e) => { e.preventDefault(); save.mutate() }} className="space-y-5 rounded-3xl border-2 border-line bg-card p-5 sm:p-6">
-          <Input label="Logo adresi (https)" value={f.logo_url} onChange={set('logo_url')} placeholder="https://okulum.k12.tr/logo.png" hint="Kare ya da yatay PNG/SVG. Panelde ve öğrencilerin kurum kartında görünür." />
+          <LogoPicker name={inst.name} logo={f.logo_url || null} color={f.brand_color} onChange={(url) => { setF((x) => ({ ...x, logo_url: url ?? '' })); qc.invalidateQueries({ queryKey: ['institution'] }) }} />
           <div>
             <p className="mb-2 flex items-center gap-2 text-sm font-bold"><Palette className="size-4" /> Kurum rengi</p>
             <div className="flex flex-wrap items-center gap-2">

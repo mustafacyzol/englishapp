@@ -22,7 +22,7 @@ class ExamSeeder extends Seeder
             if ($q['section'] !== 'irrelevant') {
                 shuffle($options);
             }
-            ExamQuestion::query()->updateOrCreate(['prompt' => $q['prompt'], 'section' => $q['section']], [
+            ExamQuestion::query()->updateOrCreate(['prompt' => $q['prompt'], 'section' => $q['section'], 'passage' => $q['passage'] ?? null], [
                 'exams' => $q['exams'],
                 'cefr' => $q['cefr'],
                 'passage' => $q['passage'] ?? null,

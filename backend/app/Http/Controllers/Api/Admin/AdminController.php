@@ -363,6 +363,13 @@ class AdminController extends Controller
             'defne.voice_rate' => ['sometimes', 'numeric', 'between:0.8,1.15'],
             'ai.api_key' => ['sometimes', 'nullable', 'string', 'max:300'],
             'ai.model' => ['sometimes', 'nullable', 'string', 'max:80'],
+            'mail.host' => ['sometimes', 'nullable', 'string', 'max:190', 'regex:/^[A-Za-z0-9.-]*$/'],
+            'mail.port' => ['sometimes', 'nullable', 'integer', 'between:1,65535'],
+            'mail.username' => ['sometimes', 'nullable', 'string', 'max:190'],
+            'mail.password' => ['sometimes', 'nullable', 'string', 'max:300'],
+            'mail.encryption' => ['sometimes', 'nullable', 'in:tls,ssl,none'],
+            'mail.from_address' => ['sometimes', 'nullable', 'email', 'max:190'],
+            'mail.from_name' => ['sometimes', 'nullable', 'string', 'max:120'],
         ];
         // keys are dotted names sent flat (not nested), so validate them as plain fields
         $all = $request->all();
@@ -380,6 +387,22 @@ class AdminController extends Controller
         Audit::log('admin.integrations.updated', $request->user(), null, ['keys' => array_keys($flat), 'cleared' => $clear]);
 
         return response()->json(['data' => Integrations::forAdmin()]);
+    }
+
+    /** Sends one message through the saved SMTP settings and reports the exact error if it fails. */
+    public function testMail(Request $request): JsonResponse
+    {
+        abort_unless($request->user()->isSuperAdmin(), 403, 'Yalnızca süper yönetici test e-postası gönderebilir.');
+        $data = $request->validate(['to' => ['required', 'email', 'max:190']]);
+        Integrations::applyMail();
+        try {
+            \Illuminate\Support\Facades\Mail::raw('Bu bir test e-postasıdır. SMTP ayarların çalışıyor.', fn ($m) => $m->to($data['to'])->subject(config('app.name').' SMTP testi'));
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'message' => 'Gönderilemedi: '.mb_substr($e->getMessage(), 0, 240)], 422);
+        }
+        Audit::log('admin.integrations.test_mail', $request->user(), null, ['to' => $data['to']]);
+
+        return response()->json(['ok' => true, 'message' => "Test e-postası {$data['to']} adresine gönderildi."]);
     }
 
     public function settings(): JsonResponse

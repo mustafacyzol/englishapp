@@ -76,4 +76,32 @@ class SchoolTest extends TestCase
         $this->actingAs(User::factory()->create(), 'sanctum')->postJson("/api/v1/me/assignments/{$custom}/done")->assertNotFound();
         $this->actingAs($s1, 'sanctum')->getJson('/api/v1/institution')->assertForbidden();
     }
+
+    public function test_setup_wizard_and_logo_upload(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+        $inst = Institution::query()->create(['name' => 'Yeni Okul', 'slug' => 'yeni', 'type' => 'school', 'seats' => 50, 'join_code' => 'YEN123']);
+        $principal = User::factory()->create(['email_verified_at' => now()]);
+        $teacher = User::factory()->create(['email_verified_at' => now()]);
+        $this->member($inst, $principal, 'manager');
+        $this->member($inst, $teacher, 'teacher');
+
+        $this->actingAs($principal, 'sanctum')->getJson('/api/v1/institution')->assertJsonPath('institution.setup_done', false);
+        $png = \Illuminate\Http\UploadedFile::fake()->image('logo.png', 256, 256);
+        $url = $this->post('/api/v1/institution/logo', ['logo' => $png], ['Accept' => 'application/json'])->assertOk()->json('logo_url');
+        $this->assertStringContainsString('/storage/logos/', $url);
+        \Illuminate\Support\Facades\Storage::disk('public')->assertExists('logos/'.basename($url));
+
+        // SVG, oversized and tiny files are refused
+        $this->post('/api/v1/institution/logo', ['logo' => \Illuminate\Http\UploadedFile::fake()->create('x.svg', 3, 'image/svg+xml')], ['Accept' => 'application/json'])->assertUnprocessable();
+        $this->post('/api/v1/institution/logo', ['logo' => \Illuminate\Http\UploadedFile::fake()->image('big.png', 400, 400)->size(3000)], ['Accept' => 'application/json'])->assertUnprocessable();
+        $this->post('/api/v1/institution/logo', ['logo' => \Illuminate\Http\UploadedFile::fake()->image('tiny.png', 20, 20)], ['Accept' => 'application/json'])->assertUnprocessable();
+
+        $this->patchJson('/api/v1/institution', ['name' => '<b>Atatürk</b> Ortaokulu', 'city' => 'İzmir', 'complete_setup' => true])->assertOk()
+            ->assertJsonPath('institution.setup_done', true)->assertJsonPath('institution.name', 'Atatürk Ortaokulu');
+
+        // teachers cannot change the logo
+        $this->app['auth']->forgetGuards();
+        $this->actingAs($teacher, 'sanctum')->post('/api/v1/institution/logo', ['logo' => \Illuminate\Http\UploadedFile::fake()->image('l.png', 100, 100)], ['Accept' => 'application/json'])->assertForbidden();
+    }
 }

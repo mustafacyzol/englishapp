@@ -21,6 +21,11 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        // SMTP configured in the admin panel wins over .env (tests keep the array mailer)
+        if (! $this->app->runningUnitTests()) {
+            \App\Support\Integrations::applyMail();
+        }
+
         RateLimiter::for('api', fn (Request $r) => Limit::perMinute(180)->by($r->user()?->id ?: $r->ip()));
         RateLimiter::for('auth', fn (Request $r) => [
             Limit::perMinute(10)->by('ip:'.$r->ip()),

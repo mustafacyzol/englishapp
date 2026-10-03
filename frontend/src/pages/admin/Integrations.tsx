@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { BookAudio, CreditCard, Mic, Save, Sparkles, Volume2 } from 'lucide-react'
-import { ApiError, get, put } from '@/lib/api'
+import { BookAudio, CreditCard, Mail, Mic, Save, Send, Sparkles, Volume2 } from 'lucide-react'
+import { ApiError, get, post, put } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { speak, speakNeural } from '@/lib/speech'
 import { Button } from '@/components/ui/Button'
@@ -14,7 +14,7 @@ import { AdminTitle, Pill } from './kit'
 type Secret = { set: boolean; hint: string | null }
 type Data = Record<string, string | number | boolean | null | Secret>
 
-const SECRETS = ['payments.iyzico.api_key', 'payments.iyzico.secret_key', 'tts.elevenlabs.key', 'tts.openai.key', 'tts.google.key', 'ai.api_key'] as const
+const SECRETS = ['payments.iyzico.api_key', 'payments.iyzico.secret_key', 'tts.elevenlabs.key', 'tts.openai.key', 'tts.google.key', 'ai.api_key', 'mail.password'] as const
 const isSecret = (k: string) => (SECRETS as readonly string[]).includes(k)
 
 function Card({ icon, title, text, status, children }: { icon: ReactNode; title: string; text: string; status?: ReactNode; children: ReactNode }) {
@@ -212,6 +212,28 @@ export default function AdminIntegrations() {
           {dirty && <p className="mt-1 text-xs text-ink-soft">Dinlemeden önce değişiklikleri kaydet.</p>}
         </Card>
 
+        <Card icon={<Mail className="size-5" />} title="E-posta (SMTP)" text="Doğrulama kodları, şifre sıfırlama ve haftalık raporlar bu sunucudan gider. Boşsa sunucudaki .env ayarı kullanılır." status={str('mail.host') && !/^(127\.|localhost|mailpit$)/.test(str('mail.host')) ? <Pill tone="good">Ayarlı</Pill> : <Pill tone="warn">Gerçek sunucu yok</Pill>}>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Input label="SMTP sunucusu" placeholder="smtp.ornek.com" disabled={!canEdit} value={str('mail.host')} onChange={(e) => set('mail.host', e.target.value.trim() || null)} />
+            <div className="grid grid-cols-2 gap-3">
+              <Input label="Port" type="number" placeholder="587" disabled={!canEdit} value={s['mail.port'] == null ? '' : String(s['mail.port'])} onChange={(e) => set('mail.port', e.target.value ? Number(e.target.value) : null)} />
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-bold">Şifreleme</span>
+                <select disabled={!canEdit} value={str('mail.encryption') || 'tls'} onChange={(e) => set('mail.encryption', e.target.value)} className="h-12 w-full rounded-2xl border-2 border-line bg-card px-3 font-semibold">
+                  <option value="tls">TLS (587)</option>
+                  <option value="ssl">SSL (465)</option>
+                  <option value="none">Yok</option>
+                </select>
+              </label>
+            </div>
+            <Input label="Kullanıcı adı" autoComplete="off" disabled={!canEdit} value={str('mail.username')} onChange={(e) => set('mail.username', e.target.value || null)} />
+            {secretField('mail.password', 'Şifre')}
+            <Input label="Gönderen adresi" type="email" placeholder="noreply@ornek.com" disabled={!canEdit} value={str('mail.from_address')} onChange={(e) => set('mail.from_address', e.target.value || null)} />
+            <Input label="Gönderen adı" placeholder="Dilgo" disabled={!canEdit} value={str('mail.from_name')} onChange={(e) => set('mail.from_name', e.target.value || null)} />
+          </div>
+          {canEdit && <TestMail disabled={dirty} />}
+        </Card>
+
         <Card icon={<Sparkles className="size-5" />} title="Yapay zekâ" text="Defne'nin sohbet, rol oyunu ve yazı düzeltme özellikleri bu anahtarla çalışır. Boşken kısa hazır yanıtlar verir." status={secretInfo('ai.api_key')?.set ? <Pill tone="good">Bağlı</Pill> : <Pill tone="warn">Anahtar yok</Pill>}>
           <div className="grid gap-4 sm:grid-cols-2">
             {secretField('ai.api_key', 'Anthropic API anahtarı')}
@@ -228,6 +250,25 @@ export default function AdminIntegrations() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/** One click to prove the saved SMTP works; the server returns the exact error otherwise. */
+function TestMail({ disabled }: { disabled: boolean }) {
+  const toast = useToast()
+  const { user } = useAuth()
+  const [to, setTo] = useState(user?.email ?? '')
+  const m = useMutation({
+    mutationFn: () => post<{ message: string }>('/admin/integrations/test-mail', { to }, true),
+    onSuccess: (r) => toast(r.message, 'success'),
+    onError: (e: ApiError) => toast(e.message, 'error'),
+  })
+  return (
+    <div className="mt-5 flex flex-col gap-2 rounded-2xl bg-paper-2 p-3 sm:flex-row sm:items-end">
+      <div className="flex-1"><Input label="Test e-postası gönder" type="email" value={to} onChange={(e) => setTo(e.target.value)} /></div>
+      <Button variant="secondary" onClick={() => m.mutate()} loading={m.isPending} disabled={disabled || !to}><Send className="size-4" /> Gönder</Button>
+      {disabled && <p className="text-xs text-ink-soft sm:hidden">Önce kaydet.</p>}
     </div>
   )
 }

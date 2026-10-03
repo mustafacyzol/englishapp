@@ -118,11 +118,14 @@ class ExamController extends Controller
         [$target, $missed] = $this->adaptive($user);
 
         $picked = collect();
+        // about a quarter of the mock (at least one question) re-checks earlier mistakes; in a
+        // short mock a section's own share would round down to zero, so the budget is shared
+        $budget = max(1, intdiv($shape['questions'], 4));
         foreach ($blueprint as $section => $count) {
             $want = max(1, (int) round($count / $total * $shape['questions']));
             $pool = $bank->where('section', $section);
-            // up to a quarter of each section: questions the learner got wrong before, to check they stuck
-            $again = $pool->whereIn('id', $missed)->shuffle()->take(max(0, (int) floor($want / 4)));
+            $again = $pool->whereIn('id', $missed)->shuffle()->take(min($budget, max(1, (int) floor($want / 4)), $want));
+            $budget -= $again->count();
             // the rest at the learner's working difficulty: near the target level first, harder only
             // once the easier ones are done (someone who misses the easy ones won't get the hard ones)
             $rest = $pool->whereNotIn('id', $again->pluck('id'))->sortBy(fn ($q) => abs(self::rank($q->cefr) - $target) * 100000 + (self::rank($q->cefr) > $target ? 50000 : 0) + ($seen[$q->id] ?? 0) * 1000 + random_int(0, 999))->take($want - $again->count());

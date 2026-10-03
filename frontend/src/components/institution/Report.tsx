@@ -27,7 +27,7 @@ export interface Member {
   skills: Record<SkillKey, { level: number; xp: number }> | null
 }
 export interface InstitutionReport {
-  institution: { id: number; name: string; type: string; city: string | null; seats: number; seats_used: number; join_code: string; starts_at: string | null; ends_at: string | null; is_active: boolean; current: boolean; logo_url?: string | null; brand_color?: string | null; contact_name?: string | null; contact_email?: string | null; contact_phone?: string | null }
+  institution: { id: number; name: string; type: string; city: string | null; seats: number; seats_used: number; join_code: string; starts_at: string | null; ends_at: string | null; is_active: boolean; current: boolean; logo_url?: string | null; brand_color?: string | null; contact_name?: string | null; contact_email?: string | null; contact_phone?: string | null; setup_done?: boolean }
   summary: { students: number; active: number; invited: number; active_this_week: number; week_xp: number; avg_streak: number; skills: Record<SkillKey, number> }
   classes: string[]
   members: Member[]

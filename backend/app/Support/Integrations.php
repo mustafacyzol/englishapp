@@ -40,6 +40,14 @@ class Integrations
         'defne.voice_rate' => [null, false],   // 0.8..1.15
         'ai.api_key' => ['dilgo.ai.api_key', true],
         'ai.model' => ['dilgo.ai.model', false],
+        // outgoing e-mail (OTP codes, reports, password resets)
+        'mail.host' => ['mail.mailers.smtp.host', false],
+        'mail.port' => ['mail.mailers.smtp.port', false],
+        'mail.username' => ['mail.mailers.smtp.username', false],
+        'mail.password' => ['mail.mailers.smtp.password', true],
+        'mail.encryption' => [null, false], // tls | ssl | none
+        'mail.from_address' => ['mail.from.address', false],
+        'mail.from_name' => ['mail.from.name', false],
     ];
 
     private const DEFAULTS = [
@@ -132,6 +140,34 @@ class Integrations
             'stability' => (float) self::get('tts.stability'),
             'similarity' => (float) self::get('tts.similarity'),
         ];
+    }
+
+    /**
+     * SMTP saved in the panel replaces the .env mailer at boot, so a school or the
+     * site owner can switch providers without server access. Nothing happens until
+     * a host is stored, and a missing settings table (fresh install) is ignored.
+     */
+    public static function applyMail(): void
+    {
+        try {
+            $host = self::stored()['int.mail.host'] ?? null;
+        } catch (\Throwable) {
+            return;
+        }
+        if (! filled($host)) {
+            return;
+        }
+        $enc = self::get('mail.encryption');
+        config([
+            'mail.default' => 'smtp',
+            'mail.mailers.smtp.host' => $host,
+            'mail.mailers.smtp.port' => (int) (self::get('mail.port') ?: 587),
+            'mail.mailers.smtp.username' => self::get('mail.username'),
+            'mail.mailers.smtp.password' => self::get('mail.password'),
+            'mail.mailers.smtp.scheme' => $enc === 'ssl' ? 'smtps' : 'smtp',
+            'mail.from.address' => self::get('mail.from_address') ?: config('mail.from.address'),
+            'mail.from.name' => self::get('mail.from_name') ?: config('mail.from.name'),
+        ]);
     }
 
     /** Public, safe values the app needs to drive Defne's face and voice. */

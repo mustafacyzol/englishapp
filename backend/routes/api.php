@@ -82,6 +82,8 @@ Route::prefix('v1')->group(function () {
         Route::post('institution/join', [InstitutionController::class, 'join'])->middleware('throttle:10,1');
         Route::get('institution', [InstitutionController::class, 'show']);
         Route::patch('institution', [InstitutionController::class, 'update'])->middleware('throttle:20,1');
+        Route::post('institution/logo', [InstitutionController::class, 'uploadLogo'])->middleware('throttle:10,1');
+        Route::delete('institution/logo', [InstitutionController::class, 'deleteLogo']);
         Route::post('institution/invite', [InstitutionController::class, 'invite'])->middleware('throttle:20,1');
         Route::delete('institution/members/{member}', [InstitutionController::class, 'removeMember']);
         Route::patch('institution/members/{member}', [InstitutionController::class, 'moveMember']);
@@ -202,6 +204,7 @@ Route::prefix('v1')->group(function () {
             Route::put('settings', [AdminController::class, 'updateSettings'])->middleware('perm:settings');
             Route::get('integrations', [AdminController::class, 'integrations'])->middleware('perm:settings');
             Route::put('integrations', [AdminController::class, 'updateIntegrations'])->middleware('perm:settings');
+            Route::post('integrations/test-mail', [AdminController::class, 'testMail'])->middleware(['perm:settings', 'throttle:5,1']);
             Route::post('vouchers', [AdminController::class, 'voucher'])->middleware('perm:desk');
 
             Route::middleware('perm:users')->group(function () {

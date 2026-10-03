@@ -86,6 +86,7 @@ DB_PASSWORD=GÜÇLÜ_BİR_ŞİFRE
 CACHE_STORE=database
 QUEUE_CONNECTION=database
 MAIL_MAILER=smtp                      # SMTP bilgileri: DEPLOY_HOSTINGER.md 3. bölüm
+                                      # (ya da Yönetim > Entegrasyonlar > E-posta: şifreli saklanır, .env'in önüne geçer, test e-postası butonu var)
 ```
 
 İsteğe bağlı anahtarlar (boş bırakılırsa ilgili özellik zarif biçimde kapanır): `ANTHROPIC_API_KEY` (Defne AI), `ELEVENLABS_API_KEY` (Defne'nin sesi), `IYZICO_*` (ödeme), `GOOGLE_CLIENT_ID` / `APPLE_CLIENT_ID` (sosyal giriş), `TURNSTILE_SECRET_KEY` (robot koruması).
@@ -209,4 +210,5 @@ Tarayıcıda web adresini açın, kayıt olun, bir ders bitirin, yönetim paneli
 | `Specified key was too long` | MySQL 5.7 kullanıyorsunuz; MySQL 8 / MariaDB 10.6+ kullanın |
 | Yüklenen avatar görünmüyor | `php artisan storage:link` çalıştırılmamış ya da `APP_URL` yanlış |
 | CORS hatası | `CORS_ALLOWED_ORIGINS` web adresini tam olarak içermeli, sonra `php artisan config:cache` |
-| E-posta gitmiyor | SMTP ayarları ve cron'un çalıştığını kontrol edin |
+| E-posta gitmiyor | Yönetim > Entegrasyonlar > E-posta bölümünden "Test e-postası gönder"i deneyin; hata mesajı sebebi söyler. Cron'un çalıştığını da kontrol edin |
+| Okul logosu görünmüyor | `php artisan storage:link` çalıştırılmış olmalı (logolar storage/app/public/logos altında) |

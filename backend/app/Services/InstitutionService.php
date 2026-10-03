@@ -155,6 +155,7 @@ class InstitutionService
 
         return [
             'institution' => $inst->only(['id', 'name', 'type', 'city', 'seats', 'join_code', 'starts_at', 'ends_at', 'is_active', 'logo_url', 'brand_color', 'contact_name', 'contact_email', 'contact_phone']) + [
+                'setup_done' => $inst->setup_completed_at !== null,
                 'seats_used' => $inst->seatsUsed(),
                 'current' => $inst->isCurrent(),
             ],
