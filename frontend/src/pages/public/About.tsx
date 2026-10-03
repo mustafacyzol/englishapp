@@ -18,6 +18,14 @@ const VALUES = [
   { icon: GraduationCap, color: '#2f7cf6', title: 'Gerçek öğretmen, gerçek sınıf', text: 'Teknoloji öğretmenin yerini almaz, onu her güne taşır. Okul paneli bu yüzden uygulamanın parçası.' },
 ]
 
+/** The research behind the product, in one line each, with where it comes from. */
+const METHOD = [
+  { t: 'Aralıklı tekrar', d: 'Kelimeler unutulmak üzereyken geri gelir; aynı süreyle çok daha kalıcı öğrenme.', src: 'Cepeda ve ark., Psychological Bulletin, 2006' },
+  { t: 'Hatırlayarak öğrenme', d: 'Okumak yerine cevabı hatırlamaya çalışmak; her alıştırma küçük bir sınav.', src: 'Roediger ve Karpicke, Psychological Science, 2006' },
+  { t: 'Anlaşılır girdi', d: 'Seviyenin biraz üstünde hikâyeler ve dinlemeler; bağlamdan öğrenilen dil.', src: 'Krashen, Input Hypothesis, 1985' },
+  { t: 'CEFR ile ölçülen ilerleme', d: 'A1’den B2’ye her ünite, Avrupa ortak çerçevesinin "yapabilirim" ifadelerine göre.', src: 'Avrupa Konseyi, CEFR Companion Volume, 2020' },
+]
+
 const STORY = [
   { tag: 'Sınıfta', title: 'Her şey bir sınıfta başladı', text: 'Bayrak Dil Okulları’nda öğrencilerimiz derste hızla ilerliyordu, ama iki ders arasındaki günlerde pratik yapacak bir yer bulamıyordu.', icon: School },
   { tag: 'İlk adım', title: 'Önce hikâyeler geldi', text: 'Okuma ve dinlemeyi her güne taşıyan hikâye uygulamamızı yaptık. Öğrenciler daha fazlasını istedi: konuşmak, yazmak, yarışmak.', icon: BookOpen },
@@ -56,7 +64,7 @@ export default function About() {
             ))}
           </h1>
           <motion.p initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="mt-6 max-w-xl text-lg leading-relaxed text-ink-soft">
-            {BRAND}, Bayrak Dil Okulları’nın yıllardır sınıfta kullandığı yöntemlerin dijital hali. Öğretmenlerimizin hazırladığı müfredatı hikâyeler, sesli pratik ve yapay zekâ ile her gün birkaç dakikada uygulanabilir hale getirdik.
+            {BRAND}, Bayrak Dil Okulları’nın sınıfta denenmiş yöntemlerinin dijital hali: her gün birkaç dakikada, dört beceriyle.
           </motion.p>
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="mt-8 flex flex-wrap gap-3">
             <LinkButton to="/register" size="lg" className="gap-2">Ücretsiz başla <ArrowRight className="size-5" /></LinkButton>
@@ -86,7 +94,7 @@ export default function About() {
             [data?.learners ? data.learners.toLocaleString('tr-TR') : '·', `öğrenci ${BRAND} ile çalışıyor`],
             [data?.stories ?? '·', 'seviyeli hikâye'],
             ['4', 'beceri: okuma, dinleme, konuşma, yazma'],
-            ['A1 → C1', 'tek yolda, kendi hızında'],
+            ['A1 → B2', 'CEFR uyumlu tek yol'],
           ].map(([v, l], k) => (
             <motion.div key={l} initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: k * 0.08 }}>
               <p className="font-display text-[clamp(1.8rem,3.4vw,2.6rem)] font-black leading-none">{v}</p>
@@ -125,16 +133,36 @@ export default function About() {
             <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">İlkelerimiz</p>
             <h2 className="mt-3 font-display text-[clamp(2rem,4vw,3rem)] font-black leading-[1.05]">Her kararı bu dört cümleyle tartıyoruz.</h2>
           </div>
-          <div className="grid gap-5 sm:grid-cols-2">
+          <div className="grid border-t-2 border-ink sm:grid-cols-2">
             {VALUES.map((v, k) => (
-              <motion.div key={v.title} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ delay: (k % 2) * 0.1, duration: 0.5, ease }} whileHover={{ y: -4 }} className="group relative overflow-hidden rounded-[28px] border-2 border-line bg-card p-7">
-                <span aria-hidden className="absolute -right-10 -top-10 size-36 rounded-full opacity-10 transition-transform duration-500 group-hover:scale-125" style={{ background: v.color }} />
-                <span className="grid size-12 place-items-center rounded-2xl text-white" style={{ background: v.color }}><v.icon className="size-6" /></span>
-                <h3 className="mt-5 font-display text-2xl font-black">{v.title}</h3>
-                <p className="mt-2 text-[16px] leading-relaxed text-ink-soft">{v.text}</p>
+              <motion.div key={v.title} initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ delay: (k % 2) * 0.1, duration: 0.5, ease }} className={`group border-b-2 border-line py-8 sm:px-8 ${k % 2 ? 'sm:border-l-2' : 'sm:pl-0'}`}>
+                <p className="font-mono text-sm font-bold" style={{ color: v.color }}>0{k + 1}</p>
+                <h3 className="mt-2 font-display text-2xl font-black">{v.title}</h3>
+                <p className="mt-2 max-w-md text-[16px] leading-relaxed text-ink-soft">{v.text}</p>
               </motion.div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* -------------------------------------------------------- method */}
+      <section className="mx-auto max-w-6xl px-5 py-24">
+        <div className="grid gap-12 lg:grid-cols-[0.8fr_1.2fr]">
+          <div>
+            <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Yöntemimiz</p>
+            <h2 className="mt-3 font-display text-[clamp(2rem,4vw,3rem)] font-black leading-[1.05]">Araştırmanın söylediğini her güne çeviriyoruz.</h2>
+            <p className="mt-4 text-lg text-ink-soft">Dört ilke, her derste.</p>
+          </div>
+          <ol className="grid gap-4 sm:grid-cols-2">
+            {METHOD.map((m, k) => (
+              <motion.li key={m.t} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ delay: (k % 2) * 0.08, duration: 0.5, ease }} className="rounded-[24px] border-2 border-line bg-card p-6">
+                <p className="font-display text-4xl font-black text-ink/10">{k + 1}</p>
+                <h3 className="-mt-2 font-display text-xl font-black">{m.t}</h3>
+                <p className="mt-2 text-[15px] leading-relaxed text-ink-soft">{m.d}</p>
+                <p className="mt-3 text-xs font-bold text-ink-soft/80">Kaynak: {m.src}</p>
+              </motion.li>
+            ))}
+          </ol>
         </div>
       </section>
 
