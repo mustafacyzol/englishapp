@@ -260,11 +260,11 @@ function HubTabs({ tabs, path }: { tabs: (typeof HUBS)[number]['tabs']; path: st
   const { t } = useLang()
   return (
     <div className="mb-6 flex justify-center">
-      <div className="inline-flex max-w-full gap-1 rounded-2xl border-2 border-line bg-card p-1" role="tablist">
+      <div className="grid w-full auto-cols-fr grid-flow-col gap-1 rounded-2xl border-2 border-line bg-card p-1 sm:inline-flex sm:w-auto" role="tablist">
         {tabs.map((x) => {
           const on = path === x.to
           return (
-            <Link key={x.to} to={x.to} role="tab" aria-selected={on} className={clsx('relative flex items-center gap-2 whitespace-nowrap rounded-xl px-3 py-2 text-sm font-extrabold transition sm:px-4', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
+            <Link key={x.to} to={x.to} role="tab" aria-selected={on} className={clsx('relative flex min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-1.5 py-2 text-[13px] font-extrabold transition sm:px-4 sm:text-sm', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
               {on && <motion.span layoutId="hub-tab" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="absolute inset-0 rounded-xl bg-ink" />}
               <x.icon className="relative hidden size-[18px] sm:block" />
               <span className="relative">{t(x.label)}</span>

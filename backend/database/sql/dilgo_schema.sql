@@ -1,5 +1,4 @@
 -- DilGO: yalnızca tablo yapısı (veri yok). Referans ve inceleme için.
-SET NAMES utf8mb4;
 /*M!999999\- enable the sandbox mode */ 
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
@@ -606,6 +605,7 @@ CREATE TABLE `lessons` (
   `story_id` bigint(20) unsigned DEFAULT NULL,
   `scenario_key` varchar(255) DEFAULT NULL,
   `exercises` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`exercises`)),
+  `meta` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`meta`)),
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -924,6 +924,32 @@ CREATE TABLE `reward_items` (
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `reward_items_key_unique` (`key`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `school_applications`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `school_applications` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `school_name` varchar(160) NOT NULL,
+  `city` varchar(60) NOT NULL,
+  `district` varchar(60) DEFAULT NULL,
+  `school_type` varchar(20) NOT NULL,
+  `students` int(10) unsigned NOT NULL,
+  `grades` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`grades`)),
+  `contact_name` varchar(80) NOT NULL,
+  `contact_role` varchar(20) NOT NULL,
+  `email` varchar(190) NOT NULL,
+  `phone` varchar(30) NOT NULL,
+  `interests` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`interests`)),
+  `message` text DEFAULT NULL,
+  `status` varchar(20) NOT NULL DEFAULT 'new',
+  `admin_note` text DEFAULT NULL,
+  `ip` varchar(45) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `school_applications_status_created_at_index` (`status`,`created_at`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `school_classes`;

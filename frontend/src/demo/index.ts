@@ -308,7 +308,8 @@ function getRoute(path: string, admin: boolean): Json {
     }
   }
   if (base === '/exam/practice') return db['/exam/practice?section=mix&n=10']
-  if (base === '/words/deck') return db['/words/deck?n=16']
+  if (base === '/words/deck') return db[`/words/deck?n=${params.get('n') ?? 16}&lesson=${params.get('lesson')}`] ?? db[`/words/deck?n=${params.get('n') ?? 16}`] ?? db['/words/deck?n=16']
+  if (base === '/institution/leaderboard') return db[`/institution/leaderboard?${params.get('class') ? `class=${encodeURIComponent(params.get('class')!)}&` : ''}period=${params.get('period') ?? 'week'}`] ?? { data: [] }
   if ((m = base.match(/^\/admin\/users\/(\d+)$/))) return db[base] ?? db['/admin/users/1']
   if (base === '/admin/subscribers') {
     const all = db[`/admin/subscribers?status=${params.get('status') ?? 'active'}&page=1`]

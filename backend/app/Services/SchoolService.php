@@ -171,7 +171,7 @@ class SchoolService
         $from = $period === 'month' ? Period::now()->startOfMonth() : Period::now()->startOfWeek();
         $members = InstitutionMember::query()->where('institution_id', $institutionId)->where('role', 'student')->where('status', 'active')
             ->when($class, fn ($q) => $q->where('class_name', $class))->whereNotNull('user_id')
-            ->with('user:id,name,username,avatar,avatar_url,frame,streak_current,league_tier')->get();
+            ->with('user')->get();
         $xp = \App\Models\DailyActivity::query()->whereIn('user_id', $members->pluck('user_id'))->where('date', '>=', $from->toDateString())
             ->groupBy('user_id')->selectRaw('user_id, sum(xp) as xp, sum(lessons) as lessons')->get()->keyBy('user_id');
 
@@ -179,9 +179,7 @@ class SchoolService
             'user_id' => $m->user_id,
             'name' => $m->user->name,
             'username' => $m->user->username,
-            'avatar' => $m->user->avatar,
-            'avatar_url' => $m->user->avatar_url,
-            'frame' => $m->user->frame,
+            ...$m->user->look(),
             'class_name' => $m->class_name,
             'streak' => (int) $m->user->streak_current,
             'xp' => (int) ($xp[$m->user_id]->xp ?? 0),

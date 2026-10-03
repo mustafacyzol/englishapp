@@ -27,7 +27,7 @@ const LOOK_FILTERS: { value: LookFilter; label: string }[] = [
 type TabKey = 'look' | 'boost' | 'pack' | 'chest' | 'premium'
 const GROUPS: { key: TabKey; title: string; art: string; text: string; types: string[] }[] = [
   { key: 'look', title: 'Görünüm', art: 'frame', text: 'Çerçeveler fotoğrafını, arka plan kapakları profilinin üst kısmını süsler. Herkes görür.', types: ['avatar_frame', 'profile_banner'] },
-  { key: 'boost', title: 'Güçlendirici', art: 'boost', text: 'XP takviyesi, can ve seri koruması.', types: ['xp_boost', 'streak_freeze', 'heart_refill'] },
+  { key: 'boost', title: 'Takviye', art: 'boost', text: 'XP takviyesi, can ve seri koruması.', types: ['xp_boost', 'streak_freeze', 'heart_refill'] },
   { key: 'pack', title: 'Paketler', art: 'gems', text: 'Birlikte al, daha az öde. Paket açılınca kartlar kasana düşer.', types: ['bundle'] },
   { key: 'chest', title: 'Sandıklar', art: 'chest', text: 'Sandığı aç, içinden elmas, güçlendirici ya da iş ortağı hediyesi çıksın. Neler çıkabileceğini açtıktan sonra görürsün.', types: ['chest'] },
   { key: 'premium', title: 'Premium', art: 'crown', text: 'Elmaslarınla Premium günleri aç.', types: ['premium_days'] },
