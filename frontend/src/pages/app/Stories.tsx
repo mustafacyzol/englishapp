@@ -71,7 +71,7 @@ export default function Stories() {
   const [quick, setQuick] = useState<Quick>('')
   const [sort, setSort] = useState<'recommended' | 'short'>('recommended')
   const [q, setQ] = useState('')
-  const params = new URLSearchParams({ ...(level && { level }), ...(category && { category }), ...(q && { q }) }).toString()
+  const params = new URLSearchParams({ ...(level && { level }), ...(category && { category }), ...(q && { q }), per_page: '48' }).toString()
   const { data, isLoading } = useQuery({ queryKey: ['stories', params], queryFn: () => get<Paginated<StoryCard>>(`/stories?${params}`) })
   const cats = useQuery({ queryKey: ['story-cats'], queryFn: () => get<{ data: string[] }>('/stories/categories') })
   const lib = useQuery({ queryKey: ['library'], queryFn: () => get<{ data: { story: StoryCard; progress: number; completed_at: string | null }[] }>('/library') })
