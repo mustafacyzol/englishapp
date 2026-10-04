@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowDownWideNarrow, Bookmark, Briefcase, Check, CheckCircle2, ChevronDown, Clock, Coffee, Crown, Headphones, Laugh, Plane, Rocket, Search, SearchCheck, Sparkles, X, type LucideIcon } from 'lucide-react'
+import { ArrowDownWideNarrow, Atom, Bookmark, Briefcase, CheckCircle2, Clock, Coffee, Crown, GraduationCap, Headphones, Home, Laugh, Newspaper, Plane, Rocket, Search, SearchCheck, Sparkles, X, type LucideIcon } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import { get } from '@/lib/api'
 import type { Paginated, StoryCard } from '@/lib/types'
@@ -20,46 +20,31 @@ const GENRE: Record<string, { icon: LucideIcon; color: string }> = {
   Kariyer: { icon: Briefcase, color: '#4f8a6e' },
   Gizem: { icon: SearchCheck, color: '#8f7cf8' },
   'Bilim Kurgu': { icon: Rocket, color: '#ef4e7b' },
+  Okul: { icon: GraduationCap, color: '#0f766e' },
+  Aile: { icon: Home, color: '#c96a12' },
+  Bilim: { icon: Atom, color: '#2563eb' },
+  Haber: { icon: Newspaper, color: '#475569' },
 }
 const genre = (c: string) => GENRE[c] ?? { icon: Sparkles, color: '#676d7c' }
 type Quick = '' | 'unread' | 'saved' | 'short'
 
-/** Genre as a single tidy dropdown, each genre with its icon and colour. */
-function GenreMenu({ cats, value, onChange }: { cats: string[]; value: string; onChange: (v: string) => void }) {
-  const [open, setOpen] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!open) return
-    const close = (e: MouseEvent) => !ref.current?.contains(e.target as Node) && setOpen(false)
-    document.addEventListener('mousedown', close)
-    return () => document.removeEventListener('mousedown', close)
-  }, [open])
-  const G = value ? genre(value) : null
+/**
+ * Genres as a compact grid of icon tiles that wraps (never scrolls sideways).
+ * Picking one never moves the page: the list keeps its old content until the new one arrives.
+ */
+function GenreGrid({ cats, value, onChange }: { cats: string[]; value: string; onChange: (v: string) => void }) {
   return (
-    <div ref={ref} className="relative">
-      <button onClick={() => setOpen((o) => !o)} aria-haspopup="listbox" aria-expanded={open} className={clsx('flex h-10 items-center gap-2 rounded-xl border-2 px-3 text-sm font-extrabold transition', value ? 'border-transparent text-white' : 'border-line hover:border-ink/25')} style={G ? { background: G.color } : undefined}>
-        {G ? <G.icon className="size-4" /> : <Sparkles className="size-4 text-ink-soft" />}
-        {value || 'Tüm türler'}
-        <ChevronDown className={clsx('size-4 transition', open && 'rotate-180')} />
-      </button>
-      <AnimatePresence>
-        {open && (
-          <motion.ul role="listbox" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="absolute left-0 top-12 z-30 w-56 rounded-2xl border-2 border-line bg-card p-1.5 shadow-soft">
-            {['', ...cats].map((c) => {
-              const g = c ? genre(c) : { icon: Sparkles, color: '#676d7c' }
-              return (
-                <li key={c || 'all'}>
-                  <button role="option" aria-selected={value === c} onClick={() => { onChange(c); setOpen(false) }} className={clsx('flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-left text-sm font-bold hover:bg-paper-2', value === c && 'bg-paper-2')}>
-                    <span className="grid size-7 place-items-center rounded-lg" style={{ background: `${g.color}1f`, color: g.color }}><g.icon className="size-4" /></span>
-                    {c || 'Tüm türler'}
-                    {value === c && <Check className="ml-auto size-4" strokeWidth={3} />}
-                  </button>
-                </li>
-              )
-            })}
-          </motion.ul>
-        )}
-      </AnimatePresence>
+    <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6 lg:grid-cols-11" role="radiogroup" aria-label="Tür">
+      {['', ...cats].map((c) => {
+        const g = c ? genre(c) : { icon: Sparkles, color: '#1f2433' }
+        const on = value === c
+        return (
+          <button key={c || 'all'} role="radio" aria-checked={on} onClick={(e) => { e.preventDefault(); onChange(on ? '' : c) }} className={clsx('press group flex min-w-0 flex-col items-center gap-1 rounded-2xl border-2 px-1 py-2 transition', on ? 'border-transparent text-white shadow-hard-sm' : 'border-line bg-card hover:border-ink/25')} style={on ? { background: g.color } : undefined}>
+            <span className={clsx('grid size-9 place-items-center rounded-xl transition group-hover:scale-110', on ? 'bg-white/20' : '')} style={on ? undefined : { background: `${g.color}18`, color: g.color }}><g.icon className="size-5" /></span>
+            <span className="w-full truncate text-center text-[11px] font-extrabold leading-tight">{c || 'Tümü'}</span>
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -72,7 +57,7 @@ export default function Stories() {
   const [sort, setSort] = useState<'recommended' | 'short'>('recommended')
   const [q, setQ] = useState('')
   const params = new URLSearchParams({ ...(level && { level }), ...(category && { category }), ...(q && { q }), per_page: '48' }).toString()
-  const { data, isLoading } = useQuery({ queryKey: ['stories', params], queryFn: () => get<Paginated<StoryCard>>(`/stories?${params}`) })
+  const { data, isLoading } = useQuery({ queryKey: ['stories', params], queryFn: () => get<Paginated<StoryCard>>(`/stories?${params}`), placeholderData: keepPreviousData })
   const cats = useQuery({ queryKey: ['story-cats'], queryFn: () => get<{ data: string[] }>('/stories/categories') })
   const lib = useQuery({ queryKey: ['library'], queryFn: () => get<{ data: { story: StoryCard; progress: number; completed_at: string | null }[] }>('/library') })
   const reading = lib.data?.data.filter((r) => r.progress > 0 && !r.completed_at).slice(0, 3) ?? []
@@ -129,7 +114,6 @@ export default function Stories() {
             )
           })}
         </div>
-        <GenreMenu cats={cats.data?.data ?? []} value={category} onChange={setCategory} />
         <div className="ml-auto flex flex-wrap items-center gap-1">
           {([['unread', 'Okunmamış'], ['saved', 'Kaydettiklerim'], ['short', 'Kısa']] as const).map(([k, l]) => (
             <button key={k} onClick={() => setQuick(quick === k ? '' : k)} aria-pressed={quick === k} className={clsx('rounded-lg px-2.5 py-1.5 text-sm font-bold transition', quick === k ? 'bg-ink text-paper' : 'text-ink-soft hover:bg-paper-2 hover:text-ink')}>{l}</button>
@@ -140,6 +124,8 @@ export default function Stories() {
         </div>
       </section>
 
+      <div className="mb-5"><GenreGrid cats={cats.data?.data ?? []} value={category} onChange={setCategory} /></div>
+
       <div className="mb-4 flex min-h-8 flex-wrap items-center gap-2">
         <p className="text-sm font-bold text-ink-soft">{data ? `${list.length} hikâye` : ''}</p>
         <AnimatePresence>
@@ -148,7 +134,7 @@ export default function Stories() {
         {(active.length > 0 || q) && <button onClick={clear} className="flex items-center gap-1 text-xs font-extrabold text-flame hover:underline"><X className="size-3.5" /> Temizle</button>}
       </div>
 
-      {isLoading ? (
+      {isLoading && !data ? (
         <SkeletonPage variant="cards" />
       ) : !list.length ? (
         <Empty icon={<Search className="size-7" />} title="Bu filtrelerde hikâye yok" text="Bir filtreyi kaldırmayı dene." action={<button onClick={clear} className="font-bold text-flame">Filtreleri temizle</button>} />

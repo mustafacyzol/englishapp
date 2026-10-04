@@ -422,3 +422,9 @@ html[data-age='teen'] {
 @media (prefers-reduced-motion: reduce) {
   .premium-edge, .premium-name { animation: none; }
 }
+/* Higo's blink on the sign-in avatar: the closed-eye frame shows for a beat every few seconds */
+@keyframes higo-blink {
+  0%, 44%, 49%, 92%, 97%, 100% { opacity: 0; }
+  45.5%, 47.5%, 93.5%, 95.5% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .higo-blink { animation: none !important; } }

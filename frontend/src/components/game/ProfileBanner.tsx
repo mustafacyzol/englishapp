@@ -19,6 +19,10 @@ export const BANNERS: Record<string, { label: string; bg: string; src?: string; 
   cappadocia: { label: 'Kapadokya', bg: '#f0a35e', src: 'banners/cappadocia.webp', pos: '50% 40%' },
   library: { label: 'Gece Kütüphanesi', bg: '#4a2e1c', src: 'banners/library.webp', pos: '60% 50%' },
   aurora: { label: 'Kuzey Işıkları', bg: '#13254a', src: 'banners/aurora.webp', pos: '50% 35%' },
+  rainy: { label: 'Yağmurlu Akşam', bg: '#3a2e5a', src: 'banners/rainy.webp', pos: '50% 45%' },
+  aegean: { label: 'Ege Koyu', bg: '#3cc4c9', src: 'banners/aegean.webp', pos: '55% 50%' },
+  lavender: { label: 'Lavanta', bg: '#8d74c9', src: 'banners/lavender.webp', pos: '60% 45%' },
+  zen: { label: 'Sakura Bahçesi', bg: '#cfe3d6', src: 'banners/zen.webp', pos: '45% 50%' },
   higo: { label: 'Higo ile Uçuş', bg: '#9fe3ea', src: 'banners/higo.webp', pos: '80% 45%' },
 }
 

@@ -26,7 +26,12 @@ class AccountController extends Controller
         $data = $request->validate([
             'name' => ['sometimes', 'string', 'min:2', 'max:60'],
             'username' => ['sometimes', 'string', 'min:3', 'max:30', 'regex:/^[a-z0-9_.]+$/', Rule::unique('users', 'username')->ignore($user->id)],
-            'avatar' => ['sometimes', 'required', Rule::in(array_keys(Avatar::catalog()))],
+            'avatar' => ['sometimes', 'required', 'string', 'max:80', function ($attr, $value, $fail) {
+                [$key, $bg] = \App\Support\AvatarBackdrops::split($value);
+                if (! isset(Avatar::catalog()[$key]) || (str_contains((string) $value, '@') && $bg === null)) {
+                    $fail('Bu avatar ya da arka plan bulunamadı.');
+                }
+            }],
             'bio' => ['sometimes', 'nullable', 'string', 'max:120'],
             'frame' => ['sometimes', 'nullable', Rule::in(\App\Support\Cosmetics::frameKeys())],
             'banner' => ['sometimes', 'nullable', Rule::in(\App\Support\Cosmetics::bannerKeys())],
@@ -57,8 +62,11 @@ class AccountController extends Controller
             'preferences.exam_mode' => ['sometimes', 'boolean'],
         ], ['username.regex' => 'Kullanıcı adı yalnızca küçük harf, rakam, nokta ve alt çizgi içerebilir.']);
 
-        if (! empty($data['avatar']) && (Avatar::catalog()[$data['avatar']]['tier'] ?? '') === 'premium' && ! $user->isPremium()) {
-            abort(403, 'Bu avatar Premium üyelere özel.');
+        if (! empty($data['avatar'])) {
+            [$key, $bg] = \App\Support\AvatarBackdrops::split($data['avatar']);
+            if (! $user->isPremium() && ((Avatar::catalog()[$key]['tier'] ?? '') === 'premium' || \App\Support\AvatarBackdrops::isPremium($bg))) {
+                abort(403, 'Bu avatar ya da arka plan Premium üyelere özel.');
+            }
         }
         // Frames and banners are worn only once owned; null takes them off.
         $owned = $user->ownedCosmetics();

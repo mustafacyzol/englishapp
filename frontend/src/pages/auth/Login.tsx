@@ -15,7 +15,7 @@ import { Alert } from '@/components/ui/Misc'
 import { Logo } from '@/components/game/Logo'
 import { SocialButtons } from '@/components/auth/SocialButtons'
 import { Turnstile } from './Turnstile'
-import { higoImg } from '@/components/game/Higo'
+import { HigoHello } from '@/components/auth/HigoHello'
 import { BRAND } from '@/lib/brand'
 
 /**
@@ -64,35 +64,24 @@ export default function Login() {
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 pb-4 pt-1">
         <motion.div initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }} className="w-full max-w-[420px]">
           <div className="rounded-[28px] border-2 border-line bg-card p-5 shadow-soft sm:p-7 [@media(max-height:680px)]:py-4">
-            {/* Higo with a small speech bubble, then one short heading: fits any phone */}
-            <div className="mb-5 flex flex-col items-center text-center [@media(max-height:680px)]:mb-3">
-              <div className="relative [@media(max-height:680px)]:hidden">
-                <motion.img
-                  src={higoImg('wave')}
-                  alt=""
-                  aria-hidden
-                  className="size-16 object-contain"
-                  initial={{ scale: 0.6, rotate: -10, opacity: 0 }}
-                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 320, damping: 16 }}
-                />
-                <motion.span initial={{ opacity: 0, scale: 0.6, x: -6 }} animate={{ opacity: 1, scale: 1, x: 0 }} transition={{ delay: 0.25, type: 'spring', stiffness: 380, damping: 18 }}
-                  className="absolute -right-2 top-0 translate-x-full whitespace-nowrap rounded-2xl rounded-bl-md bg-flame px-2.5 py-1 text-xs font-black text-white">
-                  {t('Seni özledim!')}
-                </motion.span>
+            {/* Higo as a round profile picture beside the heading: fits every screen */}
+            <div className="mb-5 flex items-center gap-3.5 [@media(max-height:680px)]:mb-3">
+              <HigoHello />
+              <div className="min-w-0">
+                <h1 className="whitespace-nowrap font-display text-[23px] font-black leading-tight min-[400px]:text-[26px]">{t('Tekrar hoş geldin')}</h1>
+                <motion.p initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="text-sm font-bold text-ink-soft">{t('Seni özledim!')}</motion.p>
               </div>
-              <h1 className="mt-1 font-display text-[26px] font-black leading-tight">{t('Tekrar hoş geldin')}</h1>
             </div>
 
             <SocialButtons onDone={done} remember={remember} compact />
 
-            <div className="my-4 flex items-center gap-3 text-xs font-black uppercase tracking-widest text-ink-soft">
+            <div className="my-4 flex items-center gap-3 text-xs [@media(max-height:700px)]:my-2.5 font-black uppercase tracking-widest text-ink-soft">
               <span className="h-0.5 flex-1 rounded bg-line" />
               {t('veya e-posta ile')}
               <span className="h-0.5 flex-1 rounded bg-line" />
             </div>
 
-            <form onSubmit={submit} className="space-y-3">
+            <form onSubmit={submit} className="space-y-3 [@media(max-height:700px)]:space-y-2">
               {err && <Alert tone="error">{err.first()}</Alert>}
               <Input label={t('E-posta veya kullanıcı adı')} autoComplete="username" value={login} onChange={(e) => setLogin(e.target.value)} required autoFocus />
               <Input label={t('Şifre')} type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} required />

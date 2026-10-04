@@ -68,11 +68,13 @@ function GamePicker({ onPick }: { onPick: (g: GameKey) => void }) {
   return (
     <>
       {st && (
-        <div className="mb-6 flex flex-wrap items-center gap-x-8 gap-y-3 rounded-3xl border-2 border-line bg-card px-5 py-4">
-          <Stat v={st.due} l="tekrar zamanı" c="text-flame" />
-          <Stat v={st.total} l="defterde" />
-          <Stat v={st.mastered} l="ustalaşıldı" c="text-mint-deep" />
-          <p className="basis-full text-sm text-ink-soft sm:ml-auto sm:basis-auto">{st.total < 8 ? 'Defterin dolana kadar seviyene uygun başlangıç kelimeleriyle oynarsın.' : 'Oyunlar önce tekrar zamanı gelen kelimeleri getirir.'}</p>
+        <div className="mb-6 overflow-hidden rounded-3xl border-2 border-line bg-card">
+          <div className="grid grid-cols-3 divide-x-2 divide-line">
+            <Stat v={st.due} l="tekrar zamanı" c="text-flame" />
+            <Stat v={st.total} l="defterde" />
+            <Stat v={st.mastered} l="ustalaşıldı" c="text-mint-deep" />
+          </div>
+          <p className="border-t-2 border-line bg-paper-2/60 px-4 py-2 text-xs font-semibold text-ink-soft">{st.total < 8 ? 'Defterin dolana kadar seviyene uygun başlangıç kelimeleriyle oynarsın.' : 'Oyunlar önce tekrar zamanı gelen kelimeleri getirir.'}</p>
         </div>
       )}
       {/* The day's pick: the swipe deck, big. Then the rest in three short rows that scroll
@@ -107,7 +109,7 @@ function GamePicker({ onPick }: { onPick: (g: GameKey) => void }) {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.04 }}
                 onClick={() => onPick(g.key)}
-                className="press group relative flex w-[46%] shrink-0 snap-start flex-col overflow-hidden rounded-3xl border-2 border-line bg-card text-left shadow-hard-sm transition hover:border-ink/25 sm:w-auto"
+                className="press group relative flex min-w-0 flex-col overflow-hidden rounded-3xl border-2 border-line bg-card text-left shadow-hard-sm transition hover:-translate-y-0.5 hover:border-ink/25"
               >
                 <span className={clsx('relative grid h-24 place-items-center overflow-hidden bg-gradient-to-br text-white sm:h-28', g.tone)}>
                   <span aria-hidden className="absolute -right-5 -top-6 size-20 rounded-full bg-white/15" />
@@ -115,8 +117,8 @@ function GamePicker({ onPick }: { onPick: (g: GameKey) => void }) {
                   {g.badge && <span className="absolute left-2.5 top-2 rounded-full bg-white/90 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-[#1f2433]">{g.badge}</span>}
                 </span>
                 <span className="flex flex-1 flex-col p-3">
-                  <span className="flex items-center gap-1.5 font-display text-[15px] font-black leading-tight sm:text-base"><g.icon className="size-4 shrink-0 text-ink-soft" />{g.title}</span>
-                  <span className="mt-0.5 line-clamp-2 text-xs text-ink-soft">{g.text}</span>
+                  <span className="font-display text-[15px] font-black leading-tight sm:text-base">{g.title}</span>
+                  <span className="mt-1 line-clamp-2 text-xs leading-snug text-ink-soft">{g.text}</span>
                   <Best game={g.key} />
                 </span>
               </motion.button>
@@ -238,9 +240,9 @@ function SwipeArt() {
 
 function Stat({ v, l, c }: { v: number; l: string; c?: string }) {
   return (
-    <span>
-      <span className={clsx('block font-display text-3xl font-black leading-none tabular-nums', c)}>{v}</span>
-      <span className="text-xs font-bold uppercase tracking-wide text-ink-soft">{l}</span>
+    <span className="flex flex-col items-center px-2 py-3 text-center">
+      <span className={clsx('block font-display text-2xl font-black leading-none tabular-nums sm:text-3xl', c)}>{v}</span>
+      <span className="mt-1 text-[10px] font-bold uppercase leading-tight tracking-wide text-ink-soft sm:text-xs">{l}</span>
     </span>
   )
 }

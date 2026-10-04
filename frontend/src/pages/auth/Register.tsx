@@ -151,9 +151,9 @@ export default function Register() {
   // Choices only select; moving on is always an explicit "Devam", so nobody skips a step by accident.
   const pick = (patch: Partial<Draft>) => () => up(patch)
   const nextBtn = (ok: boolean, label = 'Devam') => (
-    <motion.div initial={false} animate={{ opacity: ok ? 1 : 0.55 }} className="pt-2">
+    <div className="sticky bottom-0 z-10 -mx-5 bg-gradient-to-t from-card from-70% to-transparent px-5 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-5 sm:-mx-10 sm:px-10 lg:static lg:mx-0 lg:bg-none lg:px-0 lg:pb-0 lg:pt-2">
       <Button block size="lg" disabled={!ok} onClick={next} icon={<ArrowRight className="size-5" />}>{label}</Button>
-    </motion.div>
+    </div>
   )
 
   const who = firstName ? `${firstName}, ` : ''
@@ -216,7 +216,7 @@ export default function Register() {
                 <p className="font-semibold text-ink-soft">“Ben Higo, {BRAND} rehberin. Adını yaz, planını sana özel kuralım.”</p>
               </div>
               <Input label="Adın" autoComplete="given-name" value={d.name} onChange={(e) => up({ name: e.target.value })} autoFocus placeholder="ör. Deniz" maxLength={60} />
-              <Button type="submit" block size="lg" disabled={!canNext.name} icon={<ArrowRight className="size-5" />}>Devam</Button>
+              <div className="sticky bottom-0 z-10 -mx-5 bg-gradient-to-t from-card from-70% to-transparent px-5 pb-[max(env(safe-area-inset-bottom),0.75rem)] pt-5 sm:-mx-10 sm:px-10 lg:static lg:mx-0 lg:bg-none lg:px-0 lg:pb-0 lg:pt-0"><Button type="submit" block size="lg" disabled={!canNext.name} icon={<ArrowRight className="size-5" />}>Devam</Button></div>
             </form>
           )}
 
@@ -433,12 +433,12 @@ function PhotoCard({ photo, title, text, selected, onClick, compact, multi }: { 
       aria-pressed={selected}
       className={clsx('press group relative overflow-hidden border-2 text-left transition', compact ? 'rounded-2xl sm:rounded-3xl' : 'rounded-3xl', selected ? 'border-ink shadow-[0_4px_0_0_var(--ink)]' : 'border-line shadow-hard hover:border-ink/25')}
     >
-      <div className={clsx('relative overflow-hidden', compact ? 'aspect-square' : 'aspect-[16/10] sm:aspect-[4/3]')}>
+      <div className={clsx('relative overflow-hidden', compact ? 'aspect-square' : 'aspect-[5/4] sm:aspect-[4/3]')}>
         <Img src={photo} alt="" className={clsx('photo transition duration-500 group-hover:scale-105', multi && !selected && 'saturate-[.85]')} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         <div className={clsx('absolute text-white', compact ? 'inset-x-1.5 bottom-1.5 sm:inset-x-3 sm:bottom-2.5' : 'inset-x-3 bottom-2.5')}>
-          <p className={clsx('font-display font-black leading-tight', compact && 'text-[11px] sm:text-base')}>{title}</p>
-          {text && <p className={clsx('text-xs text-white/80', compact && 'hidden sm:block')}>{text}</p>}
+          <p className={clsx('font-display font-black leading-tight', compact ? 'text-[11px] sm:text-base' : 'text-[15px] sm:text-base')}>{title}</p>
+          {text && <p className={clsx('line-clamp-2 text-xs text-white/80', compact ? 'hidden sm:block' : 'max-[379px]:hidden')}>{text}</p>}
         </div>
       </div>
       {selected && <Tick small={compact} />}

@@ -1,5 +1,5 @@
 import clsx from 'clsx'
-import { STANDARD_KEYS, avatarUrl } from '@/lib/avatars'
+import { BACKDROPS, STANDARD_KEYS, avatarUrl, isCutout, parseAvatar } from '@/lib/avatars'
 import { img } from '@/lib/assets'
 import { customCosmetics } from '@/lib/cosmetics'
 
@@ -39,9 +39,18 @@ export const fallbackAvatar = (seed: string) => STANDARD_KEYS[[...seed].reduce((
  * inside the frame they wear. `rounded` sets the shape of both.
  */
 export function UserAvatar({ name, avatar, avatarUrl: url, frame, className = 'size-10', rounded = 'rounded-full' }: { name?: string | null; avatar?: string | null; avatarUrl?: string | null; frame?: string | null; className?: string; rounded?: string }) {
-  const src = avatarUrl(avatar || fallbackAvatar(name ?? '?'), url)!
+  const value = avatar || fallbackAvatar(name ?? '?')
+  const src = avatarUrl(value, url)!
   const f = frameOf(frame)
-  const pic = <img src={src} alt="" className={clsx('size-full object-cover', rounded)} draggable={false} />
+  const cut = isCutout(value, url)
+  const bd = BACKDROPS[parseAvatar(value).bg]
+  // built-in avatars are cut-outs on their backdrop; premium backdrops add a fine metallic hairline
+  const pic = cut ? (
+    <span className={clsx('relative block size-full overflow-hidden', rounded)} style={{ background: bd?.css, boxShadow: bd?.ring ? `inset 0 0 0 1.5px ${bd.ring}` : undefined }}>
+      {bd?.premium && <span aria-hidden className="absolute inset-0 bg-[linear-gradient(115deg,transparent_35%,rgba(255,255,255,.35)_50%,transparent_65%)] opacity-70" />}
+      <img src={src} alt="" className="absolute inset-x-0 bottom-0 mx-auto h-[94%] w-[94%] object-contain object-bottom" draggable={false} />
+    </span>
+  ) : <img src={src} alt="" className={clsx('size-full object-cover', rounded)} draggable={false} />
   if (!f) return <span className={clsx('relative block shrink-0 overflow-hidden bg-paper-2', rounded, className)}>{pic}</span>
   // The photo sits in the ring's measured hole, the ring image on top; both stay inside the box.
   // a hair larger than the hole so no gap shows between the photo and the ring
@@ -49,7 +58,7 @@ export function UserAvatar({ name, avatar, avatarUrl: url, frame, className = 's
   return (
     <span className={clsx('relative block shrink-0', className)}>
       <span className="absolute -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-full bg-paper-2" style={{ width: d, height: d, left: `${(f.cx ?? 0.5) * 100}%`, top: `${(f.cy ?? 0.5) * 100}%` }}>
-        <img src={src} alt="" className="size-full object-cover" draggable={false} />
+        {cut ? pic : <img src={src} alt="" className="size-full object-cover" draggable={false} />}
       </span>
       <img src={frameImg(frame!)} alt="" aria-hidden draggable={false} className={clsx('pointer-events-none absolute inset-0 size-full select-none object-contain', f.fx)} />
     </span>

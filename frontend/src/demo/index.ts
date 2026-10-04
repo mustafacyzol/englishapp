@@ -4,7 +4,7 @@
  * Mutations update an in-memory copy, and Defne's replies come from a small rule-based script.
  */
 import fixture from './fixture.json'
-const isPremiumAvatar = (k: string) => ['astronaut', 'wizard', 'king', 'pilot', 'scientist', 'chef', 'jazz', 'detective', 'explorer'].includes(k)
+const isPremiumAvatar = (v: string) => { const [k, bg] = v.split('@'); return ['astronaut', 'wizard', 'king', 'pilot', 'scientist', 'chef', 'jazz', 'detective', 'explorer'].includes(k) || ['gold', 'obsidian', 'aurora', 'rosegold', 'pearl', 'emerald'].includes(bg ?? '') }
 
 type Json = any // eslint-disable-line @typescript-eslint/no-explicit-any
 const F = fixture as { get: Record<string, Json>; post: Record<string, Json>; err: Record<string, { status: number; message: string }>; fresh?: Record<string, Json> }
@@ -786,7 +786,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
 
   // --- account
   if (path === '/account' && method === 'PATCH') {
-    if (body.avatar && isPremiumAvatar(body.avatar) && !me().premium?.active) throw new DemoError(403, 'Bu avatar Premium üyelere özel.')
+    if (body.avatar && isPremiumAvatar(body.avatar) && !me().premium?.active) throw new DemoError(403, 'Bu avatar ya da fon Premium üyelere özel.')
     const own = me().cosmetics ?? { frames: [], banners: [] }
     if (body.frame && !own.frames.includes(body.frame)) throw new DemoError(403, 'Önce mağazadan edinmelisin.')
     if (body.banner && !own.banners.includes(body.banner)) throw new DemoError(403, 'Önce mağazadan edinmelisin.')

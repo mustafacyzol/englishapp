@@ -164,13 +164,16 @@ class User extends Authenticatable
     public function displayAvatar(): string
     {
         $catalog = Avatar::catalog();
-        $a = $catalog[$this->avatar ?? ''] ?? null;
+        [$key, $bg] = \App\Support\AvatarBackdrops::split($this->avatar);
+        // premium backdrops, like premium avatars, show only while Premium is active
+        $suffix = $bg && (! \App\Support\AvatarBackdrops::isPremium($bg) || $this->isPremium()) ? "@{$bg}" : '';
+        $a = $catalog[$key ?? ''] ?? null;
         if ($a && ($a['tier'] !== 'premium' || $this->isPremium())) {
-            return $this->avatar;
+            return $key.$suffix;
         }
         $standard = Avatar::standardKeys() ?: ['headphones'];
 
-        return $standard[($this->id ?? 0) % count($standard)];
+        return $standard[($this->id ?? 0) % count($standard)].$suffix;
     }
 
     /** Frames and banners this learner owns (bought, won or granted). */
@@ -191,7 +194,7 @@ class User extends Authenticatable
 
         return [
             'avatar' => $this->displayAvatar(),
-            'avatar_url' => Avatar::catalog()[$this->displayAvatar()]['url'] ?? null,
+            'avatar_url' => Avatar::catalog()[\App\Support\AvatarBackdrops::split($this->displayAvatar())[0]]['url'] ?? null,
             'frame' => $prefs['frame'] ?? null,
             'banner' => $prefs['banner'] ?? null,
         ];

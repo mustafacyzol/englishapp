@@ -328,7 +328,7 @@ const SOCIAL_ORDER = ['instagram', 'youtube', 'tiktok', 'linkedin', 'x'] as cons
 const SOCIAL_NAME: Record<string, string> = { instagram: 'Instagram', youtube: 'YouTube', tiktok: 'TikTok', linkedin: 'LinkedIn', x: 'X' }
 
 /** App Store and Google Play badges, drawn inline so they stay crisp in light and dark. */
-export function StoreBadges({ className }: { className?: string }) {
+export function StoreBadges({ className, label }: { className?: string; label?: string }) {
   const { data } = useSiteConfig()
   const apps = data?.site?.apps ?? {}
   const items = [
@@ -336,8 +336,8 @@ export function StoreBadges({ className }: { className?: string }) {
     { href: apps.android, top: "Google Play'den", name: 'Edinin', icon: <svg viewBox="0 0 24 24" className="size-6" aria-hidden><path d="M3.6 2.3 13.4 12l-9.8 9.7c-.4-.2-.6-.6-.6-1.1V3.4c0-.5.2-.9.6-1.1z" fill="#2fb8a0" /><path d="m16.7 8.7-3.3 3.3-9.8-9.7c.2-.1.5-.1.8 0z" fill="#22b573" /><path d="m16.7 15.3-12.3 7c-.3.1-.6.1-.8 0l9.8-9.7z" fill="#e8403a" /><path d="M20.4 10.8c.8.5.8 1.9 0 2.4l-3.7 2.1-3.3-3.3 3.3-3.3z" fill="#ffc233" /></svg> },
   ].filter((x) => !!x.href)
   if (!items.length) return null
-  return (
-    <div className={clsx('flex flex-wrap gap-2', className)}>
+  const row = (
+    <div className={clsx('flex flex-wrap gap-2', !label && className)}>
       {items.map((x) => (
         <a key={x.top} href={x.href!} target="_blank" rel="noreferrer" className="press flex h-12 items-center gap-2.5 rounded-xl bg-ink px-3.5 text-paper shadow-[0_3px_0_rgba(0,0,0,.25)] transition hover:-translate-y-0.5">
           {x.icon}
@@ -349,6 +349,7 @@ export function StoreBadges({ className }: { className?: string }) {
       ))}
     </div>
   )
+  return label ? <div className={className}><p className="mb-2 text-sm font-extrabold text-ink">{label}</p>{row}</div> : row
 }
 
 /** Newsletter: double opt-in on the server, so a typo never subscribes someone else. */
@@ -358,7 +359,7 @@ function Newsletter() {
   const sub = useMutation({ mutationFn: () => post<{ message: string }>('/newsletter', { email, source: 'footer', website: trap || undefined }) })
   const err = sub.error as ApiError | null
   return (
-    <div id="bulten" className="mt-6 max-w-sm scroll-mt-24">
+    <div id="bulten" className="w-full max-w-sm scroll-mt-24">
       <p className="mb-2 text-sm font-extrabold text-ink">Haftada bir İngilizce ipucu</p>
       {sub.isSuccess ? (
         <motion.p initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} className="flex items-center gap-2 rounded-2xl bg-mint/15 px-3 py-3 text-sm font-bold text-mint-deep">
@@ -398,8 +399,8 @@ function Footer() {
   return (
     <footer className="relative overflow-hidden border-t border-line bg-card text-ink">
       <span aria-hidden className="absolute inset-x-0 top-0 mx-auto h-[3px] max-w-3xl bg-gradient-to-r from-transparent via-flame to-transparent" />
-      <div className="relative mx-auto max-w-6xl px-5 pt-14">
-        <div className="grid gap-10 lg:grid-cols-[1fr_1.9fr]">
+      <div className="relative mx-auto max-w-6xl px-5 pt-12">
+        <div className="grid gap-8 lg:grid-cols-[1fr_1.9fr] lg:gap-10">
           <div>
             <Link to="/" aria-label={`${BRAND} ana sayfa`} className="inline-flex items-center gap-2">
               <img src={higoImg('wave')} alt="" className="size-9" />
@@ -407,8 +408,6 @@ function Footer() {
             </Link>
             <p className="mt-3 max-w-xs text-sm leading-relaxed text-ink-soft">Bayrak Dil Okulları’nın İngilizce platformu. İlkokuldan üniversiteye; bireyler, aileler ve okullar için.</p>
             <a href={`mailto:${email}`} className="mt-3 inline-flex items-center gap-2 text-sm font-bold text-ink-soft transition hover:text-ink"><Mail className="size-4 text-flame" />{email}</a>
-            <Newsletter />
-            <StoreBadges className="mt-6" />
           </div>
 
           <nav aria-label="Alt bilgi" className="grid grid-cols-2 gap-x-6 gap-y-8 sm:grid-cols-4">
@@ -425,7 +424,13 @@ function Footer() {
           </nav>
         </div>
 
-        <div className="mt-12 flex flex-col-reverse items-center justify-between gap-3 border-t border-line py-5 text-[13px] font-semibold text-ink-soft sm:flex-row">
+        {/* newsletter on the left, the apps on the right, on one line */}
+        <div className="mt-8 flex flex-col gap-6 border-t border-line pt-6 md:flex-row md:items-start md:justify-between">
+          <Newsletter />
+          <StoreBadges label="Uygulamayı indir" className="md:[&>div]:justify-end md:[&>p]:text-right" />
+        </div>
+
+        <div className="mt-6 flex flex-col-reverse items-center justify-between gap-3 border-t border-line py-5 text-[13px] font-semibold text-ink-soft sm:flex-row">
           <p>© {new Date().getFullYear()} Bayrak Dil Okulları · Tüm hakları saklıdır.</p>
           <div className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
             {SOCIAL.length > 0 && (
@@ -445,11 +450,11 @@ function Footer() {
       </div>
 
       {/* the closing wordmark: hidden while you read the links, it rises as the page ends */}
-      <div ref={ref} className="safe-bottom relative mx-auto flex h-[clamp(8rem,21vw,16.5rem)] max-w-6xl select-none items-end justify-center gap-3 overflow-x-clip px-5 pb-3" aria-hidden>
-        <motion.p initial={false} animate={atEnd ? { y: '0%', opacity: 1 } : { y: '70%', opacity: 0 }} transition={{ type: 'spring', stiffness: 120, damping: 20 }} style={{ backgroundImage: 'linear-gradient(180deg, var(--ink) 0%, color-mix(in oklab, var(--ink) 25%, transparent) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }} className="px-[0.06em] pb-[0.12em] font-display text-[clamp(4.5rem,17vw,13rem)] font-black leading-[1.05] tracking-[-0.035em]">
+      <div ref={ref} className="safe-bottom relative mx-auto flex h-[clamp(5rem,11vw,9rem)] max-w-6xl select-none items-end justify-center gap-3 overflow-x-clip px-5 pb-3" aria-hidden>
+        <motion.p initial={false} animate={atEnd ? { y: '0%', opacity: 1 } : { y: '70%', opacity: 0 }} transition={{ type: 'spring', stiffness: 120, damping: 20 }} style={{ backgroundImage: 'linear-gradient(180deg, var(--ink) 0%, color-mix(in oklab, var(--ink) 25%, transparent) 100%)', WebkitBackgroundClip: 'text', backgroundClip: 'text', color: 'transparent' }} className="px-[0.06em] pb-[0.12em] font-display text-[clamp(3.5rem,10vw,7.5rem)] font-black leading-[1.05] tracking-[-0.035em]">
           {WORDMARK.join('')}
         </motion.p>
-        <motion.img initial={false} animate={atEnd ? { y: '0%', rotate: 0 } : { y: '130%', rotate: -20 }} transition={{ type: 'spring', stiffness: 160, damping: 14, delay: atEnd ? 0.2 : 0 }} src={higoImg('wave')} alt="" className="mb-[2%] w-[clamp(44px,7vw,84px)] shrink-0" />
+        <motion.img initial={false} animate={atEnd ? { y: '0%', rotate: 0 } : { y: '130%', rotate: -20 }} transition={{ type: 'spring', stiffness: 160, damping: 14, delay: atEnd ? 0.2 : 0 }} src={higoImg('wave')} alt="" className="mb-[2%] w-[clamp(36px,4.5vw,56px)] shrink-0" />
       </div>
     </footer>
   )

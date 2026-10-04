@@ -6,7 +6,7 @@ import clsx from 'clsx'
 import { Check, Crown, Lock, ShoppingBag } from 'lucide-react'
 import { ApiError, patch } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
-import { avatarUrl, useAvatarCatalog } from '@/lib/avatars'
+import { BACKDROPS, joinAvatar, parseAvatar, useAvatarCatalog } from '@/lib/avatars'
 import type { Me } from '@/lib/types'
 import { Modal } from '@/components/ui/Misc'
 import { Button } from '@/components/ui/Button'
@@ -14,7 +14,7 @@ import { useToast } from '@/components/ui/Toast'
 import { FRAMES, UserAvatar } from './UserAvatar'
 import { BANNERS, ProfileBanner } from './ProfileBanner'
 
-type Tab = 'avatar' | 'frame' | 'banner' | 'bio'
+type Tab = 'avatar' | 'backdrop' | 'frame' | 'banner' | 'bio'
 
 /**
  * The profile studio: pick an avatar, wear a frame or cover you own and write a
@@ -40,12 +40,17 @@ export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolea
   const banner = draft.banner !== undefined ? draft.banner : user.banner ?? null
   const bio = draft.bio ?? user.bio ?? ''
   const premium = user.premium.active
-  const lockedAvatar = !premium && cat.premium.some((a) => a.key === avatar)
+  const parsed = parseAvatar(avatar)
+  const bdKey = parsed.chosen ? parsed.bg : null
+  const lockedAvatar = !premium && (cat.premium.some((a) => a.key === parsed.key) || !!(bdKey && BACKDROPS[bdKey]?.premium))
+  // switching avatar keeps the chosen backdrop, switching backdrop keeps the avatar
+  const pickAvatar = (key: string) => setDraft((d) => ({ ...d, avatar: joinAvatar(key, bdKey) }))
+  const pickBackdrop = (bg: string | null) => setDraft((d) => ({ ...d, avatar: joinAvatar(parsed.key, bg) }))
   const ownedFrames = Object.keys(FRAMES).filter((k) => owned.frames.includes(k))
   const ownedBanners = Object.keys(BANNERS).filter((k) => k !== 'default' && owned.banners.includes(k))
   const changed = Object.keys(draft).length > 0
 
-  const TABS: [Tab, string][] = [['avatar', 'Avatar'], ['frame', 'Çerçeve'], ['banner', 'Kapak'], ['bio', 'Hakkımda']]
+  const TABS: [Tab, string][] = [['avatar', 'Avatar'], ['backdrop', 'Fon'], ['frame', 'Çerçeve'], ['banner', 'Kapak'], ['bio', 'Bio']]
   return (
     <Modal open={open} onClose={onClose} className="max-w-lg">
       {/* live preview: the card others see */}
@@ -78,11 +83,32 @@ export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolea
         {tab === 'avatar' && (
           <>
             <Grid>
-              {cat.standard.map((a) => <Tile key={a.key} on={avatar === a.key} label={a.label} onClick={() => setDraft((d) => ({ ...d, avatar: a.key }))}><img src={avatarUrl(a.key, a.url)!} alt="" className="size-full object-cover" /></Tile>)}
+              {cat.standard.map((a) => <Tile key={a.key} on={parsed.key === a.key} label={a.label} onClick={() => pickAvatar(a.key)}><UserAvatar avatar={a.url ? a.key : joinAvatar(a.key, bdKey)} avatarUrl={a.url} className="size-full" rounded="rounded-none" /></Tile>)}
             </Grid>
-            <p className="mb-2 mt-5 flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-ink-soft"><Crown className="size-4 text-butter-deep" /> Premium koleksiyon</p>
+            <div className="mb-3 mt-6 flex items-center gap-2">
+              <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#d9b46a]" />
+              <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[.2em] text-[#a8803a]"><Crown className="size-4" /> Premium koleksiyon</p>
+              <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#d9b46a]" />
+            </div>
             <Grid>
-              {cat.premium.map((a) => <Tile key={a.key} on={avatar === a.key} locked={!premium} label={a.label} onClick={() => setDraft((d) => ({ ...d, avatar: a.key }))}><img src={avatarUrl(a.key, a.url)!} alt="" className="size-full object-cover" /></Tile>)}
+              {cat.premium.map((a) => <Tile key={a.key} vip on={parsed.key === a.key} locked={!premium} label={a.label} onClick={() => pickAvatar(a.key)}><UserAvatar avatar={a.url ? a.key : joinAvatar(a.key, bdKey && BACKDROPS[bdKey]?.premium ? bdKey : 'obsidian')} avatarUrl={a.url} className="size-full" rounded="rounded-none" /></Tile>)}
+            </Grid>
+          </>
+        )}
+        {tab === 'backdrop' && (
+          <>
+            <p className="mb-3 text-sm text-ink-soft">Avatarının arkasındaki fon. Ligde, arenada ve profilinde böyle görünür.</p>
+            <Grid>
+              <Tile on={!bdKey} label="Otomatik" onClick={() => pickBackdrop(null)}><UserAvatar avatar={parsed.key} className="size-full" rounded="rounded-none" /></Tile>
+              {Object.entries(BACKDROPS).filter(([, b]) => !b.premium).map(([k, b]) => <Tile key={k} on={bdKey === k} label={b.label} onClick={() => pickBackdrop(k)}><UserAvatar avatar={joinAvatar(parsed.key, k)} className="size-full" rounded="rounded-none" /></Tile>)}
+            </Grid>
+            <div className="mb-3 mt-6 flex items-center gap-2">
+              <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#d9b46a]" />
+              <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[.2em] text-[#a8803a]"><Crown className="size-4" /> Premium fonlar</p>
+              <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#d9b46a]" />
+            </div>
+            <Grid>
+              {Object.entries(BACKDROPS).filter(([, b]) => b.premium).map(([k, b]) => <Tile key={k} vip on={bdKey === k} locked={!premium} label={b.label} onClick={() => pickBackdrop(k)}><UserAvatar avatar={joinAvatar(parsed.key, k)} className="size-full" rounded="rounded-none" /></Tile>)}
             </Grid>
           </>
         )}
@@ -144,12 +170,14 @@ function Grid({ children }: { children: React.ReactNode }) {
   return <div className="grid grid-cols-3 gap-3 sm:grid-cols-4">{children}</div>
 }
 
-function Tile({ on, locked, label, onClick, children }: { on: boolean; locked?: boolean; label: string; onClick: () => void; children: React.ReactNode }) {
+function Tile({ on, locked, vip, label, onClick, children }: { on: boolean; locked?: boolean; vip?: boolean; label: string; onClick: () => void; children: React.ReactNode }) {
   return (
     <motion.button whileTap={{ scale: 0.94 }} onClick={onClick} aria-pressed={on} aria-label={`${label}${locked ? ' (kilitli)' : ''}`} className="group text-center">
-      <span className={clsx('relative block aspect-square overflow-hidden rounded-2xl border-[3px] bg-paper-2 transition', on ? 'border-flame shadow-[0_0_0_4px_rgba(255,90,54,.18)]' : 'border-transparent group-hover:border-line')}>
+      <span className={clsx('relative block aspect-square overflow-hidden rounded-2xl border-[3px] bg-paper-2 transition', on ? 'border-flame shadow-[0_0_0_4px_rgba(255,90,54,.18)]' : vip ? 'border-[#e6cf9c] group-hover:border-[#d9b46a]' : 'border-transparent group-hover:border-line')}>
         {children}
-        {locked && <span className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-black/55 text-butter backdrop-blur"><Lock className="size-3" /></span>}
+        {vip && <span aria-hidden className="pointer-events-none absolute inset-0 rounded-[13px] shadow-[inset_0_0_0_1px_rgba(255,236,190,.7)]" />}
+        {vip && !locked && <span className="absolute left-1 top-1 grid size-6 place-items-center rounded-full bg-gradient-to-b from-[#f7e3ad] to-[#c99a4c] text-[#4a3410] shadow"><Crown className="size-3" /></span>}
+        {locked && <span className="absolute right-1 top-1 grid size-6 place-items-center rounded-full bg-black/55 text-[#f2d9a0] backdrop-blur"><Lock className="size-3" /></span>}
         {on && <span className="absolute bottom-1 right-1 grid size-6 place-items-center rounded-full bg-flame text-white"><Check className="size-3.5" strokeWidth={3} /></span>}
       </span>
       <span className="mt-1 block truncate text-[11px] font-bold text-ink-soft">{label}</span>
