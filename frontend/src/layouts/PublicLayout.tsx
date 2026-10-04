@@ -26,7 +26,7 @@ const LINKS = [
   { to: '/blog', label: 'Blog' },
 ]
 /** The phone menu has no dropdown, so "Ürün" items fold into its list. */
-const MOBILE_LINKS = [{ to: '/#nasil', label: 'Nasıl çalışır' }, ...LINKS.map((l) => (l.to === '/yardim' ? { ...l, label: 'Yardım merkezi' } : l)), { to: '/about', label: 'Hakkımızda' }]
+const MOBILE_LINKS = [{ to: '/#nasil', label: 'Nasıl çalışır' }, ...LINKS.map((l) => (l.to === '/yardim' ? { ...l, label: 'Yardım merkezi' } : l)), { to: '/maarif', label: 'Maarif Modeli' }, { to: '/about', label: 'Hakkımızda' }]
 const MORE = [
   { to: '/contact', label: 'İletişim' },
   { to: '/placement', label: 'Seviye testi' },
@@ -41,6 +41,7 @@ const PRODUCT = [
 const COMPANY = [
   { to: '/about', label: 'Hakkımızda' },
   { to: '/okullar', label: 'Okullar için' },
+  { to: '/maarif', label: 'Maarif Modeli ile İngilizce' },
   { to: '/yardim', label: 'Yardım merkezi' },
   { to: '/contact', label: 'İletişim' },
 ]
@@ -317,7 +318,7 @@ const SOCIAL_ICON: Record<string, (p: { className?: string }) => React.JSX.Eleme
 }
 
 const COLS: { title: string; links: [string, string][] }[] = [
-  { title: 'Ürün', links: [['/#nasil', 'Nasıl çalışır'], ['/#paketler', 'Paketler'], ['/placement', 'Seviye testi'], ['/okullar', 'Okullar için']] },
+  { title: 'Ürün', links: [['/#nasil', 'Nasıl çalışır'], ['/#paketler', 'Paketler'], ['/placement', 'Seviye testi'], ['/maarif', 'Maarif Modeli']] },
   { title: 'Şirket', links: [['/about', 'Hakkımızda'], ['/blog', 'Blog'], ['/contact?konu=partnership', 'İş birliği'], ['/contact', 'İletişim']] },
   { title: 'Destek', links: [['/yardim', 'Yardım merkezi'], ['/contact?konu=support', 'Teknik destek'], ['/contact?konu=course', 'Kurs bilgisi'], ['/okullar', 'Okul paneli']] },
   { title: 'Yasal', links: [['/terms', 'Kullanım koşulları'], ['/privacy', 'Gizlilik ve KVKK'], ['/distance-sales', 'Mesafeli satış'], ['/refund', 'İptal ve iade']] },

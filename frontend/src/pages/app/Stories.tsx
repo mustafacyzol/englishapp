@@ -41,7 +41,7 @@ function GenreGrid({ cats, value, onChange }: { cats: string[]; value: string; o
         return (
           <button key={c || 'all'} role="radio" aria-checked={on} onClick={(e) => { e.preventDefault(); onChange(on ? '' : c) }} className={clsx('press group flex min-w-0 flex-col items-center gap-1 rounded-2xl border-2 px-1 py-2 transition', on ? 'border-transparent text-white shadow-hard-sm' : 'border-line bg-card hover:border-ink/25')} style={on ? { background: g.color } : undefined}>
             <span className={clsx('grid size-9 place-items-center rounded-xl transition group-hover:scale-110', on ? 'bg-white/20' : '')} style={on ? undefined : { background: `${g.color}18`, color: g.color }}><g.icon className="size-5" /></span>
-            <span className="w-full truncate text-center text-[11px] font-extrabold leading-tight">{c || 'Tümü'}</span>
+            <span className="line-clamp-2 w-full break-words text-center text-[11px] font-extrabold leading-tight [hyphens:auto]">{c || 'Tümü'}</span>
           </button>
         )
       })}

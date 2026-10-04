@@ -51,6 +51,7 @@ const ROUTES: [RegExp, string, string?][] = [
   [/^\/blog$/, 'Blog', 'İngilizce öğrenme ipuçları, sınav rehberleri ve kelime listeleri.'],
   [/^\/yardim/, 'Yardım merkezi', 'Ders yolu, Defne, seri ve ödüller, sınav modu, Premium, okullar ve hesabınla ilgili tüm sorular ve yanıtları.'],
   [/^\/okullar/, 'Okullar için', 'Okulunuzun bütün İngilizcesi tek yerde: müdür ve öğretmen panelleri, ödev, sınıf karnesi, LGS ve YDT hazırlığı.'],
+  [/^\/maarif/, 'Maarif Modeli ile İngilizce', `Ortaokul İngilizcesi Türkiye Yüzyılı Maarif Modeli temalarına göre: 5-8. sınıf, A2.1-A2.4, 8 tema ve LGS hazırlığı ${BRAND}'da.`],
   [/^\/placement/, 'Seviye testi', '3 dakikada İngilizce seviyeni öğren, sana uygun yerden başla.'],
   [/^\/login/, 'Giriş yap'],
   [/^\/register/, 'Ücretsiz kayıt ol', 'Kişisel İngilizce planını 1 dakikada kur ve ücretsiz başla.'],

@@ -417,6 +417,19 @@ export default function Schools() {
         </div>
       </section>
 
+      {/* middle school follows the national programme */}
+      <section className="mx-auto max-w-6xl px-5 pt-14">
+        <Link to="/maarif" className="group flex flex-col items-start gap-4 rounded-[28px] border-2 border-line bg-card p-5 transition hover:border-flame/50 sm:flex-row sm:items-center sm:p-6">
+          <img src={higoImg('books')} alt="" className="size-20 shrink-0 object-contain transition group-hover:-rotate-6" />
+          <span className="min-w-0 flex-1">
+            <span className="block text-xs font-black uppercase tracking-[0.18em] text-flame">Türkiye Yüzyılı Maarif Modeli</span>
+            <span className="mt-1 block font-display text-xl font-black leading-tight sm:text-2xl">Ortaokul yolu MEB programının 8 temasıyla eşleşir</span>
+            <span className="mt-1 block text-sm text-ink-soft">5-8. sınıf, A2.1 ile A2.4 arası; 8. sınıfta her ünite sonunda LGS tarzı sorular.</span>
+          </span>
+          <span className="inline-flex items-center gap-1.5 font-display text-sm font-extrabold uppercase tracking-wide text-flame">Nasıl uyumlu? <ArrowRight className="size-4 transition group-hover:translate-x-1" /></span>
+        </Link>
+      </section>
+
       <Roles />
       <Week />
 

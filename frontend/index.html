@@ -41,8 +41,14 @@
       {
         "@context": "https://schema.org",
         "@graph": [
-          { "@type": "Organization", "name": "Bayrak Dil Okulları", "url": "%VITE_SITE_URL%/", "logo": "%VITE_SITE_URL%/icon-512.png" },
-          { "@type": "WebSite", "name": "%VITE_APP_NAME%", "url": "%VITE_SITE_URL%/", "inLanguage": "tr-TR" },
+          { "@type": "EducationalOrganization", "@id": "%VITE_SITE_URL%/#org", "name": "Bayrak Dil Okulları", "url": "%VITE_SITE_URL%/", "logo": "%VITE_SITE_URL%/icon-512.png", "areaServed": "TR", "knowsLanguage": ["tr", "en"] },
+          { "@type": "WebSite", "name": "%VITE_APP_NAME%", "url": "%VITE_SITE_URL%/", "inLanguage": "tr-TR", "publisher": { "@id": "%VITE_SITE_URL%/#org" } },
+          { "@type": "ItemList", "name": "%VITE_APP_NAME% İngilizce kursları", "itemListElement": [
+            { "@type": "ListItem", "position": 1, "item": { "@type": "Course", "name": "A1 İlk Adımlar", "description": "Kendini tanıt, aileni ve gününü anlat: İngilizcede ilk gerçek cümleler.", "educationalLevel": "A1", "inLanguage": "en", "provider": { "@id": "%VITE_SITE_URL%/#org" } } },
+            { "@type": "ListItem", "position": 2, "item": { "@type": "Course", "name": "A2 Yol Arkadaşı", "description": "Geçmişi anlat, plan yap, karşılaştır; Maarif Modeli ortaokul temalarıyla uyumlu.", "educationalLevel": "A2", "inLanguage": "en", "provider": { "@id": "%VITE_SITE_URL%/#org" } } },
+            { "@type": "ListItem", "position": 3, "item": { "@type": "Course", "name": "B1 Özgürce Konuş", "description": "Şart cümleleri, edilgen yapı, dolaylı anlatım ve iş İngilizcesi.", "educationalLevel": "B1", "inLanguage": "en", "provider": { "@id": "%VITE_SITE_URL%/#org" } } },
+            { "@type": "ListItem", "position": 4, "item": { "@type": "Course", "name": "B2 Akıcılık", "description": "YDS, YÖKDİL ve YDT için akademik okuma, çıkarım ve ikna edici yazma.", "educationalLevel": "B2", "inLanguage": "en", "provider": { "@id": "%VITE_SITE_URL%/#org" } } }
+          ] },
           { "@type": "SoftwareApplication", "name": "%VITE_APP_NAME%", "applicationCategory": "EducationalApplication", "operatingSystem": "Web, Android, iOS", "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" } }
         ]
       }

@@ -10,10 +10,11 @@ import { Alert, Modal, Spinner } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { AdminTitle, Pager, Pill, Table } from './kit'
 import { avatarUrl } from '@/lib/avatars'
+import { GuideField } from './GuideField'
 import { ParagraphsField, QuestionsField, VocabField, type Para, type Question, type Vocab } from './StoryFields'
 
 type Row = Record<string, unknown> & { id: number }
-type FieldType = 'text' | 'textarea' | 'number' | 'bool' | 'select' | 'json' | 'date' | 'list' | 'vocab' | 'paragraphs' | 'questions'
+type FieldType = 'text' | 'guide' | 'textarea' | 'number' | 'bool' | 'select' | 'json' | 'date' | 'list' | 'vocab' | 'paragraphs' | 'questions'
 interface Field { key: string; label: string; type: FieldType; options?: string[]; hint?: string; full?: boolean }
 interface Col { key: string; label: string; render?: (r: Row) => ReactNode }
 interface Cfg { title: string; cols: Col[]; fields: Field[]; defaults: Record<string, unknown>; noCreate?: boolean; readOnly?: boolean; preview?: (r: Row) => ReactNode; action?: (r: Row) => ReactNode; intro?: ReactNode }
@@ -31,9 +32,9 @@ const CONFIG: Record<string, Cfg> = {
     defaults: { cefr_level: 'A1', color: '#FF5A36', position: 0, is_published: true },
   },
   units: {
-    title: 'Üniteler',
-    cols: [{ key: 'title', label: 'Başlık' }, { key: 'course', label: 'Kurs', render: (r) => (r.course as { title: string })?.title }, { key: 'position', label: 'Sıra' }],
-    fields: [{ key: 'course_id', label: 'Kurs ID', type: 'number' }, { key: 'title', label: 'Başlık', type: 'text' }, { key: 'description', label: 'Kısa açıklama', type: 'text' }, { key: 'color', label: 'Renk', type: 'text' }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'guidebook', label: 'Rehber (markdown). Uygulamada kitap gibi açılır: sayfaları --- satırıyla ayır ya da her sayfaya ## başlık ver.', type: 'textarea', full: true }],
+    title: 'Üniteler ve rehberler',
+    cols: [{ key: 'title', label: 'Başlık' }, { key: 'course', label: 'Kurs', render: (r) => (r.course as { title: string })?.title }, { key: 'guidebook', label: 'Rehber', render: (r) => { const g = String(r.guidebook ?? '').trim(); return g ? <Pill tone="good">{g.split(/\n(?=## )/).length} sayfa</Pill> : <Pill tone="bad">Yok</Pill> } }, { key: 'position', label: 'Sıra' }],
+    fields: [{ key: 'course_id', label: 'Kurs ID', type: 'number' }, { key: 'title', label: 'Başlık', type: 'text' }, { key: 'description', label: 'Kısa açıklama', type: 'text' }, { key: 'color', label: 'Renk', type: 'text' }, { key: 'position', label: 'Sıra', type: 'number' }, { key: 'guidebook', label: 'Ünite rehberi (uygulamada kitap gibi açılır)', type: 'guide', full: true }],
     defaults: { position: 0 },
   },
   lessons: {
@@ -383,6 +384,7 @@ function Editor({ resource, cfg, row, onClose }: { resource: string; cfg: Cfg; r
           switch (f.type) {
             case 'bool': return <div key={f.key} className={cls}><Toggle label={f.label} checked={!!v} onChange={set} /></div>
             case 'select': return <Select key={f.key} label={f.label} className={cls} value={String(v ?? '')} onChange={(e) => set(e.target.value)} error={fieldErr}>{f.options!.map((o) => <option key={o}>{o}</option>)}</Select>
+            case 'guide': return <div key={f.key} className={cls}><p className="mb-1.5 text-sm font-bold">{f.label}</p><GuideField value={String(v ?? '')} onChange={set} />{fieldErr && <p className="mt-1 text-sm font-semibold text-berry">{fieldErr}</p>}</div>
             case 'textarea': return <Textarea key={f.key} label={f.label} className={cls} value={String(v ?? '')} onChange={(e) => set(e.target.value)} error={fieldErr} rows={8} />
             case 'list': return <Textarea key={f.key} label={f.label} className={cls} value={((v as string[]) ?? []).join('\n')} onChange={(e) => set(e.target.value.split('\n').filter((x, i, a) => x.trim() || i === a.length - 1))} error={fieldErr} />
             case 'json': return <Textarea key={f.key} label={f.label} hint={f.hint} className={`${cls} [&_textarea]:min-h-48 [&_textarea]:font-mono [&_textarea]:text-xs`} value={json[f.key]} onChange={(e) => setJson((s) => ({ ...s, [f.key]: e.target.value }))} error={fieldErr} />

@@ -204,7 +204,7 @@ function Page({ leaf, n, color, unit, leaves, onStart, goTo }: { leaf: Leaf; n: 
   }
   return (
     <div className="flex h-full flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-4 pt-7 sm:px-9 [&_h3]:font-display [&_h3]:text-[1.6rem] [&_h3]:leading-tight [&_table]:bg-white/60 [&_td]:align-top [&_em]:text-[inherit] [&_em]:font-bold [&_em]:italic">
+      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-4 pt-7 sm:px-9 [&_h3]:font-display [&_h3]:text-[1.6rem] [&_h3]:leading-tight [&_table]:bg-white/60 [&_td]:align-top [&_em]:text-[inherit] [&_em]:font-semibold [&_em]:italic [&_em]:opacity-80 [&_blockquote]:my-1 [&_blockquote]:border-l-[3px] [&_blockquote]:font-sans [&_blockquote]:text-[15px] [&_blockquote]:font-semibold [&_blockquote]:leading-snug [&_table]:text-[13.5px] sm:[&_table]:text-sm">
         <Markdown source={leaf.body ?? ''} />
         {!!leaf.tips?.length && (
           <div className="mt-5 space-y-3">

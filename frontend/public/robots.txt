@@ -9,6 +9,18 @@ Disallow: /notifications
 Disallow: /lesson/
 Disallow: /verify-email
 Disallow: /newsletter/
+Disallow: /stories
+Disallow: /practice
+Disallow: /ai
+Disallow: /exam
+Disallow: /duel
+Disallow: /leagues
+Disallow: /rewards
+Disallow: /shop
+Disallow: /quests
+Disallow: /profile
+Disallow: /yolum
+Disallow: /reset-password
 
 # Sitemap is served by the API (blog posts included). Update the domain when you deploy.
 Sitemap: https://api.dilgo.app/sitemap.xml
