@@ -94,14 +94,12 @@ class AccountController extends Controller
             abort(422, 'Seviyeni değiştirmek için seviye testine gir. Seviyendeki dersleri bitirince de bir üst seviyeye kendiliğinden geçersin.');
         }
 
-        // The exam goal comes from onboarding. Switching to another exam is allowed, but
-        // only once per 30 days, so progress and the AI plan are not reset on a whim.
-        if (! empty($data['exam_target']) && $user->exam_target && $data['exam_target'] !== $user->exam_target) {
-            $changed = isset($user->preferences['exam_target_changed_at']) ? \Illuminate\Support\Carbon::parse($user->preferences['exam_target_changed_at']) : null;
-            if ($changed && $changed->gt(now()->subDays(30))) {
-                abort(422, 'Sınav hedefini 30 günde bir değiştirebilirsin. Sonraki değişiklik: '.$changed->addDays(30)->format('d.m.Y'));
+        // Stage, grade and exam come from onboarding. Once set they change only through
+        // the track re-onboarding (POST /me/track), never from a plain profile update.
+        foreach (['exam_target', 'school_stage', 'grade'] as $k) {
+            if (array_key_exists($k, $data) && $user->{$k} !== null && $data[$k] != $user->{$k}) {
+                abort(422, 'Sınav ve sınıf tercihin onboarding ile belirlenir. Değiştirmek için "Yolumu yeniden belirle" adımlarını kullan.');
             }
-            $examStamp = now()->toIso8601String();
         }
 
         // Exam practice is for teens and adults only.
@@ -117,10 +115,6 @@ class AccountController extends Controller
             // merge and whitelist; never let the client overwrite server-owned keys (frame)
             $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'sound', 'tts_voice', 'tts_rate', 'theme', 'tour_done', 'exam_mode']));
             $data['preferences'] = array_merge($user->preferences ?? [], $allowed);
-        }
-        if (isset($examStamp)) {
-            // server-owned: when the exam goal last changed
-            $data['preferences'] = array_merge($data['preferences'] ?? $user->preferences ?? [], ['exam_target_changed_at' => $examStamp]);
         }
         if (isset($data['name'])) {
             $data['name'] = strip_tags($data['name']);
@@ -297,5 +291,46 @@ class AccountController extends Controller
     public function resumeSubscription(Request $request, SubscriptionService $subs): JsonResponse
     {
         return response()->json($subs->resume($request->user()) + ['user' => UserPresenter::me($request->user()->fresh())]);
+    }
+
+    /**
+     * Re-onboarding: the learner answers the track questions again (stage, grade,
+     * exam, date). Allowed once per 30 days, so exam modes are a choice, not a menu
+     * to hop between. The path, exam mode and Defne all follow the new answers.
+     */
+    public function track(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $data = $request->validate([
+            'school_stage' => ['required', Rule::in(\App\Support\SchoolStage::keys())],
+            'grade' => ['nullable', 'integer', 'between:1,12'],
+            'exam_target' => ['nullable', Rule::in(Exams::keys())],
+            'exam_date' => ['nullable', 'date', 'after:today', 'before:+3 years'],
+        ]);
+        $stage = \App\Support\SchoolStage::STAGES[$data['school_stage']];
+        if (isset($data['grade']) && $stage['grades'] && ! in_array((int) $data['grade'], $stage['grades'], true)) {
+            abort(422, 'Bu sınıf seçilen okul düzeyine uymuyor.');
+        }
+        if (! empty($data['exam_target']) && ! in_array($data['exam_target'], $stage['exams'] ?? [], true)) {
+            abort(422, 'Bu sınav seçilen okul düzeyi için sunulmuyor.');
+        }
+        $age = \App\Support\SchoolStage::ageGroup($data['school_stage'], $data['grade'] ?? null);
+        if ($age === 'kid') {
+            $data['exam_target'] = null;
+            $data['exam_date'] = null;
+        }
+        $changed = isset($user->preferences['track_changed_at']) ? \Illuminate\Support\Carbon::parse($user->preferences['track_changed_at']) : null;
+        $same = $user->school_stage === $data['school_stage'] && (int) $user->grade === (int) ($data['grade'] ?? 0) && $user->exam_target === ($data['exam_target'] ?? null);
+        if (! $same && $changed && $changed->gt(now()->subDays(30))) {
+            abort(422, 'Yolunu 30 günde bir yeniden belirleyebilirsin. Sonraki değişiklik: '.$changed->addDays(30)->format('d.m.Y'));
+        }
+        $user->forceFill([
+            'school_stage' => $data['school_stage'], 'grade' => $data['grade'] ?? null, 'age_group' => $age,
+            'exam_target' => $data['exam_target'] ?? null, 'exam_date' => $data['exam_date'] ?? null,
+            'preferences' => array_merge($user->preferences ?? [], $same ? [] : ['track_changed_at' => now()->toIso8601String()],
+                ['exam_mode' => ! empty($data['exam_target'])]),
+        ])->save();
+
+        return response()->json(['user' => \App\Http\Presenters\UserPresenter::me($user->fresh()), 'track' => \App\Support\Tracks::for($user->fresh())]);
     }
 }

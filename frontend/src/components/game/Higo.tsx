@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { img } from '@/lib/assets'
 
-export type HigoPose = 'wave' | 'cheer' | 'think' | 'point' | 'read' | 'thumbs' | 'music' | 'map' | 'walk' | 'scope' | 'nap'
+export type HigoPose = 'wave' | 'cheer' | 'think' | 'point' | 'read' | 'thumbs' | 'music' | 'map' | 'walk' | 'scope' | 'nap' | 'skate' | 'kite' | 'tea' | 'dance' | 'books' | 'balloon'
 export const higoImg = (pose: HigoPose) => img(`higo/${pose}.webp`)
 
 /**

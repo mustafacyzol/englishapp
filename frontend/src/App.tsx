@@ -33,6 +33,7 @@ const LessonPlayer = lazy(() => import('./pages/app/LessonPlayer'))
 const Stories = lazy(() => import('./pages/app/Stories'))
 const StoryReader = lazy(() => import('./pages/app/StoryReader'))
 const Practice = lazy(() => import('./pages/app/Practice'))
+const TrackSetup = lazy(() => import('./pages/app/TrackSetup'))
 const SetDetail = lazy(() => import('./pages/app/WordSets').then((m) => ({ default: m.SetDetailPage })))
 const SetEditor = lazy(() => import('./pages/app/WordSets').then((m) => ({ default: m.SetEditorPage })))
 const AiHub = lazy(() => import('./pages/app/AiHub'))
@@ -161,6 +162,7 @@ export default function App() {
           <Route path="/stories" element={<Stories />} />
           <Route path="/stories/:slug" element={<StoryReader />} />
           <Route path="/practice" element={<Practice />} />
+          <Route path="/yolum" element={<TrackSetup />} />
           <Route path="/practice/sets/new" element={<SetEditor />} />
           <Route path="/practice/sets/:id" element={<SetDetail />} />
           <Route path="/practice/sets/:id/edit" element={<SetEditor />} />

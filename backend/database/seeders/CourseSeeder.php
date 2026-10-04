@@ -94,12 +94,40 @@ class CourseSeeder extends Seeder
             $reading ? ['title' => 'Okuma: '.$reading['title'], 'skill' => 'reading', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $reading['exercises']] : null,
             ['title' => 'Kelime oyunu', 'skill' => 'vocabulary', 'kind' => 'words', 'xp_reward' => $xp, 'exercises' => [],
                 'meta' => $this->wordGame($u)],
+            ['title' => 'Dilbilgisi pekiştir', 'skill' => 'grammar', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $this->grammarDrill($u, $ui)],
             ['title' => 'Dinle ve konuş', 'skill' => 'listening', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $listening],
+            ['title' => 'Kelime tekrarı', 'skill' => 'vocabulary', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $this->review($v, $ui + 11)],
             ['title' => 'Telaffuz', 'skill' => 'speaking', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $this->pronunciation($u)],
             $story ? ['title' => 'Oku: '.$story->title, 'skill' => 'reading', 'kind' => 'story', 'story_id' => $story->id, 'xp_reward' => $xp + 5, 'is_premium' => $story->is_premium, 'exercises' => []] : null,
             ['title' => 'Pratik', 'skill' => 'vocabulary', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $this->review($v, $ui)],
             $scenario ? ['title' => 'Defne ile: '.$scenario->title, 'skill' => 'speaking', 'kind' => 'ai_talk', 'scenario_key' => $scenario->key, 'xp_reward' => $xp + 5, 'is_premium' => (bool) $scenario->is_premium, 'exercises' => []] : null,
         ]));
+    }
+
+    /**
+     * Second grammar stop: the unit's gap sentences again with the options in a new
+     * order, the error to spot, both translations and the target sentence spoken,
+     * so the rule is met three different ways before the unit ends.
+     */
+    private function grammarDrill(array $u, int $seed): array
+    {
+        $fills = array_map(function ($f) use ($seed) {
+            [$sentence, $options, $answer] = $f;
+            $right = $options[$answer];
+            $shuffled = $this->shuffle($options, $seed + strlen($sentence));
+
+            return $this->fill($sentence, $shuffled, array_search($right, $shuffled, true), $f[3] ?? null);
+        }, array_reverse($u['fill']));
+        [$tr0, $tr1] = $u['tr'];
+
+        return [
+            ...array_slice($fills, 0, 2),
+            $this->spot(...$u['err']),
+            $this->translate(...$tr1),
+            ...array_slice($fills, 2),
+            $this->translate(...$tr0),
+            $this->speak(...$u['sp'][2]),
+        ];
     }
 
     /** A short text in the unit's language with comprehension questions (curriculum/readings.json). */

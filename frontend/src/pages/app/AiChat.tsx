@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { ArrowLeft, CheckCircle2, Circle, Languages, Lightbulb, Mic, Phone, Plus, Send, Square, Volume2, VolumeX } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
-import { canListen, listen, speak, stopSpeaking } from '@/lib/speech'
+import { cancelAllListening, canListen, listen, speak, stopSpeaking, stopVoice } from '@/lib/speech'
 import { ensureMic, micHelpText } from '@/lib/mic'
 import type { RewardSummary } from '@/lib/types'
 import { Defne } from '@/components/game/Defne'
@@ -63,7 +63,7 @@ export default function AiChat() {
   }, [data])
   useEffect(() => endRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' }), [messages])
   // Leaving the chat ends everything it started: no voice or open mic follows you to the next page.
-  useEffect(() => () => { stopSpeaking(); stopRef.current() }, [])
+  useEffect(() => () => { stopVoice(); cancelAllListening() }, [])
 
   const say = (t: string) => {
     setTalking(true)

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Link, Navigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
@@ -38,7 +38,9 @@ const LETTERS = ['A', 'B', 'C', 'D', 'E', 'F']
  */
 export default function Exam() {
   const { user } = useAuth()
-  const [run, setRun] = useState<{ section: string; n: number; mock?: boolean } | null>(null)
+  const [params] = useSearchParams()
+  // "?drill=1" from the learning path: a short mixed set straight away
+  const [run, setRun] = useState<{ section: string; n: number; mock?: boolean } | null>(() => (params.get('drill') ? { section: 'mix', n: 5 } : null))
   const { data, isLoading } = useQuery({ queryKey: ['exam'], queryFn: () => get<Overview>('/exam') })
 
   if (!user) return null
@@ -175,32 +177,9 @@ function PickExam() {
   )
 }
 
-function ChangeExam({ current }: { current: ExamKey }) {
-  const [open, setOpen] = useState(false)
-  const save = useSaveExam()
-  const { user } = useAuth()
-  return (
-    <div className="relative">
-      <Button variant="secondary" size="sm" onClick={() => setOpen((o) => !o)}>Sınavı / tarihi değiştir</Button>
-      <AnimatePresence>
-        {open && (
-          <motion.div initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }} className="absolute right-0 top-12 z-30 w-72 rounded-2xl border-2 border-line bg-card p-2 shadow-soft">
-            {EXAMS.map((e) => (
-              <button key={e.key} onClick={() => { save.mutate({ exam_target: e.key }); setOpen(false) }} className={clsx('flex w-full items-center gap-3 rounded-xl p-2 text-left text-sm font-bold hover:bg-paper-2', e.key === current && 'bg-paper-2')}>
-                <span className="grid h-8 min-w-14 place-items-center rounded-lg px-1 text-xs font-black text-white" style={{ background: e.color }}>{e.name}</span>
-                {e.label}
-                {e.key === current && <Check className="ml-auto size-4" strokeWidth={3} />}
-              </button>
-            ))}
-            <label className="mt-1 block border-t-2 border-line px-2 pb-1 pt-3 text-xs font-black uppercase tracking-widest text-ink-soft">
-              Sınav tarihi
-              <input type="date" defaultValue={user?.exam_date ?? ''} min={new Date(Date.now() + 864e5).toISOString().slice(0, 10)} onChange={(e) => save.mutate({ exam_target: current, exam_date: e.target.value || null })} className="mt-1.5 block w-full rounded-xl border-2 border-line bg-paper-2 px-3 py-2 text-sm font-bold normal-case tracking-normal text-ink" />
-            </label>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
+function ChangeExam(_: { current: ExamKey }) {
+  // the exam comes from onboarding; switching means answering the track questions again
+  return <Link to="/yolum" className="inline-flex h-10 items-center rounded-xl border-2 border-line bg-card px-3 text-sm font-extrabold hover:border-ink/30">Yolumu yeniden belirle</Link>
 }
 
 function Runner({ section, n, mock, onExit }: { section: string; n: number; mock?: boolean; onExit: () => void }) {

@@ -21,6 +21,7 @@ interface PathData {
   course: { id: number; title: string; cefr_level: string; color: string; description: string; access?: Access }
   courses?: { id: number; title: string; cefr_level: string; access: Access }[]
   units: PathUnit[]
+  track?: { key: 'maarif' | 'primary' | 'exam' | 'general'; label: string; sub: string; exam: string | null; grade: number | null; drill: string | null }
 }
 interface CourseItem { id: number; title: string; cefr_level: string; color: string }
 export interface PlanItem { skill: SkillKey; title: string; detail: string; to: string; minutes: number; done: boolean; focus: boolean; weakest: boolean }
@@ -85,6 +86,8 @@ export default function Learn() {
       </div>
 
 
+      {data.track && <TrackBanner track={data.track} />}
+
       <div className="mt-8">
         {data.units.map((unit, ui) => (
           <div key={unit.id}>
@@ -123,6 +126,23 @@ export default function Learn() {
       </Modal>
 
       <Guidebook unit={guide ? { id: guide.id, title: guide.title, color: guide.color ?? undefined, description: guide.description } : null} onClose={() => setGuide(null)} />
+    </div>
+  )
+}
+
+/* ------------------------------------------------------------------- Track */
+
+/** What this path is for: chosen at sign-up (school stage, grade, exam), changed through onboarding. */
+function TrackBanner({ track }: { track: NonNullable<PathData['track']> }) {
+  const tone = track.key === 'maarif' ? 'from-[#e8403a] to-[#c93460]' : track.key === 'exam' ? 'from-[#2f7cf6] to-[#8f7cf8]' : track.key === 'primary' ? 'from-[#22b573] to-[#0f766e]' : 'from-[#1f2433] to-[#3b4357]'
+  return (
+    <div className={clsx('mt-4 flex items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r p-3 pr-4 text-white', tone)}>
+      <img src={higoImg(track.key === 'exam' ? 'scope' : track.key === 'primary' ? 'music' : 'read')} alt="" className="size-12 shrink-0 object-contain drop-shadow" />
+      <div className="min-w-0 flex-1">
+        <p className="font-display text-[15px] font-black leading-tight">{track.label}</p>
+        <p className="text-xs font-semibold leading-snug text-white/85">{track.sub}</p>
+      </div>
+      <Link to="/yolum" className="shrink-0 rounded-xl bg-white/20 px-2.5 py-1.5 text-[11px] font-extrabold hover:bg-white/30">Değiştir</Link>
     </div>
   )
 }
@@ -189,8 +209,7 @@ function ContinueCard({ data, stats, onJump, onPick, away }: { data: PathData; s
  * Higo walks the road with you: he sits in the free space beside the trail, on
  * the side the stop's label doesn't use, in a different pose each time.
  */
-const SIDE_POSES: HigoPose[] = ['map', 'walk', 'scope', 'read', 'think', 'nap', 'point', 'thumbs']
-const SIDE_LINES: Record<string, string> = { map: 'Rotayı çizdim!', walk: 'Az kaldı, yürü!', scope: 'Sıradakini gördüm', read: 'Rehbere göz at', think: 'Hmm, zor bir konu', nap: 'Mola mı? 5 dk!', point: 'İşte şuradan!', thumbs: 'Harika gidiyorsun' }
+const SIDE_POSES: HigoPose[] = ['skate', 'books', 'kite', 'map', 'tea', 'dance', 'balloon', 'scope', 'read', 'walk', 'thumbs', 'nap']
 
 function SideHigo({ pose, x, y, side }: { pose: HigoPose; x: number; y: number; side: 'left' | 'right' }) {
   // Positioned by a plain wrapper: the entrance animation lives on the inner element, so it can
@@ -210,7 +229,6 @@ function SideHigo({ pose, x, y, side }: { pose: HigoPose; x: number; y: number; 
         className={clsx('flex flex-col', side === 'right' ? 'items-start' : 'items-end')}
       >
         <motion.img src={higoImg(pose)} alt="" className="w-full max-w-[96px] drop-shadow-[0_10px_12px_rgba(31,36,51,.22)]" style={{ transform: side === 'left' ? 'scaleX(-1)' : undefined }} animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 3.4, ease: 'easeInOut' }} />
-        <span className="mt-1 hidden max-w-full rounded-2xl bg-card px-2.5 py-1 text-center text-[11px] font-extrabold leading-tight shadow-[0_6px_14px_-8px_rgba(31,36,51,.4)] ring-1 ring-line sm:block">{SIDE_LINES[pose]}</span>
       </motion.div>
     </div>
   )
@@ -222,13 +240,14 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
   const count = unit.lessons.length
   // Path geometry: node centres, then a smooth curve between each pair.
   const pts = unit.lessons.map((_, i) => ({ x: wave(i), y: i * (NODE + GAP) + NODE / 2 }))
-  const endY = count * (NODE + GAP) + 30
+  const endY = count * (NODE + GAP) + 30 + (unit.drill ? 96 : 0)
   const lastDone = unit.lessons.reduce((acc, l, i) => (l.state === 'completed' ? i : acc), -1)
   // one Higo by a far-swinging stop in the middle of the unit, a second one on long units
   const swing = pts.map((p, i) => ({ i, d: Math.abs(p.x) })).filter((p) => p.d >= 50)
-  const half = Math.ceil(count / 2)
-  const picks = count >= 5 ? [swing.find((p) => p.i < half), swing.find((p) => p.i >= half)] : [swing[0]]
-  const higoSpots = picks.filter((p, k, a): p is { i: number; d: number } => !!p && a.findIndex((q) => q?.i === p.i) === k).map((p, k) => ({ i: p.i, pose: SIDE_POSES[(index * 2 + k) % SIDE_POSES.length] }))
+  // one Higo per third of a long unit (two on shorter ones), each in a different pose
+  const parts = count >= 9 ? 3 : count >= 5 ? 2 : 1
+  const picks = Array.from({ length: parts }, (_, k) => swing.find((p) => p.i >= Math.floor((k * count) / parts) && p.i < Math.floor(((k + 1) * count) / parts)))
+  const higoSpots = picks.filter((p, k, a): p is { i: number; d: number } => !!p && a.findIndex((q) => q?.i === p.i) === k).map((p, k) => ({ i: p.i, pose: SIDE_POSES[(index * 3 + k) % SIDE_POSES.length] }))
   const seg = (a: { x: number; y: number }, b: { x: number; y: number }) => `M ${a.x} ${a.y} C ${a.x} ${(a.y + b.y) / 2}, ${b.x} ${(a.y + b.y) / 2}, ${b.x} ${b.y}`
 
   return (
@@ -236,7 +255,8 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
       <div className="relative mb-10 overflow-hidden rounded-3xl text-white" style={{ background: color }}>
         <div className="flex items-stretch">
           <div className="min-w-0 flex-1 p-5 sm:p-6">
-            <p className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] opacity-85">Ünite {index + 1} {done && <span className="rounded bg-white/25 px-1.5 py-0.5 tracking-normal">Tamamlandı</span>}</p>
+            <p className="flex flex-wrap items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] opacity-85">Ünite {index + 1} {done && <span className="rounded bg-white/25 px-1.5 py-0.5 tracking-normal">Tamamlandı</span>}</p>
+            {unit.tag && <p className="mt-1 inline-flex max-w-full items-center gap-1.5 truncate rounded-full bg-black/15 px-2.5 py-0.5 text-[11px] font-extrabold" title={`MEB Maarif Modeli teması: ${unit.tag.tr}`}>{unit.tag.label} · {unit.tag.tr}</p>}
             <h2 className="text-2xl leading-tight">{unit.title}</h2>
             <p className="mt-1 font-semibold opacity-90">{unit.description}</p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -273,6 +293,19 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
         {higoSpots.map(({ i, pose }) => (
           <SideHigo key={i} pose={pose} x={pts[i].x} y={pts[i].y - NODE / 2 - 10} side={pts[i].x > 0 ? 'right' : 'left'} />
         ))}
+
+        {/* exam learners: a short set in their exam's format, opened halfway through the unit */}
+        {unit.drill && (
+          <div className="absolute left-1/2 z-10 w-[min(260px,calc(100%-24px))] -translate-x-1/2" style={{ top: endY - 140 }}>
+            <Link to={unit.drill.open ? '/exam?drill=1' : '#'} onClick={(e) => { if (!unit.drill?.open) e.preventDefault() }} aria-disabled={!unit.drill.open} className={clsx('press flex items-center gap-3 rounded-2xl border-2 bg-card px-3 py-2.5 shadow-hard-sm', unit.drill.open ? 'border-ink/20 hover:border-ink/40' : 'cursor-not-allowed border-dashed border-line opacity-70')}>
+              <span className="grid size-10 shrink-0 place-items-center rounded-xl text-white" style={{ background: color }}><Trophy className="size-5" /></span>
+              <span className="min-w-0">
+                <span className="block text-sm font-black leading-tight">{unit.drill.label}</span>
+                <span className="block text-xs font-bold text-ink-soft">{unit.drill.open ? '5 soru · hemen çöz' : 'Ünitenin yarısında açılır'}</span>
+              </span>
+            </Link>
+          </div>
+        )}
 
         {/* unit trophy, the visible finish line of this unit */}
         <div className="absolute left-1/2 flex -translate-x-1/2 flex-col items-center" style={{ top: endY - 34 }}>
@@ -332,7 +365,6 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
             <svg viewBox="0 0 100 100" className="absolute inset-0 size-full origin-center animate-[spin_16s_linear_infinite] [transform-box:fill-box]">
               <circle cx="50" cy="50" r="48" fill="none" stroke={color} strokeWidth="2.2" strokeLinecap="round" pathLength={100} strokeDasharray="2.5 2.5" opacity=".85" />
             </svg>
-            <motion.img src={higoImg('wave')} alt="" className="absolute -right-4 -top-6 w-11 drop-shadow-md" animate={{ y: [0, -4, 0], rotate: [0, -6, 0] }} transition={{ repeat: Infinity, duration: 2.4, ease: 'easeInOut' }} />
           </span>
         )}
       <motion.button

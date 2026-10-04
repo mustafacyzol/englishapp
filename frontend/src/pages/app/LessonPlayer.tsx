@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { Check, Gem, Infinity as InfinityIcon, Keyboard, Mic, MicOff, Snail, Volume2, X } from 'lucide-react'
 import { img, rewardImg } from '@/lib/assets'
-import { higoImg } from '@/components/game/Higo'
+import { higoImg, type HigoPose } from '@/components/game/Higo'
 import { SKILL } from '@/lib/skills'
 import type { SkillKey } from '@/lib/types'
 import { ApiError, get, post } from '@/lib/api'
@@ -84,6 +84,12 @@ const DRILL: Record<Exercise['type'], { label: string; title: string; accent: st
   sequence: { label: 'Sıralama', title: 'Doğru sıraya diz', accent: 'text-mint-deep', tint: 'from-mint/10' },
   read: { label: 'Okuma', title: 'Metni oku, soruyu cevapla', accent: 'text-butter-deep', tint: 'from-butter/14' },
   pronounce: { label: 'Telaffuz', title: 'Sesli söyle, Higo dinlesin', accent: 'text-flame', tint: 'from-flame/12' },
+}
+
+/** Higo's pose next to each kind of drill. */
+const DRILL_HIGO: Partial<Record<Exercise['type'], HigoPose>> = {
+  choice: 'think', fill: 'books', listen_choice: 'dance', listen_type: 'music', translate: 'map', speak: 'wave', match: 'kite',
+  spot_error: 'scope', dialogue: 'tea', sequence: 'walk', read: 'read', pronounce: 'skate',
 }
 
 export default function LessonPlayer() {
@@ -338,11 +344,18 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
 
   return (
     <div>
-      <p className="mb-2 flex items-center gap-2">
-        <span className={clsx('flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider', sk.soft, sk.text)}><sk.icon className="size-3.5" /> {sk.label}</span>
-        <span className={clsx('text-xs font-black uppercase tracking-[0.2em]', d.accent)}>{d.label}</span>
-      </p>
-      <h1 className="mb-7 text-2xl font-extrabold sm:text-3xl">{d.title}</h1>
+      {/* a little scene card per drill: what to do, in one line, with Higo cheering from the side */}
+      <motion.div key={ex.type + d.title} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 24 }} className="relative mb-7 flex items-center gap-3 overflow-hidden rounded-3xl border-2 border-line bg-card/80 py-3 pl-4 pr-20 shadow-[0_10px_30px_-22px_rgba(31,36,51,.5)] backdrop-blur sm:pr-24">
+        <span aria-hidden className={clsx('absolute -right-6 -top-8 size-28 rounded-full opacity-60', sk.soft)} />
+        <div className="relative min-w-0">
+          <p className="mb-1 flex flex-wrap items-center gap-2">
+            <span className={clsx('flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider', sk.soft, sk.text)}><sk.icon className="size-3.5" /> {sk.label}</span>
+            <span className={clsx('text-xs font-black uppercase tracking-[0.2em]', d.accent)}>{d.label}</span>
+          </p>
+          <h1 className="text-xl font-extrabold leading-tight sm:text-2xl">{d.title}</h1>
+        </div>
+        <motion.img src={higoImg(DRILL_HIGO[ex.type] ?? 'point')} alt="" initial={{ y: 30, rotate: -8 }} animate={{ y: 0, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14, delay: 0.1 }} className="absolute -bottom-2 right-2 size-[72px] object-contain drop-shadow-[0_6px_8px_rgba(160,40,10,.2)] sm:size-20" />
+      </motion.div>
       {(ex.type === 'choice' || ex.type === 'fill' || ex.type === 'listen_choice' || ex.type === 'read') && (
         <>
           {ex.type === 'read' ? (

@@ -128,22 +128,7 @@ function AccountTab({ save }: { save: Save }) {
           <Button type="submit" loading={save.isPending} className="sm:col-span-2 sm:w-fit">Kaydet</Button>
         </form>
       </Section>
-      <Section title="Okul durumu" hint="Dersler, sınav modu ve Defne okulundaki konulara ve sınıfına göre ayarlanır.">
-        <div className="flex flex-wrap gap-2">
-          {STAGES.map((st) => (
-            <button key={st.key} onClick={() => st.key !== user.school_stage && save.mutate({ school_stage: st.key, grade: st.grades.length ? st.grades[0] : null })} aria-pressed={user.school_stage === st.key} className={clsx(pill(user.school_stage === st.key), 'px-4 py-2.5')}>
-              {st.label} <span className="text-xs opacity-70">{st.range}</span>
-            </button>
-          ))}
-        </div>
-        {!!STAGES.find((x) => x.key === user.school_stage)?.grades.length && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {STAGES.find((x) => x.key === user.school_stage)!.grades.map((g) => (
-              <button key={g} onClick={() => save.mutate({ grade: g })} aria-pressed={user.grade === g} className={clsx(pill(user.grade === g), 'px-3.5 py-2')}>{g}. sınıf</button>
-            ))}
-          </div>
-        )}
-      </Section>
+      <TrackSummary />
 
       <Section title="Yaş grubu" hint="İçerik, Defne'nin konuşma tonu, iş ortağı hediyeleri ve rakip eşleşmesi buna göre ayarlanır.">
         <div className="grid grid-cols-3 gap-2">
@@ -227,43 +212,32 @@ function LearningTab({ save }: { save: Save }) {
   )
 }
 
+/** School stage, grade and exam come from onboarding; changing them means answering those questions again. */
+function TrackSummary({ compact }: { compact?: boolean }) {
+  const { user } = useAuth()
+  if (!user) return null
+  const st = STAGES.find((x) => x.key === user.school_stage)
+  const ex = EXAMS.find((e) => e.key === user.exam_target)
+  const body = (
+    <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-line bg-card p-3">
+      {ex ? <span className="grid h-11 min-w-14 place-items-center rounded-xl px-2 text-sm font-black text-white" style={{ background: ex.color }}>{ex.name}</span> : <span className="grid h-11 min-w-14 place-items-center rounded-xl bg-paper-2 px-2 text-xs font-black">Genel</span>}
+      <span className="min-w-0 flex-1 text-sm font-bold leading-tight">{st ? `${st.label}${user.grade ? ` · ${user.grade}. sınıf` : ''}` : 'Okul seçilmedi'}<span className="block text-xs font-semibold text-ink-soft">{ex ? ex.label : 'Sınav hedefi yok'} · onboarding'de seçildi</span></span>
+      <Link to="/yolum" className="rounded-xl border-2 border-line px-3 py-2 text-sm font-extrabold hover:border-ink/30">Yolumu yeniden belirle</Link>
+    </div>
+  )
+  return compact ? body : <Section title="Okul ve sınav" hint="Yol haritası, sınav modu ve Defne bu tercihlere göre kurulur. Değiştirmek için onboarding sorularını yeniden yanıtlarsın; 30 günde bir yapılabilir.">{body}</Section>
+}
+
 function ExamTab({ save }: { save: Save }) {
   const { user } = useAuth()
-  const [changing, setChanging] = useState(false)
   if (!user) return null
   const on = examOn(user)
-  const current = EXAMS.find((e) => e.key === user.exam_target)
   return (
     <Section title="Sınav modu" hint="Sınav hedefin kayıt sırasında seçtiğin hedeften gelir; Defne, günlük plan ve denemeler buna göre çalışır.">
       <div className="rounded-2xl bg-paper-2 px-4">
         <Toggle label="Sınav modunu menüde göster" description={on ? 'Menüde görünüyor.' : 'Kapalı. Menüde görünmez, hedefin saklı kalır.'} checked={on} onChange={(v) => save.mutate({ preferences: { exam_mode: v } })} />
       </div>
-      <div className="mt-5">
-        <Label>Sınav hedefin</Label>
-        {current && !changing ? (
-          <div className="flex flex-wrap items-center gap-3 rounded-2xl border-2 border-line bg-card p-3">
-            <span className="grid h-11 min-w-14 place-items-center rounded-xl px-2 text-sm font-black text-white" style={{ background: current.color }}>{current.name}</span>
-            <span className="min-w-0 flex-1 text-sm font-bold leading-tight">{current.label}<span className="block text-xs font-semibold text-ink-soft">Kayıt sırasında seçildi</span></span>
-            <Button variant="secondary" size="sm" onClick={() => setChanging(true)}>Değiştir</Button>
-          </div>
-        ) : (
-          <>
-            {current && <p className="mb-3 rounded-2xl bg-butter/15 p-3 text-sm font-semibold">Hedefini 30 günde bir değiştirebilirsin. Deneme geçmişin silinmez, plan yeni sınava göre yeniden kurulur.</p>}
-            <div className="mb-4 grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
-              {EXAMS.map((e) => {
-                const sel = user.exam_target === e.key
-                return (
-                  <button key={e.key} onClick={() => { if (!sel) save.mutate({ exam_target: e.key }, { onSuccess: () => setChanging(false) }) }} aria-pressed={sel} className={clsx('flex items-center gap-2.5 rounded-2xl border-2 p-2.5 text-left transition', sel ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>
-                    <span className="grid h-9 min-w-12 place-items-center rounded-lg px-1.5 text-xs font-black text-white" style={{ background: e.color }}>{e.name}</span>
-                    <span className="text-xs font-bold leading-tight">{e.label}</span>
-                  </button>
-                )
-              })}
-            </div>
-            {current && <button onClick={() => setChanging(false)} className="text-sm font-bold text-ink-soft hover:text-ink">Vazgeç</button>}
-          </>
-        )}
-      </div>
+      <div className="mt-5"><TrackSummary compact /></div>
       {user.exam_target && (
         <Input className="mt-4" label="Sınav tarihi" type="date" defaultValue={user.exam_date ?? ''} min={new Date(Date.now() + 864e5).toISOString().slice(0, 10)} onBlur={(e) => e.target.value !== (user.exam_date ?? '') && save.mutate({ exam_date: e.target.value || null })} hint="Geri sayım ve deneme planı için." />
       )}

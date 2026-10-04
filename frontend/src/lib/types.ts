@@ -129,6 +129,10 @@ export interface PathUnit {
   has_guidebook: boolean
   lessons: PathLesson[]
   progress: number
+  /** Maarif Modeli theme for middle/primary school tracks */
+  tag?: { theme: number; en: string; tr: string; label: string } | null
+  /** exam learners: a short set in their exam's format after the unit */
+  drill?: { exam: string; label: string; open: boolean } | null
 }
 
 export interface StoryCard {

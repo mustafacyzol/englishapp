@@ -109,7 +109,9 @@ class ExamController extends Controller
     public function mock(Request $request): JsonResponse
     {
         $user = $request->user();
-        $exam = $request->validate(['exam' => ['nullable', Rule::in(Exams::keys())]])['exam'] ?? $user->exam_target ?? 'yds';
+        $request->validate(['exam' => ['nullable', Rule::in(Exams::keys())]]);
+        // the exam is the one chosen at onboarding; another exam's format is not on offer
+        $exam = $user->exam_target ?? 'yds';
         $shape = $this->mockShape($exam);
         $blueprint = Exams::EXAMS[$exam]['blueprint'];
         $total = array_sum($blueprint);
@@ -188,7 +190,7 @@ class ExamController extends Controller
             'n' => ['nullable', 'integer', 'min:1', 'max:20'],
         ]);
         $user = $request->user();
-        $exam = $data['exam'] ?? $user->exam_target ?? 'yds';
+        $exam = $user->exam_target ?? 'yds';
         $section = $data['section'] ?? 'mix';
         $n = $data['n'] ?? 10;
 

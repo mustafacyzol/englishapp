@@ -64,6 +64,7 @@ Route::prefix('v1')->group(function () {
 
         // Account & security
         Route::patch('account', [AccountController::class, 'update']);
+        Route::post('account/track', [AccountController::class, 'track'])->middleware('throttle:10,1');
         Route::post('account/password', [AccountController::class, 'changePassword'])->middleware('throttle:auth');
         Route::get('account/sessions', [AccountController::class, 'sessions']);
         Route::get('account/subscription', [AccountController::class, 'subscription']);

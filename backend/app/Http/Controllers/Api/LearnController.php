@@ -32,7 +32,8 @@ class LearnController extends Controller
         $states = $paths->states($user, $course);
         $progress = LessonProgress::query()->where('user_id', $user->id)->whereIn('lesson_id', array_keys($states))->get()->keyBy('lesson_id');
 
-        $units = $course->units->map(function ($unit) use ($progress, $states, $user) {
+        $track = \App\Support\Tracks::for($user);
+        $units = $course->units->values()->map(function ($unit, $i) use ($progress, $states, $user, $track, $course) {
             $lessons = $unit->lessons->map(fn (Lesson $lesson) => ['meta' => $lesson->meta ? ['game' => $lesson->meta['game'] ?? null] : null] + $lesson->toArray() + [
                 'state' => $states[$lesson->id] ?? 'locked',
                 'crowns' => $progress->get($lesson->id)?->crowns ?? 0,
@@ -49,6 +50,13 @@ class LearnController extends Controller
                 'has_guidebook' => filled($unit->guidebook),
                 'lessons' => $lessons,
                 'progress' => $lessons->count() ? round($done / $lessons->count() * 100) : 0,
+                'tag' => \App\Support\Tracks::unitTag($track, $course->cefr_level, $i),
+                // exam learners: a short set in their exam's format once half the unit is done
+                'drill' => $track['drill'] ? [
+                    'exam' => $track['drill'],
+                    'label' => \App\Support\Tracks::examName($track['drill']).' tarzı sorular',
+                    'open' => $lessons->count() && $done / $lessons->count() >= 0.5,
+                ] : null,
             ];
         });
 
@@ -56,6 +64,7 @@ class LearnController extends Controller
             'course' => $course->only(['id', 'slug', 'title', 'description', 'cefr_level', 'color']) + ['access' => match ($paths->relation($user, $course)) { -1 => 'review', 0 => 'current', default => 'locked' }],
             'courses' => $paths->courses()->map(fn (Course $c) => $c->only(['id', 'title', 'cefr_level']) + ['access' => match ($paths->relation($user, $c)) { -1 => 'review', 0 => 'current', default => 'locked' }])->values(),
             'units' => $units,
+            'track' => $track,
         ]);
     }
 

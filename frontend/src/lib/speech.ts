@@ -160,7 +160,11 @@ export function listen(handlers: { onPartial?: (t: string) => void; onFinal: (t:
   rec.maxAlternatives = 1
   rec.continuous = false
   let finalText = ''
+  // once the caller stops listening (or leaves the page) nothing may call back into it:
+  // no late "aborted" error toast on the next page, no half sentence sent after leaving
+  let live = true
   rec.onresult = (e) => {
+    if (!live) return
     let interim = ''
     for (let i = 0; i < e.results.length; i++) {
       const r = e.results[i]
@@ -169,13 +173,41 @@ export function listen(handlers: { onPartial?: (t: string) => void; onFinal: (t:
     }
     handlers.onPartial?.(finalText + interim)
   }
-  rec.onerror = (e) => handlers.onError?.(e.error)
+  rec.onerror = (e) => {
+    // "aborted" is our own stop; "no-speech" just means silence, which onEnd already covers
+    if (!live || e.error === 'aborted' || e.error === 'no-speech') return
+    handlers.onError?.(e.error)
+  }
   rec.onend = () => {
+    if (!live) return
+    live = false
     if (finalText) handlers.onFinal(finalText.trim())
     handlers.onEnd?.()
   }
-  rec.start()
-  return () => rec.stop()
+  try {
+    rec.start()
+  } catch {
+    live = false
+    handlers.onError?.('busy')
+    return () => {}
+  }
+  /** Stop and keep what was heard (the mic button). */
+  const stop = () => { try { rec.stop() } catch { /* already stopped */ } }
+  /** Stop and forget everything (leaving the page). */
+  stop.cancel = () => {
+    live = false
+    rec.onresult = rec.onerror = rec.onend = null
+    try { rec.abort() } catch { /* already stopped */ }
+  }
+  activeCancels.add(stop.cancel)
+  return stop
+}
+
+const activeCancels = new Set<() => void>()
+/** Ends every open microphone session; called on every route change as a safety net. */
+export function cancelAllListening() {
+  activeCancels.forEach((c) => c())
+  activeCancels.clear()
 }
 
 /** Word-overlap similarity 0..1, mirrors the server-side check for speaking exercises. */

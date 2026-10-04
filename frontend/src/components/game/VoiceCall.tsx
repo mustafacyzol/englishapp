@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
 import { Captions, CaptionsOff, Languages, Lightbulb, Mic, MicOff, PhoneOff, Repeat2 } from 'lucide-react'
 import { TUTOR } from '@/lib/tutor'
-import { canListen, listen, speakNeural, stopVoice as stopSpeaking } from '@/lib/speech'
+import { cancelAllListening, canListen, listen, speakNeural, stopVoice as stopSpeaking } from '@/lib/speech'
 import { ensureMic } from '@/lib/mic'
 
 export interface CallMsg {
@@ -68,7 +68,7 @@ export function VoiceCall({
       // Always give the page its scroll back (a remount would otherwise remember "hidden").
       html.style.overflow = ''
       stopSpeaking()
-      stopListen.current()
+      cancelAllListening()
     }
   }, [])
 

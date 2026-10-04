@@ -423,6 +423,12 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   if (path === '/contact') return ok('Mesajın bize ulaştı. En geç 1 iş günü içinde dönüş yapacağız.')
   if (path === '/placement') return { token: 'demo-placement', answered: 37, total: 40 }
   if (path === '/placement/band') return { passed: true }
+  if (path === '/account/track') {
+    const kid = body.school_stage === 'ilkokul' || (body.school_stage === 'ortaokul' && (body.grade ?? 5) <= 6)
+    Object.assign(me(), { school_stage: body.school_stage, grade: body.grade ?? null, exam_target: kid ? null : body.exam_target ?? null, exam_date: kid ? null : body.exam_date ?? null })
+    syncUser()
+    return { user: me() }
+  }
   if (path === '/word-sets' && method === 'POST') return wsWrite(null, body)
   if ((m = path.match(/^\/word-sets\/(\d+)(?:\/(save|copy|learn|played))?$/))) {
     const s = sets()[+m[1]]

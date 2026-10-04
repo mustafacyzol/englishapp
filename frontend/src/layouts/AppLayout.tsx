@@ -1,3 +1,4 @@
+import { cancelAllListening, stopVoice } from '@/lib/speech'
 import { useEffect, useState } from 'react'
 import { NavLink, useLocation, useOutlet, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
@@ -97,6 +98,8 @@ export default function AppLayout() {
   const [more, setMore] = useState(false)
   const { data } = useQuery({ queryKey: ['dashboard'], queryFn: () => get<Dashboard>('/dashboard'), refetchInterval: 60_000 })
   useEffect(() => setMore(false), [loc.pathname])
+  // a page change ends any open mic or voice from the page we left (Defne, lessons, calls)
+  useEffect(() => () => { cancelAllListening(); stopVoice() }, [loc.pathname])
   // Age group drives a few global touches (tint, type size) through one attribute.
   useEffect(() => {
     const el = document.documentElement
