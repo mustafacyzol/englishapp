@@ -99,7 +99,7 @@ export type Exercise =
   | { type: 'pronounce'; prompt: string; text: string; translation?: string }
   | { type: 'read'; prompt: string; title: string; passage: string; options: string[]; answer: number }
   | { type: 'match'; prompt: string; pairs: [string, string][] }
-  // DilGO-specific drills, built around the mistakes Turkish speakers actually make.
+  // Our own drills, built around the mistakes Turkish speakers actually make.
   | { type: 'spot_error'; prompt: string; words: string[]; error_index: number; options: string[]; answer: number; explanation_tr: string; audio?: string }
   | { type: 'dialogue'; prompt: string; scene?: string; lines: { who: string; text: string; tr?: string }[]; options: string[]; answer: number; note_tr?: string }
   | { type: 'sequence'; prompt: string; items: string[]; answer: number[]; note_tr?: string }
@@ -108,11 +108,12 @@ export interface PathLesson {
   id: number
   title: string
   skill: Skill
-  kind: 'lesson' | 'story' | 'ai_talk' | 'checkpoint' | 'words' | 'review'
+  kind: 'lesson' | 'story' | 'ai_talk' | 'checkpoint' | 'words' | 'review' | 'quiz'
   xp_reward: number
   is_premium: boolean
   premium_locked: boolean
-  meta?: { game?: string | null; set?: string | null } | null
+  /** track: a school-grade lesson (g2..g12) */
+  meta?: { game?: string | null; set?: string | null; track?: string | null } | null
   story_id: number | null
   story?: { id: number; slug: string } | null
   scenario_key: string | null
@@ -129,10 +130,8 @@ export interface PathUnit {
   has_guidebook: boolean
   lessons: PathLesson[]
   progress: number
-  /** Maarif Modeli theme for middle/primary school tracks */
-  tag?: { theme: number; en: string; tr: string; label: string } | null
-  /** exam learners: a short set in their exam's format after the unit */
-  drill?: { exam: string; label: string; open: boolean } | null
+  /** pupils: the coursebook unit this path unit stands for */
+  grade?: { label: string; title_tr: string } | null
 }
 
 export interface StoryCard {

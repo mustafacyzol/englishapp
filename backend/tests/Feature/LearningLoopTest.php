@@ -54,12 +54,12 @@ class LearningLoopTest extends TestCase
         $this->assertContains('perfect_1', collect($res->json('reward.achievements'))->pluck('key')->all());
     }
 
-    /** A path node by level, unit and position (content titles change, positions don't). */
+    /** A path node by level, unit and stop index (position 0 is kept for school-grade lessons). */
     private function node(string $level, int $unit, int $pos): Lesson
     {
         return \App\Models\Course::query()->where('cefr_level', $level)->firstOrFail()
             ->units()->where('position', $unit)->firstOrFail()
-            ->lessons()->where('position', $pos)->firstOrFail();
+            ->lessons()->where('position', $pos + 1)->firstOrFail();
     }
 
     /** The answer the client would submit for a correct attempt, per exercise type. */

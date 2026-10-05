@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Lesson;
 use App\Models\LessonProgress;
 use App\Models\Unit;
+use App\Services\GradeUnitService;
 use App\Services\HeartService;
 use App\Services\LessonService;
 use App\Services\PathService;
@@ -33,30 +34,27 @@ class LearnController extends Controller
         $progress = LessonProgress::query()->where('user_id', $user->id)->whereIn('lesson_id', array_keys($states))->get()->keyBy('lesson_id');
 
         $track = \App\Support\Tracks::for($user);
-        $units = $course->units->values()->map(function ($unit, $i) use ($progress, $states, $user, $track, $course) {
-            $lessons = $unit->lessons->map(fn (Lesson $lesson) => ['meta' => $lesson->meta ? ['game' => $lesson->meta['game'] ?? null, 'set' => $lesson->meta['set'] ?? null] : null] + $lesson->toArray() + [
+        $overlay = app(GradeUnitService::class)->overlay($track['grade_track'], $course);
+        $units = $course->units->values()->map(function ($unit, $i) use ($progress, $states, $user, $track, $overlay) {
+            $lessons = PathService::visible($unit->lessons, $track['grade_track'])->values()->map(fn (Lesson $lesson) => ['meta' => $lesson->meta ? array_filter(['game' => $lesson->meta['game'] ?? null, 'set' => $lesson->meta['set'] ?? null, 'track' => $lesson->meta['track'] ?? null]) : null] + $lesson->toArray() + [
                 'state' => $states[$lesson->id] ?? 'locked',
                 'crowns' => $progress->get($lesson->id)?->crowns ?? 0,
                 'best_score' => $progress->get($lesson->id)?->best_score ?? 0,
                 'premium_locked' => $lesson->is_premium && ! $user->isPremium(),
             ]);
             $done = $lessons->where('state', 'completed')->count();
+            // a pupil sees their coursebook's unit title; the CEFR title becomes the subtitle
+            $grade = $overlay[$i] ?? [];
 
             return [
                 'id' => $unit->id,
-                'title' => $unit->title,
-                'description' => $unit->description,
+                'title' => $grade ? implode(' & ', array_map(fn ($g) => $g->title, $grade)) : $unit->title,
+                'description' => $grade ? $unit->title.' · '.$unit->description : $unit->description,
                 'color' => $unit->color,
-                'has_guidebook' => filled($unit->guidebook),
+                'has_guidebook' => filled($unit->guidebook) || (bool) $grade,
                 'lessons' => $lessons,
                 'progress' => $lessons->count() ? round($done / $lessons->count() * 100) : 0,
-                'tag' => \App\Support\Tracks::unitTag($track, $course->cefr_level, $i),
-                // exam learners: a short set in their exam's format once half the unit is done
-                'drill' => $track['drill'] ? [
-                    'exam' => $track['drill'],
-                    'label' => \App\Support\Tracks::examName($track['drill']).' tarzı sorular',
-                    'open' => $lessons->count() && $done / $lessons->count() >= 0.5,
-                ] : null,
+                'grade' => $grade ? ['label' => GradeUnitService::TRACKS[$track['grade_track']], 'title_tr' => implode(' · ', array_filter(array_map(fn ($g) => $g->title_tr, $grade)))] : null,
             ];
         });
 
@@ -69,9 +67,17 @@ class LearnController extends Controller
         ]);
     }
 
-    public function guidebook(Unit $unit): JsonResponse
+    /** The unit's guidebook: a pupil's copy opens with their coursebook unit, every copy closes with the tenses so far. */
+    public function guidebook(Request $request, Unit $unit, GradeUnitService $grades): JsonResponse
     {
-        return response()->json(['title' => $unit->title, 'guidebook' => $unit->guidebook]);
+        $unit->loadMissing('course.units:id,course_id,position');
+        $position = $unit->course->units->sortBy('position')->values()->search(fn ($u) => $u->id === $unit->id);
+        $mine = $grades->overlay(GradeUnitService::trackFor($request->user()), $unit->course)[$position] ?? [];
+        $intro = implode("\n", array_map(fn ($g) => $grades->guideSection($g), $mine));
+
+        $tenses = \App\Support\TenseGuide::chapter($unit->course->cefr_level, (int) $position);
+
+        return response()->json(['title' => $mine ? implode(' & ', array_map(fn ($g) => $g->title, $mine)) : $unit->title, 'guidebook' => trim($intro."\n".$unit->guidebook."\n\n".$tenses)]);
     }
 
     public function lesson(Request $request, Lesson $lesson, HeartService $hearts): JsonResponse
@@ -104,7 +110,7 @@ class LearnController extends Controller
         abort_unless(app(PathService::class)->canOpen($request->user(), $lesson), 403, 'Bu ders henüz kilitli.');
         // question lessons: opened first, and not finished faster than a person could read them
         $per = (float) config('dilgo.security.lesson_seconds_per_question', 1.5);
-        if ($per > 0 && in_array($lesson->kind, ['lesson', 'checkpoint', 'review'], true)) {
+        if ($per > 0 && in_array($lesson->kind, ['lesson', 'checkpoint', 'review', 'quiz'], true)) {
             $key = "lesson:open:{$request->user()->id}:{$lesson->id}";
             $opened = \Illuminate\Support\Facades\Cache::get($key);
             abort_unless($opened, 422, 'Dersi açıp soruları cevaplayarak bitirmelisin.');

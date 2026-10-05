@@ -31,7 +31,7 @@ class PathActivitiesTest extends TestCase
     private function reach(string $kind): Lesson
     {
         $unit = Course::query()->where('cefr_level', 'A1')->first()->units()->orderBy('position')->first();
-        $lesson = $unit->lessons()->where('kind', $kind)->firstOrFail();
+        $lesson = $unit->lessons()->where('kind', $kind)->where('position', '>', 0)->firstOrFail();
         foreach ($unit->lessons()->where('position', '<', $lesson->position)->get() as $prev) {
             LessonProgress::query()->firstOrCreate(['user_id' => $this->u->id, 'lesson_id' => $prev->id], ['completed_at' => now(), 'best_score' => 100, 'crowns' => 1, 'attempts' => 1]);
         }
@@ -54,7 +54,7 @@ class PathActivitiesTest extends TestCase
         // no game played
         $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => ['correct' => 10, 'total' => 10]])->assertStatus(422);
         $deck = $this->getJson("/api/v1/words/deck?lesson={$lesson->id}")->assertOk();
-        $this->assertSame('A1 · Merhaba!', $deck->json('set.title'));
+        $this->assertSame('A1 · Hello!', $deck->json('set.title'));
         // too fast to be a real game
         $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => ['correct' => 10, 'total' => 10]])->assertStatus(422);
         Carbon::setTestNow(now()->addSeconds(40));

@@ -80,10 +80,9 @@ class PathTest extends TestCase
             \App\Models\LessonProgress::query()->create(['user_id' => $u->id, 'lesson_id' => $prev->id, 'completed_at' => now(), 'best_score' => 100, 'crowns' => 1, 'attempts' => 1]);
         }
         $states = app(PathService::class)->states($u, $unit->course);
-        // the premium talk is skipped: "current" moves on to the first stop of the next unit
+        // the premium talk is skipped: "current" moves on to the unit test after it
         $this->assertNotSame('current', $states[$talk->id]);
-        $next = $unit->course->units()->where('position', 1)->first()->lessons()->orderBy('position')->first();
-        $this->assertSame('current', $states[$next->id]);
+        $this->assertSame('current', $states[$unit->lessons()->where('kind', 'quiz')->first()->id]);
     }
 
     public function test_placement_tops_out_at_b2(): void

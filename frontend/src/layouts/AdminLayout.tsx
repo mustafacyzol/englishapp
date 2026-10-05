@@ -4,7 +4,7 @@ import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowLeft, ChevronDown, Building2, Menu, X, BookOpen, Boxes, ClipboardList, Crown, FileQuestion, Gift, Handshake, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Package, Plug, Quote, Receipt, ScrollText, Send, Settings, ShieldCheck, SmilePlus, Swords, Ticket, Trophy, UserCog, Users, Wallet } from 'lucide-react'
+import { ArrowLeft, ChevronDown, Building2, Menu, X, BookOpen, Boxes, ClipboardList, Crown, FileQuestion, Gift, Handshake, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Package, Plug, Quote, Receipt, School, ScrollText, Send, Settings, ShieldCheck, SmilePlus, Swords, Ticket, Trophy, UserCog, Users, Wallet } from 'lucide-react'
 import { can, roleLabel } from '@/lib/adminAccess'
 import type { Me } from '@/lib/types'
 import { useAuth } from '@/lib/auth'
@@ -34,6 +34,7 @@ const GROUPS: { title: string; icon: typeof Gauge; items: Item[] }[] = [
   { title: 'Eğitim içeriği', icon: BookOpen, items: [
     { to: '/admin/r/courses', label: 'Kurslar', icon: Layers, perm: 'content' },
     { to: '/admin/r/units', label: 'Üniteler ve rehberler', icon: LayoutList, perm: 'content' },
+    { to: '/admin/grade-units', label: 'Sınıf üniteleri (MEB)', icon: School, perm: 'content' },
     { to: '/admin/r/lessons', label: 'Dersler', icon: ClipboardList, perm: 'content' },
     { to: '/admin/r/stories', label: 'Hikâyeler', icon: BookOpen, perm: 'content' },
     { to: '/admin/r/exam-questions', label: 'Sınav soruları', icon: FileQuestion, perm: 'content' },

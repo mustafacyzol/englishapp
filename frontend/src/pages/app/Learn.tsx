@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowDown, ArrowUp, BookOpen, BookText, Check, ChevronDown, Dumbbell, Flame, Gamepad2, Headphones, Lock, MapPin, MessageCircle, Mic, PenLine, Play, RotateCcw, Star, Trophy } from 'lucide-react'
+import { ArrowDown, ArrowUp, BookOpen, BookText, Check, ChevronDown, ClipboardCheck, Dumbbell, Flame, Gamepad2, Headphones, Lock, MapPin, MessageCircle, Mic, PenLine, Play, RotateCcw, School, Star, Trophy } from 'lucide-react'
 import { rewardImg, unitImg } from '@/lib/assets'
 import { get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
@@ -21,7 +21,7 @@ interface PathData {
   course: { id: number; title: string; cefr_level: string; color: string; description: string; access?: Access }
   courses?: { id: number; title: string; cefr_level: string; access: Access }[]
   units: PathUnit[]
-  track?: { key: 'maarif' | 'primary' | 'exam' | 'general'; label: string; sub: string; exam: string | null; grade: number | null; drill: string | null }
+  track?: { key: 'grade' | 'exam' | 'general'; label: string; exam: string | null; grade: number | null; grade_track: string | null }
   /** remembered mistakes due on the review stops */
   mistakes_due?: number
 }
@@ -32,7 +32,9 @@ export interface PlanItem { skill: SkillKey; title: string; detail: string; to: 
 interface Stats { total: number; done: number; pct: number; cur?: { l: PathLesson; u: PathUnit }; unitIndex: number; unitDone: number }
 
 const SKILL_ICON = { reading: BookOpen, listening: Headphones, speaking: Mic, writing: PenLine, vocabulary: Star, grammar: BookText, mixed: Dumbbell }
-const KIND_LABEL: Record<string, string> = { story: 'Hikâye ödevi', ai_talk: 'Defne ile konuşma', checkpoint: 'Seviye sınavı', words: 'Kelime seti ödevi', review: 'Kişisel tekrar' }
+const KIND_LABEL: Record<string, string> = { story: 'Hikâye ödevi', ai_talk: 'Defne ile konuşma', checkpoint: 'Seviye sınavı', words: 'Kelime seti ödevi', review: 'Kişisel tekrar', quiz: 'Ünite sınavı' }
+/** Lessons that cost hearts when answered wrong. */
+const HEART_KINDS = ['lesson', 'checkpoint', 'quiz', 'review']
 
 /** Where a path node takes you (the AI talk is started from the node card). */
 export const nodeHref = (l: PathLesson) => (l.kind === 'story' && l.story ? `/stories/${l.story.slug}?lesson=${l.id}` : l.kind === 'words' ? `/practice?game=${l.meta?.game ?? 'match'}&lesson=${l.id}` : l.kind === 'ai_talk' ? null : `/lesson/${l.id}`)
@@ -82,6 +84,25 @@ export default function Learn() {
     return () => io.disconnect()
   }, [data])
 
+  // An open stop card closes on a tap anywhere else, and once the page has scrolled on:
+  // it never rides along over the pinned "where you left off" bar.
+  useEffect(() => {
+    if (openId == null) return
+    const opened = Date.now()
+    let base: number | null = null
+    const down = (e: PointerEvent) => { if (!(e.target as Element | null)?.closest?.(`[data-node="${openId}"]`)) setOpenId(null) }
+    const scroll = () => {
+      if (Date.now() - opened < 700) return // the card scrolling itself into view
+      base ??= window.scrollY
+      if (Math.abs(window.scrollY - base) > 120) setOpenId(null)
+    }
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpenId(null) }
+    document.addEventListener('pointerdown', down)
+    window.addEventListener('scroll', scroll, { passive: true })
+    document.addEventListener('keydown', key)
+    return () => { document.removeEventListener('pointerdown', down); window.removeEventListener('scroll', scroll); document.removeEventListener('keydown', key) }
+  }, [openId])
+
   if (isLoading || !data || !stats) return <SkeletonPage variant="path" />
   const jump = () => currentRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
 
@@ -92,9 +113,6 @@ export default function Learn() {
       <div className="sticky top-[66px] z-[25] -mx-1 px-1 pb-2 pt-2">
         <ContinueCard data={data} stats={stats} onJump={jump} onPick={() => setPicker(true)} away={!currentVisible ? (curAbove ? 'up' : 'down') : null} />
       </div>
-
-
-      {data.track && <TrackBanner track={data.track} />}
 
       <div className="mt-8">
         {data.units.map((unit, ui) => (
@@ -134,22 +152,6 @@ export default function Learn() {
       </Modal>
 
       <Guidebook unit={guide ? { id: guide.id, title: guide.title, color: guide.color ?? undefined, description: guide.description } : null} onClose={() => setGuide(null)} />
-    </div>
-  )
-}
-
-/* ------------------------------------------------------------------- Track */
-
-/** What this path is for: chosen at sign-up (school stage, grade, exam), changed through onboarding. */
-function TrackBanner({ track }: { track: NonNullable<PathData['track']> }) {
-  const tone = track.key === 'maarif' ? 'from-[#e8403a] to-[#c93460]' : track.key === 'exam' ? 'from-[#2f7cf6] to-[#8f7cf8]' : track.key === 'primary' ? 'from-[#22b573] to-[#0f766e]' : 'from-[#1f2433] to-[#3b4357]'
-  return (
-    <div className={clsx('mt-4 flex items-center gap-3 overflow-hidden rounded-2xl bg-gradient-to-r p-3 pr-4 text-white', tone)}>
-      <img src={higoImg(track.key === 'exam' ? 'scope' : track.key === 'primary' ? 'music' : 'read')} alt="" className="size-12 shrink-0 object-contain drop-shadow" />
-      <div className="min-w-0 flex-1">
-        <p className="font-display text-[15px] font-black leading-tight">{track.label}</p>
-        <p className="text-xs font-semibold leading-snug text-white/85">{track.sub}</p>
-      </div>
     </div>
   )
 }
@@ -247,7 +249,7 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
   const count = unit.lessons.length
   // Path geometry: node centres, then a smooth curve between each pair.
   const pts = unit.lessons.map((_, i) => ({ x: wave(i), y: i * (NODE + GAP) + NODE / 2 }))
-  const endY = count * (NODE + GAP) + 30 + (unit.drill ? 96 : 0)
+  const endY = count * (NODE + GAP) + 30
   const lastDone = unit.lessons.reduce((acc, l, i) => (l.state === 'completed' ? i : acc), -1)
   // one Higo by a far-swinging stop in the middle of the unit, a second one on long units
   const swing = pts.map((p, i) => ({ i, d: Math.abs(p.x) })).filter((p) => p.d >= 50)
@@ -263,7 +265,7 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
         <div className="flex items-stretch">
           <div className="min-w-0 flex-1 p-5 sm:p-6">
             <p className="flex flex-wrap items-center gap-2 text-xs font-extrabold uppercase tracking-[0.18em] opacity-85">Ünite {index + 1} {done && <span className="rounded bg-white/25 px-1.5 py-0.5 tracking-normal">Tamamlandı</span>}</p>
-            {unit.tag && <p className="mt-1 inline-flex max-w-full items-center gap-1.5 truncate rounded-full bg-black/15 px-2.5 py-0.5 text-[11px] font-extrabold" title={`MEB Maarif Modeli teması: ${unit.tag.tr}`}>{unit.tag.label} · {unit.tag.tr}</p>}
+            {unit.grade && <p className="mt-1 inline-flex max-w-full items-center gap-1.5 truncate rounded-full bg-black/15 px-2.5 py-0.5 text-[11px] font-extrabold" title="Ders kitabındaki ünite">{unit.grade.label}{unit.grade.title_tr ? ` · ${unit.grade.title_tr}` : ''}</p>}
             <h2 className="text-2xl leading-tight">{unit.title}</h2>
             <p className="mt-1 font-semibold opacity-90">{unit.description}</p>
             <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -301,19 +303,6 @@ function UnitSection({ unit, index, photoIndex, onGuide, openId, setOpenId, curr
           <SideHigo key={i} pose={pose} x={pts[i].x} y={pts[i].y - NODE / 2 - 10} side={pts[i].x > 0 ? 'right' : 'left'} />
         ))}
 
-        {/* exam learners: a short set in their exam's format, opened halfway through the unit */}
-        {unit.drill && (
-          <div className="absolute left-1/2 z-10 w-[min(260px,calc(100%-24px))] -translate-x-1/2" style={{ top: endY - 140 }}>
-            <Link to={unit.drill.open ? '/exam?drill=1' : '#'} onClick={(e) => { if (!unit.drill?.open) e.preventDefault() }} aria-disabled={!unit.drill.open} className={clsx('press flex items-center gap-3 rounded-2xl border-2 bg-card px-3 py-2.5 shadow-hard-sm', unit.drill.open ? 'border-ink/20 hover:border-ink/40' : 'cursor-not-allowed border-dashed border-line opacity-70')}>
-              <span className="grid size-10 shrink-0 place-items-center rounded-xl text-white" style={{ background: color }}><Trophy className="size-5" /></span>
-              <span className="min-w-0">
-                <span className="block text-sm font-black leading-tight">{unit.drill.label}</span>
-                <span className="block text-xs font-bold text-ink-soft">{unit.drill.open ? '5 soru · hemen çöz' : 'Ünitenin yarısında açılır'}</span>
-              </span>
-            </Link>
-          </div>
-        )}
-
         {/* unit trophy, the visible finish line of this unit */}
         <div className="absolute left-1/2 flex -translate-x-1/2 flex-col items-center" style={{ top: endY - 34 }}>
           <span className={clsx('grid size-[68px] place-items-center rounded-full border-4 bg-card', done ? 'border-butter' : 'border-line')}>
@@ -336,11 +325,11 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
   const current = lesson.state === 'current'
   // open: reachable (the start of a topic, or opened by the placement test) but not where you are
   const ajar = lesson.state === 'open'
-  const Icon = lesson.kind === 'story' ? BookOpen : lesson.kind === 'ai_talk' ? MessageCircle : lesson.kind === 'checkpoint' ? Trophy : lesson.kind === 'words' ? Gamepad2 : lesson.kind === 'review' ? RotateCcw : SKILL_ICON[lesson.skill] ?? Star
+  const Icon = lesson.kind === 'story' ? BookOpen : lesson.kind === 'ai_talk' ? MessageCircle : lesson.kind === 'checkpoint' ? Trophy : lesson.kind === 'quiz' ? ClipboardCheck : lesson.kind === 'words' ? Gamepad2 : lesson.kind === 'review' ? RotateCcw : lesson.meta?.track ? School : SKILL_ICON[lesson.skill] ?? Star
   const size = current ? NODE + 12 : NODE
   // Labels sit on the open side of the curve, so they never collide with the trail.
   const labelLeft = x > 8
-  const kind = KIND_LABEL[lesson.kind] ?? SKILL_LABEL[lesson.skill]
+  const kind = lesson.meta?.track ? 'Sınıfının ünitesi' : KIND_LABEL[lesson.kind] ?? SKILL_LABEL[lesson.skill]
   const dueCtx = useContext(DueCtx)
   // the waiting mistakes are pointed out on one stop only: the furthest review stop you can open
   const due = dueCtx.at === lesson.id ? dueCtx.due : 0
@@ -353,7 +342,7 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
   const start = () => {
     if (lesson.premium_locked) return nav('/premium')
     if (lesson.kind === 'ai_talk') return startAi.mutate()
-    if ((lesson.kind === 'lesson' || lesson.kind === 'checkpoint') && !user?.hearts.unlimited && (user?.hearts.hearts ?? 0) <= 0) return toast('Canın kalmadı! Pratik yaparak ya da mağazadan can kazanabilirsin.', 'error')
+    if (HEART_KINDS.includes(lesson.kind) && !user?.hearts.unlimited && (user?.hearts.hearts ?? 0) <= 0) return toast('Canın kalmadı! Pratik yaparak ya da mağazadan can kazanabilirsin.', 'error')
     nav(nodeHref(lesson)!)
   }
 
@@ -365,8 +354,9 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
   const base = locked ? 'color-mix(in oklab, var(--line) 70%, #000 12%)' : `color-mix(in oklab, ${color} 66%, #000)`
 
   return (
-    // The open node is lifted above its siblings, so its card is never painted over by later stops.
-    <div ref={nodeRef} data-tour={current ? 'here' : undefined} className={clsx('absolute left-1/2', open ? 'z-40' : current ? 'z-20' : 'z-10')} style={{ top: y - (current ? 6 : 0), transform: `translateX(calc(-50% + ${x}px))`, width: size }}>
+    // The open node is lifted above its siblings (its card is never painted over by later stops)
+    // but stays under the pinned continue bar (z-25), so scrolling slides the card beneath it.
+    <div ref={nodeRef} data-node={lesson.id} data-tour={current ? 'here' : undefined} className={clsx('absolute left-1/2', open ? 'z-[24]' : current ? 'z-20' : 'z-10')} style={{ top: y - (current ? 6 : 0), transform: `translateX(calc(-50% + ${x}px))`, width: size }}>
       <div className="relative" style={{ width: size, height: size }}>
         {current && (
           // where you are: a slowly turning dashed orbit centred on the button face, a soft glow, Higo perched on top

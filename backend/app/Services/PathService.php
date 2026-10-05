@@ -20,6 +20,9 @@ use Illuminate\Support\Collection;
  *    continues from the first unit it did not cover. Opened units, like courses
  *    below your level, can still be started from their first stop.
  *
+ *  - Lessons of a school grade (GradeUnitService) are part of the path only for
+ *    learners of that grade; for everyone else they do not exist.
+ *
  * Lesson states: completed, current (where to continue), open, locked.
  */
 class PathService
@@ -55,6 +58,7 @@ class PathService
     public function states(User $user, Course $course): array
     {
         $course->loadMissing('units.lessons');
+        $track = GradeUnitService::trackFor($user);
         $ids = $course->units->flatMap->lessons->pluck('id');
         $done = LessonProgress::query()->where('user_id', $user->id)->whereIn('lesson_id', $ids)->whereNotNull('completed_at')->pluck('lesson_id')->flip();
         $rel = $this->relation($user, $course);
@@ -68,7 +72,7 @@ class PathService
         $firstAfterPlacement = null;
         foreach ($course->units->values() as $u => $unit) {
             $prevDone = true;
-            foreach ($unit->lessons->values() as $k => $lesson) {
+            foreach (self::visible($unit->lessons, $track)->values() as $k => $lesson) {
                 $isDone = $done->has($lesson->id);
                 // a topic always starts at its first stop: every unit can be started, never entered halfway
                 $states[$lesson->id] = match (true) {
@@ -105,6 +109,12 @@ class PathService
         $this->optional = $optional;
 
         return $states;
+    }
+
+    /** School-grade lessons belong to learners of that grade only. */
+    public static function visible(Collection $lessons, ?string $track): Collection
+    {
+        return $lessons->filter(fn (Lesson $l) => empty($l->meta['track']) || $l->meta['track'] === $track);
     }
 
     public function canOpen(User $user, Lesson $lesson): bool

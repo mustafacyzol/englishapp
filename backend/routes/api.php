@@ -231,6 +231,15 @@ Route::prefix('v1')->group(function () {
                 Route::delete('institution-members/{member}', [AdminController::class, 'institutionRemove']);
             });
 
+            Route::middleware('perm:content')->prefix('grade-units')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Api\Admin\GradeUnitController::class, 'index']);
+                Route::post('/', [\App\Http\Controllers\Api\Admin\GradeUnitController::class, 'store'])->middleware('throttle:60,1');
+                Route::post('reorder', [\App\Http\Controllers\Api\Admin\GradeUnitController::class, 'reorder']);
+                Route::put('{gradeUnit}', [\App\Http\Controllers\Api\Admin\GradeUnitController::class, 'update'])->whereNumber('gradeUnit');
+                Route::delete('{gradeUnit}', [\App\Http\Controllers\Api\Admin\GradeUnitController::class, 'destroy'])->whereNumber('gradeUnit');
+                Route::post('{gradeUnit}/copy', [\App\Http\Controllers\Api\Admin\GradeUnitController::class, 'copy'])->whereNumber('gradeUnit');
+            });
+
             Route::get('{resource}', [ResourceController::class, 'index']);
             Route::post('{resource}', [ResourceController::class, 'store']);
             Route::get('{resource}/{id}', [ResourceController::class, 'show'])->whereNumber('id');

@@ -40,17 +40,21 @@ class CourseSeeder extends Seeder
                 $storyId = $this->story($u['story'], $c['cefr_level']);
                 $scenario = $this->scenario($u['talk']);
                 $lessons = $this->lessons($u, $c['cefr_level'], $ui, $storyId, $scenario);
+                $lessons[] = $this->unitTest($u, $c['cefr_level'], $ui);
                 if (! empty($u['checkpoint'])) {
                     $lessons[] = $this->checkpoint($c);
                 }
+                // position 0 is left for the school-grade lesson (GradeUnitService)
                 foreach ($lessons as $li => $l) {
-                    $unit->lessons()->create($l + ['position' => $li]);
+                    $unit->lessons()->create($l + ['position' => $li + 1]);
                 }
             }
         }
+        // units were rebuilt: put the school-grade lessons back in
+        app(\App\Services\GradeUnitService::class)->sync();
     }
 
-    /** The eleven stops of a unit, in path order: mostly words and grammar, then the skills. */
+    /** The eleven stops of a unit, in path order: mostly words and grammar, then the skills (the unit test follows). */
     private function lessons(array $u, string $level, int $ui, ?int $storyId, ?AiScenario $scenario): array
     {
         $v = $u['vocab'];
@@ -163,7 +167,7 @@ class CourseSeeder extends Seeder
         ];
     }
 
-    /** The unit's words once more, Duolingo style: pairs, listening and meaning, mixed. */
+    /** The unit's words once more: pairs, listening and meaning, mixed. */
     private function review(array $v, int $seed): array
     {
         $listen = function (int $i) use ($v, $seed) {
@@ -208,6 +212,30 @@ class CourseSeeder extends Seeder
         };
 
         return ['game' => $fits ? $game : 'match', 'words' => $words];
+    }
+
+    /**
+     * The unit-end assessment: ten questions over everything the unit taught,
+     * words, grammar, listening and reading, in an order that mixes them.
+     */
+    private function unitTest(array $u, string $level, int $ui): array
+    {
+        $v = $u['vocab'];
+        $reading = $this->reading($level, $ui);
+        $ex = array_values(array_filter([
+            $this->meaning($v, 3, $ui + 41),
+            $this->fill(...$u['fill'][0]),
+            $this->listen($u['lc'][1][0], $u['lc'][1][1]),
+            $this->spot(...$u['err']),
+            $reading ? end($reading['exercises']) : null,
+            $this->reverse($v, 6, $ui + 43),
+            $this->dialogue(...$u['dlg']),
+            $this->fill(...$u['fill'][count($u['fill']) - 1]),
+            $this->translate(...$u['tr'][0]),
+            $this->type($u['lt'][1]),
+        ]));
+
+        return ['title' => 'Ünite sonu değerlendirme', 'skill' => 'mixed', 'kind' => 'quiz', 'xp_reward' => 30, 'exercises' => $ex];
     }
 
     /** The level exam: one item from every unit of the level, mixing all skills. */

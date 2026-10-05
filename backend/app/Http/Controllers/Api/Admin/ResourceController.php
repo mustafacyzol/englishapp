@@ -52,7 +52,7 @@ class ResourceController extends Controller
                     'unit_id' => ['required', 'exists:units,id'],
                     'title' => ['required', 'string', 'max:190'],
                     'skill' => ['required', 'in:reading,listening,speaking,writing,vocabulary,grammar,mixed'],
-                    'kind' => ['required', 'in:lesson,story,ai_talk,checkpoint'],
+                    'kind' => ['required', 'in:lesson,story,ai_talk,checkpoint,words,review,quiz'],
                     'position' => ['integer'],
                     'xp_reward' => ['integer', 'min:0', 'max:200'],
                     'is_premium' => ['boolean'],

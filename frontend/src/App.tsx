@@ -69,6 +69,7 @@ const AdminDashboard = lazy(() => import('./pages/admin/Dashboard'))
 const AdminUsers = lazy(() => import('./pages/admin/Users'))
 const AdminUser = lazy(() => import('./pages/admin/UserDetail'))
 const AdminResource = lazy(() => import('./pages/admin/Resource'))
+const AdminGradeUnits = lazy(() => import('./pages/admin/GradeUnits'))
 const AdminOrders = lazy(() => import('./pages/admin/Orders'))
 const AdminVouchers = lazy(() => import('./pages/admin/Vouchers'))
 const AdminCodes = lazy(() => import('./pages/admin/CodeGenerator'))
@@ -202,6 +203,7 @@ export default function App() {
           <Route path="staff" element={<AdminStaff />} />
           <Route path="blog" element={<AdminBlogList />} />
           <Route path="blog/:id" element={<AdminBlogEdit />} />
+          <Route path="grade-units" element={<AdminGradeUnits />} />
           <Route path="r/:resource" element={<AdminResource />} />
           <Route path="institutions/:id" element={<InstitutionDetail />} />
         </Route>
