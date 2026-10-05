@@ -10,12 +10,23 @@ use RuntimeException;
 /**
  * iyzico Checkout Form integration (hosted payment page) using the IYZWSv2
  * HMAC-SHA256 authorization scheme. No SDK dependency, works on shared hosting.
+ *
+ *  - initialize: opens the hosted form, the learner pays on iyzico's page
+ *  - retrieve:   the callback asks iyzico for the result and checks the
+ *                response signature (paymentStatus:paymentId:currency:basketId:
+ *                conversationId:paidPrice:price:token, HMAC-SHA256 hex)
+ *  - refund:     v2 refund by paymentId, full or partial
+ *  - webhook:    X-IYZ-SIGNATURE-V3 check for the server-to-server notice
+ *
+ * See docs.iyzico.com: Checkout Form, Response Signature Validation, Refund & Cancel, Webhook.
  */
 class IyzicoGateway implements PaymentGateway
 {
     private const INIT_PATH = '/payment/iyzipos/checkoutform/initialize/auth/ecom';
 
     private const DETAIL_PATH = '/payment/iyzipos/checkoutform/auth/ecom/detail';
+
+    private const REFUND_PATH = '/v2/payment/refund';
 
     public function name(): string
     {
@@ -87,12 +98,81 @@ class IyzicoGateway implements PaymentGateway
             'token' => $token,
         ]);
 
-        $paid = ($response['status'] ?? null) === 'success'
+        $signed = $this->signatureOk($response, ['paymentStatus', 'paymentId', 'currency', 'basketId', 'conversationId', 'paidPrice', 'price', 'token']);
+        $paid = $signed
+            && ($response['status'] ?? null) === 'success'
             && ($response['paymentStatus'] ?? null) === 'SUCCESS'
-            && ($response['basketId'] ?? $order->uuid) === $order->uuid
+            && ($response['basketId'] ?? null) === $order->uuid
+            && ($response['conversationId'] ?? $order->uuid) === $order->uuid
             && abs((float) ($response['paidPrice'] ?? 0) - (float) $order->total) < 0.01;
 
         return ['paid' => $paid, 'reference' => (string) ($response['paymentId'] ?? ''), 'raw' => $response];
+    }
+
+    /** A signed request with the saved keys (BIN lookup); proves the keys and the environment match. */
+    public function ping(): string
+    {
+        $r = $this->request('/payment/bin/check', ['locale' => 'tr', 'binNumber' => '554960']);
+        if (($r['status'] ?? null) !== 'success') {
+            throw new RuntimeException('iyzico: '.($r['errorMessage'] ?? 'yanıt alınamadı'));
+        }
+
+        return 'iyzico anahtarları çalışıyor ('.(\App\Support\Integrations::get('payments.iyzico.mode') === 'live' ? 'canlı' : 'sandbox').').';
+    }
+
+    public function refund(Order $order, float $amount): array
+    {
+        abort_if(blank($order->gateway_ref), 422, 'Bu siparişin iyzico ödeme numarası yok, iade iyzico panelinden yapılmalı.');
+        $response = $this->request(self::REFUND_PATH, [
+            'locale' => 'tr',
+            'conversationId' => $order->uuid,
+            'paymentId' => $order->gateway_ref,
+            'price' => number_format($amount, 2, '.', ''),
+            'currency' => $order->currency,
+            'ip' => request()?->ip() ?? '127.0.0.1',
+        ]);
+        $ok = ($response['status'] ?? null) === 'success';
+
+        return ['ok' => $ok, 'reference' => (string) ($response['refundHostReference'] ?? ''), 'message' => $response['errorMessage'] ?? null, 'raw' => $response];
+    }
+
+    /**
+     * The webhook iyzico sends for a checkout form payment (HPP format):
+     * HMAC-SHA256(secretKey, iyziEventType + iyziPaymentId + token + paymentConversationId + status), hex.
+     */
+    public function webhookSignatureOk(array $payload, ?string $header): bool
+    {
+        $secret = (string) (\App\Support\Integrations::iyzico()['secret_key'] ?? '');
+        if ($secret === '' || ! $header) {
+            return false;
+        }
+        $data = ($payload['iyziEventType'] ?? '').($payload['iyziPaymentId'] ?? '').($payload['token'] ?? '').($payload['paymentConversationId'] ?? '').($payload['status'] ?? '');
+
+        return hash_equals(hash_hmac('sha256', $data, $secret), strtolower($header));
+    }
+
+    /**
+     * iyzico signs its responses: the listed fields joined with ":" (prices
+     * without trailing zeros), HMAC-SHA256 with the secret key, hex. A response
+     * that carries a signature must match it; older accounts that send none pass.
+     */
+    private function signatureOk(array $response, array $fields): bool
+    {
+        if (! isset($response['signature'])) {
+            return true;
+        }
+        $secret = (string) (\App\Support\Integrations::iyzico()['secret_key'] ?? '');
+        $parts = array_map(function ($f) use ($response) {
+            $v = (string) ($response[$f] ?? '');
+
+            return in_array($f, ['paidPrice', 'price'], true) && str_contains($v, '.') ? rtrim(rtrim($v, '0'), '.') : $v;
+        }, $fields);
+        $ok = hash_equals(hash_hmac('sha256', implode(':', $parts), $secret), strtolower((string) $response['signature']));
+        if (! $ok) {
+            \Illuminate\Support\Facades\Log::warning('iyzico response signature mismatch', ['conversationId' => $response['conversationId'] ?? null]);
+        }
+
+        return $ok;
     }
 
     private function request(string $path, array $body): array

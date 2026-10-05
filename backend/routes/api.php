@@ -42,6 +42,7 @@ Route::prefix('v1')->group(function () {
 
     // Payment provider callbacks (no auth, verified server-to-server)
     Route::post('payments/iyzico/callback', [BillingController::class, 'iyzicoCallback'])->middleware('throttle:60,1');
+    Route::post('payments/iyzico/webhook', [BillingController::class, 'iyzicoWebhook'])->middleware('throttle:120,1');
     Route::get('payments/fake/{uuid}', [BillingController::class, 'fakePay']);
 
     // ---- Auth ---------------------------------------------------------------
@@ -106,6 +107,7 @@ Route::prefix('v1')->group(function () {
 
         // Everything below requires a verified e-mail
         Route::post('speech', [AiController::class, 'speech'])->middleware('throttle:240,1');
+        Route::post('speech/transcribe', [AiController::class, 'transcribe'])->middleware('throttle:30,1');
         Route::middleware('verified.api')->group(function () {
             Route::get('dashboard', [GameController::class, 'dashboard']);
 
@@ -206,6 +208,7 @@ Route::prefix('v1')->group(function () {
             Route::get('integrations', [AdminController::class, 'integrations'])->middleware('perm:settings');
             Route::put('integrations', [AdminController::class, 'updateIntegrations'])->middleware('perm:settings');
             Route::post('integrations/test-mail', [AdminController::class, 'testMail'])->middleware(['perm:settings', 'throttle:5,1']);
+            Route::post('integrations/test/{service}', [AdminController::class, 'testService'])->whereIn('service', ['ai', 'iyzico', 'speech'])->middleware(['perm:settings', 'throttle:6,1']);
             Route::post('vouchers', [AdminController::class, 'voucher'])->middleware('perm:desk');
 
             Route::middleware('perm:users')->group(function () {

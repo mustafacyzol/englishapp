@@ -13,7 +13,8 @@ import { Button } from '@/components/ui/Button'
 import { Modal, SkeletonPage } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 import { Img } from '@/components/ui/Img'
-import { higoImg, type HigoPose } from '@/components/game/Higo'
+import { type HigoPose } from '@/components/game/Higo'
+import { PathHigo } from '@/components/game/PathHigo'
 import { Guidebook } from '@/components/game/Guidebook'
 
 type Access = 'review' | 'current' | 'locked'
@@ -215,7 +216,7 @@ function ContinueCard({ data, stats, onJump, onPick, away }: { data: PathData; s
  * Higo walks the road with you: he sits in the free space beside the trail, on
  * the side the stop's label doesn't use, in a different pose each time.
  */
-const SIDE_POSES: HigoPose[] = ['skate', 'books', 'kite', 'map', 'tea', 'dance', 'balloon', 'scope', 'read', 'walk', 'thumbs', 'nap']
+const SIDE_POSES: HigoPose[] = ['wave', 'kite', 'music', 'tea', 'skate', 'balloon', 'nap', 'dance', 'scope', 'books', 'map', 'walk']
 
 function SideHigo({ pose, x, y, side }: { pose: HigoPose; x: number; y: number; side: 'left' | 'right' }) {
   // Positioned by a plain wrapper: the entrance animation lives on the inner element, so it can
@@ -234,7 +235,7 @@ function SideHigo({ pose, x, y, side }: { pose: HigoPose; x: number; y: number; 
         transition={{ type: 'spring', stiffness: 220, damping: 16 }}
         className={clsx('flex flex-col', side === 'right' ? 'items-start' : 'items-end')}
       >
-        <motion.img src={higoImg(pose)} alt="" className="w-full max-w-[96px] drop-shadow-[0_10px_12px_rgba(31,36,51,.22)]" style={{ transform: side === 'left' ? 'scaleX(-1)' : undefined }} animate={{ y: [0, -5, 0] }} transition={{ repeat: Infinity, duration: 3.4, ease: 'easeInOut' }} />
+        <span className="block w-full max-w-[96px]"><PathHigo pose={pose} flip={side === 'left'} /></span>
       </motion.div>
     </div>
   )

@@ -569,6 +569,31 @@ CREATE TABLE `failed_jobs` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `grade_units`
+--
+
+DROP TABLE IF EXISTS `grade_units`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `grade_units` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `track` varchar(8) NOT NULL,
+  `position` smallint(5) unsigned NOT NULL DEFAULT 0,
+  `title` varchar(120) NOT NULL,
+  `title_tr` varchar(120) DEFAULT NULL,
+  `words` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`words`)),
+  `sentences` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`sentences`)),
+  `note` text DEFAULT NULL,
+  `slot` tinyint(3) unsigned DEFAULT NULL,
+  `is_published` tinyint(1) NOT NULL DEFAULT 1,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `grade_units_track_position_index` (`track`,`position`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `institution_members`
 --
 

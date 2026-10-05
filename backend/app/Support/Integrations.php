@@ -33,6 +33,7 @@ class Integrations
         'tts.openai.key' => ['services.openai_tts.key', true],
         'tts.openai.voice' => ['services.openai_tts.voice', false],
         'tts.openai.model' => ['services.openai_tts.model', false],
+        'stt.openai.model' => [null, false], // speech recognition fallback, default gpt-4o-mini-transcribe
         'tts.google.key' => ['services.google_tts.key', true],
         'tts.google.voice' => ['services.google_tts.voice', false],
         'defne.lipsync' => [null, false],      // true | false

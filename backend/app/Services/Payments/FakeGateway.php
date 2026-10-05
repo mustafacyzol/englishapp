@@ -31,4 +31,9 @@ class FakeGateway implements PaymentGateway
     {
         return ['paid' => $order->gateway_token === $token, 'reference' => $token];
     }
+
+    public function refund(Order $order, float $amount): array
+    {
+        return ['ok' => true, 'reference' => 'fake_refund_'.$order->uuid];
+    }
 }

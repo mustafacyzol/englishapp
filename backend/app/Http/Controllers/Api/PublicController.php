@@ -67,7 +67,7 @@ class PublicController extends Controller
                 'apple' => Settings::get('features.social_login', true) && SocialToken::enabled('apple') ? config('services.apple.client_id') : null,
             ],
             'tts' => filled(\App\Support\Integrations::get('tts.elevenlabs.key')),
-            'defne' => \App\Support\Integrations::defne(),
+            'defne' => \App\Support\Integrations::defne() + ['stt' => \App\Services\SpeechService::canTranscribe()],
             'ai' => filled(\App\Support\Integrations::get('ai.api_key')) && config('dilgo.ai.enabled'),
             'cosmetics' => \App\Support\Cosmetics::custom(),
             'exams' => collect(Exams::EXAMS)->map(fn ($e, $k) => ['key' => $k, 'name' => $e['name'], 'full' => $e['full'], 'about' => $e['about']])->values(),

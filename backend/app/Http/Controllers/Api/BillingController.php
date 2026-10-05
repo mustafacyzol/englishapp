@@ -89,6 +89,35 @@ class BillingController extends Controller
         return redirect()->away($front.'/premium/result?order='.$order->uuid.'&status='.$order->status);
     }
 
+    /**
+     * iyzico's server-to-server notice for a checkout form payment. The
+     * signature is checked, then the payment is confirmed against iyzico's
+     * own record (never trusted from the notice alone), so a learner whose
+     * browser closed before the callback still gets their Premium.
+     */
+    public function iyzicoWebhook(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $gateway = new \App\Services\Payments\IyzicoGateway;
+        $payload = $request->json()->all();
+        if (! $gateway->webhookSignatureOk($payload, $request->header('X-IYZ-SIGNATURE-V3'))) {
+            Log::warning('iyzico webhook with a bad signature', ['ip' => $request->ip()]);
+
+            return response()->json(['ok' => false], 401);
+        }
+        $order = Order::query()->where('gateway', 'iyzico')->where('uuid', (string) ($payload['paymentConversationId'] ?? ''))->first();
+        if ($order && ($payload['status'] ?? null) === 'SUCCESS' && $order->status !== 'paid' && filled($payload['token'] ?? null) && $order->gateway_token === $payload['token']) {
+            try {
+                $this->checkout->confirm($order, (string) $payload['token']);
+            } catch (Throwable $e) {
+                Log::error('iyzico webhook confirm failed', ['order' => $order->uuid, 'error' => $e->getMessage()]);
+
+                return response()->json(['ok' => false], 500); // iyzico retries
+            }
+        }
+
+        return response()->json(['ok' => true]);
+    }
+
     /** Development-only simulated payment page. */
     public function fakePay(Request $request, string $uuid): RedirectResponse
     {

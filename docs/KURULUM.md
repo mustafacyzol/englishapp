@@ -104,6 +104,11 @@ chmod -R 775 storage bootstrap/cache
 Bu anahtarları .env'e yazmak zorunda değilsiniz. **Yönetim → Sistem → Entegrasyonlar** sayfasında süper yönetici:
 
 - **Ödeme:** "Test ödemesi" ↔ "iyzico" seçer, ortamı (Sandbox / Canlı) belirler, API anahtarı ve gizli anahtarı girer. Canlıya geçmeden önce sandbox anahtarlarıyla bir deneme satın alma yapın (https://sandbox-merchant.iyzipay.com). Geri dönüş adresi otomatiktir: `https://API_ALAN_ADI/api/v1/payments/iyzico/callback`.
+  - **Bildirim (webhook):** iyzico panelinde bildirim adresi olarak `https://API_ALAN_ADI/api/v1/payments/iyzico/webhook` girin ve entegrasyon@iyzico.com'dan imzalı bildirimi (X-IYZ-SIGNATURE-V3) açtırın. Tarayıcısı ödeme sonrası kapanan öğrencinin Premium'u da böylece açılır; bildirim her zaman iyzico'dan ödeme sorgulanarak doğrulanır.
+  - **Yanıt imzası:** iyzico'nun ödeme sorgu yanıtındaki `signature` alanı gizli anahtarla kontrol edilir; tutmayan yanıt ödenmiş sayılmaz.
+  - **İade:** Yönetim > Siparişler'den yapılan iade önce iyzico'ya (v2 iade, ödeme numarasıyla) gider, iyzico onaylarsa sipariş "iade edildi" olur. Kısmi iade için tutar girilebilir.
+  - **Bağlantıyı dene:** Entegrasyonlar sayfasındaki "iyzico anahtarlarını dene" ve "Defne'yi dene" düğmeleri kayıtlı anahtarlarla küçük bir gerçek istek yapar.
+- **Ses tanıma yedeği:** Konuşma alıştırmalarında tarayıcının kendi ses tanıması yoksa (bazı iOS ve masaüstü tarayıcılar), kayıt sunucuya gönderilir ve OpenAI anahtarıyla (`gpt-4o-mini-transcribe`) yazıya çevrilir. OpenAI anahtarı yoksa bu yedek kapalıdır; kayıtlar sunucuda saklanmaz.
 - **Defne'nin sesi:** ElevenLabs anahtarı, ses kimliği (voice ID), model, kararlılık ve benzerlik.
 - **Kelime ve ders sesi (anlatıcı):** Kelimeler, örnek cümleler, dersler ve hikâyeler sunucuda üretilen doğal İngilizce sesle okunur; telefonun dili Türkçe olsa bile. Google Cloud TTS, OpenAI veya ElevenLabs'tan **biri** yeterli. Her ses bir kez üretilip `storage/app/tts` altında saklanır, aynı kelime tekrar ücretlendirilmez. Hiçbiri girilmezse cihazın İngilizce sesi kullanılır (bazı Türkçe Android telefonlarda yüklü değildir, bu yüzden canlıda bir sağlayıcı önerilir).
 

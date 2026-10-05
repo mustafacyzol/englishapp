@@ -41,6 +41,36 @@ class SpeechService
         return null;
     }
 
+    /** Server speech recognition is available (an OpenAI key is set), for browsers without their own. */
+    public static function canTranscribe(): bool
+    {
+        return filled(Integrations::get('tts.openai.key'));
+    }
+
+    /**
+     * What the learner said, from a short recording, in English. Used only when
+     * the browser has no speech recognition of its own (some iOS and desktop
+     * browsers). The clip is sent to the provider and not stored here.
+     */
+    public function transcribe(string $path, string $mime): ?string
+    {
+        if (! self::canTranscribe()) {
+            return null;
+        }
+        $ext = match (true) { str_contains($mime, 'mp4'), str_contains($mime, 'm4a') => 'm4a', str_contains($mime, 'ogg') => 'ogg', str_contains($mime, 'wav') => 'wav', default => 'webm' };
+        try {
+            $res = Http::timeout(30)->withToken((string) Integrations::get('tts.openai.key'))
+                ->attach('file', file_get_contents($path), "speech.{$ext}")
+                ->post('https://api.openai.com/v1/audio/transcriptions', ['model' => (string) (Integrations::get('stt.openai.model') ?: 'gpt-4o-mini-transcribe'), 'language' => 'en', 'response_format' => 'json']);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Transcription failed', ['error' => $e->getMessage()]);
+
+            return null;
+        }
+
+        return $res->successful() ? trim((string) $res->json('text')) : null;
+    }
+
     /** MP3 bytes, or null when no provider is set or the provider failed. */
     public function synth(string $text, string $who = 'narrator'): ?string
     {

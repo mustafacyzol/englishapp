@@ -122,6 +122,19 @@ class AiController extends Controller
         return $mp3 ? response($mp3, 200, ['Content-Type' => 'audio/mpeg', 'Cache-Control' => 'private, max-age=86400']) : response()->noContent();
     }
 
+    /** Speech recognition fallback: a short recording in, the English text out. */
+    public function transcribe(Request $request, \App\Services\SpeechService $speech): \Illuminate\Http\JsonResponse
+    {
+        abort_unless(\App\Services\SpeechService::canTranscribe(), 503, 'Ses tanıma şu anda kullanılamıyor.');
+        $request->validate(['audio' => ['required', 'file', 'max:3072', 'mimetypes:audio/webm,video/webm,audio/ogg,audio/mp4,audio/m4a,audio/x-m4a,audio/wav,audio/x-wav,audio/mpeg']]);
+        \App\Support\Quota::take($request->user(), 'speech.transcribe', 400, 'day', 'Bugünkü ses tanıma hakkın doldu. Yarın yeniden dene.');
+        $file = $request->file('audio');
+        $text = $speech->transcribe($file->getRealPath(), (string) $file->getMimeType());
+        abort_if($text === null, 502, 'Sesini anlayamadım, bir daha dener misin?');
+
+        return response()->json(['text' => mb_substr($text, 0, 500)]);
+    }
+
     /** The narrator: words, example sentences, lessons and stories, always in English. */
     public function speech(Request $request, \App\Services\SpeechService $speech): Response
     {

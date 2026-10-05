@@ -311,7 +311,16 @@ class AdminController extends Controller
     {
         abort_unless($request->user()->isAdmin(), 403, 'İadeyi yalnızca yöneticiler yapabilir.');
         abort_unless($order->status === 'paid', 422, 'Yalnızca ödenmiş siparişler iade edilebilir.');
-        $data = $request->validate(['revoke_premium' => ['boolean']]);
+        $data = $request->validate(['revoke_premium' => ['boolean'], 'amount' => ['nullable', 'numeric', 'min:0.01'], 'manual' => ['boolean']]);
+        $amount = (float) ($data['amount'] ?? $order->total);
+        abort_if($amount > (float) $order->total + 0.001, 422, 'İade tutarı ödenen tutarı aşamaz.');
+
+        // money goes back through the provider first; "manual" marks one already refunded in the provider's panel
+        if (empty($data['manual']) && (float) $order->total > 0) {
+            $result = app(\App\Services\CheckoutService::class)->gateway($order->gateway)->refund($order, $amount);
+            abort_unless($result['ok'], 502, 'Ödeme sağlayıcısı iadeyi kabul etmedi: '.($result['message'] ?? 'bilinmeyen hata'));
+            $order->forceFill(['gateway_payload' => array_merge((array) $order->gateway_payload, ['refund' => $result['raw'] ?? $result])])->save();
+        }
 
         DB::transaction(function () use ($order, $data) {
             $order->update(['status' => 'refunded']);
@@ -405,6 +414,30 @@ class AdminController extends Controller
         return response()->json(['ok' => true, 'message' => "Test e-postası {$data['to']} adresine gönderildi."]);
     }
 
+    /**
+     * "Bağlantıyı dene" for the paid services: a tiny real request with the saved
+     * keys, so a wrong key shows up here and not in a learner's lesson.
+     */
+    public function testService(Request $request, string $service): JsonResponse
+    {
+        abort_unless($request->user()->isAdmin(), 403);
+        try {
+            $message = match ($service) {
+                'ai' => app(\App\Services\AiTutorService::class)->ping(),
+                'iyzico' => (new \App\Services\Payments\IyzicoGateway)->ping(),
+                'speech' => \App\Services\SpeechService::narratorProvider() ? (app(\App\Services\SpeechService::class)->synth('Hello') ? 'Anlatıcı sesi çalışıyor ('.\App\Services\SpeechService::narratorProvider().').' : throw new \RuntimeException('Ses sağlayıcısı yanıt vermedi.')) : throw new \RuntimeException('Ses sağlayıcısı ayarlı değil; tarayıcı sesi kullanılıyor.'),
+                default => abort(404),
+            };
+        } catch (\Symfony\Component\HttpKernel\Exception\HttpExceptionInterface $e) {
+            throw $e;
+        } catch (\Throwable $e) {
+            return response()->json(['ok' => false, 'message' => mb_substr($e->getMessage(), 0, 240)], 422);
+        }
+        Audit::log("admin.integrations.test_{$service}", $request->user());
+
+        return response()->json(['ok' => true, 'message' => $message]);
+    }
+
     public function settings(): JsonResponse
     {
         return response()->json(['data' => Settings::all()]);
@@ -451,6 +484,12 @@ class AdminController extends Controller
             'corporate.url' => ['sometimes', 'nullable', 'string', 'max:300', 'regex:~^(/[^/\\s]|https://)~'],
             'gamification.daily_chest' => ['sometimes', 'boolean'],
             'auth.remember_days' => ['sometimes', 'integer', 'min:1', 'max:365'],
+            'limits.word_sets_per_day' => ['sometimes', 'integer', 'min:1', 'max:500'],
+            'limits.word_sets_total' => ['sometimes', 'integer', 'min:1', 'max:1000'],
+            'limits.public_sets' => ['sometimes', 'integer', 'min:0', 'max:200'],
+            'limits.words_per_day' => ['sometimes', 'integer', 'min:1', 'max:5000'],
+            'limits.notebook_size' => ['sometimes', 'integer', 'min:100', 'max:50000'],
+            'moderation.blocked_words' => ['sometimes', 'nullable', 'string', 'max:4000'],
         ]);
         // dotted keys arrive nested, flatten
         $flat = [];

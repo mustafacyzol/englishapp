@@ -226,6 +226,15 @@ TXT;
         return $prompt;
     }
 
+    /** A one-line request with the saved key and model, for the admin's "Bağlantıyı dene". */
+    public function ping(): string
+    {
+        throw_if(blank(\App\Support\Integrations::get('ai.api_key')), new \RuntimeException('Anthropic API anahtarı girilmemiş.'));
+        $r = $this->call('Reply with JSON only.', [['role' => 'user', 'content' => 'Say ok.']], ['type' => 'object', 'properties' => ['reply' => ['type' => 'string']], 'required' => ['reply'], 'additionalProperties' => false]);
+
+        return 'Defne çalışıyor ('.\App\Support\Integrations::get('ai.model').'): '.mb_substr((string) ($r['reply'] ?? ''), 0, 40);
+    }
+
     private function call(string $system, array $messages, array $schema, ?array &$usage = null): array
     {
         $client = new Client(apiKey: \App\Support\Integrations::get('ai.api_key'));

@@ -146,11 +146,56 @@ function recognitionCtor(): RecognitionCtor | null {
   return w.SpeechRecognition ?? w.webkitSpeechRecognition ?? null
 }
 
-export const canListen = () => !!recognitionCtor()
+/** The browser hears by itself, or the server can transcribe a short recording instead. */
+const canRecord = () => typeof window !== 'undefined' && typeof MediaRecorder !== 'undefined' && !!navigator.mediaDevices?.getUserMedia
+export const canListen = () => !!recognitionCtor() || (tuning.stt && canRecord())
 
-export function listen(handlers: { onPartial?: (t: string) => void; onFinal: (t: string) => void; onError?: (e: string) => void; onEnd?: () => void }) {
+type ListenHandlers = { onPartial?: (t: string) => void; onFinal: (t: string) => void; onError?: (e: string) => void; onEnd?: () => void }
+
+/**
+ * Fallback for browsers without speech recognition: record up to eight seconds,
+ * send the clip to /speech/transcribe and hand back the text. Same contract as
+ * `listen`: the returned function stops (and keeps), `.cancel` drops everything.
+ */
+function listenOnServer(handlers: ListenHandlers) {
+  let live = true
+  let rec: MediaRecorder | null = null
+  let stream: MediaStream | null = null
+  const chunks: Blob[] = []
+  const finish = () => { stream?.getTracks().forEach((t) => t.stop()) }
+  void navigator.mediaDevices.getUserMedia({ audio: true }).then((s) => {
+    if (!live) { s.getTracks().forEach((t) => t.stop()); return }
+    stream = s
+    rec = new MediaRecorder(s)
+    rec.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data) }
+    rec.onstop = async () => {
+      finish()
+      if (!live) return
+      handlers.onPartial?.('…')
+      try {
+        const { api } = await import('./api')
+        const form = new FormData()
+        form.append('audio', new Blob(chunks, { type: rec?.mimeType || 'audio/webm' }), 'speech')
+        const r = await api<{ text: string }>('/speech/transcribe', { method: 'POST', body: form })
+        if (live && r.text) handlers.onFinal(r.text)
+      } catch {
+        if (live) handlers.onError?.('network')
+      }
+      if (live) { live = false; handlers.onEnd?.() }
+    }
+    rec.start()
+    setTimeout(() => { if (rec?.state === 'recording') rec.stop() }, 8000)
+  }).catch(() => { if (live) { live = false; handlers.onError?.('not-allowed'); handlers.onEnd?.() } })
+  const stop = () => { if (rec?.state === 'recording') rec.stop() }
+  stop.cancel = () => { live = false; try { if (rec?.state === 'recording') rec.stop() } catch { /* stopped */ } finish() }
+  activeCancels.add(stop.cancel)
+  return stop
+}
+
+export function listen(handlers: ListenHandlers) {
   const Ctor = recognitionCtor()
   if (!Ctor) {
+    if (tuning.stt && canRecord()) return listenOnServer(handlers)
     handlers.onError?.('unsupported')
     return () => {}
   }
@@ -228,8 +273,8 @@ export function normalize(s: string) {
 type VoiceOpts = { rate?: number; voice?: string; onStart?: () => void; onEnd?: () => void; onBoundary?: (charIndex: number) => void; onLevel?: (level: number) => void }
 
 /** Admin-tuned voice and lip-sync values from /config (Yönetim → Entegrasyonlar). */
-export type DefneTuning = { voice: boolean; speech: boolean; lipsync: boolean; gain: number; rate: number }
-const tuning: DefneTuning = { voice: true, speech: false, lipsync: true, gain: 4, rate: 1 }
+export type DefneTuning = { voice: boolean; speech: boolean; lipsync: boolean; gain: number; rate: number; stt: boolean }
+const tuning: DefneTuning = { voice: true, speech: false, lipsync: true, gain: 4, rate: 1, stt: false }
 export function setDefneTuning(t?: Partial<DefneTuning>) {
   if (t) Object.assign(tuning, t)
 }

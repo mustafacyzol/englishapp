@@ -21,4 +21,11 @@ interface PaymentGateway
      * @return array{paid:bool, reference?:string, raw?:array}
      */
     public function retrieve(Order $order, string $token): array;
+
+    /**
+     * Give money back for a paid order (all of it, or part).
+     *
+     * @return array{ok:bool, reference?:string, message?:string, raw?:array}
+     */
+    public function refund(Order $order, float $amount): array;
 }

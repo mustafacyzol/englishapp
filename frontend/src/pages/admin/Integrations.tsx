@@ -150,7 +150,8 @@ export default function AdminIntegrations() {
                   {secretField('payments.iyzico.api_key', 'API anahtarı')}
                   {secretField('payments.iyzico.secret_key', 'Gizli anahtar')}
                 </div>
-                <p className="text-xs text-ink-soft">Anahtarlar iyzico panelinde Ayarlar → Firma Ayarları altında. Sandbox anahtarları sandbox-merchant.iyzipay.com adresinden alınır. Geri dönüş adresi otomatik: <code className="font-mono">/api/v1/payments/iyzico/callback</code></p>
+                <p className="text-xs text-ink-soft">Anahtarlar iyzico panelinde Ayarlar → Firma Ayarları altında. Sandbox anahtarları sandbox-merchant.iyzipay.com adresinden alınır. Geri dönüş adresi otomatik: <code className="font-mono">/api/v1/payments/iyzico/callback</code>. Bildirim (webhook) adresi olarak iyzico paneline <code className="font-mono">/api/v1/payments/iyzico/webhook</code> girin; imza (X-IYZ-SIGNATURE-V3) için iyzico entegrasyon ekibinden imzalı bildirimi açtırın.</p>
+                <TestService service="iyzico" label="iyzico anahtarlarını dene" disabled={dirty} />
               </>
             )}
           </div>
@@ -239,6 +240,8 @@ export default function AdminIntegrations() {
             {secretField('ai.api_key', 'Anthropic API anahtarı')}
             <Input label="Model" disabled={!canEdit} value={str('ai.model')} onChange={(e) => set('ai.model', e.target.value || null)} />
           </div>
+          <TestService service="ai" label="Defne'yi dene" disabled={dirty} />
+          <p className="mt-3 text-xs text-ink-soft">Konuşma alıştırmalarında tarayıcı sesi tanıyamazsa (bazı iOS ve masaüstü tarayıcılar) kayıt sunucuya gönderilir ve OpenAI anahtarıyla yazıya çevrilir. OpenAI anahtarı yoksa bu yedek kapalıdır.</p>
         </Card>
       </div>
 
@@ -250,6 +253,22 @@ export default function AdminIntegrations() {
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/** One click to prove a saved key works (AI, iyzico); the server returns the exact error otherwise. */
+function TestService({ service, label, disabled }: { service: 'ai' | 'iyzico' | 'speech'; label: string; disabled: boolean }) {
+  const toast = useToast()
+  const m = useMutation({
+    mutationFn: () => post<{ message: string }>(`/admin/integrations/test/${service}`, {}, true),
+    onSuccess: (r) => toast(r.message, 'success'),
+    onError: (e: ApiError) => toast(e.message, 'error'),
+  })
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-2">
+      <Button variant="secondary" size="sm" onClick={() => m.mutate()} loading={m.isPending} disabled={disabled}>{label}</Button>
+      {disabled && <span className="text-xs text-ink-soft">Önce kaydet.</span>}
     </div>
   )
 }

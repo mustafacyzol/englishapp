@@ -191,6 +191,17 @@ export default function AdminSettings() {
           </Card>
         )}
 
+        {tab === 'economy' && (
+          <Card title="Spam ve kötüye kullanım sınırları" text="Bir öğrencinin oluşturabileceği içerik. Sınır dolunca öğrenci ne kadar beklemesi gerektiğini açıkça görür.">
+            <div className="grid gap-4 sm:grid-cols-2">
+              {([['limits.word_sets_per_day', 'Günde yeni set (kopya dahil)', 20], ['limits.word_sets_total', 'Bir öğrencinin en çok seti', 60], ['limits.public_sets', 'Herkese açık set sayısı', 10], ['limits.words_per_day', 'Günde deftere yeni kelime', 300], ['limits.notebook_size', 'Kelime defteri kapasitesi', 5000]] as const).map(([k, l, d]) => (
+                <Input key={k} type="number" min={1} label={l} value={Number(s[k] ?? d)} onChange={(e) => set(k, Number(e.target.value))} />
+              ))}
+            </div>
+            <Textarea className="mt-4" rows={2} label="Paylaşılan içerikte yasak kelimeler" hint="Virgülle ayırın. Herkese açık setlerde ve profil yazılarında bu kelimeler, bağlantılar ve telefon/e-posta engellenir." value={String(s['moderation.blocked_words'] ?? '')} onChange={(e) => set('moderation.blocked_words', e.target.value || null)} />
+          </Card>
+        )}
+
         {tab === 'auth' && (
           <>
             <Card title="Beni hatırla" text="İşaretleyen kullanıcının oturumu bu süre boyunca açık kalır. İşaretlemeyenlerin oturumu 1 gün sonra kapanır.">
