@@ -718,6 +718,34 @@ CREATE TABLE `league_memberships` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `lesson_mistakes`
+--
+
+DROP TABLE IF EXISTS `lesson_mistakes`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `lesson_mistakes` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` bigint(20) unsigned NOT NULL,
+  `lesson_id` bigint(20) unsigned NOT NULL,
+  `ex_index` smallint(5) unsigned NOT NULL,
+  `skill` varchar(20) DEFAULT NULL,
+  `misses` smallint(5) unsigned NOT NULL DEFAULT 1,
+  `streak` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `due_at` timestamp NULL DEFAULT NULL,
+  `fixed_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `lesson_mistakes_user_id_lesson_id_ex_index_unique` (`user_id`,`lesson_id`,`ex_index`),
+  KEY `lesson_mistakes_lesson_id_foreign` (`lesson_id`),
+  KEY `lesson_mistakes_user_id_fixed_at_due_at_index` (`user_id`,`fixed_at`,`due_at`),
+  CONSTRAINT `lesson_mistakes_lesson_id_foreign` FOREIGN KEY (`lesson_id`) REFERENCES `lessons` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `lesson_mistakes_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `lesson_progress`
 --
 

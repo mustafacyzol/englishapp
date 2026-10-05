@@ -33,6 +33,9 @@ return [
         // signed out), and the age group can only change once in this many days.
         'max_sessions' => (int) env('AUTH_MAX_SESSIONS', 3),
         'age_group_change_days' => (int) env('AGE_GROUP_CHANGE_DAYS', 30),
+        // a lesson must be opened before it is submitted and take at least this many seconds
+        // per question, so scripts cannot finish the path (and farm the league) in seconds
+        'lesson_seconds_per_question' => (float) env('LESSON_SECONDS_PER_QUESTION', 1.5),
         'turnstile_secret' => env('TURNSTILE_SECRET_KEY'),
         'allowed_origins' => array_filter(explode(',', env('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,capacitor://localhost,https://localhost'))),
     ],

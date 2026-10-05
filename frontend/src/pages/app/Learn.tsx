@@ -26,7 +26,7 @@ interface PathData {
   mistakes_due?: number
 }
 /** How many remembered mistakes wait for the review stops (shown under them). */
-const DueCtx = createContext(0)
+const DueCtx = createContext<{ due: number; at: number | null }>({ due: 0, at: null })
 interface CourseItem { id: number; title: string; cefr_level: string; color: string }
 export interface PlanItem { skill: SkillKey; title: string; detail: string; to: string; minutes: number; done: boolean; focus: boolean; weakest: boolean }
 interface Stats { total: number; done: number; pct: number; cur?: { l: PathLesson; u: PathUnit }; unitIndex: number; unitDone: number }
@@ -46,6 +46,10 @@ const courseOffset = (lvl: string) => ({ A1: 0, A2: 3, B1: 5 } as Record<string,
 export default function Learn() {
   const [courseId, setCourseId] = useState<number | null>(null)
   const { data, isLoading } = useQuery({ queryKey: ['path', courseId], queryFn: () => get<PathData>(`/path${courseId ? `/${courseId}` : ''}`) })
+  const dueAt = useMemo(() => {
+    const open = (data?.units ?? []).flatMap((u) => u.lessons).filter((l) => l.kind === 'review' && l.state !== 'locked')
+    return { due: data?.mistakes_due ?? 0, at: open.length ? open[open.length - 1].id : null }
+  }, [data])
   const courses = useQuery({ queryKey: ['courses'], queryFn: () => get<{ data: CourseItem[] }>('/courses') })
   const [picker, setPicker] = useState(false)
   const [guide, setGuide] = useState<PathUnit | null>(null)
@@ -95,7 +99,7 @@ export default function Learn() {
       <div className="mt-8">
         {data.units.map((unit, ui) => (
           <div key={unit.id}>
-            <DueCtx.Provider value={data.mistakes_due ?? 0}><UnitSection unit={unit} index={ui} photoIndex={courseOffset(data.course.cefr_level) + ui} onGuide={() => setGuide(unit)} openId={openId} setOpenId={setOpenId} currentRef={currentRef} /></DueCtx.Provider>
+            <DueCtx.Provider value={dueAt}><UnitSection unit={unit} index={ui} photoIndex={courseOffset(data.course.cefr_level) + ui} onGuide={() => setGuide(unit)} openId={openId} setOpenId={setOpenId} currentRef={currentRef} /></DueCtx.Provider>
           </div>
         ))}
       </div>
@@ -337,7 +341,9 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
   // Labels sit on the open side of the curve, so they never collide with the trail.
   const labelLeft = x > 8
   const kind = KIND_LABEL[lesson.kind] ?? SKILL_LABEL[lesson.skill]
-  const due = useContext(DueCtx)
+  const dueCtx = useContext(DueCtx)
+  // the waiting mistakes are pointed out on one stop only: the furthest review stop you can open
+  const due = dueCtx.at === lesson.id ? dueCtx.due : 0
 
   const startAi = useMutation({
     mutationFn: () => post<{ conversation: { id: number } }>('/ai/conversations', { mode: 'roleplay', scenario_key: lesson.scenario_key }),

@@ -89,7 +89,13 @@ class SkillsDuelInstitutionTest extends TestCase
                 }, 1500];
             }
         }
+        // finishing the moment it starts is refused; a real run takes a while
+        $this->actingAs($me)->postJson("/api/v1/duel/{$duel['id']}/finish", ['answers' => $answers])->assertStatus(422);
+        \Illuminate\Support\Carbon::setTestNow(now()->addMinutes(2));
         $res = $this->actingAs($me)->postJson("/api/v1/duel/{$duel['id']}/finish", ['answers' => $answers])->assertOk();
+        // a second finish cannot be settled again
+        $this->actingAs($me)->postJson("/api/v1/duel/{$duel['id']}/finish", ['answers' => $answers])->assertStatus(422);
+        \Illuminate\Support\Carbon::setTestNow();
         $this->assertSame(count($answers), $res->json('correct'));
         $this->assertSame('win', $res->json('result')); // a perfect, fast run always beats the replay
         $this->assertGreaterThanOrEqual(24, $me->fresh()->duel_trophies);

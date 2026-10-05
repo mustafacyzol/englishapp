@@ -82,6 +82,7 @@ class LearnController extends Controller
         $heartState = $hearts->sync($user);
         abort_if(! $heartState['unlimited'] && $heartState['hearts'] <= 0, 423, 'Canın kalmadı. Biraz bekle, can yenile ya da pratik yaparak kazan.');
 
+        \Illuminate\Support\Facades\Cache::put("lesson:open:{$user->id}:{$lesson->id}", now()->timestamp, now()->addHours(6));
         $data = $lesson->load('story:id,slug,title')->only(['id', 'title', 'skill', 'kind', 'xp_reward', 'exercises', 'story', 'scenario_key']);
         // the review stop is personal: the learner's own due mistakes, then the unit's questions
         if ($lesson->kind === 'review') {
@@ -101,6 +102,16 @@ class LearnController extends Controller
         ]);
 
         abort_unless(app(PathService::class)->canOpen($request->user(), $lesson), 403, 'Bu ders henüz kilitli.');
+        // question lessons: opened first, and not finished faster than a person could read them
+        $per = (float) config('dilgo.security.lesson_seconds_per_question', 1.5);
+        if ($per > 0 && in_array($lesson->kind, ['lesson', 'checkpoint', 'review'], true)) {
+            $key = "lesson:open:{$request->user()->id}:{$lesson->id}";
+            $opened = \Illuminate\Support\Facades\Cache::get($key);
+            abort_unless($opened, 422, 'Dersi açıp soruları cevaplayarak bitirmelisin.');
+            $n = max(1, count($lesson->exercises ?? []));
+            abort_if(now()->timestamp - $opened < (int) ceil($n * $per), 422, 'Ders çok hızlı bitti. Soruları okuyarak cevapla.');
+            \Illuminate\Support\Facades\Cache::forget($key);
+        }
         $result = $lessons->complete($request->user(), $lesson, $data['answers'], $data['seconds'] ?? 0);
         // finishing the last lesson of your level moves you up one level
         $up = app(PathService::class)->maybeLevelUp($request->user()->fresh());

@@ -109,4 +109,30 @@ class PathActivitiesTest extends TestCase
         $this->assertNotNull($m->fresh()->fixed_at);
         Carbon::setTestNow();
     }
+
+    public function test_lessons_must_be_opened_and_not_finished_in_seconds(): void
+    {
+        config(['dilgo.security.lesson_seconds_per_question' => 1.5]);
+        $lesson = $this->reach('lesson');
+        $answers = collect($lesson->exercises)->map(fn ($ex) => match ($ex['type']) {
+            'speak' => $ex['text'], 'match' => true, 'spot_error' => $ex['error_index'].':'.$ex['answer'], default => $ex['answer'],
+        })->all();
+        // never opened: a script posting answers straight away
+        $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertStatus(422);
+        $this->getJson("/api/v1/lessons/{$lesson->id}")->assertOk();
+        $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertStatus(422); // too fast
+        Carbon::setTestNow(now()->addSeconds(60));
+        $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertOk();
+        Carbon::setTestNow();
+    }
+
+    public function test_earning_a_heart_needs_real_practice_and_quests_pay_once(): void
+    {
+        $this->u->forceFill(['hearts' => 2, 'premium_until' => null])->save();
+        $this->postJson('/api/v1/hearts/earn', ['correct' => 5])->assertStatus(422);
+        $this->postJson('/api/v1/review', ['reviews' => [], 'played' => 6])->assertOk();
+        $this->postJson('/api/v1/hearts/earn', ['correct' => 5])->assertOk();
+        $this->assertSame(3, $this->u->fresh()->hearts);
+        $this->postJson('/api/v1/hearts/earn', ['correct' => 5])->assertStatus(422); // credit spent
+    }
 }

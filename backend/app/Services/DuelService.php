@@ -27,6 +27,10 @@ class DuelService
 
     public const ITEM_MS = 12000;
 
+    /** The fastest answer time that counts, in milliseconds. */
+
+    public const MIN_MS = 450;
+
     public const COMBO_STEP = 0.25;
 
     public const COMBO_MAX = 2.0;
@@ -179,11 +183,14 @@ class DuelService
         abort_if($duel->status !== 'active', 422, 'Bu düello zaten bitti.');
 
         $items = $this->flatItems($duel);
+        // the whole duel cannot have been played faster than a person can tap
+        abort_if($duel->created_at && now()->diffInSeconds($duel->created_at, true) < count($items) * 0.8, 422, 'Düello çok hızlı bitti.');
         $results = [];
         $run = [];
         $skillCorrect = [];
         foreach ($items as $i => [$skill, $item]) {
-            [$given, $ms] = [$answers[$i][0] ?? null, (int) ($answers[$i][1] ?? self::ITEM_MS)];
+            // reported answer times have a human floor, so "0 ms" cannot buy a top score
+            [$given, $ms] = [$answers[$i][0] ?? null, max(self::MIN_MS, (int) ($answers[$i][1] ?? self::ITEM_MS))];
             // An answer after the clock ran out never counts.
             $ok = $ms <= self::ITEM_MS + 1500 && LessonService::gradeOne($item['ex'], $given);
             $results[] = $ok;
@@ -197,6 +204,8 @@ class DuelService
     private function settle(Duel $duel, int $score, array $results, string $status, array $skillCorrect = []): array
     {
         return DB::transaction(function () use ($duel, $score, $results, $status, $skillCorrect) {
+            // settled once: a repeated or parallel finish finds it no longer active
+            abort_if(! Duel::query()->whereKey($duel->id)->where('status', 'active')->lockForUpdate()->exists(), 422, 'Bu düello zaten bitti.');
             $user = $duel->user()->lockForUpdate()->first();
             $ghostScore = self::score(collect($this->flatItems($duel))->map(fn ($p) => [$p[1]['ghost']['correct'], $p[1]['ghost']['ms']])->all())['total'];
             // Live match: once the rival has finished, you are measured against their real score.
