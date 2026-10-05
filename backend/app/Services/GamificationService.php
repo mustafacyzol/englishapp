@@ -345,7 +345,9 @@ class GamificationService
         abort_if((bool) $uq->claimed_at, 422, 'Ödül zaten alındı.');
 
         return DB::transaction(function () use ($user, $uq) {
-            $uq->update(['claimed_at' => now()]);
+            // claimed in one atomic step: a second tap or a parallel request gets nothing
+            $won = UserQuest::query()->whereKey($uq->id)->whereNull('claimed_at')->update(['claimed_at' => now()]);
+            abort_if($won === 0, 422, 'Ödül zaten alındı.');
             $quest = $uq->quest;
             $user->increment('gems', $quest->reward_gems);
             $item = $quest->reward_item_key ? $this->rewards->grant($user, $quest->reward_item_key, 'quest') : null;

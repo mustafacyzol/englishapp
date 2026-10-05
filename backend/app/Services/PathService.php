@@ -16,8 +16,9 @@ use Illuminate\Support\Collection;
  *    placement test puts you there. Courses below your level are open for review.
  *  - Inside your level, lessons in a unit go one after another: you cannot land
  *    in the middle of a topic. You may, however, jump to the start of any unit.
- *  - The placement test can open units up front (`path_unlocks`): every lesson in
- *    an opened unit is available, the ones before it are shown as passed over.
+ *  - The placement test can open units up front (`path_unlocks`): the path then
+ *    continues from the first unit it did not cover. Opened units, like courses
+ *    below your level, can still be started from their first stop.
  *
  * Lesson states: completed, current (where to continue), open, locked.
  */
@@ -60,33 +61,46 @@ class PathService
         $opened = (int) (($user->path_unlocks ?? [])[(string) $course->id] ?? -1);
 
         $premium = $user->isPremium();
+        // Defne nodes need the AI feature; while it is switched off they never block the path
+        $aiOff = ! (bool) \App\Support\Settings::get('features.ai', true);
         $optional = [];
         $states = [];
+        $firstAfterPlacement = null;
         foreach ($course->units->values() as $u => $unit) {
             $prevDone = true;
             foreach ($unit->lessons->values() as $k => $lesson) {
                 $isDone = $done->has($lesson->id);
+                // a topic always starts at its first stop: every unit can be started, never entered halfway
                 $states[$lesson->id] = match (true) {
                     $isDone => 'completed',
                     $rel > 0 => 'locked',
-                    $rel < 0, $u <= $opened => 'open',
                     $k === 0, $prevDone => 'open',
                     default => 'locked',
                 };
-                // Premium nodes never block a free learner: they show, but the path walks past them.
-                $skip = $lesson->is_premium && ! $premium;
+                // Premium nodes (for free learners) and Defne nodes (AI off) show, but the path walks past them.
+                $skip = ($lesson->is_premium && ! $premium) || ($aiOff && $lesson->kind === 'ai_talk');
                 if ($skip) {
                     $optional[$lesson->id] = true;
                 }
                 $prevDone = $isDone || ($skip && $prevDone);
+                if ($u > $opened && $firstAfterPlacement === null && $states[$lesson->id] === 'open' && ! $skip) {
+                    $firstAfterPlacement = $lesson->id;
+                }
             }
         }
-        // where to continue: the first open lesson in path order the learner can actually take
-        foreach ($states as $id => $s) {
-            if ($s === 'open' && ! isset($optional[$id])) {
-                $states[$id] = 'current';
-                break;
+        // where to continue: after a placement, the first unit it did not cover; otherwise the
+        // first open stop in path order the learner can actually take
+        $current = $opened >= 0 && $rel === 0 ? $firstAfterPlacement : null;
+        if (! $current) {
+            foreach ($states as $id => $st) {
+                if ($st === 'open' && ! isset($optional[$id])) {
+                    $current = $id;
+                    break;
+                }
             }
+        }
+        if ($current) {
+            $states[$current] = 'current';
         }
         $this->optional = $optional;
 

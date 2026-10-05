@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion, type PanInfo } from 'motion/react'
 import clsx from 'clsx'
@@ -11,23 +11,92 @@ const PAPER = '#fffaf0'
 const INK = '#2a2620'
 const POSES: HigoPose[] = ['point', 'think', 'read', 'thumbs', 'scope', 'cheer']
 
-/** One page of the guide: its markdown plus Higo's tips, which he says himself. */
-interface Leaf { kind: 'cover' | 'page' | 'end'; body?: string; tips?: string[]; heading?: string }
+/** A piece of a page: some markdown, or one of Higo's tips (he says those himself). */
+type Block = { kind: 'md'; src: string; group?: string; table?: boolean } | { kind: 'tip'; text: string }
+/** One page of the book. Long sections flow on to the next page instead of scrolling. */
+interface Leaf { kind: 'cover' | 'page' | 'end'; blocks?: Block[]; heading?: string; cont?: boolean; section?: number }
+interface Section { heading?: string; blocks: Block[] }
 
-function parse(src: string, title: string): Leaf[] {
+/** Rows of a long table go in chunks (the header repeats), lists in a few items at a time. */
+const TABLE_ROWS = 3
+const LIST_ITEMS = 2
+
+/**
+ * Splits the guide into sections ("##" headings or "---" lines) and each section
+ * into small blocks: paragraphs, table chunks, list chunks, dialogue lines, tips.
+ * Small blocks are what lets a section break cleanly across pages.
+ */
+function parse(src: string): Section[] {
   const text = src.trim()
   if (!text) return []
   const chunks = text.split(/\n-{3,}\n/).length > 1 ? text.split(/\n-{3,}\n/) : text.split(/\n(?=## )/)
-  const pages: Leaf[] = chunks.map((c) => {
-    const tips: string[] = []
-    const body = c.split('\n').filter((l) => {
-      const m = l.match(/^>\s*Higo'nun ipucu:\s*(.*)$/i)
-      if (m) tips.push(m[1])
-      return !m
-    }).join('\n').trim()
-    return { kind: 'page', body, tips, heading: body.match(/^## (.+)$/m)?.[1] }
+  return chunks.map((c) => {
+    const lines = c.split('\n')
+    const blocks: Block[] = []
+    let heading: string | undefined
+    let i = 0
+    const take = (test: (l: string) => boolean) => { const out: string[] = []; while (i < lines.length && test(lines[i])) out.push(lines[i++]); return out }
+    while (i < lines.length) {
+      const l = lines[i]
+      if (!l.trim()) { i++; continue }
+      const tip = l.match(/^>\s*Higo'nun ipucu:\s*(.*)$/i)
+      if (tip) { blocks.push({ kind: 'tip', text: tip[1] }); i++; continue }
+      if (l.startsWith('## ')) { heading ??= l.slice(3).trim(); blocks.push({ kind: 'md', src: l }); i++; continue }
+      if (l.startsWith('|')) {
+        const rows = take((x) => x.startsWith('|'))
+        const [head, sep, ...body] = rows
+        const group = `t${i}`
+        for (let k = 0; k < Math.max(1, body.length); k += TABLE_ROWS) blocks.push({ kind: 'md', group, table: true, src: [head, sep, ...body.slice(k, k + TABLE_ROWS)].join('\n') })
+        continue
+      }
+      if (/^(- |\d+\. )/.test(l)) {
+        const items = take((x) => /^(- |\d+\. )/.test(x))
+        const group = `l${i}`
+        for (let k = 0; k < items.length; k += LIST_ITEMS) blocks.push({ kind: 'md', group, src: items.slice(k, k + LIST_ITEMS).join('\n') })
+        continue
+      }
+      if (l.startsWith('> ')) {
+        const quote = take((x) => x.startsWith('> ') && !/^>\s*Higo'nun ipucu:/i.test(x))
+        const group = `q${i}`
+        for (let k = 0; k < quote.length; k += 2) blocks.push({ kind: 'md', group, src: quote.slice(k, k + 2).join('\n') })
+        continue
+      }
+      blocks.push({ kind: 'md', src: take((x) => !!x.trim() && !/^(\||- |\d+\. |> |## )/.test(x)).join('\n') })
+    }
+    return { heading, blocks }
   })
-  return [{ kind: 'cover', heading: title }, ...pages, { kind: 'end' }]
+}
+
+/**
+ * Packs the sections into pages of the measured height: blocks fill a page in
+ * order and the first block that does not fit starts the next page, which
+ * repeats the section title as "(devam)". A block taller than a whole page
+ * still gets a page of its own.
+ */
+function paginate(sections: Section[], heights: number[][], avail: number, contH: number): Leaf[] {
+  const leaves: Leaf[] = []
+  sections.forEach((sec, si) => {
+    let page: Block[] = []
+    let used = 0
+    let cont = false
+    sec.blocks.forEach((b, bi) => {
+      const h = heights[si]?.[bi] ?? 0
+      if (page.length && used + h > avail) {
+        leaves.push({ kind: 'page', blocks: page, heading: sec.heading, cont, section: si })
+        page = []
+        cont = true
+        used = contH
+      }
+      // pieces of the same table or list that land on one page are joined back together
+      const last = page[page.length - 1]
+      if (last && last.kind === 'md' && b.kind === 'md' && b.group && last.group === b.group) {
+        page[page.length - 1] = { ...last, src: last.src + '\n' + (b.table ? b.src.split('\n').slice(2).join('\n') : b.src) }
+      } else page.push(b)
+      used += h
+    })
+    if (page.length) leaves.push({ kind: 'page', blocks: page, heading: sec.heading, cont, section: si })
+  })
+  return leaves
 }
 
 /**
@@ -43,7 +112,36 @@ export function Guidebook({ unit, onClose, onStart }: { unit: { id: number; titl
   const [at, setAt] = useState(0)
   const [flip, setFlip] = useState<null | 1 | -1>(null)
   const color = unit?.color ?? '#e8403a'
-  const leaves = useMemo(() => parse(data?.guidebook ?? '', unit?.title ?? ''), [data, unit?.title])
+  const sections = useMemo(() => parse(data?.guidebook ?? ''), [data])
+  // every block is measured at the real page size, then packed into pages that never scroll
+  const probe = useRef<HTMLDivElement>(null)
+  const [layout, setLayout] = useState<{ heights: number[][]; avail: number; contH: number } | null>(null)
+  useLayoutEffect(() => {
+    const el = probe.current
+    if (!el) return
+    const measure = () => {
+      const body = el.querySelector<HTMLElement>('[data-body]')
+      if (!body) return
+      const cs = getComputedStyle(body)
+      const avail = body.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 10
+      // a block's height is the distance to the next block's top, so shared margins count once
+      const all = [...el.querySelectorAll<HTMLElement>('[data-b]')]
+      const tops = all.map((b) => b.getBoundingClientRect().top)
+      const end = el.querySelector<HTMLElement>('[data-end]')!.getBoundingClientRect().top
+      const byKey = new Map(all.map((b, i) => [b.dataset.b!, (tops[i + 1] ?? end) - tops[i]]))
+      const heights = sections.map((sec, si) => sec.blocks.map((_, bi) => Math.ceil(byKey.get(`${si}-${bi}`) ?? 0)))
+      const cont = el.querySelector<HTMLElement>('[data-cont]')!
+      const contH = Math.ceil(all[0] ? tops[0] - cont.getBoundingClientRect().top : cont.offsetHeight)
+      setLayout((old) => (old && old.avail === avail && JSON.stringify(old.heights) === JSON.stringify(heights) ? old : { heights, avail, contH }))
+    }
+    measure()
+    const ro = new ResizeObserver(measure)
+    ro.observe(el)
+    // web fonts change line heights once they arrive
+    document.fonts?.ready.then(measure).catch(() => {})
+    return () => ro.disconnect()
+  }, [sections, wide, unit?.id, !!data])
+  const leaves = useMemo<Leaf[]>(() => (sections.length && layout ? [{ kind: 'cover', heading: unit?.title ?? '' }, ...paginate(sections, layout.heights, layout.avail, layout.contH), { kind: 'end' }] : []), [sections, layout, unit?.title])
   const per = wide ? 2 : 1
   const spreads = Math.max(1, Math.ceil(leaves.length / per))
 
@@ -108,6 +206,14 @@ export function Guidebook({ unit, onClose, onStart }: { unit: { id: number; titl
                 {/* the book block: cover boards behind the pages */}
                 <div className="absolute inset-0 translate-y-1.5 rounded-[18px]" style={{ background: `color-mix(in oklab, ${color} 55%, #3b2a1a)` }} />
                 <div className="absolute inset-[6px] flex overflow-hidden rounded-[12px] shadow-[0_30px_60px_-20px_rgba(0,0,0,.6)]" style={{ background: PAPER, color: INK }}>
+                  {/* invisible copy of a page holding every block, only for measuring */}
+                  <div ref={probe} aria-hidden className="pointer-events-none invisible absolute inset-y-0 left-0" style={{ width: wide ? '50%' : '100%' }}>
+                    <PageFrame n={0}>
+                      <div data-cont className="flow-root"><ContHeading text="Başlık" color={color} /></div>
+                      {sections.map((sec, si) => sec.blocks.map((b, bi) => <div key={`${si}-${bi}`} data-b={`${si}-${bi}`}><BlockView block={b} n={si + bi} color={color} /></div>))}
+                      <div data-end />
+                    </PageFrame>
+                  </div>
                   {wide ? (
                     <>
                       <div className="relative h-full w-1/2 overflow-hidden">{leaf(flip === -1 ? next : L)}<Spine side="left" /></div>
@@ -167,21 +273,21 @@ function Spine({ side }: { side: 'left' | 'right' }) {
 
 function Page({ leaf, n, color, unit, leaves, onStart, goTo }: { leaf: Leaf; n: number; color: string; unit: { title: string; description?: string } | null; leaves: Leaf[]; onStart: () => void; goTo: (p: number) => void }) {
   if (leaf.kind === 'cover') {
-    const contents = leaves.map((l, i) => ({ l, i })).filter((x) => x.l.kind === 'page')
+    const contents = leaves.map((l, i) => ({ l, i })).filter((x) => x.l.kind === 'page' && !x.l.cont)
     return (
-      <div className="flex h-full flex-col overflow-y-auto p-6 sm:p-9">
+      <div className="flex h-full flex-col overflow-hidden p-6 sm:p-9">
         <p className="text-xs font-black uppercase tracking-[0.25em]" style={{ color }}>Ünite rehberi</p>
         <h2 className="mt-2 font-display text-3xl font-black leading-tight sm:text-4xl">{leaf.heading}</h2>
         {unit?.description && <p className="mt-2 text-[15px] opacity-70">{unit.description}</p>}
-        <div className="my-5 flex items-end gap-3">
+        <div className="my-5 flex items-end gap-3 [@media(max-height:760px)]:hidden">
           <motion.img src={higoImg('read')} alt="" className="w-24 shrink-0 drop-shadow sm:w-28" animate={{ y: [0, -4, 0] }} transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }} />
           <Bubble color={color}>Bu ünitede sana ben rehberlik edeceğim. Sayfaları çevir, ipuçlarımı oku, sonra derse hazırsın!</Bubble>
         </div>
         <p className="mb-2 text-xs font-black uppercase tracking-[0.2em] opacity-50">İçindekiler</p>
-        <ol className="space-y-1">
+        <ol className="space-y-0.5 [@media(max-height:760px)]:mt-3">
           {contents.map(({ l, i }, k) => (
             <li key={i}>
-              <button onClick={() => goTo(i)} className="flex w-full items-baseline gap-2 rounded-lg px-1 py-1 text-left hover:bg-black/[.04]">
+              <button onClick={() => goTo(i)} className="flex w-full items-baseline gap-2 rounded-lg px-1 py-1 text-left text-[15px] hover:bg-black/[.04] [@media(max-height:700px)]:py-0.5">
                 <span className="font-mono text-xs opacity-50">{String(k + 1).padStart(2, '0')}</span>
                 <span className="flex-1 font-bold">{l.heading ?? `Bölüm ${k + 1}`}</span>
                 <span className="font-mono text-xs opacity-40">{i + 1}</span>
@@ -203,29 +309,46 @@ function Page({ leaf, n, color, unit, leaves, onStart, goTo }: { leaf: Leaf; n: 
     )
   }
   return (
+    <PageFrame n={n}>
+      {leaf.cont && leaf.heading && <div className="flow-root"><ContHeading text={leaf.heading} color={color} /></div>}
+      {leaf.blocks?.map((b, i) => <div key={i}><BlockView block={b} n={n + i} color={color} /></div>)}
+    </PageFrame>
+  )
+}
+
+/** The page shell: a fixed body that never scrolls, and the page number at the foot. */
+function PageFrame({ n, children }: { n: number; children: ReactNode }) {
+  return (
     <div className="flex h-full flex-col">
-      <div className="min-h-0 flex-1 overflow-y-auto px-6 pb-4 pt-7 sm:px-9 [&_h3]:font-display [&_h3]:text-[1.6rem] [&_h3]:leading-tight [&_table]:bg-white/60 [&_td]:align-top [&_em]:text-[inherit] [&_em]:font-semibold [&_em]:italic [&_em]:opacity-80 [&_blockquote]:my-1 [&_blockquote]:border-l-[3px] [&_blockquote]:font-sans [&_blockquote]:text-[15px] [&_blockquote]:font-semibold [&_blockquote]:leading-snug [&_table]:text-[13.5px] sm:[&_table]:text-sm">
-        <Markdown source={leaf.body ?? ''} />
-        {!!leaf.tips?.length && (
-          <div className="mt-5 space-y-3">
-            {leaf.tips.map((t, i) => (
-              <div key={i} className="flex items-end gap-2">
-                <img src={higoImg(POSES[(n + i) % POSES.length])} alt="" className="w-14 shrink-0 drop-shadow" />
-                <Bubble color={color}><span className="mb-0.5 block text-[10px] font-black uppercase tracking-[0.18em]" style={{ color }}>Higo'nun ipucu</span>{t}</Bubble>
-              </div>
-            ))}
-          </div>
-        )}
+      <div data-body className="min-h-0 flex-1 overflow-hidden px-6 pb-3 pt-7 sm:px-9 [&_h3]:font-display [&_h3]:text-[1.6rem] [&_h3]:leading-tight [&_table]:bg-white/60 [&_td]:align-top [&_em]:text-[inherit] [&_em]:font-semibold [&_em]:italic [&_em]:opacity-80 [&_blockquote]:my-1 [&_blockquote]:border-l-[3px] [&_blockquote]:font-sans [&_blockquote]:text-[15px] [&_blockquote]:font-semibold [&_blockquote]:leading-snug [&_table]:text-[13.5px] sm:[&_table]:text-sm">
+        {children}
       </div>
       <p className="shrink-0 pb-3 text-center font-mono text-xs opacity-40">{n + 1}</p>
     </div>
   )
 }
 
+/** A page that carries on a section from the page before. */
+function ContHeading({ text, color }: { text: string; color: string }) {
+  return <p className="mb-2 text-[11px] font-black uppercase tracking-[0.18em]" style={{ color }}>{text} · devam</p>
+}
+
+function BlockView({ block, n, color }: { block: Block; n: number; color: string }) {
+  if (block.kind === 'tip') {
+    return (
+      <div className="mt-4 flex items-end gap-2">
+        <img src={higoImg(POSES[n % POSES.length])} alt="" className="size-14 shrink-0 object-contain drop-shadow" />
+        <Bubble color={color}><span className="mb-0.5 block text-[10px] font-black uppercase tracking-[0.18em]" style={{ color }}>Higo'nun ipucu</span><span className="block [&_p]:m-0 [&_p]:text-sm [&_p]:leading-snug"><Markdown source={block.text} /></span></Bubble>
+      </div>
+    )
+  }
+  return <Markdown source={block.src} />
+}
+
 function Bubble({ children, color }: { children: ReactNode; color: string }) {
   return (
-    <p className="relative rounded-2xl rounded-bl-md border-2 bg-white px-3.5 py-2.5 text-sm font-semibold leading-snug" style={{ borderColor: `color-mix(in oklab, ${color} 35%, transparent)` }}>
+    <div className="relative rounded-2xl rounded-bl-md border-2 bg-white px-3.5 py-2.5 text-sm font-semibold leading-snug" style={{ borderColor: `color-mix(in oklab, ${color} 35%, transparent)` }}>
       {children}
-    </p>
+    </div>
   )
 }

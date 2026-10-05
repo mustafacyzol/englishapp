@@ -88,6 +88,15 @@ class RewardService
         $value = $item->value ?? [];
 
         return DB::transaction(function () use ($user, $userItem, $item, $value) {
+            // re-read under a lock: two taps on the same chest or card open it only once
+            $locked = UserItem::query()->lockForUpdate()->find($userItem->id);
+            if (! $locked || $locked->status !== 'available') {
+                throw ValidationException::withMessages(['item' => 'Bu kart zaten kullanılmış veya aktif.']);
+            }
+            // consumables are marked as taken before anything is paid out
+            if (! in_array($item->type, ['streak_freeze', 'partner_coupon'], true)) {
+                UserItem::query()->whereKey($userItem->id)->where('status', 'available')->update(['status' => 'used', 'activated_at' => now()]) || throw ValidationException::withMessages(['item' => 'Bu kart zaten kullanılmış veya aktif.']);
+            }
             $extra = [];
             switch ($item->type) {
                 case 'streak_freeze':

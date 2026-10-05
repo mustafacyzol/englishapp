@@ -245,10 +245,14 @@ class GameController extends Controller
     /** "Practice to earn a heart", a short review session restores one heart. */
     public function earnHeart(Request $request, HeartService $hearts): JsonResponse
     {
-        $data = $request->validate(['correct' => ['required', 'integer', 'min:5']]);
+        $request->validate(['correct' => ['required', 'integer', 'min:5']]);
         $user = $request->user();
         $hearts->sync($user);
+        // the five right answers must really have been given in practice (counted server-side)
+        $key = "hearts:credit:{$user->id}";
+        abort_if((int) \Illuminate\Support\Facades\Cache::get($key, 0) < 5, 422, 'Can kazanmak için pratikte 5 doğru cevap ver.');
         if ($user->hearts < User::MAX_HEARTS) {
+            \Illuminate\Support\Facades\Cache::decrement($key, 5);
             $user->forceFill(['hearts' => $user->hearts + 1])->save();
         }
 

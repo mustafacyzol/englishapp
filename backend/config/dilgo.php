@@ -88,8 +88,9 @@ return [
             'duel' => 150,
             'ai' => 60,          // chat + writing
             'quest' => null,
+            'replay' => 120,     // replaying finished lessons (premium hearts are unlimited)
         ],
-        'groups' => ['review' => 'words', 'practice' => 'words', 'writing' => 'ai'],
+        'groups' => ['review' => 'words', 'practice' => 'words', 'writing' => 'ai', 'lesson_replay' => 'replay'],
         // the streak only grows on a real study session, not on a single tap
         'streak_min_xp' => 10,
     ],

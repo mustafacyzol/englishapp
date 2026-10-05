@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { Check, Gem, Infinity as InfinityIcon, Keyboard, Mic, MicOff, Snail, Volume2, X } from 'lucide-react'
+import { Check, Gem, Infinity as InfinityIcon, Keyboard, Mic, MicOff, RotateCcw, Snail, Volume2, X } from 'lucide-react'
 import { img, rewardImg } from '@/lib/assets'
 import { higoImg, type HigoPose } from '@/components/game/Higo'
 import { SKILL } from '@/lib/skills'
@@ -353,6 +353,12 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
             <span className={clsx('text-xs font-black uppercase tracking-[0.2em]', d.accent)}>{d.label}</span>
           </p>
           <h1 className="text-xl font-extrabold leading-tight sm:text-2xl">{d.title}</h1>
+          {/* a remembered mistake from an earlier stop, back for another try */}
+          {'review_of' in ex && typeof (ex as { review_of?: unknown }).review_of === 'string' && (
+            <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-berry/10 px-2.5 py-1 text-[11px] font-extrabold text-berry">
+              <RotateCcw className="size-3" /> Daha önce burada yanılmıştın · {(ex as { review_of: string }).review_of}
+            </p>
+          )}
         </div>
         <motion.img src={higoImg(DRILL_HIGO[ex.type] ?? 'point')} alt="" initial={{ y: 30, rotate: -8 }} animate={{ y: 0, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14, delay: 0.1 }} className="absolute -bottom-2 right-2 size-[72px] object-contain drop-shadow-[0_6px_8px_rgba(160,40,10,.2)] sm:size-20" />
       </motion.div>

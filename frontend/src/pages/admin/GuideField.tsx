@@ -10,7 +10,7 @@ const SNIPPETS: { label: string; icon: typeof Heading2; text: string }[] = [
   { label: 'Örnekler', icon: PenLine, text: '\n\n- *I **am** a student.* Ben öğrenciyim.\n- *She **is** at home.* O evde.\n' },
   { label: 'Higo ipucu', icon: Lightbulb, text: "\n\n> Higo'nun ipucu: Sık yapılan bir hatayı ve doğrusunu yaz.\n" },
   { label: 'Diyalog', icon: MessageSquareQuote, text: '\n\n> A: Hi! How are you?\n> B: I\'m fine, thanks.\n' },
-  { label: 'Alıştırma', icon: ListChecks, text: '\n\n## Kendini kontrol et\n1. My sister ___ got long hair.\n2. ___ you got a pet?\n\nCevaplar: 1. has · 2. Have\n' },
+  { label: 'Sık hata', icon: ListChecks, text: '\n\n| Yanlış | Doğru | Neden? |\n|---|---|---|\n| I have 12 years. | I am 12. | Yaş "to be" ile söylenir. |\n' },
 ]
 
 /** Splits the markdown into book pages the same way the app does ("---" lines or "##" headings). */
@@ -69,7 +69,7 @@ export function GuideField({ value, onChange }: { value: string; onChange: (v: s
           ) : <p className="text-sm opacity-60">Henüz içerik yok.</p>}
         </div>
       )}
-      <p className="border-t-2 border-line bg-paper-2 px-3 py-2 text-[11px] text-ink-soft">{list.length} sayfa · {value.length} karakter · Her "##" başlığı yeni sayfa açar. "&gt; Higo'nun ipucu:" satırları Higo'nun konuşma balonunda görünür. Konuyu, anlamını ve Türkçe karşılıklı örnekleri yaz.</p>
+      <p className="border-t-2 border-line bg-paper-2 px-3 py-2 text-[11px] text-ink-soft">{list.length} sayfa · {value.length} karakter · Her "##" başlığı yeni sayfa açar. "&gt; Higo'nun ipucu:" satırları Higo'nun konuşma balonunda görünür. Konuyu, anlamını ve Türkçe karşılıklı örnekleri yaz. Alıştırmayı rehbere değil derslere koy; uzun sayfalar uygulamada kendiliğinden sonraki sayfaya geçer.</p>
     </div>
   )
 }

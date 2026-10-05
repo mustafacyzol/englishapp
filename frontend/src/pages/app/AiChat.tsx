@@ -102,6 +102,7 @@ export default function AiChat() {
       showReward(r.reward, 'Konuşma dersi tamam!')
       nav('/learn')
     },
+    onError: (e: Error) => toast(e.message, 'error'),
   })
 
   const submit = (e?: FormEvent, spoken = false, override?: string) => {

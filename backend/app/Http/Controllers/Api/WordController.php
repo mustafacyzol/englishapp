@@ -87,13 +87,19 @@ class WordController extends Controller
         if ($lessonId = (int) $request->query('lesson')) {
             $lesson = \App\Models\Lesson::query()->findOrFail($lessonId);
             abort_unless(app(\App\Services\PathService::class)->canOpen($user, $lesson), 403, 'Bu ders henüz kilitli.');
-            $list = collect($lesson->meta['words'] ?? []);
+            $acts = app(\App\Services\PathActivities::class);
+            $acts->deckServed($user, $lesson);
+            // the stop plays the unit's ready-made word set (the same one in the word-set library)
+            $set = $acts->wordSet($lesson);
+            $list = $set
+                ? $set->items->map(fn ($i) => ['word' => $i->word, 'translation' => $i->translation, 'example' => $i->example])
+                : collect($lesson->meta['words'] ?? []);
             $saved = $user->words()->whereIn('word', $list->pluck('word'))->get(['id', 'word', 'translation', 'example', 'interval_days'])->keyBy(fn ($w) => mb_strtolower($w->word));
             $deck = $list->map(fn ($w) => $saved->has(mb_strtolower($w['word']))
                 ? $saved[mb_strtolower($w['word'])]->only(['id', 'word', 'translation', 'example', 'interval_days'])
                 : ['id' => null, 'word' => $w['word'], 'translation' => $w['translation'], 'example' => $w['example'] ?? null, 'interval_days' => 0]);
 
-            return response()->json(['data' => $deck->shuffle()->take($n)->values(), 'saved' => $saved->count(), 'lesson' => $lesson->only(['id', 'title'])]);
+            return response()->json(['data' => $deck->shuffle()->take($n)->values(), 'saved' => $saved->count(), 'lesson' => $lesson->only(['id', 'title']), 'set' => $set?->only(['id', 'title'])]);
         }
         $mine = $user->words()->whereNotNull('translation')
             ->orderByRaw('CASE WHEN due_at <= ? THEN 0 ELSE 1 END', [now()])
@@ -133,6 +139,11 @@ class WordController extends Controller
             }
         }
         abort_if($count === 0 && empty($data['played']), 422, 'Tekrar edilecek kelime yok.');
+        // right answers in practice are what "earn a heart" spends (see GameController::earnHeart)
+        $right = collect($data['reviews'])->filter(fn ($r) => $words->has($r['id']) && $r['grade'] >= 3)->count() + (int) ($data['played'] ?? 0);
+        $key = "hearts:credit:{$user->id}";
+        \Illuminate\Support\Facades\Cache::add($key, 0, now()->addDay());
+        \Illuminate\Support\Facades\Cache::increment($key, $right);
 
         // Amounts come from the economy table; the daily cap for word games is applied centrally.
         $e = config('dilgo.economy.xp');

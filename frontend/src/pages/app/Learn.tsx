@@ -1,9 +1,9 @@
-import { useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
+import { createContext, useContext, useEffect, useMemo, useRef, useState, type MutableRefObject } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowDown, ArrowUp, BookOpen, BookText, Check, ChevronDown, Dumbbell, Flame, Gamepad2, Headphones, Lock, MapPin, MessageCircle, Mic, PenLine, Play, Star, Trophy } from 'lucide-react'
+import { ArrowDown, ArrowUp, BookOpen, BookText, Check, ChevronDown, Dumbbell, Flame, Gamepad2, Headphones, Lock, MapPin, MessageCircle, Mic, PenLine, Play, RotateCcw, Star, Trophy } from 'lucide-react'
 import { rewardImg, unitImg } from '@/lib/assets'
 import { get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
@@ -22,13 +22,17 @@ interface PathData {
   courses?: { id: number; title: string; cefr_level: string; access: Access }[]
   units: PathUnit[]
   track?: { key: 'maarif' | 'primary' | 'exam' | 'general'; label: string; sub: string; exam: string | null; grade: number | null; drill: string | null }
+  /** remembered mistakes due on the review stops */
+  mistakes_due?: number
 }
+/** How many remembered mistakes wait for the review stops (shown under them). */
+const DueCtx = createContext(0)
 interface CourseItem { id: number; title: string; cefr_level: string; color: string }
 export interface PlanItem { skill: SkillKey; title: string; detail: string; to: string; minutes: number; done: boolean; focus: boolean; weakest: boolean }
 interface Stats { total: number; done: number; pct: number; cur?: { l: PathLesson; u: PathUnit }; unitIndex: number; unitDone: number }
 
 const SKILL_ICON = { reading: BookOpen, listening: Headphones, speaking: Mic, writing: PenLine, vocabulary: Star, grammar: BookText, mixed: Dumbbell }
-const KIND_LABEL: Record<string, string> = { story: 'Okuma', ai_talk: 'Defne ile konuşma', checkpoint: 'Seviye sınavı', words: 'Kelime oyunu' }
+const KIND_LABEL: Record<string, string> = { story: 'Hikâye ödevi', ai_talk: 'Defne ile konuşma', checkpoint: 'Seviye sınavı', words: 'Kelime seti ödevi', review: 'Kişisel tekrar' }
 
 /** Where a path node takes you (the AI talk is started from the node card). */
 export const nodeHref = (l: PathLesson) => (l.kind === 'story' && l.story ? `/stories/${l.story.slug}?lesson=${l.id}` : l.kind === 'words' ? `/practice?game=${l.meta?.game ?? 'match'}&lesson=${l.id}` : l.kind === 'ai_talk' ? null : `/lesson/${l.id}`)
@@ -91,7 +95,7 @@ export default function Learn() {
       <div className="mt-8">
         {data.units.map((unit, ui) => (
           <div key={unit.id}>
-            <UnitSection unit={unit} index={ui} photoIndex={courseOffset(data.course.cefr_level) + ui} onGuide={() => setGuide(unit)} openId={openId} setOpenId={setOpenId} currentRef={currentRef} />
+            <DueCtx.Provider value={data.mistakes_due ?? 0}><UnitSection unit={unit} index={ui} photoIndex={courseOffset(data.course.cefr_level) + ui} onGuide={() => setGuide(unit)} openId={openId} setOpenId={setOpenId} currentRef={currentRef} /></DueCtx.Provider>
           </div>
         ))}
       </div>
@@ -142,7 +146,6 @@ function TrackBanner({ track }: { track: NonNullable<PathData['track']> }) {
         <p className="font-display text-[15px] font-black leading-tight">{track.label}</p>
         <p className="text-xs font-semibold leading-snug text-white/85">{track.sub}</p>
       </div>
-      <Link to="/yolum" className="shrink-0 rounded-xl bg-white/20 px-2.5 py-1.5 text-[11px] font-extrabold hover:bg-white/30">Değiştir</Link>
     </div>
   )
 }
@@ -174,7 +177,7 @@ function ContinueCard({ data, stats, onJump, onPick, away }: { data: PathData; s
           <span className="mt-1 flex items-center gap-2">
             <span className="flex gap-0.5" aria-hidden>
               {unit.lessons.map((l) => (
-                <span key={l.id} className={clsx('h-1.5 w-4 rounded-full sm:w-5', l.state === 'locked' && 'bg-paper-2')} style={l.state === 'completed' ? { background: unitColor } : l.state === 'current' ? { background: `color-mix(in oklab, ${unitColor} 40%, transparent)` } : undefined} />
+                <span key={l.id} className={clsx('h-1.5 w-4 rounded-full sm:w-5', l.state !== 'completed' && l.state !== 'current' && 'bg-ink/15 dark:bg-white/20')} style={l.state === 'completed' ? { background: unitColor } : l.state === 'current' ? { background: `color-mix(in oklab, ${unitColor} 40%, transparent)` } : undefined} />
               ))}
             </span>
             <span className="truncate text-xs font-bold text-ink-soft">Ünite {stats.unitIndex + 1} · {stats.unitDone}/{unit.lessons.length}</span>
@@ -329,11 +332,12 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
   const current = lesson.state === 'current'
   // open: reachable (the start of a topic, or opened by the placement test) but not where you are
   const ajar = lesson.state === 'open'
-  const Icon = lesson.kind === 'story' ? BookOpen : lesson.kind === 'ai_talk' ? MessageCircle : lesson.kind === 'checkpoint' ? Trophy : lesson.kind === 'words' ? Gamepad2 : SKILL_ICON[lesson.skill] ?? Star
+  const Icon = lesson.kind === 'story' ? BookOpen : lesson.kind === 'ai_talk' ? MessageCircle : lesson.kind === 'checkpoint' ? Trophy : lesson.kind === 'words' ? Gamepad2 : lesson.kind === 'review' ? RotateCcw : SKILL_ICON[lesson.skill] ?? Star
   const size = current ? NODE + 12 : NODE
   // Labels sit on the open side of the curve, so they never collide with the trail.
   const labelLeft = x > 8
   const kind = KIND_LABEL[lesson.kind] ?? SKILL_LABEL[lesson.skill]
+  const due = useContext(DueCtx)
 
   const startAi = useMutation({
     mutationFn: () => post<{ conversation: { id: number } }>('/ai/conversations', { mode: 'roleplay', scenario_key: lesson.scenario_key }),
@@ -392,6 +396,7 @@ function LessonNode({ lesson, index, x, y, color, open, setOpenId, nodeRef }: { 
       <p className={clsx('absolute top-1/2 w-max max-w-[118px] -translate-y-1/2 text-xs font-extrabold leading-tight sm:max-w-[168px] sm:text-[13px]', labelLeft ? 'right-[calc(100%+14px)] text-right' : 'left-[calc(100%+14px)]', locked ? 'text-ink-soft/70' : 'text-ink')}>
         <span className="block text-[10px] font-black uppercase tracking-wider" style={{ color: locked ? undefined : color }}>{current ? 'Kaldığın yer' : ajar ? 'Buradan başlayabilirsin' : kind}</span>
         {lesson.title}
+        {lesson.kind === 'review' && due > 0 && !locked && <span className="mt-0.5 block text-[11px] font-black text-berry">{due} hata seni bekliyor</span>}
       </p>
 
       <AnimatePresence>

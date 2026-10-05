@@ -51,20 +51,32 @@ class CheckoutService
     /** @return array{order:Order, checkout:array|null} */
     public function start(User $user, Plan $plan, ?string $couponCode): array
     {
-        $quote = $this->quote($user, $plan, $couponCode);
         $gateway = $this->gateway();
+        // the coupon row is locked while it is checked and the order is created, so two
+        // simultaneous checkouts cannot both take the last use of a code
+        [$quote, $order] = DB::transaction(function () use ($user, $plan, $couponCode, $gateway) {
+            if ($couponCode) {
+                $locked = Coupon::query()->whereRaw('UPPER(code) = ?', [strtoupper(trim($couponCode))])->lockForUpdate()->first();
+                // starting again replaces your own unfinished checkout with this coupon
+                if ($locked) {
+                    Order::query()->where('user_id', $user->id)->where('coupon_id', $locked->id)->where('status', 'pending')->update(['status' => 'cancelled']);
+                }
+            }
+            $quote = $this->quote($user, $plan, $couponCode);
+            $order = Order::query()->create([
+                'uuid' => (string) Str::uuid(),
+                'user_id' => $user->id,
+                'plan_id' => $plan->id,
+                'coupon_id' => $quote['coupon']?->id,
+                'amount' => $quote['amount'],
+                'discount' => $quote['discount'],
+                'total' => $quote['total'],
+                'currency' => $quote['currency'],
+                'gateway' => $quote['total'] <= 0 ? 'free' : $gateway->name(),
+            ]);
 
-        $order = Order::query()->create([
-            'uuid' => (string) Str::uuid(),
-            'user_id' => $user->id,
-            'plan_id' => $plan->id,
-            'coupon_id' => $quote['coupon']?->id,
-            'amount' => $quote['amount'],
-            'discount' => $quote['discount'],
-            'total' => $quote['total'],
-            'currency' => $quote['currency'],
-            'gateway' => $quote['total'] <= 0 ? 'free' : $gateway->name(),
-        ]);
+            return [$quote, $order];
+        });
 
         if ($quote['total'] <= 0) {
             $this->fulfill($order, 'free');
@@ -123,6 +135,13 @@ class CheckoutService
             }
 
             if ($order->coupon_id) {
+                // a free order must still find its coupon usable when it is fulfilled
+                $coupon = Coupon::query()->lockForUpdate()->find($order->coupon_id);
+                if ((float) $order->total <= 0 && $coupon && $coupon->max_uses !== null && $coupon->used_count >= $coupon->max_uses) {
+                    $order->update(['status' => 'failed']);
+
+                    return;
+                }
                 Coupon::query()->whereKey($order->coupon_id)->increment('used_count');
                 CouponRedemption::query()->create([
                     'coupon_id' => $order->coupon_id,

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { Link, Navigate, useSearchParams } from 'react-router-dom'
+import { Navigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
@@ -178,8 +178,8 @@ function PickExam() {
 }
 
 function ChangeExam(_: { current: ExamKey }) {
-  // the exam comes from onboarding; switching means answering the track questions again
-  return <Link to="/yolum" className="inline-flex h-10 items-center rounded-xl border-2 border-line bg-card px-3 text-sm font-extrabold hover:border-ink/30">Yolumu yeniden belirle</Link>
+  // the exam comes from onboarding and is changed only in Settings, never from the practice screens
+  return <span className="inline-flex h-10 items-center rounded-xl bg-paper-2 px-3 text-xs font-bold text-ink-soft">Sınav tercihin Ayarlar'dan değişir</span>
 }
 
 function Runner({ section, n, mock, onExit }: { section: string; n: number; mock?: boolean; onExit: () => void }) {

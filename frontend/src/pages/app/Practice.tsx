@@ -10,6 +10,7 @@ import { celebrate, sfx } from '@/lib/fx'
 import type { RewardSummary } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Empty, PageHeader, SkeletonPage, Spinner, Tabs } from '@/components/ui/Misc'
+import { useToast } from '@/components/ui/Toast'
 import { useReward } from '@/components/game/RewardProvider'
 import { useEconomy, XpGuide } from '@/components/game/XpGuide'
 import { SetBrowser } from './WordSets'
@@ -250,6 +251,7 @@ function Stat({ v, l, c }: { v: number; l: string; c?: string }) {
 function GameRun({ game, lesson, set, onExit, onSwitch }: { game: GameKey; lesson?: number | null; set?: number | null; onExit: () => void; onSwitch: (g: GameKey) => void }) {
   const qc = useQueryClient()
   const showReward = useReward()
+  const toast = useToast()
   const [round, setRound] = useState(0)
   const [started, setStarted] = useState(false)
   const [result, setResult] = useState<{ outcomes: Outcome[]; score?: number; saved: number } | null>(null)
@@ -269,9 +271,12 @@ function GameRun({ game, lesson, set, onExit, onSwitch }: { game: GameKey; lesso
       // a word-set game counts towards homework that assigned the set
       if (set && outcomes.length) await post(`/word-sets/${set}/played`, { game, correct, total: outcomes.length }).catch(() => null)
       if (correct >= 5) await post('/hearts/earn', { correct }).catch(() => null)
-      // played from the path: half the unit's words right completes the stop
+      // played from the path: the server checks the result (half right, a real game) and completes the stop
       let path: { reward?: RewardSummary; level_up?: string | null } | null = null
-      if (lesson && outcomes.length && correct / outcomes.length >= 0.5) path = await post<{ reward: RewardSummary; level_up?: string | null }>(`/lessons/${lesson}/complete`, { answers: [] }).catch(() => null)
+      if (lesson && outcomes.length) {
+        path = await post<{ reward: RewardSummary; level_up?: string | null }>(`/lessons/${lesson}/complete`, { answers: { game, correct, total: outcomes.length } })
+          .catch((e: Error) => { toast(e.message, 'error'); return null })
+      }
       return { outcomes, score, saved: toSave.length, reward: path?.reward ?? r?.reward, pathDone: !!path }
     },
     onSuccess: (r) => {

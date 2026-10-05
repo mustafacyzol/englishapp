@@ -50,7 +50,7 @@ class CourseSeeder extends Seeder
         }
     }
 
-    /** The nine nodes of a unit, in path order. */
+    /** The eleven stops of a unit, in path order: mostly words and grammar, then the skills. */
     private function lessons(array $u, string $level, int $ui, ?int $storyId, ?AiScenario $scenario): array
     {
         $v = $u['vocab'];
@@ -92,14 +92,16 @@ class CourseSeeder extends Seeder
             ['title' => 'Kelimeler', 'skill' => 'vocabulary', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $words],
             ['title' => 'Dilbilgisi', 'skill' => 'grammar', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $grammar],
             $reading ? ['title' => 'Okuma: '.$reading['title'], 'skill' => 'reading', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $reading['exercises']] : null,
-            ['title' => 'Kelime oyunu', 'skill' => 'vocabulary', 'kind' => 'words', 'xp_reward' => $xp, 'exercises' => [],
-                'meta' => $this->wordGame($u)],
+            // the unit's ready-made word set from the library (WordSetSeeder, slug "a1-1"...), played as a game
+            ['title' => 'Kelime seti: '.$u['title'], 'skill' => 'vocabulary', 'kind' => 'words', 'xp_reward' => $xp, 'exercises' => [],
+                'meta' => $this->wordGame($u) + ['set' => strtolower($level).'-'.($ui + 1)]],
             ['title' => 'Dilbilgisi pekiştir', 'skill' => 'grammar', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $this->grammarDrill($u, $ui)],
             ['title' => 'Dinle ve konuş', 'skill' => 'listening', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $listening],
             ['title' => 'Kelime tekrarı', 'skill' => 'vocabulary', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $this->review($v, $ui + 11)],
             ['title' => 'Telaffuz', 'skill' => 'speaking', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $this->pronunciation($u)],
             $story ? ['title' => 'Oku: '.$story->title, 'skill' => 'reading', 'kind' => 'story', 'story_id' => $story->id, 'xp_reward' => $xp + 5, 'is_premium' => $story->is_premium, 'exercises' => []] : null,
-            ['title' => 'Pratik', 'skill' => 'vocabulary', 'kind' => 'lesson', 'xp_reward' => $xp, 'exercises' => $this->review($v, $ui)],
+            // personal: the learner's due mistakes from earlier stops first, then this unit's words
+            ['title' => 'Hatalarını onar', 'skill' => 'vocabulary', 'kind' => 'review', 'xp_reward' => $xp, 'exercises' => $this->review($v, $ui)],
             $scenario ? ['title' => 'Defne ile: '.$scenario->title, 'skill' => 'speaking', 'kind' => 'ai_talk', 'scenario_key' => $scenario->key, 'xp_reward' => $xp + 5, 'is_premium' => (bool) $scenario->is_premium, 'exercises' => []] : null,
         ]));
     }

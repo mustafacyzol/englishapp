@@ -34,7 +34,7 @@ class LearnController extends Controller
 
         $track = \App\Support\Tracks::for($user);
         $units = $course->units->values()->map(function ($unit, $i) use ($progress, $states, $user, $track, $course) {
-            $lessons = $unit->lessons->map(fn (Lesson $lesson) => ['meta' => $lesson->meta ? ['game' => $lesson->meta['game'] ?? null] : null] + $lesson->toArray() + [
+            $lessons = $unit->lessons->map(fn (Lesson $lesson) => ['meta' => $lesson->meta ? ['game' => $lesson->meta['game'] ?? null, 'set' => $lesson->meta['set'] ?? null] : null] + $lesson->toArray() + [
                 'state' => $states[$lesson->id] ?? 'locked',
                 'crowns' => $progress->get($lesson->id)?->crowns ?? 0,
                 'best_score' => $progress->get($lesson->id)?->best_score ?? 0,
@@ -65,6 +65,7 @@ class LearnController extends Controller
             'courses' => $paths->courses()->map(fn (Course $c) => $c->only(['id', 'title', 'cefr_level']) + ['access' => match ($paths->relation($user, $c)) { -1 => 'review', 0 => 'current', default => 'locked' }])->values(),
             'units' => $units,
             'track' => $track,
+            'mistakes_due' => app(\App\Services\PathActivities::class)->dueCount($user),
         ]);
     }
 
@@ -81,10 +82,15 @@ class LearnController extends Controller
         $heartState = $hearts->sync($user);
         abort_if(! $heartState['unlimited'] && $heartState['hearts'] <= 0, 423, 'Canın kalmadı. Biraz bekle, can yenile ya da pratik yaparak kazan.');
 
-        return response()->json([
-            'lesson' => $lesson->load('story:id,slug,title')->only(['id', 'title', 'skill', 'kind', 'xp_reward', 'exercises', 'story', 'scenario_key']),
-            'hearts' => $heartState,
-        ]);
+        $data = $lesson->load('story:id,slug,title')->only(['id', 'title', 'skill', 'kind', 'xp_reward', 'exercises', 'story', 'scenario_key']);
+        // the review stop is personal: the learner's own due mistakes, then the unit's questions
+        if ($lesson->kind === 'review') {
+            $set = app(\App\Services\PathActivities::class)->reviewSet($user, $lesson);
+            $data['exercises'] = $set['exercises'];
+            $data['mistakes'] = count(array_filter($set['ids']));
+        }
+
+        return response()->json(['lesson' => $data, 'hearts' => $heartState]);
     }
 
     public function complete(Request $request, Lesson $lesson, LessonService $lessons): JsonResponse

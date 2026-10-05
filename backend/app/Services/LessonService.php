@@ -21,10 +21,10 @@ class LessonService
      *
      * @param  list<mixed>  $answers  one entry per exercise
      */
-    public function grade(Lesson $lesson, array $answers): array
+    public function grade(Lesson $lesson, array $answers, ?array $exercises = null): array
     {
         $results = [];
-        foreach (array_values($lesson->exercises ?? []) as $i => $ex) {
+        foreach (array_values($exercises ?? $lesson->exercises ?? []) as $i => $ex) {
             $results[] = self::gradeOne($ex, $answers[$i] ?? null);
         }
         if (! $results) {
@@ -62,7 +62,19 @@ class LessonService
 
     public function complete(User $user, Lesson $lesson, array $answers, int $seconds = 0): array
     {
-        $grade = $this->grade($lesson, $answers);
+        $acts = app(PathActivities::class);
+        // story, word-set and Defne stops are checked against the work itself
+        $acts->verify($user, $lesson, $answers);
+        if ($lesson->kind === 'review') {
+            // graded against the exact questions that were served, mistakes included
+            $set = $acts->reviewSet($user, $lesson);
+            $grade = $this->grade($lesson, array_values($answers), $set['exercises']);
+            $acts->remember($user, $lesson, $set['exercises'], $grade['results'], $set['ids']);
+            $acts->forgetReviewSet($user, $lesson);
+        } else {
+            $grade = $this->grade($lesson, in_array($lesson->kind, ['words', 'story', 'ai_talk'], true) ? [] : array_values($answers));
+            $acts->remember($user, $lesson, array_values($lesson->exercises ?? []), $grade['results']);
+        }
         $this->hearts->lose($user, $grade['mistakes']);
 
         $progress = LessonProgress::query()->firstOrNew(['user_id' => $user->id, 'lesson_id' => $lesson->id]);
@@ -83,8 +95,9 @@ class LessonService
             $xp += config('dilgo.gamification.perfect_lesson_bonus_xp');
         }
 
-        $speaking = collect($lesson->exercises ?? [])->whereIn('type', ['speak', 'pronounce'])->count();
-        $summary = $this->game->record($user, $xp, 'lesson', $lesson->id, array_filter([
+        $speaking = collect($lesson->kind === 'review' ? [] : $lesson->exercises ?? [])->whereIn('type', ['speak', 'pronounce'])->count();
+        // replays share a daily XP cap, so replaying an easy lesson cannot farm the league
+        $summary = $this->game->record($user, $xp, $firstTime ? 'lesson' : 'lesson_replay', $lesson->id, array_filter([
             'lessons' => $passed ? 1 : 0,
             'perfect_lessons' => $perfect ? 1 : 0,
             'speaking' => $speaking,

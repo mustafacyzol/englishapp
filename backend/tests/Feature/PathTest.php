@@ -38,7 +38,9 @@ class PathTest extends TestCase
         $a1 = Course::query()->where('cefr_level', 'A1')->first();
         $b1 = Course::query()->where('cefr_level', 'B1')->first();
         $this->actingAs($u)->getJson("/api/v1/path/{$a1->id}")->assertOk()->assertJsonPath('course.access', 'review')
-            ->assertJsonPath('units.0.lessons.1.state', 'open');
+            ->assertJsonPath('units.0.lessons.0.state', 'current')->assertJsonPath('units.1.lessons.0.state', 'open')
+            // review courses are also entered at the start of a unit, never halfway
+            ->assertJsonPath('units.0.lessons.1.state', 'locked');
         $locked = $this->getJson("/api/v1/path/{$b1->id}")->assertOk()->assertJsonPath('course.access', 'locked')->json('units.0.lessons.0.id');
         $this->getJson("/api/v1/lessons/{$locked}")->assertForbidden();
     }

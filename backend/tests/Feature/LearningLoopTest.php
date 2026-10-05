@@ -38,9 +38,12 @@ class LearningLoopTest extends TestCase
     {
         $lesson = $this->node('A1', 0, 1);
         $answers = collect($lesson->exercises)->map(fn ($ex) => $this->correctAnswer($ex))->all();
-        // a later lesson opens once the one before it is done (or the level is above A1)
+        // a later stop opens only once the one before it is done, even in a course below your level
         $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertForbidden();
         $this->user->forceFill(['cefr_level' => 'A2'])->save();
+        $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertForbidden();
+        $first = $this->node('A1', 0, 0);
+        \App\Models\LessonProgress::query()->create(['user_id' => $this->user->id, 'lesson_id' => $first->id, 'best_score' => 100, 'attempts' => 1, 'crowns' => 1, 'completed_at' => now()]);
 
         $res = $this->postJson("/api/v1/lessons/{$lesson->id}/complete", ['answers' => $answers])->assertOk();
         $this->assertSame(100, $res->json('score'));
