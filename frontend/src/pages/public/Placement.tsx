@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, BookOpen, Clock, Headphones, Lock, PenLine, Sparkles, Type, Volume2, X } from 'lucide-react'
+import { ArrowRight, BookOpen, Clock, Headphones, Lock, PenLine, Trophy, Type, Volume2, X } from 'lucide-react'
 import { get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { Button } from '@/components/ui/Button'
@@ -215,7 +215,7 @@ function Done({ pending, signedIn, onGo }: { pending: boolean; signedIn: boolean
           <p className="mt-6 text-sm font-black uppercase tracking-[0.2em] text-mint-deep">Sınav tamamlandı</p>
           <h1 className="mt-2 font-display text-3xl font-black leading-tight">{signedIn ? 'Sonucun hesabına işlendi.' : 'Sonucun hazır, seni bekliyor.'}</h1>
           <p className="mt-3 text-ink-soft">{signedIn ? 'Seviyeni ve dört becerideki durumunu yol haritanda görebilirsin.' : 'Ücretsiz hesabını oluştur; seviyeni, beceri raporunu ve sana göre hazırlanan yolu hemen göstereceğiz.'}</p>
-          <Button block size="lg" className="mt-7 gap-2" onClick={onGo}><Sparkles className="size-5" /> {signedIn ? 'Sonucumu gör' : 'Hesap oluştur, sonucu gör'}</Button>
+          <Button block size="lg" className="mt-7 gap-2" onClick={onGo}><Trophy className="size-5" /> {signedIn ? 'Sonucumu gör' : 'Hesap oluştur, sonucu gör'}</Button>
           {!signedIn && <p className="mt-3 text-sm text-ink-soft">Zaten hesabın var mı? <Link to="/login" className="font-bold text-flame">Giriş yap</Link>, sonuç hesabına eklenir.</p>}
         </motion.div>
       )}

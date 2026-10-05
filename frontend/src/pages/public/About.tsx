@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { motion, useScroll, useSpring, useTransform } from 'motion/react'
-import { ArrowRight, BookOpen, GraduationCap, HeartHandshake, MessageCircle, School, Sparkles, Sprout } from 'lucide-react'
+import { ArrowRight, BookOpen, GraduationCap, HeartHandshake, MessageCircle, Layers, School, Sprout } from 'lucide-react'
 import { get } from '@/lib/api'
 import { img } from '@/lib/assets'
 import { LinkButton } from '@/components/ui/Button'
@@ -29,7 +29,7 @@ const METHOD = [
 const STORY = [
   { tag: 'Sınıfta', title: 'Her şey bir sınıfta başladı', text: 'Bayrak Dil Okulları’nda öğrencilerimiz derste hızla ilerliyordu, ama iki ders arasındaki günlerde pratik yapacak bir yer bulamıyordu.', icon: School },
   { tag: 'İlk adım', title: 'Önce hikâyeler geldi', text: 'Okuma ve dinlemeyi her güne taşıyan hikâye uygulamamızı yaptık. Öğrenciler daha fazlasını istedi: konuşmak, yazmak, yarışmak.', icon: BookOpen },
-  { tag: 'Bugün', title: 'Dört beceri, tek uygulama', text: 'Ders yolu, hikâyeler, oyunlar, Defne ile konuşma ve Gölge Düellosu. İlkokuldan üniversiteye, kendi hızında.', icon: Sparkles },
+  { tag: 'Bugün', title: 'Dört beceri, tek uygulama', text: 'Ders yolu, hikâyeler, oyunlar, Defne ile konuşma ve Gölge Düellosu. İlkokuldan üniversiteye, kendi hızında.', icon: Layers },
   { tag: 'Okullarla', title: 'Sınıfa geri dönüyoruz', text: 'Öğretmen ve müdür panelleriyle uygulama, çıktığı yere, sınıfa geri dönüyor: ödev, takip ve dört beceri karnesi.', icon: GraduationCap },
 ]
 

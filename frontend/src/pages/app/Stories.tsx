@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowDownWideNarrow, Atom, Bookmark, Briefcase, CheckCircle2, Clock, Coffee, Crown, GraduationCap, Headphones, Home, Laugh, Newspaper, Plane, Rocket, Search, SearchCheck, Sparkles, X, type LucideIcon } from 'lucide-react'
+import { ArrowDownWideNarrow, Bookmark, Check, ChevronDown, ChevronLeft, ChevronRight, Clock, Crown, Search, X } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
 import { get } from '@/lib/api'
 import type { Paginated, StoryCard } from '@/lib/types'
@@ -12,43 +12,22 @@ import { StoryCover } from './StoryCover'
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'] as const
 const LEVEL_TEXT: Record<string, string> = { A1: 'Başlangıç', A2: 'Temel', B1: 'Orta', B2: 'İyi', C1: 'İleri' }
-/** Genres get an icon and a colour so the chips read at a glance. */
-const GENRE: Record<string, { icon: LucideIcon; color: string }> = {
-  'Günlük Hayat': { icon: Coffee, color: '#e8403a' },
-  Seyahat: { icon: Plane, color: '#2f7cf6' },
-  Eğlence: { icon: Laugh, color: '#d99a00' },
-  Kariyer: { icon: Briefcase, color: '#4f8a6e' },
-  Gizem: { icon: SearchCheck, color: '#8f7cf8' },
-  'Bilim Kurgu': { icon: Rocket, color: '#ef4e7b' },
-  Okul: { icon: GraduationCap, color: '#0f766e' },
-  Aile: { icon: Home, color: '#c96a12' },
-  Bilim: { icon: Atom, color: '#2563eb' },
-  Haber: { icon: Newspaper, color: '#475569' },
+/** Each genre has a quiet colour (a dot on the chip, the ribbon on the book); no icons. */
+const GENRE_COLOR: Record<string, string> = {
+  'Günlük Hayat': '#e8403a', Seyahat: '#2f7cf6', Eğlence: '#d99a00', Kariyer: '#4f8a6e', Gizem: '#8f7cf8',
+  'Bilim Kurgu': '#ef4e7b', Okul: '#0f766e', Aile: '#c96a12', Bilim: '#2563eb', Haber: '#475569',
 }
-const genre = (c: string) => GENRE[c] ?? { icon: Sparkles, color: '#676d7c' }
+const tone = (c?: string | null) => (c && GENRE_COLOR[c]) || '#676d7c'
+/** Genres shown as chips before "Daha fazla" folds the rest away. */
+const VISIBLE_GENRES = 4
 type Quick = '' | 'unread' | 'saved' | 'short'
 
 /**
- * Genres as a compact grid of icon tiles that wraps (never scrolls sideways).
- * Picking one never moves the page: the list keeps its old content until the new one arrives.
+ * The library as a bookshelf: books stand on shelves by level (by genre once a
+ * level is chosen), each shelf slides sideways on phones and shows arrows on
+ * larger screens. Filters stay one quiet toolbar: level, a few genre chips with
+ * the rest under "Daha fazla", and quick toggles.
  */
-function GenreGrid({ cats, value, onChange }: { cats: string[]; value: string; onChange: (v: string) => void }) {
-  return (
-    <div className="grid grid-cols-4 gap-1.5 sm:grid-cols-6 lg:grid-cols-11" role="radiogroup" aria-label="Tür">
-      {['', ...cats].map((c) => {
-        const g = c ? genre(c) : { icon: Sparkles, color: '#1f2433' }
-        const on = value === c
-        return (
-          <button key={c || 'all'} role="radio" aria-checked={on} onClick={(e) => { e.preventDefault(); onChange(on ? '' : c) }} className={clsx('press group flex min-w-0 flex-col items-center gap-1 rounded-2xl border-2 px-1 py-2 transition', on ? 'border-transparent text-white shadow-hard-sm' : 'border-line bg-card hover:border-ink/25')} style={on ? { background: g.color } : undefined}>
-            <span className={clsx('grid size-9 place-items-center rounded-xl transition group-hover:scale-110', on ? 'bg-white/20' : '')} style={on ? undefined : { background: `${g.color}18`, color: g.color }}><g.icon className="size-5" /></span>
-            <span className="line-clamp-2 w-full break-words text-center text-[11px] font-extrabold leading-tight [hyphens:auto]">{c || 'Tümü'}</span>
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
 export default function Stories() {
   const { user } = useAuth()
   const [level, setLevel] = useState('')
@@ -61,6 +40,7 @@ export default function Stories() {
   const cats = useQuery({ queryKey: ['story-cats'], queryFn: () => get<{ data: string[] }>('/stories/categories') })
   const lib = useQuery({ queryKey: ['library'], queryFn: () => get<{ data: { story: StoryCard; progress: number; completed_at: string | null }[] }>('/library') })
   const reading = lib.data?.data.filter((r) => r.progress > 0 && !r.completed_at).slice(0, 3) ?? []
+
   // Quick filters and sorting run on the loaded page, so switching them is instant.
   const list = useMemo(() => {
     let xs = data?.data ?? []
@@ -70,6 +50,17 @@ export default function Stories() {
     if (sort === 'short') xs = [...xs].sort((a, b) => a.reading_minutes - b.reading_minutes)
     return xs
   }, [data, quick, sort])
+
+  // Shelves: by level, or by genre inside one level; the learner's own level comes first.
+  const shelves = useMemo(() => {
+    const key = (s: StoryCard) => (level ? s.category ?? 'Diğer' : s.cefr_level)
+    const map = new Map<string, StoryCard[]>()
+    list.forEach((s) => map.set(key(s), [...(map.get(key(s)) ?? []), s]))
+    const order = level ? [...map.keys()] : LEVELS.filter((l) => map.has(l)) as string[]
+    if (!level && user?.cefr_level && order.includes(user.cefr_level)) order.splice(order.indexOf(user.cefr_level), 1), order.unshift(user.cefr_level)
+    return order.map((k) => ({ key: k, title: level ? k : `${k} · ${LEVEL_TEXT[k] ?? ''}`, mine: !level && k === user?.cefr_level, books: map.get(k)! }))
+  }, [list, level, user?.cefr_level])
+
   const active = [level && `Seviye ${level}`, category, quick && { unread: 'Okunmamış', saved: 'Kaydettiklerim', short: 'Kısa (5 dk altı)' }[quick]].filter(Boolean) as string[]
   const clear = () => { setLevel(''); setCategory(''); setQuick(''); setQ('') }
 
@@ -78,20 +69,20 @@ export default function Stories() {
       <PageHeader kicker="Oku & dinle" title="Hikâye kütüphanesi">
         <label className="relative w-full sm:w-72">
           <Search className="absolute left-3 top-1/2 size-5 -translate-y-1/2 text-ink-soft" />
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Hikaye ara…" className="h-11 w-full rounded-2xl border-2 border-line bg-card pl-10 pr-3 font-semibold focus:border-sky focus:outline-none" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Hikâye ara…" className="h-11 w-full rounded-2xl border-2 border-line bg-card pl-10 pr-3 font-semibold focus:border-sky focus:outline-none" />
         </label>
       </PageHeader>
 
       {reading.length > 0 && (
-        <section className="mb-8">
-          <h2 className="mb-3 text-lg font-extrabold">Okumaya devam et</h2>
-          <div className="grid gap-3 sm:grid-cols-3">
+        <section className="mb-7">
+          <h2 className="mb-3 text-sm font-black uppercase tracking-[0.14em] text-ink-soft">Okumaya devam et</h2>
+          <div className="grid gap-2.5 sm:grid-cols-3">
             {reading.map((r) => (
-              <Link key={r.story.slug} to={`/stories/${r.story.slug}`} className="press ink-card flex items-center gap-3 p-3">
-                <div className="size-14 shrink-0 overflow-hidden rounded-xl"><StoryCover story={r.story} /></div>
-                <div className="min-w-0">
-                  <p className="truncate font-bold">{r.story.title}</p>
-                  <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-paper-2"><div className="h-full rounded-full bg-mint" style={{ width: `${r.progress}%` }} /></div>
+              <Link key={r.story.slug} to={`/stories/${r.story.slug}`} className="press flex items-center gap-3 rounded-2xl border-2 border-line bg-card p-2.5 transition hover:border-ink/25">
+                <div className="h-14 w-11 shrink-0 overflow-hidden rounded-md shadow-[2px_2px_0_rgba(31,36,51,.12)]"><StoryCover story={r.story} /></div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-extrabold">{r.story.title}</p>
+                  <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-paper-2"><div className="h-full rounded-full bg-mint" style={{ width: `${r.progress}%` }} /></div>
                 </div>
               </Link>
             ))}
@@ -99,34 +90,35 @@ export default function Stories() {
         </section>
       )}
 
-      {/* ------------------------------------------------------------ Filters: one calm toolbar */}
-      <section className="mb-5 flex flex-wrap items-center gap-2 rounded-2xl border-2 border-line bg-card p-2">
-        <div className="grid w-full auto-cols-fr grid-flow-col rounded-xl bg-paper-2 p-1 sm:w-auto" role="radiogroup" aria-label="Seviye">
-          {['', ...LEVELS].map((l) => {
-            const on = level === l
-            const mine = !!l && user?.cefr_level === l
-            return (
-              <button key={l || 'all'} role="radio" aria-checked={on} onClick={() => setLevel(l)} title={l ? LEVEL_TEXT[l] : undefined} className={clsx('relative min-w-0 rounded-lg px-1.5 py-1.5 text-sm font-extrabold transition sm:px-3', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
-                {on && <motion.span layoutId="lvl" className="absolute inset-0 rounded-lg bg-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
-                <span className="relative">{l || 'Tümü'}</span>
-                {mine && <span className={clsx('absolute bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full', on ? 'bg-paper' : 'bg-flame')} aria-label="senin seviyen" />}
-              </button>
-            )
-          })}
+      {/* --------------------------------------------------------------- Filters: one toolbar */}
+      <section className="mb-4 space-y-2 rounded-2xl border-2 border-line bg-card p-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="grid w-full auto-cols-fr grid-flow-col rounded-xl bg-paper-2 p-1 sm:w-auto" role="radiogroup" aria-label="Seviye">
+            {['', ...LEVELS].map((l) => {
+              const on = level === l
+              const mine = !!l && user?.cefr_level === l
+              return (
+                <button key={l || 'all'} role="radio" aria-checked={on} onClick={() => setLevel(l)} title={l ? LEVEL_TEXT[l] : undefined} className={clsx('relative min-w-0 rounded-lg px-1.5 py-1.5 text-sm font-extrabold transition sm:px-3', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
+                  {on && <motion.span layoutId="lvl" className="absolute inset-0 rounded-lg bg-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+                  <span className="relative">{l || 'Tümü'}</span>
+                  {mine && <span className={clsx('absolute bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full', on ? 'bg-paper' : 'bg-flame')} aria-label="senin seviyen" />}
+                </button>
+              )
+            })}
+          </div>
+          <div className="no-scrollbar -mx-0.5 flex w-full items-center gap-1 overflow-x-auto px-0.5 sm:ml-auto sm:w-auto [&>*]:shrink-0 [&>*]:whitespace-nowrap">
+            {([['unread', 'Okunmamış'], ['saved', 'Kaydettiklerim'], ['short', 'Kısa']] as const).map(([k, l]) => (
+              <button key={k} onClick={() => setQuick(quick === k ? '' : k)} aria-pressed={quick === k} className={clsx('rounded-lg px-2.5 py-1.5 text-sm font-bold transition', quick === k ? 'bg-ink text-paper' : 'text-ink-soft hover:bg-paper-2 hover:text-ink')}>{l}</button>
+            ))}
+            <button onClick={() => setSort(sort === 'short' ? 'recommended' : 'short')} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-bold text-ink-soft hover:bg-paper-2 hover:text-ink" title="Sıralama">
+              <ArrowDownWideNarrow className="size-4" /> {sort === 'short' ? 'Kısadan uzuna' : 'Önerilen'}
+            </button>
+          </div>
         </div>
-        <div className="ml-auto flex flex-wrap items-center gap-1">
-          {([['unread', 'Okunmamış'], ['saved', 'Kaydettiklerim'], ['short', 'Kısa']] as const).map(([k, l]) => (
-            <button key={k} onClick={() => setQuick(quick === k ? '' : k)} aria-pressed={quick === k} className={clsx('rounded-lg px-2.5 py-1.5 text-sm font-bold transition', quick === k ? 'bg-ink text-paper' : 'text-ink-soft hover:bg-paper-2 hover:text-ink')}>{l}</button>
-          ))}
-          <button onClick={() => setSort(sort === 'short' ? 'recommended' : 'short')} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-bold text-ink-soft hover:bg-paper-2 hover:text-ink" title="Sıralama">
-            <ArrowDownWideNarrow className="size-4" /> {sort === 'short' ? 'Kısadan uzuna' : 'Önerilen'}
-          </button>
-        </div>
+        <GenreChips cats={cats.data?.data ?? []} value={category} onChange={setCategory} />
       </section>
 
-      <div className="mb-5"><GenreGrid cats={cats.data?.data ?? []} value={category} onChange={setCategory} /></div>
-
-      <div className="mb-4 flex min-h-8 flex-wrap items-center gap-2">
+      <div className="mb-3 flex min-h-8 flex-wrap items-center gap-2">
         <p className="text-sm font-bold text-ink-soft">{data ? `${list.length} hikâye` : ''}</p>
         <AnimatePresence>
           {active.map((a) => <motion.span key={a} initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.8, opacity: 0 }} className="rounded-full bg-paper-2 px-2.5 py-0.5 text-xs font-extrabold">{a}</motion.span>)}
@@ -139,35 +131,114 @@ export default function Stories() {
       ) : !list.length ? (
         <Empty icon={<Search className="size-7" />} title="Bu filtrelerde hikâye yok" text="Bir filtreyi kaldırmayı dene." action={<button onClick={clear} className="font-bold text-flame">Filtreleri temizle</button>} />
       ) : (
-        <div className="grid gap-5 sm:grid-cols-2 2xl:grid-cols-3">
-          {list.map((s, i) => (
-            <Link key={s.id} to={`/stories/${s.slug}`} className="group overflow-hidden rounded-3xl border-2 border-line bg-card transition hover:-translate-y-1 hover:shadow-soft" style={{ transitionDelay: `${(i % 6) * 0}ms` }}>
-              <div className="relative aspect-[16/10] overflow-hidden">
-                <StoryCover story={s} className="transition duration-700 group-hover:scale-105" />
-                <div className="absolute left-3 top-3 flex gap-1.5">
-                  <span className="rounded-lg bg-card/95 px-2 py-0.5 text-xs font-black">{s.cefr_level}</span>
-                  {s.is_premium && <span className="flex items-center gap-1 rounded-lg bg-butter px-2 py-0.5 text-xs font-black text-[#1f2433]"><Crown className="size-3.5" /> Premium</span>}
-                </div>
-                <div className="absolute right-3 top-3 flex gap-1.5">
-                  {s.completed && <CheckCircle2 className="size-7 rounded-full bg-mint p-0.5 text-white" />}
-                  {s.bookmarked && <Bookmark className="size-7 rounded-lg bg-card p-1" />}
-                </div>
-              </div>
-              <div className="p-5">
-                <h3 className="text-xl leading-tight group-hover:text-flame">{s.title}</h3>
-                {s.title_tr && <p className="text-sm text-ink-soft">{s.title_tr}</p>}
-                <p className="mt-2 line-clamp-2 text-sm">{s.summary}</p>
-                <div className="mt-3 flex items-center gap-3 text-xs font-bold text-ink-soft">
-                  <span className="flex items-center gap-1"><Clock className="size-3.5" /> {s.reading_minutes} dk</span>
-                  <span className="flex items-center gap-1"><Headphones className="size-3.5" /> Sesli</span>
-                  {s.category && <span className="flex items-center gap-1" style={{ color: genre(s.category).color }}>{(() => { const G = genre(s.category!); return <G.icon className="size-3.5" /> })()}{s.category}</span>}
-                </div>
-                {!!s.progress && !s.completed && <div className="mt-3 h-2 overflow-hidden rounded-full bg-paper-2"><div className="h-full rounded-full bg-mint" style={{ width: `${s.progress}%` }} /></div>}
-              </div>
-            </Link>
-          ))}
+        <div className="space-y-9">
+          {shelves.map((s) => <Shelf key={s.key} title={s.title} mine={s.mine} books={s.books} />)}
         </div>
       )}
     </div>
+  )
+}
+
+/** A few genres as chips; the rest wait in a small menu so the toolbar never crowds. */
+function GenreChips({ cats, value, onChange }: { cats: string[]; value: string; onChange: (v: string) => void }) {
+  const [more, setMore] = useState(false)
+  const ref = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!more) return
+    const off = (e: PointerEvent) => { if (!ref.current?.contains(e.target as Node)) setMore(false) }
+    document.addEventListener('pointerdown', off)
+    return () => document.removeEventListener('pointerdown', off)
+  }, [more])
+  // the chosen genre always stays visible, even if it lives in the menu
+  const shown = cats.slice(0, VISIBLE_GENRES)
+  const rest = cats.slice(VISIBLE_GENRES)
+  const chips = value && !shown.includes(value) ? [...shown, value] : shown
+  const chip = (c: string, label = c) => {
+    const on = value === c
+    return (
+      <button key={c || 'all'} onClick={() => onChange(on && c ? '' : c)} aria-pressed={on} className={clsx('flex h-8 shrink-0 items-center gap-1.5 rounded-full border-2 px-3 text-[13px] font-extrabold transition', on ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink-soft hover:border-ink/25 hover:text-ink')}>
+        {c && <span className="size-2 rounded-full" style={{ background: tone(c) }} />}{label}
+      </button>
+    )
+  }
+  return (
+    <div className="flex items-center gap-1.5 px-0.5" role="group" aria-label="Tür">
+      <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto sm:flex-wrap">
+        {chip('', 'Tüm türler')}
+        {chips.map((c) => chip(c))}
+      </div>
+      {rest.filter((c) => c !== value).length > 0 && (
+        <div ref={ref} className="relative shrink-0">
+          <button onClick={() => setMore((v) => !v)} aria-expanded={more} className="flex h-8 items-center gap-1 rounded-full px-2.5 text-[13px] font-extrabold text-ink-soft hover:bg-paper-2 hover:text-ink">
+            <span className="hidden min-[400px]:inline">Daha fazla</span><span className="min-[400px]:hidden">Diğer</span> <ChevronDown className={clsx('size-4 transition', more && 'rotate-180')} />
+          </button>
+          <AnimatePresence>
+            {more && (
+              <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="absolute right-0 top-[calc(100%+6px)] z-30 w-48 rounded-2xl border-2 border-line bg-card p-1.5 shadow-soft">
+                {rest.filter((c) => c !== value).map((c) => (
+                  <button key={c} onClick={() => { onChange(c); setMore(false) }} className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm font-bold hover:bg-paper-2">
+                    <span className="size-2 rounded-full" style={{ background: tone(c) }} />{c}
+                  </button>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** One shelf: a row of standing books on a board; swipe on phones, arrows on wider screens. */
+function Shelf({ title, mine, books }: { title: string; mine?: boolean; books: StoryCard[] }) {
+  const row = useRef<HTMLDivElement>(null)
+  const [edge, setEdge] = useState({ start: true, end: false })
+  const update = () => {
+    const el = row.current
+    if (el) setEdge({ start: el.scrollLeft < 8, end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 8 })
+  }
+  useEffect(update, [books.length])
+  const go = (d: 1 | -1) => row.current?.scrollBy({ left: d * row.current.clientWidth * 0.8, behavior: 'smooth' })
+  return (
+    <section>
+      <div className="mb-2 flex items-end justify-between gap-3">
+        <h2 className="flex items-center gap-2 font-display text-xl font-black leading-tight">
+          {title}
+          {mine && <span className="rounded-full bg-flame/12 px-2 py-0.5 text-[11px] font-black uppercase tracking-wider text-flame">Senin seviyen</span>}
+        </h2>
+        <div className="hidden items-center gap-1 sm:flex">
+          <span className="mr-1 text-xs font-bold text-ink-soft">{books.length} kitap</span>
+          <button aria-label="Geri" disabled={edge.start} onClick={() => go(-1)} className="grid size-8 place-items-center rounded-full border-2 border-line bg-card transition hover:border-ink/30 disabled:opacity-30"><ChevronLeft className="size-4" /></button>
+          <button aria-label="İleri" disabled={edge.end} onClick={() => go(1)} className="grid size-8 place-items-center rounded-full border-2 border-line bg-card transition hover:border-ink/30 disabled:opacity-30"><ChevronRight className="size-4" /></button>
+        </div>
+      </div>
+      <div className="relative">
+        {/* every book carries its piece of the board, so the plank runs under the whole row as it scrolls */}
+        <div ref={row} onScroll={update} className="no-scrollbar -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-2 pb-1 pt-3 sm:gap-4">
+          {books.map((s) => <Book key={s.id} s={s} />)}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function Book({ s }: { s: StoryCard }) {
+  return (
+    <Link to={`/stories/${s.slug}`} className="group w-[118px] shrink-0 snap-start sm:w-[140px] lg:w-[152px]" title={s.title}>
+      <div className="relative aspect-[3/4] origin-bottom overflow-hidden rounded-[4px_10px_10px_4px] bg-paper-2 shadow-[3px_4px_0_rgba(31,36,51,.14),0_10px_18px_-10px_rgba(31,36,51,.45)] transition duration-300 group-hover:-translate-y-2 group-hover:-rotate-1">
+        <StoryCover story={s} />
+        {/* spine shading and the genre ribbon */}
+        <span aria-hidden className="absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-black/30 via-black/10 to-transparent" />
+        <span aria-hidden className="absolute right-3 top-0 h-7 w-3 rounded-b-sm shadow" style={{ background: tone(s.category), clipPath: 'polygon(0 0,100% 0,100% 100%,50% 78%,0 100%)' }} />
+        <span className="absolute left-2 top-2 rounded-md bg-card/95 px-1.5 py-0.5 text-[10px] font-black">{s.cefr_level}</span>
+        {s.is_premium && <span className="absolute bottom-2 left-2 grid size-6 place-items-center rounded-full bg-butter text-[#1f2433]" title="Premium"><Crown className="size-3.5" /></span>}
+        {s.completed && <span className="absolute bottom-2 right-2 grid size-6 place-items-center rounded-full bg-mint text-white" title="Okundu"><Check className="size-4" strokeWidth={3} /></span>}
+        {s.bookmarked && !s.completed && <span className="absolute bottom-2 right-2 grid size-6 place-items-center rounded-full bg-card" title="Kaydedildi"><Bookmark className="size-3.5" /></span>}
+        {!!s.progress && !s.completed && <span className="absolute inset-x-0 bottom-0 h-1 bg-black/20"><span className="block h-full bg-mint" style={{ width: `${s.progress}%` }} /></span>}
+      </div>
+      <div aria-hidden className="-mx-[6px] h-2.5 bg-gradient-to-b from-[#dcbd93] to-[#b78a58] shadow-[0_8px_12px_-8px_rgba(80,50,20,.6)] group-first:rounded-l-[4px] group-last:rounded-r-[4px] sm:-mx-2 dark:from-[#5b4632] dark:to-[#3f2f20]" />
+      <p className="mt-2.5 line-clamp-2 text-[13px] font-extrabold leading-tight transition group-hover:text-flame sm:text-sm">{s.title}</p>
+      <p className="mt-0.5 flex items-center gap-1 text-[11px] font-bold text-ink-soft"><Clock className="size-3" /> {s.reading_minutes} dk{s.category ? ` · ${s.category}` : ''}</p>
+    </Link>
   )
 }

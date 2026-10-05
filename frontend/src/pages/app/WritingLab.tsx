@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, Check, Eye, EyeOff, PenLine, RotateCcw, Sparkles, Target } from 'lucide-react'
+import { ArrowLeft, Check, Eye, EyeOff, PenLine, RotateCcw, SpellCheck, Target } from 'lucide-react'
 import { ApiError, post } from '@/lib/api'
 import { img, PHOTO } from '@/lib/assets'
 import { TUTOR } from '@/lib/tutor'
@@ -132,7 +132,7 @@ export default function WritingLab() {
               {r && !scanning ? (
                 <Button onClick={() => m.reset()} variant="secondary" icon={<RotateCcw className="size-5" />}>Düzenle ve tekrar gönder</Button>
               ) : (
-                <Button loading={scanning} disabled={text.trim().length < 20} onClick={() => m.mutate()} icon={<Sparkles className="size-5" />}>{TUTOR.name} incelesin</Button>
+                <Button loading={scanning} disabled={text.trim().length < 20} onClick={() => m.mutate()} icon={<SpellCheck className="size-5" />}>{TUTOR.name} incelesin</Button>
               )}
             </div>
           </div>

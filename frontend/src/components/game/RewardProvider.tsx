@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { motion } from 'motion/react'
-import { Sparkles, Target, Zap } from 'lucide-react'
+import { Target, Zap } from 'lucide-react'
 import { rewardImg } from '@/lib/assets'
 import { Modal } from '@/components/ui/Misc'
 import { Button } from '@/components/ui/Button'
@@ -59,7 +59,7 @@ export function RewardProvider({ children }: { children: ReactNode }) {
               <div className="mt-3 max-h-40 space-y-1.5 overflow-y-auto">
                 {r.goal_met_now && <Banner icon={<Zap className="size-4" />}>Günlük hedef tamam!</Banner>}
                 {r.quests_completed.map((q) => (
-                  <Banner key={q.id} icon={<Sparkles className="size-4" />}>Görev bitti: {q.title} (+{q.reward_gems})</Banner>
+                  <Banner key={q.id} icon={<Target className="size-4" />}>Görev bitti: {q.title} (+{q.reward_gems})</Banner>
                 ))}
                 {r.rewards?.map((w, i) => (
                   <motion.div key={i} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 + i * 0.1 }} className="flex items-center gap-2 rounded-xl bg-butter/15 px-3 py-1.5 text-left">

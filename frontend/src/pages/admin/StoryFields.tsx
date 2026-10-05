@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import clsx from 'clsx'
-import { ArrowDown, ArrowUp, Plus, Sparkles, Trash2, Wand2 } from 'lucide-react'
+import { ArrowDown, ArrowUp, Lightbulb, ListChecks, Plus, Trash2 } from 'lucide-react'
 
 export interface Vocab { word: string; meaning: string; example?: string }
 export interface Para { en: string; tr?: string }
@@ -58,7 +58,7 @@ export function VocabField({ value, onChange, paragraphs }: { value: Vocab[]; on
 
       {suggestions.length > 0 && (
         <div>
-          <p className="mb-1.5 flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-ink-soft"><Wand2 className="size-3.5" /> Metinden öner (tıkla, ekle)</p>
+          <p className="mb-1.5 flex items-center gap-1.5 text-xs font-black uppercase tracking-widest text-ink-soft"><Lightbulb className="size-3.5" /> Metinden öner (tıkla, ekle)</p>
           <div className="flex flex-wrap gap-1.5">
             {suggestions.map(([w, ex]) => (
               <button key={w} type="button" onClick={() => onChange([...list, { word: w, meaning: '', example: ex }])} className="rounded-full border-2 border-line px-2.5 py-1 text-xs font-bold hover:border-flame hover:text-flame">+ {w}</button>
@@ -167,7 +167,7 @@ export function QuestionsField({ value, onChange }: { value: Question[]; onChang
           </div>
         )
       })}
-      <button type="button" onClick={() => onChange([...list, { type: 'choice', q: '', options: ['', '', '', ''], answer: 0 }])} className="inline-flex items-center gap-1.5 rounded-xl border-2 border-line px-3 py-2 text-sm font-extrabold"><Sparkles className="size-4" /> Soru ekle</button>
+      <button type="button" onClick={() => onChange([...list, { type: 'choice', q: '', options: ['', '', '', ''], answer: 0 }])} className="inline-flex items-center gap-1.5 rounded-xl border-2 border-line px-3 py-2 text-sm font-extrabold"><ListChecks className="size-4" /> Soru ekle</button>
       <p className="text-xs text-ink-soft">Sorular hikâye bittikten sonra "Anlama testi" adıyla, tek tek sorulur.</p>
     </div>
   )

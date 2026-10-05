@@ -3,7 +3,7 @@ import { Navigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, BookOpenText, CalendarClock, Check, Flame, Lightbulb, RotateCcw, Sparkles, Target, Timer, Trophy, X } from 'lucide-react'
+import { ArrowRight, BookOpenText, CalendarClock, Check, Flame, Lightbulb, RotateCcw, Shuffle, Target, Timer, Trophy, X } from 'lucide-react'
 import { get, patch, post, type ApiError } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { EXAMS } from '@/lib/onboarding'
@@ -88,7 +88,7 @@ export default function Exam() {
           </div>
           <div className="mt-6 flex flex-wrap gap-2">
             {data.mock && <Button variant="secondary" onClick={() => setRun({ section: 'mix', n: data.mock!.questions, mock: true })} icon={<Timer className="size-5" />}>Deneme sınavı · {data.mock.questions} soru · {data.mock.minutes} dk</Button>}
-            <Button variant="ghost" className="!text-white hover:!bg-white/15" onClick={() => setRun({ section: 'mix', n: 10 })} icon={<Sparkles className="size-5" />}>Karma set · 10</Button>
+            <Button variant="ghost" className="!text-white hover:!bg-white/15" onClick={() => setRun({ section: 'mix', n: 10 })} icon={<Shuffle className="size-5" />}>Karma set · 10</Button>
           </div>
           {data.mock && <p className="mt-3 text-xs font-semibold text-white/75">Deneme, gerçek {exam.name} sınavının bölüm dağılımı ve süresiyle hazırlanır ({data.mock.full_questions} soru · {data.mock.full_minutes} dk ölçeğinde).</p>}
         </div>

@@ -88,19 +88,16 @@ export default function Learn() {
   // it never rides along over the pinned "where you left off" bar.
   useEffect(() => {
     if (openId == null) return
-    const opened = Date.now()
+    // the baseline is taken once the card has finished scrolling itself into view
     let base: number | null = null
+    const settle = window.setTimeout(() => { base = window.scrollY }, 650)
     const down = (e: PointerEvent) => { if (!(e.target as Element | null)?.closest?.(`[data-node="${openId}"]`)) setOpenId(null) }
-    const scroll = () => {
-      if (Date.now() - opened < 700) return // the card scrolling itself into view
-      base ??= window.scrollY
-      if (Math.abs(window.scrollY - base) > 120) setOpenId(null)
-    }
+    const scroll = () => { if (base !== null && Math.abs(window.scrollY - base) > 120) setOpenId(null) }
     const key = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpenId(null) }
     document.addEventListener('pointerdown', down)
     window.addEventListener('scroll', scroll, { passive: true })
     document.addEventListener('keydown', key)
-    return () => { document.removeEventListener('pointerdown', down); window.removeEventListener('scroll', scroll); document.removeEventListener('keydown', key) }
+    return () => { window.clearTimeout(settle); document.removeEventListener('pointerdown', down); window.removeEventListener('scroll', scroll); document.removeEventListener('keydown', key) }
   }, [openId])
 
   if (isLoading || !data || !stats) return <SkeletonPage variant="path" />

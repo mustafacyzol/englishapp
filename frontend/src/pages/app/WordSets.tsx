@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, Bookmark, BookmarkCheck, Brain, Check, ClipboardPaste, Copy, Globe2, Grid3x3, Headphones, Layers, Lock, Pencil, Play, Plus, Puzzle, Search, Sparkles, Timer, Trash2, Volume2, X, Zap } from 'lucide-react'
+import { ArrowLeft, Bookmark, BookmarkCheck, Check, ClipboardPaste, Copy, Globe2, Grid3x3, Headphones, Layers, Lock, Pencil, Play, Plus, Puzzle, Search, Timer, Trash2, Volume2, X, PartyPopper, SquareStack, Zap } from 'lucide-react'
 import { del, get, post, put, type ApiError } from '@/lib/api'
 import { img } from '@/lib/assets'
 import { speak } from '@/lib/speech'
@@ -29,10 +29,10 @@ export const coverSrc = (c: string | null | undefined) => img(`sets/${COVERS.som
 
 /** The games a set can be played in; the key is the Practice game key. */
 export const SET_GAMES: { key: string; title: string; icon: typeof Layers; tone: string }[] = [
-  { key: 'balloon', title: 'Balon patlat', icon: Sparkles, tone: 'from-sky to-lilac' },
+  { key: 'balloon', title: 'Balon patlat', icon: PartyPopper, tone: 'from-sky to-lilac' },
   { key: 'swipe', title: 'Kaydır kartları', icon: Layers, tone: 'from-flame to-berry' },
   { key: 'match', title: 'Hızlı eşleştir', icon: Timer, tone: 'from-lilac to-sky' },
-  { key: 'memory', title: 'Hafıza kartları', icon: Brain, tone: 'from-berry to-lilac' },
+  { key: 'memory', title: 'Hafıza kartları', icon: SquareStack, tone: 'from-berry to-lilac' },
   { key: 'kelimle', title: 'Kelimle', icon: Grid3x3, tone: 'from-mint to-sky' },
   { key: 'listen', title: 'Dinle ve yaz', icon: Headphones, tone: 'from-lilac to-berry' },
   { key: 'scramble', title: 'Harf karıştır', icon: Puzzle, tone: 'from-butter to-flame' },

@@ -51,7 +51,7 @@ function Bar({ title, tone = 'text-ink' }: { title: string; tone?: string }) {
   )
 }
 
-/** Duolingo's strength: a clear daily path. */
+/** A clear daily path. */
 export function PathMock() {
   const nodes = [
     { x: 0, done: true, icon: Check },
@@ -88,7 +88,7 @@ export function PathMock() {
   )
 }
 
-/** Quizlet's strength: flashcards, here as swipeable cards. */
+/** Flashcards, as swipeable cards. */
 export function SwipeMock() {
   const reduced = useReducedMotion()
   const words = [['umbrella', 'şemsiye'], ['journey', 'yolculuk'], ['confident', 'kendinden emin'], ['borrow', 'ödünç almak']]
@@ -130,7 +130,7 @@ export function SwipeMock() {
   )
 }
 
-/** Kahoot's strength: the live, timed race. */
+/** The live, timed race. */
 export function DuelMock() {
   const reduced = useReducedMotion()
   const [t, setT] = useState(0)

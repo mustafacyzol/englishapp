@@ -14,7 +14,7 @@ Route::redirect('/', '/up');
 Route::get('sitemap.xml', function () {
     $xml = Cache::remember('sitemap.xml', 3600, function () {
         $base = rtrim((string) config('dilgo.brand.frontend_url'), '/');
-        $urls = collect(['/' => '1.0', '/okullar' => '0.8', '/maarif' => '0.8', '/yardim' => '0.6', '/about' => '0.6', '/blog' => '0.8', '/placement' => '0.7', '/register' => '0.7', '/contact' => '0.5', '/terms' => '0.2', '/privacy' => '0.2', '/cookies' => '0.2', '/distance-sales' => '0.2', '/refund' => '0.2'])
+        $urls = collect(['/' => '1.0', '/okullar' => '0.8', '/yardim' => '0.6', '/about' => '0.6', '/blog' => '0.8', '/placement' => '0.7', '/register' => '0.7', '/contact' => '0.5', '/terms' => '0.2', '/privacy' => '0.2', '/cookies' => '0.2', '/distance-sales' => '0.2', '/refund' => '0.2'])
             ->map(fn ($p, $path) => ['loc' => $base.$path, 'priority' => $p, 'lastmod' => now()->toDateString()]);
         BlogPost::query()->where('is_published', true)->where('published_at', '<=', now())->latest('published_at')->limit(5000)
             ->get(['slug', 'updated_at'])

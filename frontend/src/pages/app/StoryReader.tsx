@@ -3,7 +3,7 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion, useScroll, useSpring } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, Bookmark, BookmarkCheck, Check, Gauge, Languages, Minus, Pause, Plus, Sparkles, Volume2, X } from 'lucide-react'
+import { ArrowLeft, Bookmark, BookmarkCheck, Check, Gauge, Languages, Minus, Pause, Plus, Volume2, X } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { speak, stopSpeaking } from '@/lib/speech'
@@ -233,7 +233,7 @@ export default function StoryReader() {
         ))}
       </article>
 
-      <div className="my-10 flex items-center gap-3 text-ink-soft" aria-hidden><span className="h-px flex-1 bg-line" /><Sparkles className="size-4" /><span className="h-px flex-1 bg-line" /></div>
+      <div className="my-10 flex items-center gap-3 text-ink-soft" aria-hidden><span className="h-px flex-1 bg-line" /><span className="text-xs tracking-[0.4em]">• • •</span><span className="h-px flex-1 bg-line" /></div>
 
       {data.locked ? (
         <div className="relative overflow-hidden rounded-[28px] bg-[#1f2433] p-8 text-center text-white">

@@ -258,6 +258,12 @@ export default function Register() {
                         <button key={g} onClick={() => up({ grade: g, age: ageFromStage(d.stage, g) })} aria-pressed={d.grade === g} className={clsx('h-11 rounded-xl border-2 px-1 font-display text-sm font-black transition sm:text-base', d.grade === g ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink/30')}>{g}. sınıf</button>
                       ))}
                     </div>
+                    {d.grade && (
+                      <p className="mt-2 flex items-center gap-2 rounded-xl bg-sky/10 px-3 py-2 text-xs font-bold text-ink">
+                        <span className="grid size-5 shrink-0 place-items-center rounded-full bg-sky text-[10px] font-black text-white">{d.grade}</span>
+                        Yolunda {d.grade}. sınıf MEB İngilizce ünitelerini göreceksin (Maarif Modeli ile uyumlu){d.grade === 8 ? ', LGS notlarıyla' : d.grade === 12 ? ', YDT notlarıyla' : ''}.
+                      </p>
+                    )}
                   </motion.div>
                 )}
               </AnimatePresence>
@@ -447,46 +453,32 @@ function PhotoCard({ photo, title, text, selected, onClick, compact, multi }: { 
 }
 
 /**
- * The very first screen: no panels, just Higo. He drops in, words in both
- * languages float round him, three promises appear, and "Hadi tanışalım" opens
- * the curtain: the screen slides into the left panel and the questions come in.
+ * The very first screen, kept calm: Higo in a soft circle, one sentence, one
+ * button. "Hadi tanışalım" slides it away and the questions come in.
  */
 function HelloScreen({ onGo }: { onGo: () => void }) {
   const [leaving, setLeaving] = useState(false)
-  const words = [['Hello!', 'left-[8%] top-[18%]', 'bg-sky'], ['Merhaba!', 'right-[9%] top-[14%]', 'bg-flame'], ["Let's go!", 'left-[12%] bottom-[24%]', 'bg-mint'], ['Hadi!', 'right-[12%] bottom-[28%]', 'bg-butter !text-[#1f2433]']] as const
   return (
     <div className="fixed inset-0 z-50 overflow-hidden bg-paper">
       <motion.div
         initial={false}
-        animate={leaving ? { clipPath: 'inset(0 50% 0 0 round 0px)', opacity: 0.0 } : { clipPath: 'inset(0 0% 0 0 round 0px)', opacity: 1 }}
-        transition={{ duration: 0.65, ease: [0.65, 0, 0.35, 1] }}
+        animate={leaving ? { opacity: 0, x: '-8%' } : { opacity: 1, x: 0 }}
+        transition={{ duration: 0.45, ease: [0.65, 0, 0.35, 1] }}
         onAnimationComplete={() => leaving && onGo()}
-        className="absolute inset-0 flex flex-col items-center justify-center bg-[radial-gradient(60rem_40rem_at_50%_40%,color-mix(in_oklab,var(--color-flame)_16%,var(--paper)),var(--paper)_70%)] px-6 text-center"
+        className="absolute inset-0 flex flex-col items-center justify-center px-6 text-center"
       >
-        {words.map(([w, pos, c], i) => (
-          <motion.span key={w} aria-hidden initial={{ opacity: 0, scale: 0.4, y: 20 }} animate={{ opacity: 1, scale: 1, y: [0, -10, 0] }} transition={{ opacity: { delay: 0.9 + i * 0.15 }, scale: { delay: 0.9 + i * 0.15, type: 'spring', stiffness: 300, damping: 14 }, y: { delay: 1.2 + i * 0.2, duration: 3 + i * 0.4, repeat: Infinity, ease: 'easeInOut' } }}
-            className={clsx('absolute hidden rounded-2xl px-4 py-2 font-display text-lg font-black text-white shadow-lg sm:block', pos, c)}>{w}</motion.span>
-        ))}
         <motion.div
-          initial={{ opacity: 0, y: '-60vh', scaleY: 1.15, scaleX: 0.9 }}
-          animate={{ opacity: 1, y: ['-60vh', '2%', '-1%', '0%'], scaleY: [1.15, 0.86, 1.04, 1], scaleX: [0.9, 1.12, 0.97, 1] }}
-          transition={{ duration: 1.1, times: [0, 0.55, 0.8, 1], ease: ['easeIn', 'easeOut', 'easeInOut'], opacity: { duration: 0.2 } }}
-          className="relative w-[min(62vw,300px)] origin-bottom [@media(max-height:640px)]:w-[min(44vw,200px)]"
+          initial={{ opacity: 0, scale: 0.85, y: 16 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ type: 'spring', stiffness: 180, damping: 18 }}
+          className="relative grid size-[min(52vw,220px)] place-items-center rounded-full bg-gradient-to-b from-flame/12 to-butter/20 ring-1 ring-flame/10 [@media(max-height:640px)]:size-[150px]"
         >
-          <span aria-hidden className="absolute inset-[14%] rounded-full bg-flame/15 blur-2xl" />
-          <HigoMotion className="relative w-full" />
+          <HigoMotion className="relative w-[86%] translate-y-[4%]" />
         </motion.div>
-        <motion.span aria-hidden initial={{ opacity: 0, scale: 0.3 }} animate={{ opacity: [0, 0.7, 0], scale: [0.3, 1.5, 2] }} transition={{ delay: 0.6, duration: 0.8 }} className="-mt-6 h-6 w-48 rounded-[50%] border-2 border-flame/40" />
-        <motion.h1 initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.05, duration: 0.5 }} className="mt-2 font-display text-[clamp(2rem,6vw,3.4rem)] font-black leading-tight">Merhaba, ben Higo!</motion.h1>
-        <motion.p initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.2, duration: 0.5 }} className="mt-2 max-w-sm text-lg text-ink-soft">Seni biraz tanıyalım, planını birlikte kuralım. Bir dakika sürer.</motion.p>
-        <div className="mt-5 flex max-w-md flex-wrap justify-center gap-2">
-          {['Sana özel plan', 'Türkçe açıklama', 'Hikâyeler ve oyunlar'].map((t, k) => (
-            <motion.span key={t} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.35 + k * 0.1 }} className="flex items-center gap-1.5 rounded-full bg-card px-3 py-1.5 text-sm font-bold shadow-sm ring-1 ring-line">
-              <Check className="size-4 text-mint-deep" strokeWidth={3} />{t}
-            </motion.span>
-          ))}
-        </div>
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.6 }} className="mt-7 w-full max-w-xs">
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.35 }} className="mt-6 text-xs font-black uppercase tracking-[0.22em] text-flame">Hoş geldin</motion.p>
+        <motion.h1 initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4, duration: 0.45 }} className="mt-2 font-display text-[clamp(1.9rem,5.5vw,3rem)] font-black leading-tight">Merhaba, ben Higo</motion.h1>
+        <motion.p initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5, duration: 0.45 }} className="mt-2 max-w-sm text-base text-ink-soft sm:text-lg">Birkaç soruyla seviyene, okuluna ya da sınavına göre planını kuralım. Bir dakika sürer.</motion.p>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.65 }} className="mt-7 w-full max-w-xs">
           <Button block size="lg" onClick={() => setLeaving(true)} icon={<ArrowRight className="size-5" />}>Hadi tanışalım</Button>
           <p className="mt-4 text-sm font-semibold text-ink-soft">Zaten hesabın var mı? <Link to="/login" className="font-extrabold text-flame">Giriş yap</Link></p>
         </motion.div>

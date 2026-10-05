@@ -1,7 +1,7 @@
 # DilGO · Bayrak Dil Okulları
 
 **Oku · Dinle · Konuş · Yaz.** Dört beceriyi tek uygulamada birleştiren, tamamen oyunlaştırılmış İngilizce öğrenme platformu.
-HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyunlaştırmayla, yapay zekâ öğretmen **Defne** ile konuşma/yazma pratiğiyle ve Bayrak Dil Okulları'nın gerçek öğretmenleriyle birleştirir.
+HikayeGO'nun hikaye tabanlı okuma deneyimini; adım adım ilerleyen ders yolu ve oyunlaştırmayla, yapay zekâ öğretmen **Defne** ile konuşma/yazma pratiğiyle ve Bayrak Dil Okulları'nın gerçek öğretmenleriyle birleştirir.
 
 > "DilGO" çalışma adıdır; marka adı tek yerden değişir (bkz. [Adı değiştirmek](#adı-değiştirmek)).
 
@@ -41,7 +41,7 @@ HikayeGO'nun hikaye tabanlı okuma deneyimini; Duolingo tarzı ders yolu ve oyun
 | **Ödeme** | iyzico Checkout Form (3D Secure), sandbox desteği, geliştirme için sahte ödeme ağ geçidi, %100 kuponla ücretsiz sipariş |
 | **Yönetim paneli** | Adım-yukarı (step-up) OTP / TOTP korumalı; pano (KPI + 30 günlük grafikler), kullanıcı yönetimi (rol, askı, elmas, Premium, kart verme, kilit açma, 2FA sıfırlama), sipariş/iade, canlı ders kuponu doğrulama, tüm içerik ve oyun tablolarının CRUD'u, **site ayarları** (bakım, kayıt, duyuru, marka ve iletişim, sosyal medya, özellik aç/kapa: düello, lig, AI, hikâye, sınav, sandık iş ortakları, sosyal giriş; ekonomi ve limitler, oturum süresi), iş ortakları, sandık teklifleri, sınav soru bankası, denetim kaydı. Kapatılan özellik hem menüden kalkar hem API'de kapanır |
 | **Dil** | Başlıkta şık dil seçici (Türkçe / English, arayüz); tema (açık/koyu/sistem) Ayarlar'da önizlemeli |
-| **Özgün alıştırmalar** | 10 alıştırma tipi. Duolingo'da olmayan üçü: **Hata Avı** (Türk öğrencilerin tipik hatasını taşıyan cümlede hatalı kelimeye dokun, düzeltmeyi seç, Türkçe açıklamayı oku), **Sahne** (gerçek bir senaryoda senin repliğin eksik; doğru cevabı seç) ve **Sıralama** (bir işin ya da hikâyenin adımlarını doğru sıraya diz). Her tip kendi rengi, etiketi ve sahne tonuyla gelir; üst üste doğru yapınca kombo rozeti çıkar |
+| **Özgün alıştırmalar** | 10 alıştırma tipi. Bize özgü üçü: **Hata Avı** (Türk öğrencilerin tipik hatasını taşıyan cümlede hatalı kelimeye dokun, düzeltmeyi seç, Türkçe açıklamayı oku), **Sahne** (gerçek bir senaryoda senin repliğin eksik; doğru cevabı seç) ve **Sıralama** (bir işin ya da hikâyenin adımlarını doğru sıraya diz). Her tip kendi rengi, etiketi ve sahne tonuyla gelir; üst üste doğru yapınca kombo rozeti çıkar |
 | **Ders yolu tasarımı** | "Kaldığın yer" kartı (kurs ilerleme halkası, ünite kupasına kalan durak), seri uyarısı, dört beceri planı; yürünen kısmı renklenen kıvrımlı patika, her durağın yanında okunabilir etiket, "Buradasın" işareti, ünite kupaları ve ekrandan çıktığında "Kaldığın yere dön" düğmesi |
 | **Ödül yolu** | Tek seferlik, çift verilmeyen ödüller (`reward_claims`): günlük hedef +5 elmas, her seviye +20 elmas ve her 5 seviyede gizemli sandık, seri kilometre taşları (3 gün 30 elmas → 7 dondurucu → 14 XP takviyesi → 30 Premium 3 gün → 50 sandık → 100 canlı ders → 200 Premium 7 gün → 365 canlı ders + 1000 elmas), lig birincisine sandık. Ödüller sayfasındaki "Nasıl kazanırım?" sekmesi ilerlemeyi gösterir |
 | **Tanıtım sayfaları** | Ana sayfa (otomatik dönen dört beceri modülü, canlanan Defne sohbeti, ödül yolu animasyonu, öğrenci yorumları kaydırıcısı, kayan yorum şeridi), Hakkımızda, Blog, İletişim formu (KVKK onayı, bal küpü, isteğe bağlı Turnstile). Kurumsal footer + 5 yasal belge (kullanım, gizlilik/KVKK, çerez, mesafeli satış, iptal-iade) |

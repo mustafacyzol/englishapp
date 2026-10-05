@@ -14,7 +14,7 @@ import { useToast } from '@/components/ui/Toast'
 import { FRAMES, UserAvatar } from './UserAvatar'
 import { BANNERS, ProfileBanner } from './ProfileBanner'
 
-type Tab = 'avatar' | 'backdrop' | 'frame' | 'banner' | 'bio'
+type Tab = 'avatar' | 'frame' | 'banner' | 'bio'
 
 /**
  * The profile studio: pick an avatar, wear a frame or cover you own and write a
@@ -43,14 +43,13 @@ export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolea
   const parsed = parseAvatar(avatar)
   const bdKey = parsed.chosen ? parsed.bg : null
   const lockedAvatar = !premium && (cat.premium.some((a) => a.key === parsed.key) || !!(bdKey && BACKDROPS[bdKey]?.premium))
-  // switching avatar keeps the chosen backdrop, switching backdrop keeps the avatar
-  const pickAvatar = (key: string) => setDraft((d) => ({ ...d, avatar: joinAvatar(key, bdKey) }))
-  const pickBackdrop = (bg: string | null) => setDraft((d) => ({ ...d, avatar: joinAvatar(parsed.key, bg) }))
+  // every avatar sits on its own built-in background
+  const pickAvatar = (key: string) => setDraft((d) => ({ ...d, avatar: joinAvatar(key, null) }))
   const ownedFrames = Object.keys(FRAMES).filter((k) => owned.frames.includes(k))
   const ownedBanners = Object.keys(BANNERS).filter((k) => k !== 'default' && owned.banners.includes(k))
   const changed = Object.keys(draft).length > 0
 
-  const TABS: [Tab, string][] = [['avatar', 'Avatar'], ['backdrop', 'Fon'], ['frame', 'Çerçeve'], ['banner', 'Kapak'], ['bio', 'Bio']]
+  const TABS: [Tab, string][] = [['avatar', 'Avatar'], ['frame', 'Çerçeve'], ['banner', 'Kapak'], ['bio', 'Bio']]
   return (
     <Modal open={open} onClose={onClose} className="max-w-lg">
       {/* live preview: the card others see */}
@@ -92,23 +91,6 @@ export function AvatarPicker({ open, onClose, start = 'avatar' }: { open: boolea
             </div>
             <Grid>
               {cat.premium.map((a) => <Tile key={a.key} vip on={parsed.key === a.key} locked={!premium} label={a.label} onClick={() => pickAvatar(a.key)}><UserAvatar avatar={a.url ? a.key : joinAvatar(a.key, bdKey && BACKDROPS[bdKey]?.premium ? bdKey : 'obsidian')} avatarUrl={a.url} className="size-full" rounded="rounded-none" /></Tile>)}
-            </Grid>
-          </>
-        )}
-        {tab === 'backdrop' && (
-          <>
-            <p className="mb-3 text-sm text-ink-soft">Avatarının arkasındaki fon. Ligde, arenada ve profilinde böyle görünür.</p>
-            <Grid>
-              <Tile on={!bdKey} label="Otomatik" onClick={() => pickBackdrop(null)}><UserAvatar avatar={parsed.key} className="size-full" rounded="rounded-none" /></Tile>
-              {Object.entries(BACKDROPS).filter(([, b]) => !b.premium).map(([k, b]) => <Tile key={k} on={bdKey === k} label={b.label} onClick={() => pickBackdrop(k)}><UserAvatar avatar={joinAvatar(parsed.key, k)} className="size-full" rounded="rounded-none" /></Tile>)}
-            </Grid>
-            <div className="mb-3 mt-6 flex items-center gap-2">
-              <span className="h-px flex-1 bg-gradient-to-r from-transparent to-[#d9b46a]" />
-              <p className="flex items-center gap-1.5 text-xs font-black uppercase tracking-[.2em] text-[#a8803a]"><Crown className="size-4" /> Premium fonlar</p>
-              <span className="h-px flex-1 bg-gradient-to-l from-transparent to-[#d9b46a]" />
-            </div>
-            <Grid>
-              {Object.entries(BACKDROPS).filter(([, b]) => b.premium).map(([k, b]) => <Tile key={k} vip on={bdKey === k} locked={!premium} label={b.label} onClick={() => pickBackdrop(k)}><UserAvatar avatar={joinAvatar(parsed.key, k)} className="size-full" rounded="rounded-none" /></Tile>)}
             </Grid>
           </>
         )}

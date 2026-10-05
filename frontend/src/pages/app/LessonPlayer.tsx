@@ -193,7 +193,8 @@ export default function LessonPlayer() {
   const canCheck = value !== null && value !== '' && checked === null
 
   return (
-    <div className="relative flex min-h-dvh flex-col">
+    // One fixed screen: header and answer bar stay put, only an unusually long drill scrolls inside.
+    <div className="lesson-stage fixed inset-0 z-30 flex h-dvh flex-col overflow-hidden bg-paper">
       {/* Each drill tints the stage, so the lesson reads as a set of scenes rather than a form. */}
       <motion.div
         key={ex.type}
@@ -204,8 +205,8 @@ export default function LessonPlayer() {
         className={clsx('pointer-events-none fixed inset-x-0 top-0 h-[55vh] bg-gradient-to-b to-transparent', DRILL[ex.type].tint)}
       />
 
-      <div className="relative mx-auto flex w-full max-w-3xl flex-1 flex-col">
-        <header className="safe-top flex items-center gap-4 px-5 pt-5">
+      <div className="relative mx-auto flex min-h-0 w-full max-w-3xl flex-1 flex-col">
+        <header className="safe-top flex shrink-0 items-center gap-4 px-5 pt-4 sm:pt-5">
           <button onClick={() => setQuit(true)} aria-label="Dersten çık" className="text-ink-soft hover:text-ink">
             <X className="size-7" />
           </button>
@@ -242,7 +243,7 @@ export default function LessonPlayer() {
           )}
         </AnimatePresence>
 
-        <main className="flex-1 px-5 py-8">
+        <main className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-4 sm:py-8">
           <AnimatePresence mode="wait">
             <motion.div key={`${current}-${queue.length}`} initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} transition={{ duration: 0.2 }}>
               <ExerciseView ex={ex} value={value} setValue={setValue} locked={checked !== null} ttsRate={user?.preferences?.tts_rate} />
@@ -250,20 +251,20 @@ export default function LessonPlayer() {
           </AnimatePresence>
         </main>
 
-      <footer className={clsx('safe-bottom border-t-2 px-5 pb-4 pt-4 transition-colors', checked === null ? 'border-line' : checked ? 'border-transparent bg-mint/15' : 'border-transparent bg-berry/12')}>
+      <footer className={clsx('safe-bottom shrink-0 border-t-2 px-5 pb-3 pt-3 transition-colors sm:pb-4 sm:pt-4', checked === null ? 'border-line' : checked ? 'border-transparent bg-mint/15' : 'border-transparent bg-berry/12')}>
         <div className="mx-auto flex max-w-3xl flex-col gap-3 sm:flex-row sm:items-center">
           {checked !== null && (
             <motion.div initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} className="relative flex flex-1 items-center gap-3">
               {/* Higo reacts between questions: jumps for joy on a right answer, cheers you on after a miss. */}
               <motion.span initial={{ scale: 0.4, y: 20, rotate: -10 }} animate={{ scale: 1, y: 0, rotate: 0 }} transition={{ type: 'spring', stiffness: 420, damping: 14 }} className="relative shrink-0">
-                <img src={higoImg(checked ? (combo >= 3 ? 'music' : 'cheer') : 'thumbs')} alt="Higo" className="block size-16 object-contain drop-shadow-[0_8px_10px_rgba(160,40,10,.2)] sm:size-[72px]" />
+                <img src={higoImg(checked ? (combo >= 3 ? 'music' : 'cheer') : 'thumbs')} alt="Higo" className="block size-12 object-contain sm:size-16 drop-shadow-[0_8px_10px_rgba(160,40,10,.2)] sm:size-[72px]" />
                 <span className={clsx('absolute -bottom-1 -right-1 grid size-6 place-items-center rounded-full border-2 border-card text-white', checked ? 'bg-mint' : 'bg-berry')}>
                   {checked ? <Check className="size-3.5" strokeWidth={4} /> : <X className="size-3.5" strokeWidth={4} />}
                 </span>
               </motion.span>
               <div>
-                <p className={clsx('text-2xl font-black', checked ? 'text-mint-deep' : 'text-berry')}>{checked ? ['Harika!', 'Süper!', 'Aynen böyle!', 'Mükemmel!'][done % 4] : 'Doğru cevap:'}</p>
-                {!checked && <p className="text-lg font-bold text-berry">{correctText(ex)}</p>}
+                <p className={clsx('text-xl font-black sm:text-2xl', checked ? 'text-mint-deep' : 'text-berry')}>{checked ? ['Harika!', 'Süper!', 'Aynen böyle!', 'Mükemmel!'][done % 4] : 'Doğru cevap:'}</p>
+                {!checked && <p className="line-clamp-2 text-base font-bold leading-snug text-berry sm:text-lg">{correctText(ex)}</p>}
               </div>
             </motion.div>
           )}
@@ -345,14 +346,14 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
   return (
     <div>
       {/* a little scene card per drill: what to do, in one line, with Higo cheering from the side */}
-      <motion.div key={ex.type + d.title} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 24 }} className="relative mb-7 flex items-center gap-3 overflow-hidden rounded-3xl border-2 border-line bg-card/80 py-3 pl-4 pr-20 shadow-[0_10px_30px_-22px_rgba(31,36,51,.5)] backdrop-blur sm:pr-24">
+      <motion.div key={ex.type + d.title} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 24 }} className="relative mb-4 flex items-center gap-3 overflow-hidden rounded-3xl border-2 border-line bg-card/80 py-2.5 pl-4 pr-20 sm:mb-7 sm:py-3 shadow-[0_10px_30px_-22px_rgba(31,36,51,.5)] backdrop-blur sm:pr-24">
         <span aria-hidden className={clsx('absolute -right-6 -top-8 size-28 rounded-full opacity-60', sk.soft)} />
         <div className="relative min-w-0">
           <p className="mb-1 flex flex-wrap items-center gap-2">
             <span className={clsx('flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-black uppercase tracking-wider', sk.soft, sk.text)}><sk.icon className="size-3.5" /> {sk.label}</span>
             <span className={clsx('text-xs font-black uppercase tracking-[0.2em]', d.accent)}>{d.label}</span>
           </p>
-          <h1 className="text-xl font-extrabold leading-tight sm:text-2xl">{d.title}</h1>
+          <h1 className="text-lg font-extrabold leading-tight sm:text-2xl">{d.title}</h1>
           {/* a remembered mistake from an earlier stop, back for another try */}
           {'review_of' in ex && typeof (ex as { review_of?: unknown }).review_of === 'string' && (
             <p className="mt-1.5 inline-flex items-center gap-1.5 rounded-full bg-berry/10 px-2.5 py-1 text-[11px] font-extrabold text-berry">
@@ -360,16 +361,16 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
             </p>
           )}
         </div>
-        <motion.img src={higoImg(DRILL_HIGO[ex.type] ?? 'point')} alt="" initial={{ y: 30, rotate: -8 }} animate={{ y: 0, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14, delay: 0.1 }} className="absolute -bottom-2 right-2 size-[72px] object-contain drop-shadow-[0_6px_8px_rgba(160,40,10,.2)] sm:size-20" />
+        <motion.img src={higoImg(DRILL_HIGO[ex.type] ?? 'point')} alt="" initial={{ y: 30, rotate: -8 }} animate={{ y: 0, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14, delay: 0.1 }} className="absolute -bottom-2 right-2 size-16 object-contain drop-shadow-[0_6px_8px_rgba(160,40,10,.2)] sm:size-20" />
       </motion.div>
       {(ex.type === 'choice' || ex.type === 'fill' || ex.type === 'listen_choice' || ex.type === 'read') && (
         <>
           {ex.type === 'read' ? (
             <ReadingCard ex={ex} ttsRate={ttsRate} />
           ) : ex.type === 'listen_choice' ? (
-            <div className="mb-8"><SpeakerButton text={ex.audio} rate={ttsRate} big /></div>
+            <div className="mb-5 sm:mb-8"><SpeakerButton text={ex.audio} rate={ttsRate} big /></div>
           ) : (
-            <div className="mb-8 flex items-center gap-3">
+            <div className="mb-5 flex items-center gap-3 sm:mb-8">
               {ex.type === 'choice' && ex.audio && <SpeakerButton text={ex.audio} rate={ttsRate} />}
               <p className="rounded-2xl border-2 border-line bg-card px-5 py-4 text-xl font-bold">
                 {ex.prompt.split('___').map((part, i, arr) => (
@@ -389,7 +390,7 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
                 onClick={() => setValue(i)}
                 animate={locked && value === i && i !== ex.answer ? { x: [0, -6, 6, -3, 0] } : {}}
                 className={clsx(
-                  'press flex items-center gap-3 rounded-2xl border-2 px-4 py-4 text-left text-lg font-bold transition-colors',
+                  'press flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left text-base font-bold sm:py-4 sm:text-lg transition-colors',
                   locked && i === ex.answer
                     ? 'border-mint bg-mint/12 text-mint-deep shadow-[0_3px_0_0_var(--color-mint)]'
                     : locked && value === i
@@ -447,8 +448,8 @@ function SpotError({ ex, value, setValue, locked }: { ex: Extract<Exercise, { ty
 
   return (
     <div>
-      <p className="mb-6 text-ink-soft">{ex.prompt}</p>
-      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-3 rounded-2xl border-2 border-line bg-card p-5 text-2xl font-bold leading-relaxed">
+      <p className="mb-4 sm:mb-6 text-ink-soft">{ex.prompt}</p>
+      <div className="flex flex-wrap items-center gap-x-1.5 gap-y-3 rounded-2xl border-2 border-line bg-card p-4 text-xl font-bold leading-relaxed sm:p-5 sm:text-2xl">
         {ex.words.map((w, i) => (
           <button
             key={i}
@@ -476,7 +477,7 @@ function SpotError({ ex, value, setValue, locked }: { ex: Extract<Exercise, { ty
                 <button
                   key={i}
                   onClick={() => setValue(`${picked}:${i}`)}
-                  className={clsx('press rounded-2xl border-2 px-4 py-4 text-lg font-bold', chosen === i ? 'border-berry bg-berry/10 text-berry shadow-[0_3px_0_0_var(--color-berry)]' : 'border-line bg-card shadow-hard hover:bg-paper-2')}
+                  className={clsx('press rounded-2xl border-2 px-4 py-3 text-base font-bold sm:py-4 sm:text-lg', chosen === i ? 'border-berry bg-berry/10 text-berry shadow-[0_3px_0_0_var(--color-berry)]' : 'border-line bg-card shadow-hard hover:bg-paper-2')}
                 >
                   {o}
                 </button>
@@ -504,13 +505,13 @@ function DialogueScene({ ex, value, setValue, locked, ttsRate }: { ex: Extract<E
   return (
     <div>
       {ex.scene && (
-        <div className="relative mb-6 h-36 overflow-hidden rounded-3xl">
+        <div className="relative mb-4 h-28 sm:mb-6 sm:h-36 overflow-hidden rounded-3xl">
           <Img src={img(`${ex.scene}.webp`)} alt="" className="photo" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
           <p className="absolute inset-x-5 bottom-3 font-display text-lg font-black text-white">{ex.prompt}</p>
         </div>
       )}
-      {!ex.scene && <p className="mb-6 text-ink-soft">{ex.prompt}</p>}
+      {!ex.scene && <p className="mb-4 sm:mb-6 text-ink-soft">{ex.prompt}</p>}
 
       <div className="space-y-3">
         {ex.lines.map((l, i) => (
@@ -543,7 +544,7 @@ function DialogueScene({ ex, value, setValue, locked, ttsRate }: { ex: Extract<E
             key={i}
             disabled={locked}
             onClick={() => setValue(i)}
-            className={clsx('press rounded-2xl border-2 px-4 py-4 text-left text-lg font-bold', value === i ? 'border-flame bg-flame/10 text-flame shadow-[0_3px_0_0_var(--color-flame)]' : 'border-line bg-card shadow-hard hover:bg-paper-2')}
+            className={clsx('press rounded-2xl border-2 px-4 py-3 text-left text-base font-bold sm:py-4 sm:text-lg', value === i ? 'border-flame bg-flame/10 text-flame shadow-[0_3px_0_0_var(--color-flame)]' : 'border-line bg-card shadow-hard hover:bg-paper-2')}
           >
             {o}
           </button>
@@ -577,7 +578,7 @@ function SequenceTrack({ ex, value, setValue, locked }: { ex: Extract<Exercise, 
 
   return (
     <div>
-      <p className="mb-6 text-ink-soft">{ex.prompt}</p>
+      <p className="mb-4 sm:mb-6 text-ink-soft">{ex.prompt}</p>
 
       <ol className="relative mb-7 space-y-2.5 pl-8">
         <span className="absolute bottom-3 left-[13px] top-3 w-0.5 rounded-full bg-line" />
@@ -621,12 +622,12 @@ function TileBuilder({ ex, value, setValue, locked }: { ex: Extract<Exercise, { 
 
   return (
     <div>
-      <div className="mb-6 flex items-start gap-3"><img src={higoImg('point')} alt="" className="size-16 shrink-0 object-contain" /><p className="relative rounded-2xl border-2 border-line bg-card px-5 py-4 text-xl font-bold">{ex.prompt}</p></div>
+      <div className="mb-4 sm:mb-6 flex items-start gap-3"><img src={higoImg('point')} alt="" className="size-16 shrink-0 object-contain" /><p className="relative rounded-2xl border-2 border-line bg-card px-5 py-4 text-xl font-bold">{ex.prompt}</p></div>
       {typing ? (
         <textarea value={(value as string) ?? ''} onChange={(e) => setValue(e.target.value)} disabled={locked} autoFocus placeholder="İngilizce yaz…" className="min-h-32 w-full rounded-2xl border-2 border-line bg-card p-4 text-lg font-semibold shadow-hard-sm focus:outline-none" />
       ) : (
         <>
-          <div className="mb-6 flex min-h-[4.5rem] flex-wrap content-start gap-2 border-b-2 border-dashed border-line/30 pb-3">
+          <div className="mb-4 sm:mb-6 flex min-h-[4.5rem] flex-wrap content-start gap-2 border-b-2 border-dashed border-line/30 pb-3">
             {picked.map((i) => (
               <motion.button layoutId={`tile-${i}`} key={i} disabled={locked} onClick={() => setPicked((p) => p.filter((x) => x !== i))} className="rounded-xl border-2 border-line bg-card px-3 py-2 text-lg font-bold shadow-hard">
                 {ex.tiles[i]}
@@ -745,7 +746,7 @@ function SpeakExercise({ ex, setValue, locked, value, ttsRate }: { ex: Extract<E
 function ReadingCard({ ex, ttsRate }: { ex: Extract<Exercise, { type: 'read' }>; ttsRate?: number }) {
   return (
     <div className="mb-6">
-      <article className="relative max-h-[42dvh] overflow-y-auto rounded-3xl border-2 border-line bg-card p-5 shadow-hard sm:max-h-none sm:p-6">
+      <article className="relative max-h-[34dvh] overflow-y-auto rounded-3xl border-2 border-line bg-card p-5 shadow-hard sm:max-h-none sm:p-6">
         <div className="mb-2 flex items-center justify-between gap-3">
           <p className="font-display text-lg font-black">{ex.title}</p>
           <SpeakerButton text={ex.passage} rate={ttsRate} />
@@ -825,7 +826,7 @@ function PronounceExercise({ ex, setValue, locked, value, ttsRate }: { ex: Extra
 
   return (
     <div>
-      <div className="mb-6 flex items-center gap-4 rounded-3xl border-2 border-line bg-card p-5 shadow-hard">
+      <div className="mb-4 sm:mb-6 flex items-center gap-4 rounded-3xl border-2 border-line bg-card p-5 shadow-hard">
         <SpeakerButton text={ex.text} rate={ttsRate} big />
         <div className="min-w-0">
           <p className="text-2xl font-black leading-snug sm:text-3xl">

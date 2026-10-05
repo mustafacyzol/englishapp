@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowRight, AudioLines, ChevronRight, Lock, MessageSquareText, PenLine, Phone, Sparkles } from 'lucide-react'
+import { ArrowRight, AudioLines, ChevronRight, Lock, MessageSquareText, PenLine, Phone, Theater } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { rewardImg, scenarioImg } from '@/lib/assets'
 import { TUTOR } from '@/lib/tutor'
@@ -20,7 +20,7 @@ const CAT: Record<string, string> = { daily: 'Günlük hayat', travel: 'Seyahat'
 /** Which onboarding interests make a scenario category feel "made for you". */
 const INTEREST_CAT: Record<string, string[]> = { travel: ['travel'], career: ['career'], food: ['travel', 'daily'], movies: ['fun'], music: ['fun'], games: ['fun'], sports: ['daily', 'fun'], tech: ['career'] }
 const INTEREST_TR: Record<string, string> = { travel: 'Seyahat', career: 'Kariyer', movies: 'Film & dizi', music: 'Müzik', games: 'Oyun', sports: 'Spor', tech: 'Teknoloji', food: 'Yemek' }
-const MODE_ICON: Record<string, typeof Phone> = { speaking: AudioLines, chat: MessageSquareText, roleplay: Sparkles }
+const MODE_ICON: Record<string, typeof Phone> = { speaking: AudioLines, chat: MessageSquareText, roleplay: Theater }
 
 export default function AiHub() {
   const nav = useNavigate()

@@ -82,7 +82,7 @@ export default function TrackSetup() {
               {st.grades.map((g) => (
                 <button key={g} onClick={() => setGrade(g)} aria-pressed={grade === g} className={clsx('rounded-2xl border-2 py-5 font-display text-2xl font-black transition', grade === g ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>{g}. sınıf</button>
               ))}
-              {stage === 'ortaokul' && <p className="col-span-2 mt-2 flex gap-2 rounded-2xl bg-sky/10 p-3 text-sm font-semibold text-ink"><Info className="mt-0.5 size-4 shrink-0 text-sky" /> Yol, MEB Türkiye Yüzyılı Maarif Modeli İngilizce programının temalarıyla eşleşir.</p>}
+              {stage === 'ortaokul' && <p className="col-span-2 mt-2 flex gap-2 rounded-2xl bg-sky/10 p-3 text-sm font-semibold text-ink"><Info className="mt-0.5 size-4 shrink-0 text-sky" /> Yolunda kendi sınıfının MEB İngilizce ünite başlıklarını ve kelimelerini görürsün.</p>}
             </div>
           )}
           {step === 'Sınav' && (
@@ -106,7 +106,7 @@ export default function TrackSetup() {
               <div className="rounded-2xl border-2 border-line bg-card p-4">
                 <Row k="Okul" v={`${st.label}${st.grades.length && grade ? ` · ${grade}. sınıf` : ''}`} />
                 {!kid && <Row k="Sınav" v={exam ? EXAMS.find((e) => e.key === exam)?.name ?? exam : 'Yok'} />}
-                <Row k="Yol" v={stage === 'ortaokul' ? 'Maarif Modeli temaları' + (exam === 'lgs' || grade === 8 ? ' + LGS soruları' : '') : exam ? `Her ünite sonunda ${EXAMS.find((e) => e.key === exam)?.name} soruları` : 'Genel İngilizce'} />
+                <Row k="Yol" v={grade && st.grades.length ? `${grade}. sınıf üniteleri` + (exam === 'lgs' ? ' + LGS notları' : exam === 'ydt' ? ' + YDT notları' : '') : exam ? `${EXAMS.find((e) => e.key === exam)?.name} odaklı genel yol` : 'Genel İngilizce'} />
               </div>
               <p className="flex gap-2 rounded-2xl bg-butter/15 p-3 text-sm font-semibold"><Info className="mt-0.5 size-4 shrink-0 text-butter-deep" /> Yolunu 30 günde bir yeniden belirleyebilirsin. İlerlemen ve deneme geçmişin silinmez.</p>
             </div>

@@ -73,5 +73,3 @@ Kaynak: StriveCloud alışkanlık oluşumu yazısı.
 
 - Hook modeli: https://www.koji.so/docs/hooked-model-habit-forming-products , https://amplitude.com/blog/the-hook-model
 - Alışkanlık oluşumu ve tutma: https://www.strivecloud.io/blog/habit-formation-user-retention
-- Sekme yapısı ve sade ana akış: https://blog.duolingo.com/core-tabs-redesign
-- Ders yapısı ve sadelik: https://xd.adobe.com/ideas/principles/app-design/simple-intuitive-gamified-babbel-language-learning-great-ux-design

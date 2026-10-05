@@ -54,12 +54,13 @@ function useAutoplay(count: number, ms: number, inView: boolean, pauseOnHover = 
 /* ------------------------------------------------------------------ hero */
 
 /**
- * Two rings round Higo. Inside, the four skills; outside, who it is for. Each
- * chip travels an ellipse: bigger and in front on the near side, smaller and
- * behind Higo on the far side, which reads as 3D. `spread` (0..1) lets the rings
- * open out from Higo after his entrance.
+ * One ring round Higo with the four skills, evenly spaced so they never meet.
+ * Each chip travels an ellipse: bigger and in front on the near side, smaller
+ * and behind Higo on the far side, which reads as 3D. `spread` (0..1) lets the
+ * ring open out from Higo after his entrance.
  */
 const SKILL_ORBIT = SKILLS.map((k) => SKILL[k])
+/** The people it is for, shown as a row of faces under the hero buttons. */
 const WHO_ORBIT = [
   { a: 'avatars/braids.webp', t: 'İlkokul' },
   { a: 'avatars/cap.webp', t: 'Ortaokul · LGS' },
@@ -112,6 +113,13 @@ export function HeroPro() {
             <LinkButton to="/register" size="lg" className="gap-2">Ücretsiz başla <ArrowRight className="size-5" /></LinkButton>
             <LinkButton to="/placement" size="lg" variant="secondary">Seviyemi bul</LinkButton>
           </motion.div>
+          {/* who it is for: one quiet row instead of a second ring round Higo */}
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7, duration: 0.6 }} className="mt-7 flex flex-col items-center justify-center gap-2.5 sm:flex-row sm:gap-3 lg:justify-start">
+            <span className="flex shrink-0 -space-x-2">
+              {WHO_ORBIT.map((w) => <img key={w.t} src={img(w.a)} alt="" title={w.t} className="size-8 rounded-full object-cover ring-2 ring-paper" />)}
+            </span>
+            <span className="text-center text-sm font-semibold leading-snug text-ink-soft sm:text-left">İlkokuldan üniversiteye, <span className="font-extrabold text-ink">MEB Maarif Modeli</span> ile uyumlu;<br className="hidden sm:block" /> LGS, YDT ve YDS hazırlığıyla.</span>
+          </motion.div>
         </div>
 
         {/* Higo drops in, lands with a little squash and a ring of dust, then
@@ -119,21 +127,13 @@ export function HeroPro() {
         <div className="relative mx-auto aspect-square w-full max-w-[330px] [container-type:inline-size] sm:max-w-[430px] lg:max-w-[520px]">
           <motion.div aria-hidden className="absolute inset-x-[10%] bottom-[14%] top-[0%] rounded-full bg-[radial-gradient(circle,color-mix(in_oklab,var(--color-flame)_22%,transparent),transparent_68%)]" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.7, duration: 0.9, ease }} />
           <svg aria-hidden viewBox="0 0 100 100" className="absolute inset-0 size-full overflow-visible">
-            <motion.ellipse cx="50" cy="76" rx="33" ry="9" fill="none" stroke="currentColor" strokeWidth="0.35" strokeDasharray="0.6 2.2" className="text-ink/25" initial={{ opacity: 0, scale: 0.3 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.95, duration: 1, ease }} style={{ transformOrigin: '50px 76px' }} />
-            <motion.ellipse cx="50" cy="76" rx="41" ry="14" fill="none" stroke="currentColor" strokeWidth="0.3" strokeDasharray="0.6 2.6" className="text-ink/15" initial={{ opacity: 0, scale: 0.3 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1.05, duration: 1.1, ease }} style={{ transformOrigin: '50px 76px' }} />
+            <motion.ellipse cx="50" cy="76" rx="38" ry="11" fill="none" stroke="currentColor" strokeWidth="0.35" strokeDasharray="0.6 2.2" className="text-ink/25" initial={{ opacity: 0, scale: 0.3 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.95, duration: 1, ease }} style={{ transformOrigin: '50px 76px' }} />
           </svg>
 
           {!reduced && SKILL_ORBIT.map((S, k) => (
-            <Orbit key={S.label} phase={k / 4} rx={33} ry={9} period={22000} spread={spread}>
+            <Orbit key={S.label} phase={k / 4 + 0.125} rx={38} ry={11} period={26000} spread={spread}>
               <span className={clsx('flex items-center gap-1.5 whitespace-nowrap rounded-full py-1 pl-1 pr-3 font-display text-xs font-black text-white shadow-[0_10px_22px_-10px_rgba(31,36,51,.5)] sm:text-sm', S.bg, S.bg === 'bg-butter' && '!text-[#1f2433]')}>
                 <span className="grid size-6 place-items-center rounded-full bg-white/25 sm:size-7"><S.icon className="size-3.5 sm:size-4" strokeWidth={2.6} /></span>{S.verb}
-              </span>
-            </Orbit>
-          ))}
-          {!reduced && WHO_ORBIT.map((w, k) => (
-            <Orbit key={w.t} phase={k / WHO_ORBIT.length + 0.08} rx={41} ry={14} period={34000} dir={-1} spread={spread}>
-              <span className="flex items-center gap-1.5 whitespace-nowrap rounded-full bg-card py-1 pl-1 pr-2.5 text-[11px] font-extrabold shadow-[0_12px_24px_-12px_rgba(31,36,51,.35)] ring-1 ring-line sm:text-xs">
-                <img src={img(w.a)} alt="" className="size-6 rounded-full object-cover sm:size-7" />{w.t}
               </span>
             </Orbit>
           ))}
@@ -158,9 +158,9 @@ export function HeroPro() {
 /* ---------------------------------------------------------------- Türkiye */
 
 const LADDER = [
-  { stage: 'İlkokul', range: '2-4. sınıf', tag: 'Oyunla ilk adımlar', text: 'Şarkılar, oyunlar ve resimlerle; okulda görülen konularla birlikte.', color: '#22b573', icon: 'braids' },
-  { stage: 'Ortaokul', range: '5-8. sınıf', tag: 'Okul dersine destek', text: 'Sınıfına göre kelime ve dilbilgisi, kısa hikâyeler ve konuşma pratiği.', color: '#2f7cf6', icon: 'cap' },
-  { stage: 'Lise', range: '9-12. sınıf', tag: 'Akıcı konuşma', text: 'Okul İngilizcesinin üstüne okuma, yazma ve Defne ile gerçek konuşmalar.', color: '#8f7cf8', icon: 'headphones' },
+  { stage: 'İlkokul', range: '2-4. sınıf', tag: 'Oyunla ilk adımlar', text: 'Şarkılar, oyunlar ve resimlerle; kendi sınıfının MEB üniteleriyle.', color: '#22b573', icon: 'braids' },
+  { stage: 'Ortaokul', range: '5-8. sınıf', tag: 'Maarif Modeli ile uyumlu', text: 'Ders kitabındaki ünite başlıkları ve kelimeleri yolda; 8. sınıfta LGS notları.', color: '#2f7cf6', icon: 'cap' },
+  { stage: 'Lise', range: '9-12. sınıf', tag: 'Akıcı konuşma', text: 'Sınıfının üniteleri, YDT notları, okuma, yazma ve Defne ile gerçek konuşmalar.', color: '#8f7cf8', icon: 'headphones' },
   { stage: 'Üniversite ve sonrası', range: 'Hazırlık, iş, seyahat', tag: 'Hedefine göre', text: 'Akademik okuma, iş görüşmesi, seyahat; ne için öğrendiğini söyle, yol ona göre kurulsun.', color: '#ff7a3d', icon: 'glasses' },
   { stage: 'Okullar', range: 'Müdür ve öğretmen', tag: 'Okul paneli', text: 'Sınıflar, ödevler ve raporlarla okulun bütün İngilizce ihtiyacı tek yerde.', color: '#1f2433', icon: 'teacher' },
 ] as const

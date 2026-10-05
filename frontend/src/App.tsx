@@ -18,7 +18,6 @@ const About = lazy(() => import('./pages/public/About'))
 const Contact = lazy(() => import('./pages/public/Contact'))
 const Newsletter = lazy(() => import('./pages/public/Newsletter'))
 const NotFound = lazy(() => import('./pages/public/NotFound'))
-const Maarif = lazy(() => import('./pages/public/Maarif'))
 const BlogList = lazy(() => import('./pages/public/Blog').then((m) => ({ default: m.BlogList })))
 const BlogPost = lazy(() => import('./pages/public/Blog').then((m) => ({ default: m.BlogPost })))
 const Placement = lazy(() => import('./pages/public/Placement'))
@@ -128,7 +127,7 @@ export default function App() {
           <Route path="/" element={user ? <Navigate to="/learn" replace /> : <Landing />} />
           <Route path="/about" element={<About />} />
           <Route path="/okullar" element={<Schools />} />
-          <Route path="/maarif" element={<Maarif />} />
+          <Route path="/maarif" element={<Navigate to="/okullar" replace />} />
           <Route path="/yardim" element={<Help />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/newsletter/confirm/:token" element={<Newsletter action="confirm" />} />

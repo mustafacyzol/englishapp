@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import clsx from 'clsx'
-import { BookAudio, CreditCard, Mail, Mic, Save, Send, Sparkles, Volume2 } from 'lucide-react'
+import { BookAudio, CreditCard, Mail, Mic, Save, Send, MessagesSquare, Volume2 } from 'lucide-react'
 import { ApiError, get, post, put } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { speak, speakNeural } from '@/lib/speech'
@@ -234,7 +234,7 @@ export default function AdminIntegrations() {
           {canEdit && <TestMail disabled={dirty} />}
         </Card>
 
-        <Card icon={<Sparkles className="size-5" />} title="Yapay zekâ" text="Defne'nin sohbet, rol oyunu ve yazı düzeltme özellikleri bu anahtarla çalışır. Boşken kısa hazır yanıtlar verir." status={secretInfo('ai.api_key')?.set ? <Pill tone="good">Bağlı</Pill> : <Pill tone="warn">Anahtar yok</Pill>}>
+        <Card icon={<MessagesSquare className="size-5" />} title="Yapay zekâ" text="Defne'nin sohbet, rol oyunu ve yazı düzeltme özellikleri bu anahtarla çalışır. Boşken kısa hazır yanıtlar verir." status={secretInfo('ai.api_key')?.set ? <Pill tone="good">Bağlı</Pill> : <Pill tone="warn">Anahtar yok</Pill>}>
           <div className="grid gap-4 sm:grid-cols-2">
             {secretField('ai.api_key', 'Anthropic API anahtarı')}
             <Input label="Model" disabled={!canEdit} value={str('ai.model')} onChange={(e) => set('ai.model', e.target.value || null)} />
