@@ -66,7 +66,7 @@ export function SwipeDeck({ deck, onFinish }: { deck: DeckWord[]; onFinish: Fini
         <span className="flex items-center gap-1.5 rounded-full bg-mint/12 px-3 py-1.5 text-mint-deep"><span className="tabular-nums opacity-70">{known}</span> Biliyorum <ArrowRight className="size-4" strokeWidth={3} /></span>
       </div>
 
-      <div className="relative h-[380px] sm:h-[400px]">
+      <div className="relative h-[min(380px,calc(100dvh-340px))] min-h-[260px] sm:h-[400px]">
         {deck.slice(i, i + 3).reverse().map((w, k, arr) => {
           const depth = arr.length - 1 - k
           return depth === 0 ? (
@@ -77,7 +77,7 @@ export function SwipeDeck({ deck, onFinish }: { deck: DeckWord[]; onFinish: Fini
         })}
       </div>
 
-      <div className="mt-7 flex items-center justify-center gap-4">
+      <div className="mt-5 flex items-center justify-center gap-4 sm:mt-7">
         <button onClick={undo} disabled={!i} aria-label="Geri al" className="grid size-12 place-items-center rounded-full border-2 border-line bg-card text-ink-soft shadow-hard-sm transition hover:text-ink disabled:opacity-40"><Undo2 className="size-5" /></button>
         <button onClick={() => decide(false)} aria-label="Bilmiyorum" className="press grid size-16 place-items-center rounded-full border-2 border-berry/40 bg-card text-berry shadow-[0_4px_0_0_var(--color-berry-deep)] transition hover:bg-berry hover:text-white"><X className="size-8" strokeWidth={3} /></button>
         <button onClick={() => decide(true)} aria-label="Biliyorum" className="press grid size-16 place-items-center rounded-full border-2 border-mint/40 bg-card text-mint-deep shadow-[0_4px_0_0_var(--color-mint-deep)] transition hover:bg-mint hover:text-white"><Check className="size-8" strokeWidth={3} /></button>
@@ -90,7 +90,7 @@ export function SwipeDeck({ deck, onFinish }: { deck: DeckWord[]; onFinish: Fini
 
 function TopCard({ w, flipped, onFlip, onDecide, exit, hint }: { w: DeckWord; flipped: boolean; onFlip: () => void; onDecide: (known: boolean) => void; exit: 1 | -1; hint?: boolean }) {
   const x = useMotionValue(0)
-  // First card: a small nudge right then left shows it can be swiped, Tinder-style.
+  // First card: a small nudge right then left shows it can be swiped.
   useEffect(() => {
     if (!hint) return
     const t = setTimeout(() => {
@@ -130,12 +130,14 @@ function TopCard({ w, flipped, onFlip, onDecide, exit, hint }: { w: DeckWord; fl
         {/* front */}
         <div className="absolute inset-0 flex flex-col overflow-hidden rounded-[32px] border-2 border-line bg-card shadow-[0_18px_40px_-18px_rgba(31,36,51,.35)]" style={{ backfaceVisibility: 'hidden' }}>
           <motion.div aria-hidden className="pointer-events-none absolute inset-0" style={{ backgroundColor: tint }} />
-          <div className="flex items-center justify-between px-6 pt-5 text-[11px] font-black uppercase tracking-[0.18em] text-ink-soft">
+          <span aria-hidden className="h-2 w-full bg-gradient-to-r from-flame via-butter to-sky" />
+          <div className="flex items-center justify-between px-6 pt-4 text-[11px] font-black uppercase tracking-[0.18em] text-ink-soft">
             <span>{w.id ? (w.interval_days >= 3 ? 'Öğreniyorsun' : 'Tekrar zamanı') : 'Yeni kelime'}</span>
-            <span>EN</span>
+            {/* memory strength: one dot per step of the review ladder (1, 3, 7, 14, 30 days) */}
+            <span className="flex gap-1" title="Hafıza gücü">{[1, 3, 7, 14, 30].map((d) => <span key={d} className={clsx('size-2 rounded-full', w.interval_days >= d ? 'bg-mint' : 'bg-line')} />)}</span>
           </div>
           <div className="flex flex-1 flex-col items-center justify-center gap-3 px-6 text-center">
-            <p className="font-display text-5xl font-black leading-tight sm:text-6xl">{w.word}</p>
+            <p className={clsx('font-display font-black leading-tight [overflow-wrap:anywhere]', w.word.length > 12 ? 'text-4xl sm:text-5xl' : 'text-5xl sm:text-6xl')}>{w.word}</p>
             <button onClick={(e) => { e.stopPropagation(); speak(w.word) }} className="grid size-11 place-items-center rounded-full bg-sky/10 text-sky"><Volume2 className="size-5" /></button>
           </div>
           <p className="pb-6 text-center text-sm font-bold text-ink-soft">Anlamını hatırla, sonra çevir</p>
@@ -143,7 +145,7 @@ function TopCard({ w, flipped, onFlip, onDecide, exit, hint }: { w: DeckWord; fl
           <motion.span style={{ opacity: no }} className="absolute right-5 top-14 rotate-[12deg] rounded-xl border-4 border-berry px-3 py-1 font-display text-2xl font-black tracking-wider text-berry">TEKRAR</motion.span>
         </div>
         {/* back */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-[32px] border-2 border-butter-deep/30 bg-butter px-7 text-center text-[#1f2433] shadow-[0_18px_40px_-18px_rgba(31,36,51,.35)]" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 rounded-[32px] border-2 border-butter-deep/30 bg-butter bg-[repeating-linear-gradient(transparent,transparent_31px,rgba(31,36,51,.07)_32px)] px-7 text-center text-[#1f2433] shadow-[0_18px_40px_-18px_rgba(31,36,51,.35)]" style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}>
           <span className="text-[11px] font-black uppercase tracking-[0.18em] opacity-60">Türkçesi</span>
           <p className="font-display text-4xl font-black leading-tight">{w.translation}</p>
           <p className="text-lg font-extrabold opacity-70">{w.word}</p>
@@ -574,7 +576,7 @@ export function QuickChoice({ deck, onFinish }: { deck: DeckWord[]; onFinish: Fi
 }
 
 // ---------------------------------------------------------------------------
-// Kelimle: guess the English word in six tries (Wordle rules), with its Turkish
+// Kelimle: guess the English word in six tries, with its Turkish
 // meaning as the clue. Green = right letter, right place; yellow = in the word,
 // wrong place; grey = not in the word. Three words per game.
 // ---------------------------------------------------------------------------

@@ -25,8 +25,7 @@ const SIZES = ['text-[18px] leading-[1.8]', 'text-[20px] leading-[1.85]', 'text-
 const RATES = [0.75, 0.9, 1.05]
 
 /**
- * A story read like a book, not a slideshow (the pattern of LingQ, Beelinguapp
- * and Kindle): the whole text flows on one calm page in a reading typeface, a
+ * A story read like a book, not a slideshow: the whole text flows on one calm page in a reading typeface, a
  * thin bar shows how far you are, and a player stays at the bottom that reads
  * the story aloud paragraph by paragraph while highlighting the line. Turkish
  * can sit under each paragraph (parallel text), any word opens its meaning and

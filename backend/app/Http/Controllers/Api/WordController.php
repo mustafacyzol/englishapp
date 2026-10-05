@@ -15,7 +15,7 @@ class WordController extends Controller
     {
         $user = $request->user();
         $words = $user->words()
-            ->when(is_string($request->query('q')) ? $request->query('q') : null, fn ($q, $s) => $q->where('word', 'like', "%{$s}%"))
+            ->when(is_string($request->query('q')) ? mb_substr($request->query('q'), 0, 60) : null, fn ($q, $s) => $q->where('word', 'like', '%'.addcslashes($s, '%_\\').'%'))
             ->when($request->query('filter') === 'due', fn ($q) => $q->where('due_at', '<=', now()))
             ->when($request->query('filter') === 'mastered', fn ($q) => $q->where('interval_days', '>=', 21))
             ->latest()->paginate(50);
@@ -39,6 +39,14 @@ class WordController extends Controller
             'source_id' => ['nullable', 'integer'],
         ]);
         $user = $request->user();
+        $exists = UserWord::query()->where('user_id', $user->id)->where('word', mb_strtolower(trim($data['word'])))->exists();
+        if (! $exists) {
+            $size = (int) \App\Support\Settings::get('limits.notebook_size', 5000);
+            abort_if($user->words()->count() >= $size, 422, 'Kelime defterin dolu. Öğrendiğin kelimeleri silerek yer açabilirsin.');
+            $perDay = (int) \App\Support\Settings::get('limits.words_per_day', 300);
+            \App\Support\Quota::take($user, 'words.add', $perDay, 'day', "Bugün en fazla {$perDay} kelime ekleyebilirsin.");
+        }
+        $data = array_map(fn ($v) => is_string($v) ? trim(strip_tags($v)) : $v, $data);
         $word = UserWord::query()->firstOrCreate(
             ['user_id' => $user->id, 'word' => mb_strtolower(trim($data['word']))],
             $data + ['due_at' => now()]

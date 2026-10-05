@@ -3,8 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
 use App\Models\UserWord;
 use App\Models\WordSet;
+use App\Support\ContentGuard;
+use App\Support\Quota;
+use App\Support\Settings;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -73,7 +77,9 @@ class WordSetController extends Controller
     public function store(Request $request): JsonResponse
     {
         $data = $this->validated($request);
-        abort_if(WordSet::query()->where('user_id', $request->user()->id)->count() >= 100, 422, 'En fazla 100 set oluşturabilirsin.');
+        // content first, so a refused share does not use up the day's quota
+        $this->guardPublic($request->user(), $data);
+        $this->guardNew($request->user());
         $set = WordSet::query()->create($this->fields($data) + ['user_id' => $request->user()->id, 'category' => 'mine']);
         $this->syncItems($set, $data['items']);
 
@@ -84,6 +90,8 @@ class WordSetController extends Controller
     {
         abort_unless($set->user_id === $request->user()->id, 403, 'Bu seti yalnızca sahibi düzenleyebilir. Kopyalayıp kendi setin yapabilirsin.');
         $data = $this->validated($request);
+        Quota::take($request->user(), 'word-sets.edit', 120, 'hour', 'Setlerini çok sık düzenledin. Biraz sonra tekrar dene.');
+        $this->guardPublic($request->user(), $data, $set);
         $set->update($this->fields($data));
         $this->syncItems($set, $data['items']);
 
@@ -102,6 +110,7 @@ class WordSetController extends Controller
     {
         $user = $request->user();
         abort_unless($set->isVisibleTo($user), 404);
+        Quota::take($user, 'word-sets.save', 120, 'hour', 'Çok hızlı kaydedip çıkarıyorsun. Biraz sonra tekrar dene.');
         $q = DB::table('word_set_saves')->where('user_id', $user->id)->where('word_set_id', $set->id);
         if ($q->exists()) {
             $q->delete();
@@ -121,6 +130,7 @@ class WordSetController extends Controller
     {
         $user = $request->user();
         abort_unless($set->isVisibleTo($user), 404);
+        $this->guardNew($user);
         $copy = WordSet::query()->create([
             'user_id' => $user->id, 'title' => mb_substr($set->title, 0, 110).' (benim)', 'description' => $set->description, 'level' => $set->level,
             'exam' => $set->exam, 'cover' => $set->cover, 'category' => 'mine', 'is_public' => false, 'copied_from_id' => $set->id,
@@ -135,10 +145,13 @@ class WordSetController extends Controller
     {
         $user = $request->user();
         abort_unless($set->isVisibleTo($user), 404);
+        Quota::take($user, 'word-sets.learn', 30, 'hour', 'Bir saatte en fazla 30 seti deftere ekleyebilirsin.');
         $known = $user->words()->pluck('word')->map(fn ($w) => mb_strtolower($w))->flip();
+        $room = max(0, (int) Settings::get('limits.notebook_size', 5000) - $known->count());
+        abort_if($room === 0, 422, 'Kelime defterin dolu. Öğrendiğin kelimeleri silerek yer açabilirsin.');
         $added = 0;
         foreach ($set->items as $i) {
-            if ($known->has(mb_strtolower($i->word))) {
+            if ($known->has(mb_strtolower($i->word)) || $added >= $room) {
                 continue;
             }
             UserWord::query()->create(['user_id' => $user->id, 'word' => $i->word, 'translation' => $i->translation, 'example' => $i->example, 'due_at' => now()]);
@@ -153,6 +166,7 @@ class WordSetController extends Controller
     {
         $user = $request->user();
         abort_unless($set->isVisibleTo($user), 404);
+        Quota::take($user, 'word-sets.played', 120, 'hour', 'Çok fazla oyun sonucu gönderildi. Biraz sonra tekrar dene.');
         $d = $request->validate(['game' => ['required', 'string', 'max:20'], 'correct' => ['required', 'integer', 'min:0', 'max:200'], 'total' => ['required', 'integer', 'min:1', 'max:200']]);
         DB::table('word_set_plays')->insert(['user_id' => $user->id, 'word_set_id' => $set->id, 'game' => $d['game'], 'correct' => min($d['correct'], $d['total']), 'total' => $d['total'], 'created_at' => now()]);
 
@@ -168,11 +182,40 @@ class WordSetController extends Controller
             'exam' => ['nullable', Rule::in(self::EXAMS)],
             'cover' => ['nullable', Rule::in(self::COVERS)],
             'is_public' => ['boolean'],
-            'items' => ['required', 'array', 'min:2', 'max:300'],
+            'items' => ['required', 'array', 'min:2', 'max:150'],
             'items.*.word' => ['required', 'string', 'max:80'],
             'items.*.translation' => ['required', 'string', 'max:160'],
             'items.*.example' => ['nullable', 'string', 'max:255'],
         ], ['items.min' => 'Bir sette en az 2 kelime olmalı.']);
+    }
+
+    /** A new set (or copy): a daily quota and a ceiling on how many one learner owns. */
+    private function guardNew(User $user): void
+    {
+        $total = (int) Settings::get('limits.word_sets_total', 60);
+        abort_if(WordSet::query()->where('user_id', $user->id)->count() >= $total, 422, "En fazla {$total} setin olabilir. Kullanmadıklarını silerek yer açabilirsin.");
+        $perDay = (int) Settings::get('limits.word_sets_per_day', 20);
+        Quota::take($user, 'word-sets.create', $perDay, 'day', "Bugün en fazla {$perDay} set oluşturabilir ya da kopyalayabilirsin.");
+    }
+
+    /**
+     * Sharing is earned and checked: a verified account a day old, a cap on
+     * public sets, and no links, contact details or blocked words in anything
+     * other people will read.
+     */
+    private function guardPublic(User $user, array $data, ?WordSet $set = null): void
+    {
+        if (empty($data['is_public'])) {
+            return;
+        }
+        abort_unless($user->email_verified_at && $user->created_at?->lt(now()->subDay()), 422, 'Setini paylaşabilmek için hesabının en az bir günlük ve doğrulanmış olması gerekir.');
+        $cap = (int) Settings::get('limits.public_sets', 10);
+        $public = WordSet::query()->where('user_id', $user->id)->where('is_public', true)->when($set, fn ($q) => $q->whereKeyNot($set->id))->count();
+        abort_if($public >= $cap, 422, "En fazla {$cap} setini herkese açık paylaşabilirsin.");
+        $text = implode("\n", [$data['title'], $data['description'] ?? '', ...array_map(fn ($i) => ($i['word'] ?? '').' '.($i['translation'] ?? '').' '.($i['example'] ?? ''), $data['items'])]);
+        if ($why = ContentGuard::problem($text)) {
+            abort(422, $why.' Setini gizli tutabilir ya da düzeltip paylaşabilirsin.');
+        }
     }
 
     private function fields(array $d): array

@@ -3,12 +3,13 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import clsx from 'clsx'
-import { Check, Crown, Flame, Ghost, Shield, ShieldAlert, Swords, X } from 'lucide-react'
+import { Check, Crown, Flame, School, Shield, ShieldAlert, Swords, Users, X } from 'lucide-react'
 import { ApiError, del, get, post } from '@/lib/api'
 import { leagueImg, rewardImg } from '@/lib/assets'
 import { SKILL, SKILLS } from '@/lib/skills'
 import type { Exercise, RewardSummary, SkillKey } from '@/lib/types'
 import { useAuth } from '@/lib/auth'
+import { higoImg } from '@/components/game/Higo'
 import { celebrate, preloadSfx, sfx } from '@/lib/fx'
 import { stopSpeaking } from '@/lib/speech'
 import { Button } from '@/components/ui/Button'
@@ -249,6 +250,7 @@ export default function Duel() {
         {/* ---------------------------------------------------------- Board */}
         <section>
           <LeagueCard />
+          <SchoolLeagueCard />
           <h2 className="mb-1 mt-8 text-xl">Düello sıralaması</h2>
           <p className="mb-3 text-sm text-ink-soft">{league.name} Ligi grubundaki herkes, bu haftaki düello galibiyetine göre.</p>
           <div className="overflow-hidden rounded-2xl border-2 border-line bg-card">
@@ -452,6 +454,7 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
   const ghostDone = rivalLive ? rival!.i : replayDone
   const ghostScore = rivalLive ? rival!.score : ghostTimeline.slice(0, replayDone).reduce((s, g) => s + g.pts, 0)
   const lastGhost = !rivalLive && replayDone ? ghostTimeline[replayDone - 1] : null
+  const rivalName = duel.ghost.name.split(' ')[0]
   const ghostFresh = lastGhost && elapsed - lastGhost.at < 1100
 
   const round = duel.rounds.findIndex((r) => r.skill === item?.skill)
@@ -482,7 +485,7 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
               )}
             </AnimatePresence>
             <div className="min-w-0 text-right">
-              <p className="truncate text-xs font-black uppercase tracking-widest text-sky">{live ? <span className={clsx('mr-1.5 inline-flex items-center gap-1 rounded px-1 py-px text-[9px] text-white', rivalLive ? 'bg-berry' : 'bg-ink-soft')}><span className="size-1.5 animate-pulse rounded-full bg-white" />{rivalLive ? 'CANLI' : 'GÖLGE'}</span> : <Ghost className="mr-1 inline size-3.5" />}{duel.ghost.name.split(' ')[0]}</p>
+              <p className="truncate text-xs font-black uppercase tracking-widest text-sky">{rivalLive && <span className="mr-1.5 inline-flex items-center gap-1 rounded bg-berry px-1 py-px text-[9px] text-white"><span className="size-1.5 animate-pulse rounded-full bg-white" />CANLI</span>}{duel.ghost.name.split(' ')[0]}</p>
               <motion.p key={ghostScore} initial={{ scale: 1.25 }} animate={{ scale: 1 }} className="font-display text-3xl font-black leading-none tabular-nums text-ink/85">{ghostScore}</motion.p>
             </div>
           </div>
@@ -500,10 +503,10 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
                 <motion.span key={`r${ghostDone}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} className="text-sky">{rival!.finished ? 'Rakip bitirdi!' : `Rakip ${ghostDone}/${flat.length}. soruda`}</motion.span>
               ) : ghostFresh ? (
                 <motion.span key={`g${ghostDone}`} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className={lastGhost!.ok ? 'text-sky' : 'text-ink-soft'}>
-                  {lastGhost!.ok ? `Gölge bildi +${lastGhost!.pts}${lastGhost!.combo >= 2 ? ` · seri x${lastGhost!.combo}` : ''}` : 'Gölge kaçırdı!'}
+                  {lastGhost!.ok ? `${rivalName} bildi +${lastGhost!.pts}${lastGhost!.combo >= 2 ? ` · seri x${lastGhost!.combo}` : ''}` : `${rivalName} kaçırdı!`}
                 </motion.span>
               ) : (
-                <motion.span key="thinking" initial={{ opacity: 0 }} animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4 }} className="text-ink-soft">Gölge düşünüyor…</motion.span>
+                <motion.span key="thinking" initial={{ opacity: 0 }} animate={{ opacity: [0.4, 1, 0.4] }} transition={{ repeat: Infinity, duration: 1.4 }} className="text-ink-soft">{rivalName} düşünüyor…</motion.span>
               ))}
             </AnimatePresence>
           </div>
@@ -529,7 +532,7 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
               </div>
               <motion.p key={count} initial={{ scale: 2.2, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="font-display text-8xl font-black tabular-nums text-flame drop-shadow-[0_0_30px_rgba(232,64,58,.6)]">{count || 'GO!'}</motion.p>
               <p className="max-w-sm text-center text-sm font-bold text-ink-soft">Her soru {Math.round(R.item_ms / 1000)} saniye. Hızlı cevap = bonus, seri = çarpan (x{R.combo_max}'ye kadar).</p>
-              {duel.ghost.training && <p className="max-w-sm text-center text-sm text-ink-soft">Henüz uygun rakip yok; seviyene göre ayarlanmış bir antrenman gölgesiyle eşleştin.</p>}
+              {duel.ghost.training && <p className="max-w-sm text-center text-sm text-ink-soft">Ligin henüz boş; ilk maçında Higo seninle seviyene göre kapışıyor.</p>}
             </motion.div>
           )}
 
@@ -607,15 +610,14 @@ function Fighter({ name, sub, ghost, training, look }: { name: string; sub: stri
   return (
     <motion.div initial={{ opacity: 0, x: ghost ? 40 : -40 }} animate={{ opacity: 1, x: 0 }} className="flex w-32 flex-col items-center text-center sm:w-44">
       {look && !training ? (
-        <span className={clsx('relative', ghost && 'opacity-80 grayscale-[.35]')}>
+        <span className="relative">
           <UserAvatar name={name} avatar={look.avatar} avatarUrl={look.avatar_url} frame={look.frame} className="size-20 sm:size-24" />
-          {ghost && <span className="absolute -bottom-1 -right-1 grid size-8 place-items-center rounded-full bg-ink text-paper"><Ghost className="size-4" /></span>}
         </span>
       ) : (
-        <span className="grid size-20 place-items-center rounded-full bg-ink/10 text-ink/60 ring-4 ring-dashed ring-ink/15 sm:size-24"><Ghost className="size-10" /></span>
+        <span className="grid size-20 place-items-center overflow-hidden rounded-full bg-gradient-to-b from-butter/40 to-flame/20 sm:size-24"><img src={higoImg('thumbs')} alt="" className="w-[82%] object-contain" /></span>
       )}
       <p className="mt-3 w-full truncate font-display text-lg font-black">{name}</p>
-      <p className="text-xs font-bold text-ink-soft">{training ? 'Antrenman gölgesi' : sub}</p>
+      <p className="text-xs font-bold text-ink-soft">{training ? 'Antrenman maçı' : sub}</p>
     </motion.div>
   )
 }
@@ -640,7 +642,7 @@ function ResultView({ duel, result, onExit, onRematch }: { duel: DuelData; resul
 
       <div className="mt-8 overflow-hidden rounded-2xl border-2 border-line bg-card">
         <div className="grid grid-cols-[1fr_auto_auto] gap-x-6 border-b-2 border-line px-4 py-2 text-xs font-black uppercase tracking-wider text-ink-soft">
-          <span>Tur</span><span>Sen</span><span>Gölge</span>
+          <span>Tur</span><span>Sen</span><span className="max-w-24 truncate">{duel.ghost.name.split(' ')[0]}</span>
         </div>
         {duel.rounds.map((r) => {
           const S = SKILL[r.skill]
@@ -766,13 +768,36 @@ function Matchmaking({ lobby, onMatched, onGhost, onCancel }: { lobby?: Lobby; o
         ) : (
           <>
             <p className="mt-6 font-display text-3xl font-black uppercase tracking-wide">Rakip aranıyor<motion.span animate={{ opacity: [0, 1, 0] }} transition={{ repeat: Infinity, duration: 1.2 }}>…</motion.span></p>
-            <p className="mt-2 max-w-xs text-sm font-bold text-white/60">Ligindeki canlı oyuncular taranıyor. {Math.max(0, limit - t)} sn içinde kimse gelmezse bir rakibin gölgesiyle eşleşirsin.</p>
+            <p className="mt-2 max-w-xs text-sm font-bold text-white/60">Ligindeki oyuncular taranıyor. {Math.max(0, limit - t)} sn içinde canlı kimse gelmezse ligindeki bir rakibin kayıtlı maçıyla karşılaşırsın.</p>
             <div className="mt-5 h-1.5 w-56 overflow-hidden rounded-full bg-white/10"><motion.div className="h-full bg-mint" animate={{ width: `${Math.min(100, (t / limit) * 100)}%` }} /></div>
             <button onClick={cancel} className="mt-8 rounded-xl border border-white/20 px-5 py-2.5 text-sm font-black uppercase tracking-wider text-white/80 hover:bg-white/10">Vazgeç</button>
           </>
         )}
       </div>
     </motion.div>
+  )
+}
+
+/**
+ * For pupils of a school: their class and school leagues, one tap from the arena.
+ * Nothing shows for learners without a school.
+ */
+function SchoolLeagueCard() {
+  const { user } = useAuth()
+  if (user?.institution_role !== 'student' || !user.institution) return null
+  const cls = (user.institution as { class_name?: string | null }).class_name
+  return (
+    <div className="mt-3 grid grid-cols-2 gap-3">
+      {([['class', cls ? `${cls} sınıfı` : 'Sınıfım', 'Sınıf ligi'], ['school', user.institution.name, 'Okul ligi']] as const).map(([k, t, l]) => (
+        <Link key={k} to={`/leagues?view=${k}`} className="group flex min-w-0 items-center gap-3 rounded-3xl border-2 border-line bg-card p-4 transition hover:border-sky/50">
+          <span className="grid size-11 shrink-0 place-items-center rounded-2xl bg-sky/12 text-sky">{k === 'class' ? <Users className="size-5" /> : <School className="size-5" />}</span>
+          <span className="min-w-0">
+            <span className="block text-[11px] font-black uppercase tracking-[0.16em] text-ink-soft">{l}</span>
+            <span className="block truncate font-display text-base font-black leading-tight">{t}</span>
+          </span>
+        </Link>
+      ))}
+    </div>
   )
 }
 

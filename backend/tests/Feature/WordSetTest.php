@@ -24,10 +24,10 @@ class WordSetTest extends TestCase
     {
         $this->seed([GameSeeder::class, WordSetSeeder::class]);
         $u = $this->learner();
-        $this->assertSame(33 + 12, WordSet::query()->whereNull('user_id')->count());
+        $this->assertSame(33 + 35, WordSet::query()->whereNull('user_id')->count());
 
-        $this->actingAs($u)->getJson('/api/v1/word-sets?level=A1')->assertOk()->assertJsonCount(9 + 2, 'data');
-        $this->actingAs($u)->getJson('/api/v1/word-sets?exam=lgs')->assertOk()->assertJsonPath('data.0.title', 'LGS: Sık çıkan kelimeler');
+        $this->actingAs($u)->getJson('/api/v1/word-sets?level=A1')->assertOk()->assertJsonCount(9 + 8, 'data');
+        $this->assertContains('LGS: Sık çıkan kelimeler', $this->actingAs($u)->getJson('/api/v1/word-sets?exam=lgs')->assertOk()->json('data.*.title'));
         // search finds words inside sets too
         $hit = $this->actingAs($u)->getJson('/api/v1/word-sets?q=boarding')->assertOk()->json('data');
         $this->assertSame('Seyahat İngilizcesi', $hit[0]['title']);
@@ -73,5 +73,32 @@ class WordSetTest extends TestCase
         $this->actingAs($student)->getJson('/api/v1/me/assignments')->assertJsonPath('data.0.done', false);
         $this->actingAs($student)->postJson("/api/v1/word-sets/{$set->id}/played", ['game' => 'match', 'correct' => 9, 'total' => 10])->assertOk();
         $this->actingAs($student)->getJson('/api/v1/me/assignments')->assertJsonPath('data.0.done', true);
+    }
+
+    public function test_creating_and_sharing_is_limited_and_checked(): void
+    {
+        $this->seed([GameSeeder::class]);
+        $items = [['word' => 'apple', 'translation' => 'elma'], ['word' => 'pear', 'translation' => 'armut']];
+        $new = User::factory()->create(['email_verified_at' => now()]);
+        // a brand-new account keeps its sets private
+        $this->actingAs($new)->postJson('/api/v1/word-sets', ['title' => 'Meyveler', 'is_public' => true, 'items' => $items])->assertUnprocessable();
+
+        $u = User::factory()->create(['email_verified_at' => now(), 'created_at' => now()->subDays(3)]);
+        // links and blocked words never go public
+        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'Bedava www.spam.xyz', 'is_public' => true, 'items' => $items])->assertUnprocessable();
+        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'Meyveler', 'is_public' => true, 'items' => $items])->assertOk();
+
+        // a daily quota on new sets
+        \App\Support\Settings::put(['limits.word_sets_per_day' => 3]);
+        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'İki', 'items' => $items])->assertOk();
+        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'Üç', 'items' => $items])->assertOk();
+        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'Dört', 'items' => $items])->assertStatus(429);
+
+        // the word notebook has a ceiling
+        \App\Support\Settings::put(['limits.notebook_size' => 1]);
+        $this->actingAs($u)->postJson('/api/v1/words', ['word' => 'river'])->assertCreated();
+        $this->actingAs($u)->postJson('/api/v1/words', ['word' => 'lake'])->assertUnprocessable();
+        // the same word again is not a new entry
+        $this->actingAs($u)->postJson('/api/v1/words', ['word' => 'River'])->assertOk();
     }
 }

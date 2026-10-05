@@ -2,7 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, Crown, UserX } from 'lucide-react'
+import { ArrowLeft, Crown, School, UserX } from 'lucide-react'
 import { get } from '@/lib/api'
 import { dateTR, num } from '@/lib/format'
 import { AchievementBadge } from '@/components/game/AchievementBadge'
@@ -12,7 +12,7 @@ import { UserAvatar } from '@/components/game/UserAvatar'
 import { Empty, Spinner } from '@/components/ui/Misc'
 
 interface Pub {
-  user: { name: string; username: string; avatar?: string | null; avatar_url?: string | null; frame?: string | null; banner?: string | null; bio?: string | null; cefr_level: string; xp_total: number; level: number; streak: number; streak_longest?: number; league_tier: number; league_name?: string; badges_count?: number; is_premium: boolean; joined_at: string }
+  user: { name: string; username: string; avatar?: string | null; avatar_url?: string | null; frame?: string | null; banner?: string | null; bio?: string | null; cefr_level: string; xp_total: number; level: number; streak: number; streak_longest?: number; league_tier: number; league_name?: string; badges_count?: number; is_premium: boolean; joined_at: string; school?: { name: string; class_name?: string | null; role?: string } | null }
   badges: { id: number; title: string; tier: 'bronze' | 'silver' | 'gold' | 'legend'; icon: string; category?: string }[]
 }
 
@@ -25,9 +25,9 @@ export default function PublicProfile() {
   if (isLoading || !data) return <Spinner />
   const u = data.user
   const stats = [
-    { v: u.streak, l: 'Günlük seri', c: '#ff5a36' },
-    { v: num(u.xp_total), l: 'Toplam XP', c: '#ffc233' },
-    { v: u.level, l: 'Seviye', c: '#8f7cf8' },
+    { v: Number(u.streak) || 0, l: 'Günlük seri', c: '#ff5a36' },
+    { v: num(Number(u.xp_total) || 0), l: 'Toplam XP', c: '#ffc233' },
+    { v: Number(u.level) || 1, l: 'Seviye', c: '#8f7cf8' },
     { v: u.badges_count ?? data.badges.length, l: 'Rozet', c: '#22b573' },
   ]
   return (
@@ -41,10 +41,15 @@ export default function PublicProfile() {
         <div className="px-6 pb-6 pt-3">
           <h1 className="flex items-center gap-2 text-3xl font-extrabold"><span className={clsx('min-w-0 truncate', u.is_premium && 'premium-name')}>{u.name}</span> {u.is_premium && <Crown className="size-6 shrink-0 fill-butter text-butter-deep" />}</h1>
           <p className="text-ink-soft">@{u.username} · {dateTR(u.joined_at)} tarihinden beri · {u.cefr_level}</p>
+          {u.school?.name && (
+            <p className="mt-2.5 inline-flex max-w-full items-center gap-1.5 rounded-full bg-sky/10 px-3 py-1 text-sm font-extrabold text-sky">
+              <School className="size-4 shrink-0" /><span className="truncate">{u.school.name}{u.school.class_name ? ` · ${u.school.class_name}` : ''}</span>
+            </p>
+          )}
           {u.bio && <p className="mt-3 text-[15px]">{u.bio}</p>}
           <div className="mt-5 flex items-center gap-3 rounded-2xl bg-paper-2 p-3">
-            <LeagueEmblem tier={u.league_tier} size={44} />
-            <div><p className="font-display text-lg font-black">{u.league_name ?? ''} Ligi</p><p className="text-xs font-bold text-ink-soft">Bu hafta yarıştığı lig</p></div>
+            <LeagueEmblem tier={Number(u.league_tier) || 0} size={44} />
+            <div><p className="font-display text-lg font-black">{u.league_name || 'Bronz'} Ligi</p><p className="text-xs font-bold text-ink-soft">Bu hafta yarıştığı lig</p></div>
           </div>
           <div className="mt-5 grid grid-cols-4 gap-3">
             {stats.map((s) => (

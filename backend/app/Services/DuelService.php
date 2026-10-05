@@ -55,7 +55,8 @@ class DuelService
     ];
 
     /** Practice ghosts used when no real opponent is available yet (clearly labelled in the UI). */
-    private const TRAINING_GHOSTS = ['Antrenman Gölgesi', 'Gölge Koç', 'Sparring Gölgesi'];
+    /** When nobody else has played yet, Higo is the sparring partner (never a made-up person). */
+    private const TRAINING_GHOSTS = ['Higo'];
 
     public function __construct(
         private readonly GamificationService $game,

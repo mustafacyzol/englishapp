@@ -81,6 +81,10 @@ class AccountController extends Controller
         }
         if (array_key_exists('bio', $data)) {
             $data['bio'] = $data['bio'] === null ? null : (trim(strip_tags($data['bio'])) ?: null);
+            // the bio is public on the profile page
+            if ($data['bio'] && ($why = \App\Support\ContentGuard::problem($data['bio']))) {
+                abort(422, $why);
+            }
         }
         // Age group guards content, rivals and gifts, so it is not a switch to flip back and
         // forth (that is how one account gets shared between siblings): children's accounts

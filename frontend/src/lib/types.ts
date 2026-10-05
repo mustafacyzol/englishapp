@@ -31,7 +31,7 @@ export interface Me {
   school_stage?: string | null
   grade?: number | null
   linked?: { google: boolean; apple: boolean }
-  institution: { id: number; name: string; type: string } | null
+  institution: { id: number; name: string; type: string; class_name?: string | null } | null
   institution_role: 'student' | 'manager' | 'teacher' | null
   marketing_opt_in: boolean
   two_factor_enabled: boolean

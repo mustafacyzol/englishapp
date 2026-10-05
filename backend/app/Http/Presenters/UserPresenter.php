@@ -74,7 +74,7 @@ class UserPresenter
         $m = InstitutionMember::query()->where('user_id', $user->id)->where('status', 'active')
             ->orderByRaw("CASE role WHEN 'manager' THEN 0 WHEN 'teacher' THEN 1 ELSE 2 END")->with('institution:id,name,type')->first();
 
-        return ['institution' => $m?->institution?->only(['id', 'name', 'type']), 'institution_role' => $m?->role];
+        return ['institution' => $m?->institution ? $m->institution->only(['id', 'name', 'type']) + ['class_name' => $m->class_name] : null, 'institution_role' => $m?->role];
     }
 
     public static function public(User $user): array
@@ -86,10 +86,10 @@ class UserPresenter
             ...$user->look(),
             'bio' => $user->bio,
             'cefr_level' => $user->cefr_level,
-            'xp_total' => $user->xp_total,
+            'xp_total' => (int) $user->xp_total,
             'level' => $user->level(),
-            'streak' => $user->streak_current,
-            'league_tier' => $user->league_tier,
+            'streak' => (int) $user->streak_current,
+            'league_tier' => (int) $user->league_tier,
             'is_premium' => $user->isPremium(),
             'joined_at' => $user->created_at?->toIso8601String(),
         ];

@@ -177,14 +177,18 @@ export function SetDetailPage() {
   const { data, isLoading, isError } = useQuery({ queryKey: ['word-set', id], queryFn: () => get<{ data: SetDetail }>(`/word-sets/${id}`) })
   const s = data?.data
   const refresh = () => { qc.invalidateQueries({ queryKey: ['word-set', id] }); qc.invalidateQueries({ queryKey: ['word-sets'] }) }
-  const save = useMutation({ mutationFn: () => post<{ saved: boolean }>(`/word-sets/${id}/save`), onSuccess: (r) => { toast(r.saved ? 'Set kaydedildi' : 'Kayıtlardan çıkarıldı', 'success'); refresh() } })
-  const copy = useMutation({ mutationFn: () => post<{ data: SetDetail }>(`/word-sets/${id}/copy`), onSuccess: (r) => { toast('Kopyan hazır, şimdi kelime ekleyebilirsin', 'success'); qc.invalidateQueries({ queryKey: ['word-sets'] }); nav(`/practice/sets/${r.data.id}/edit`) } })
-  const learn = useMutation({ mutationFn: () => post<{ message: string }>(`/word-sets/${id}/learn`), onSuccess: (r) => { toast(r.message, 'success'); refresh(); qc.invalidateQueries({ queryKey: ['words'] }) } })
-  const remove = useMutation({ mutationFn: () => del(`/word-sets/${id}`), onSuccess: () => { toast('Set silindi', 'success'); qc.invalidateQueries({ queryKey: ['word-sets'] }); nav('/practice?tab=sets') } })
+  // limits (daily quotas, notebook size) come back as plain messages: show them
+  const fail = (e: Error) => toast(e.message, 'error')
+  const save = useMutation({ mutationFn: () => post<{ saved: boolean }>(`/word-sets/${id}/save`), onSuccess: (r) => { toast(r.saved ? 'Kaydettiklerine eklendi' : 'Kaydettiklerinden çıkarıldı', 'success'); refresh() }, onError: fail })
+  const copy = useMutation({ mutationFn: () => post<{ data: SetDetail }>(`/word-sets/${id}/copy`), onSuccess: (r) => { toast('Kopyan hazır, şimdi kelime ekleyebilirsin', 'success'); qc.invalidateQueries({ queryKey: ['word-sets'] }); nav(`/practice/sets/${r.data.id}/edit`) }, onError: fail })
+  const learn = useMutation({ mutationFn: () => post<{ message: string }>(`/word-sets/${id}/learn`), onSuccess: (r) => { toast(r.message, 'success'); refresh(); qc.invalidateQueries({ queryKey: ['words'] }) }, onError: fail })
+  const remove = useMutation({ mutationFn: () => del(`/word-sets/${id}`), onSuccess: () => { toast('Set silindi', 'success'); qc.invalidateQueries({ queryKey: ['word-sets'] }); nav('/practice?tab=sets') }, onError: fail })
 
   if (isLoading) return <Spinner className="min-h-[50vh]" />
   if (isError || !s) return <Empty icon={<Layers className="size-8" />} title="Set bulunamadı" text="Bu set silinmiş ya da gizli olabilir." action={<Link to="/practice?tab=sets" className="font-bold text-flame">Setlere dön</Link>} />
   const tag = [examLabel(s.exam), s.level].filter(Boolean).join(' · ')
+  const inBook = s.items.filter((i) => i.in_library).length
+  const allIn = inBook === s.items.length
 
   return (
     <div className="mx-auto max-w-4xl">
@@ -208,13 +212,13 @@ export function SetDetailPage() {
           <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-stretch">
             <Button className="sm:min-w-44" size="lg" onClick={() => setPicking(true)} icon={<Play className="size-5" />}>Oyna</Button>
             <div className="grid flex-1 grid-cols-3 gap-2">
-              <Act onClick={() => save.mutate()} busy={save.isPending} on={s.saved} icon={s.saved ? BookmarkCheck : Bookmark} label={s.saved ? 'Kaydedildi' : 'Kaydet'} />
-              <Act onClick={() => learn.mutate()} busy={learn.isPending} icon={Plus} label="Deftere ekle" />
-              {s.mine ? <Act onClick={() => nav(`/practice/sets/${s.id}/edit`)} icon={Pencil} label="Düzenle" /> : <Act onClick={() => copy.mutate()} busy={copy.isPending} icon={Copy} label="Kopyala" />}
+              <Act onClick={() => save.mutate()} busy={save.isPending} on={s.saved} icon={s.saved ? BookmarkCheck : Bookmark} label={s.saved ? 'Kaydedildi' : 'Kaydet'} sub={s.saved ? 'listende' : 'sonra bul'} />
+              <Act onClick={() => learn.mutate()} busy={learn.isPending} disabled={allIn} on={allIn} icon={allIn ? Check : Plus} label={allIn ? 'Defterinde' : 'Deftere ekle'} sub={allIn ? 'tekrar sırasında' : `${s.items.length - inBook} yeni kelime`} />
+              {s.mine ? <Act onClick={() => nav(`/practice/sets/${s.id}/edit`)} icon={Pencil} label="Düzenle" sub="kelime ekle" /> : <Act onClick={() => copy.mutate()} busy={copy.isPending} icon={Copy} label="Kopyala" sub="kendi setin olsun" />}
             </div>
           </div>
           {s.mine && <button onClick={() => confirm('Bu set silinsin mi?') && remove.mutate()} className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-ink-soft hover:text-berry"><Trash2 className="size-3.5" /> Seti sil</button>}
-          {!s.mine && <p className="mt-2 text-xs text-ink-soft">Kopyala: setin sana ait bir kopyası oluşur, üzerine kelime ekleyebilirsin.</p>}
+          <p className="mt-2.5 text-xs leading-relaxed text-ink-soft"><b className="text-ink">Kaydet</b> seti listende tutar. <b className="text-ink">Deftere ekle</b> kelimeleri tekrar sırana koyar, unuttukların yeniden karşına çıkar.{!s.mine && <> <b className="text-ink">Kopyala</b> sana ait, düzenlenebilir bir kopya açar.</>}</p>
         </div>
       </section>
 
@@ -249,29 +253,42 @@ export function SetDetailPage() {
   )
 }
 
-function Act({ onClick, icon: I, label, busy, on }: { onClick: () => void; icon: typeof Layers; label: string; busy?: boolean; on?: boolean }) {
+function Act({ onClick, icon: I, label, sub, busy, on, disabled }: { onClick: () => void; icon: typeof Layers; label: string; sub?: string; busy?: boolean; on?: boolean; disabled?: boolean }) {
   return (
-    <button onClick={onClick} disabled={busy} className={clsx('press flex flex-col items-center justify-center gap-1 rounded-2xl border-2 px-1 py-2 text-xs font-extrabold transition disabled:opacity-60', on ? 'border-flame/40 bg-flame/10 text-flame' : 'border-line bg-card hover:border-ink/30')}>
+    <button onClick={onClick} disabled={busy || disabled} className={clsx('press flex flex-col items-center justify-center gap-0.5 rounded-2xl border-2 px-1 py-2 text-xs font-extrabold transition', busy && 'opacity-60', on ? 'border-mint/50 bg-mint/10 text-mint-deep' : 'border-line bg-card hover:border-ink/30')}>
       <I className="size-5" />
       <span className="leading-tight">{label}</span>
+      {sub && <span className={clsx('text-[10px] font-bold leading-tight', on ? 'text-mint-deep/80' : 'text-ink-soft')}>{sub}</span>}
     </button>
   )
 }
 
+/**
+ * An index card: the word on a clean front with a listen button, the meaning
+ * and the example (word marked) on a lined back. Tap anywhere to turn it.
+ */
 function FlipCard({ it }: { it: SetItem }) {
   const [flip, setFlip] = useState(false)
+  const parts = it.example ? it.example.split(new RegExp(`(\\b${it.word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\w*)`, 'i')) : []
   return (
     <button onClick={() => setFlip((f) => !f)} className="group relative aspect-[4/3] w-full [perspective:900px]" aria-label={`${it.word}: ${flip ? it.translation : 'çevir'}`}>
       <motion.span className="relative block size-full [transform-style:preserve-3d]" animate={{ rotateY: flip ? 180 : 0 }} transition={{ type: 'spring', stiffness: 260, damping: 24 }}>
-        <span className="absolute inset-0 flex flex-col items-center justify-center rounded-3xl border-2 border-line bg-card p-3 shadow-hard-sm [backface-visibility:hidden]">
-          <span className="text-center font-display text-lg font-black leading-tight [overflow-wrap:anywhere] sm:text-xl">{it.word}</span>
-          <span className="mt-1 text-[10px] font-bold uppercase tracking-widest text-ink-soft">çevirmek için dokun</span>
-          {it.in_library && <Check className="absolute right-2.5 top-2.5 size-4 text-mint-deep" />}
-          <span role="button" tabIndex={-1} onClick={(e) => { e.stopPropagation(); speak(it.word) }} className="absolute bottom-2 right-2.5 text-sky"><Volume2 className="size-4" /></span>
+        <span className="absolute inset-0 flex flex-col overflow-hidden rounded-2xl border-2 border-line bg-card shadow-[0_3px_0_0_var(--line)] transition group-hover:-translate-y-0.5 [backface-visibility:hidden]">
+          <span aria-hidden className="h-1.5 w-full bg-gradient-to-r from-flame via-butter to-sky" />
+          <span className="flex flex-1 flex-col items-center justify-center px-3">
+            <span className="text-center font-display text-lg font-black leading-tight [overflow-wrap:anywhere] sm:text-xl">{it.word}</span>
+            <span className="mt-1.5 text-[10px] font-bold uppercase tracking-[0.18em] text-ink-soft/80">çevir</span>
+          </span>
+          {it.in_library && <span className="absolute left-2 top-3 flex items-center gap-0.5 rounded-full bg-mint/15 px-1.5 py-0.5 text-[9px] font-black uppercase text-mint-deep"><Check className="size-3" strokeWidth={3} /> defterde</span>}
+          <span role="button" tabIndex={-1} aria-label={`${it.word} dinle`} onClick={(e) => { e.stopPropagation(); speak(it.word) }} className="absolute bottom-2 right-2 grid size-8 place-items-center rounded-full bg-sky/12 text-sky transition hover:bg-sky hover:text-white"><Volume2 className="size-4" /></span>
         </span>
-        <span className="absolute inset-0 flex flex-col items-center justify-center rounded-3xl border-2 border-sky bg-sky/10 p-3 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+        <span className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden rounded-2xl border-2 border-sky/40 bg-[repeating-linear-gradient(transparent,transparent_21px,color-mix(in_oklab,var(--color-sky)_14%,transparent)_22px)] bg-card px-3 [backface-visibility:hidden] [transform:rotateY(180deg)]">
           <span className="text-center font-display text-lg font-black leading-tight text-sky [overflow-wrap:anywhere]">{it.translation}</span>
-          {it.example && <span className="mt-1.5 line-clamp-2 text-center text-[11px] text-ink-soft">{it.example}</span>}
+          {it.example && (
+            <span className="mt-1.5 line-clamp-3 text-center text-[11px] leading-snug text-ink-soft">
+              {parts.map((p, i) => (i % 2 ? <b key={i} className="font-extrabold text-ink">{p}</b> : p))}
+            </span>
+          )}
         </span>
       </motion.span>
     </button>

@@ -410,11 +410,20 @@ class GameController extends Controller
         $user = User::query()->where('username', $username)->where('is_banned', false)->firstOrFail();
         $badges = $user->userAchievements()->with('achievement:id,key,title,tier,icon,category')->latest('unlocked_at')->limit(12)->get()->pluck('achievement');
 
+        // The school is shown only to schoolmates (and the learner): pupils are often minors.
+        $viewer = auth('sanctum')->user();
+        $school = null;
+        $mine = \App\Models\InstitutionMember::query()->where('user_id', $user->id)->where('status', 'active')->with('institution:id,name,type')->first();
+        if ($mine && $viewer && ($viewer->id === $user->id || \App\Models\InstitutionMember::query()->where('user_id', $viewer->id)->where('status', 'active')->where('institution_id', $mine->institution_id)->exists())) {
+            $school = ['name' => $mine->institution?->name, 'class_name' => $mine->class_name, 'role' => $mine->role];
+        }
+
         return response()->json([
             'user' => UserPresenter::public($user) + [
-                'league_name' => app(\App\Services\LeagueService::class)->tierName($user->league_tier),
-                'streak_longest' => $user->streak_longest,
+                'league_name' => app(\App\Services\LeagueService::class)->tierName((int) $user->league_tier),
+                'streak_longest' => (int) $user->streak_longest,
                 'badges_count' => $user->userAchievements()->count(),
+                'school' => $school,
             ],
             'badges' => $badges,
         ]);

@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import clsx from 'clsx'
 import { motion } from 'motion/react'
 import { ArrowLeft, ChevronsDown, ChevronsUp, Clock, Flame } from 'lucide-react'
@@ -29,7 +29,8 @@ interface Standings {
 export default function Leagues() {
   const { user } = useAuth()
   const school = user?.institution_role === 'student'
-  const [view, setView] = useState<'league' | 'class' | 'school'>('league')
+  const [params] = useSearchParams()
+  const [view, setView] = useState<'league' | 'class' | 'school'>(() => (params.get('view') === 'class' || params.get('view') === 'school' ? (params.get('view') as 'class' | 'school') : 'league'))
   const { data, isLoading } = useQuery({ queryKey: ['league'], queryFn: () => get<Standings>('/league'), refetchInterval: 30_000 })
   if (isLoading || !data) return <SkeletonPage variant="list" />
   const n = data.rows.length
