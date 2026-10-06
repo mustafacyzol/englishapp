@@ -25,7 +25,7 @@ class GradeUnitTest extends TestCase
 
     public function test_every_grade_has_units_spread_over_every_course(): void
     {
-        $this->assertSame(11, GradeUnit::query()->distinct()->count('track'));
+        $this->assertSame(17, GradeUnit::query()->distinct()->count('track'));
         // one generated lesson per grade unit per course, all at the start of a unit
         $this->assertSame(GradeUnit::query()->count() * 4, Lesson::query()->whereNotNull('meta->grade_unit')->count());
         $this->assertSame(0, Lesson::query()->whereNotNull('meta->grade_unit')->where('position', '!=', 0)->count());

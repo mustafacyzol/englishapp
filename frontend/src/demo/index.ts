@@ -4,6 +4,7 @@
  * Mutations update an in-memory copy, and Defne's replies come from a small rule-based script.
  */
 import fixture from './fixture.json'
+import extra from './extra.json'
 const isPremiumAvatar = (v: string) => { const [k, bg] = v.split('@'); return ['astronaut', 'wizard', 'king', 'pilot', 'scientist', 'chef', 'jazz', 'detective', 'explorer'].includes(k) || ['gold', 'obsidian', 'aurora', 'rosegold', 'pearl', 'emerald'].includes(bg ?? '') }
 
 type Json = any // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -23,9 +24,60 @@ export function setPersona(p: Persona) {
   try { sessionStorage.setItem(PKEY, p) } catch { /* private mode */ }
   for (const k of Object.keys(db)) delete db[k]
   Object.assign(db, structuredClone(F.get), p === 'fresh' ? structuredClone(F.fresh ?? {}) : {})
+  if (db['/auth/me']) applyTrack()
 }
 if (getPersona() === 'fresh') setPersona('fresh')
 const me = () => db['/auth/me'].user
+
+// ---------------------------------------------------------------- school grade / exam tracks
+/**
+ * Every lesson of the course (so no stop is ever "not found") and, per grade or exam
+ * track, how the path changes for that learner: the coursebook unit titles, the
+ * track's own lesson at the start of each unit and the guidebook intro. Mirrors
+ * GradeUnitService::trackFor and LearnController::path.
+ */
+const X = extra as unknown as { lessons: Record<string, Json>; tracks: Record<string, { label: string; courses: Record<string, Record<string, { title: string; grade: Json; lessons: Json[]; guide: string }>> }> }
+const EXAM_TRACKS: Record<string, string> = { lgs: 'g8', ydt: 'g12', yds: 'x_yds', yokdil: 'x_yokdil', ielts: 'x_ielts', toefl: 'x_toefl', proficiency: 'x_prep' }
+function trackOf(u: Json): string | null {
+  const g = Number(u?.grade ?? 0)
+  if (['ilkokul', 'ortaokul', 'lise'].includes(u?.school_stage) && g >= 1 && g <= 12) return `g${g}`
+  return EXAM_TRACKS[u?.exam_target ?? ''] ?? null
+}
+/** Puts the learner's track on every recorded path (idempotent: a changed track is undone first). */
+function applyTrack() {
+  const track = trackOf(me())
+  for (const k of Object.keys(db).filter((x) => x === '/path' || /^\/path\/\d+$/.test(x))) {
+    const data = db[k]
+    const over = track ? X.tracks[track]?.courses[String(data.course?.id)] ?? {} : {}
+    for (const u of data.units ?? []) {
+      // undo an earlier track
+      if (u._base) { u.title = u._base.title; u.description = u._base.description; u.grade = null }
+      const first = u.lessons.findIndex((l: Json) => !l.meta?.track)
+      if (u.lessons[first]?._st) { u.lessons[first].state = u.lessons[first]._st; delete u.lessons[first]._st }
+      u.lessons = u.lessons.filter((l: Json) => !l.meta?.track)
+      const o = over[String(u.id)]
+      if (!o) continue
+      u._base ??= { title: u.title, description: u.description }
+      u.title = o.title
+      u.description = `${u._base.title} · ${u._base.description}`
+      u.grade = o.grade
+      u.has_guidebook = true
+      const head = u.lessons[0]
+      const extraLessons = o.lessons.map((l: Json) => ({ ...l }))
+      // the track lesson opens the unit: it takes the first stop's place in the order
+      if (head && head.state !== 'completed') {
+        extraLessons[0].state = head.state
+        head._st = head.state
+        head.state = 'locked'
+      } else if (head) {
+        extraLessons.forEach((l: Json) => (l.state = 'open'))
+      }
+      u.lessons = [...extraLessons, ...u.lessons]
+    }
+    data.track = { key: track ? (track.startsWith('x_') ? 'exam' : 'grade') : me().exam_target ? 'exam' : 'general', grade_track: track, label: track ? X.tracks[track]?.label : 'Genel İngilizce', grade: me().grade ?? null, exam: me().exam_target ?? null }
+  }
+}
+applyTrack()
 const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export class DemoError extends Error {
@@ -294,6 +346,13 @@ function wsWrite(target: Json | null, body: Json): Json {
 }
 
 function getRoute(path: string, admin: boolean): Json {
+  const gb = path.match(/^\/units\/(\d+)\/guidebook$/)
+  if (gb) {
+    const track = trackOf(me())
+    const o = track ? Object.values(X.tracks[track]?.courses ?? {}).map((c) => c[gb[1]]).find(Boolean) : null
+    const base = db[path] ?? { title: '', guidebook: '' }
+    if (o) return { title: o.title, guidebook: `${o.guide}\n${base.guidebook ?? ''}` }
+  }
   if (path === '/coupons') return db['/coupons'] ?? { data: [] }
   if (path === '/arena/lobby') {
     const players = (db['/duel']?.leaderboard ?? []).filter((r: Json) => !r.is_me).slice(0, 8)
@@ -377,6 +436,7 @@ function getRoute(path: string, admin: boolean): Json {
     if (row) return { user: { name: row.name, username: row.username, avatar: row.avatar, avatar_url: row.avatar_url, frame: row.frame, banner: row.banner, bio: null, cefr_level: row.cefr_level ?? 'A2', xp_total: row.xp_total ?? (Number(row.xp ?? row.trophies ?? 40) * 7 + 120), level: 4, streak: row.streak ?? 3, league_tier: db['/league']?.tier ?? 2, league_name: db['/league']?.tier_name, badges_count: 5, is_premium: !!row.is_premium, joined_at: '2026-08-12T10:00:00Z' }, badges: db['/u/elifkaya']?.badges ?? [] }
   }
   if (F.err[base]) throw new DemoError(F.err[base].status, F.err[base].message)
+  if ((m = base.match(/^\/lessons\/(\d+)$/)) && X.lessons[m[1]]) return { lesson: structuredClone(X.lessons[m[1]]), hearts: db['/hearts'] ?? { hearts: 5, unlimited: true } }
   if (/^\/(lessons|stories|u|blog|units)\//.test(base)) throw new DemoError(404, 'Bulunamadı.')
   void admin
   return { data: [] }
@@ -392,8 +452,9 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
   if (path === '/auth/register') {
     // A new sign-up starts from zero, just like on a real backend.
     setPersona('fresh')
-    Object.assign(me(), { name: body.name || me().name, email: body.email || me().email, age_group: body.age_group ?? me().age_group, cefr_level: body.cefr_level ?? me().cefr_level, learning_goal: body.learning_goal ?? me().learning_goal, exam_target: body.exam_target ?? null, daily_goal_xp: body.daily_goal_xp ?? me().daily_goal_xp })
+    Object.assign(me(), { name: body.name || me().name, email: body.email || me().email, age_group: body.age_group ?? me().age_group, cefr_level: body.cefr_level ?? me().cefr_level, learning_goal: body.learning_goal ?? me().learning_goal, exam_target: body.exam_target ?? null, daily_goal_xp: body.daily_goal_xp ?? me().daily_goal_xp, school_stage: body.school_stage ?? null, grade: body.grade ?? null })
     syncUser()
+    applyTrack()
     return { token: 'demo-token', user: { ...me(), email_verified: false } }
   }
   if (path === '/auth/email/send') return { retry_after: 60 }
@@ -428,6 +489,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     const kid = body.school_stage === 'ilkokul' || (body.school_stage === 'ortaokul' && (body.grade ?? 5) <= 6)
     Object.assign(me(), { school_stage: body.school_stage, grade: body.grade ?? null, exam_target: kid ? null : body.exam_target ?? null, exam_date: kid ? null : body.exam_date ?? null })
     syncUser()
+    applyTrack()
     return { user: me() }
   }
   if (path === '/word-sets' && method === 'POST') return wsWrite(null, body)

@@ -84,8 +84,9 @@ export default function Placement() {
   const s = SKILL[q.skill] ?? SKILL.grammar
   const bandIndex = ['A1', 'A2', 'B1', 'B2', 'C1'].indexOf(q.level)
   return (
-    <div className="mx-auto flex min-h-dvh max-w-2xl flex-col px-5 py-5">
-      <div className="mb-6 flex items-center gap-4">
+    // one fixed screen: progress on top, the task in the middle (scrolls only if a passage is long), answer bar pinned below
+    <div className="mx-auto flex h-dvh max-w-2xl flex-col px-5 pt-4">
+      <div className="mb-4 flex shrink-0 items-center gap-4 sm:mb-6">
         <Link to={exit} aria-label="Testten çık" className="grid size-10 place-items-center rounded-xl text-ink-soft hover:bg-paper-2"><X className="size-6" /></Link>
         {/* five difficulty steps, filled as you go */}
         <div className="flex flex-1 gap-1.5" aria-label={`Soru ${i + 1} / ${qs.length}`}>
@@ -103,21 +104,22 @@ export default function Placement() {
       </div>
 
       <AnimatePresence mode="wait">
-        <motion.div key={q.id} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.22 }} className="flex flex-1 flex-col">
+        <motion.div key={q.id} initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} transition={{ duration: 0.22 }} className="flex min-h-0 flex-1 flex-col">
+          <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain pb-3">
           <div className="mb-4 flex items-center gap-2">
             <span className={clsx('inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-black uppercase tracking-wider', s.tone)}><s.icon className="size-3.5" /> {s.label}</span>
             {kind !== 'choice' && <span className="rounded-full bg-flame/10 px-3 py-1 text-xs font-black uppercase tracking-wider text-flame">{KIND[kind]}</span>}
             <span className="text-xs font-bold text-ink-soft">Bölüm {bandIndex + 1} / 5</span>
           </div>
 
-          {q.passage && <div className="mb-5 rounded-2xl border-2 border-line bg-card p-4 text-[16px] leading-relaxed">{q.passage}</div>}
+          {q.passage && <div className="mb-4 rounded-2xl border-2 border-line bg-card p-4 text-[15px] leading-relaxed sm:text-[16px]">{q.passage}</div>}
           {q.say && <Listen text={q.say} key={q.id} hideText={kind === 'dictation'} />}
 
-          <h1 className="mb-6 font-display text-[clamp(1.5rem,4.5vw,2rem)] font-black leading-snug">{q.prompt}</h1>
+          <h1 className="mb-4 font-display text-[clamp(1.3rem,4.5vw,2rem)] font-black leading-snug sm:mb-6">{q.prompt}</h1>
           {kind === 'choice' && (
             <div className="grid gap-2.5" role="radiogroup">
               {q.options.map((o, oi) => (
-                <button key={oi} role="radio" aria-checked={pick === oi} onClick={() => setPick(oi)} className={clsx('flex items-center gap-4 rounded-2xl border-2 px-4 py-3.5 text-left text-[17px] font-bold transition', pick === oi ? 'border-ink bg-card shadow-[0_3px_0_0_var(--ink)]' : 'border-line bg-card hover:border-ink/30')}>
+                <button key={oi} role="radio" aria-checked={pick === oi} onClick={() => setPick(oi)} className={clsx('flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left text-base font-bold transition sm:gap-4 sm:py-3.5 sm:text-[17px]', pick === oi ? 'border-ink bg-card shadow-[0_3px_0_0_var(--ink)]' : 'border-line bg-card hover:border-ink/30')}>
                   <span className={clsx('grid size-8 shrink-0 place-items-center rounded-lg font-mono text-sm font-black', pick === oi ? 'bg-ink text-paper' : 'bg-paper-2')}>{'ABCD'[oi]}</span>
                   {o}
                 </button>
@@ -141,7 +143,8 @@ export default function Placement() {
             />
           )}
 
-          <div className="mt-auto flex items-center justify-between gap-3 pt-8">
+          </div>
+          <div className="safe-bottom flex shrink-0 items-center justify-between gap-3 border-t-2 border-line py-3">
             <button className="text-sm font-bold text-ink-soft hover:text-ink" disabled={checking} onClick={() => next(-1)}>Bilmiyorum, geç</button>
             <Button onClick={() => ready && next(current())} disabled={!ready} loading={checking} className="min-w-40 gap-2">{i + 1 < qs.length ? 'Devam' : 'Testi bitir'} <ArrowRight className="size-4" /></Button>
           </div>
@@ -154,27 +157,29 @@ export default function Placement() {
 function Intro({ total, exit, onStart }: { total: number; exit: string; onStart: () => void }) {
   const parts: Skill[] = ['vocabulary', 'grammar', 'reading', 'listening']
   return (
-    <div className="mx-auto flex min-h-dvh max-w-xl flex-col px-5 py-5">
-      <Link to={exit} aria-label="Kapat" className="grid size-10 place-items-center rounded-xl text-ink-soft hover:bg-paper-2"><X className="size-6" /></Link>
-      <div className="my-auto py-8">
-        <motion.img initial={{ scale: 0.6, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }} src={higoImg('read')} alt="" className="mb-4 w-24" />
-        <p className="text-sm font-black uppercase tracking-[0.2em] text-flame">Seviye tespit sınavı</p>
-        <h1 className="mt-2 font-display text-[clamp(2rem,6vw,2.8rem)] font-black leading-[1.05]">Nereden başlaman gerektiğini bulalım.</h1>
-        <p className="mt-3 text-[17px] text-ink-soft">Kolaydan zora en fazla {total} görev. Bir bölümü geçemezsen test orada biter, seni yormaz. Bilmediğini geçebilirsin; tahmin yerine “Bilmiyorum” demek sonucu daha doğru yapar.</p>
+    <div className="mx-auto flex h-dvh max-w-xl flex-col px-5 pt-4">
+      <Link to={exit} aria-label="Kapat" className="grid size-10 shrink-0 place-items-center rounded-xl text-ink-soft hover:bg-paper-2"><X className="size-6" /></Link>
+      <div className="flex min-h-0 flex-1 flex-col justify-center overflow-y-auto py-3">
+        <motion.img initial={{ scale: 0.6, opacity: 0, rotate: -10 }} animate={{ scale: 1, opacity: 1, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 16 }} src={higoImg('read')} alt="" className="mb-3 w-16 sm:w-24 [@media(max-height:620px)]:hidden" />
+        <p className="text-xs font-black uppercase tracking-[0.2em] text-flame sm:text-sm">Seviye tespit sınavı</p>
+        <h1 className="mt-1.5 font-display text-[clamp(1.7rem,6vw,2.8rem)] font-black leading-[1.05]">Nereden başlaman gerektiğini bulalım.</h1>
+        <p className="mt-2.5 text-[15px] text-ink-soft sm:text-[17px]">Kolaydan zora en fazla {total} görev. Bir bölümü geçemezsen test orada biter. Bilmediğini geçebilirsin; “Bilmiyorum” demek sonucu daha doğru yapar.</p>
 
-        <div className="mt-6 grid grid-cols-2 gap-2.5">
+        <div className="mt-4 grid grid-cols-4 gap-1.5 sm:mt-6 sm:grid-cols-2 sm:gap-2.5">
           {parts.map((k) => {
             const s = SKILL[k]
-            return <div key={k} className="flex items-center gap-3 rounded-2xl border-2 border-line bg-card p-3"><span className={clsx('grid size-10 place-items-center rounded-xl', s.tone)}><s.icon className="size-5" /></span><span className="font-extrabold">{s.label}</span></div>
+            return <div key={k} className="flex flex-col items-center gap-1 rounded-2xl border-2 border-line bg-card p-2 text-center sm:flex-row sm:gap-3 sm:p-3 sm:text-left"><span className={clsx('grid size-8 place-items-center rounded-xl sm:size-10', s.tone)}><s.icon className="size-4 sm:size-5" /></span><span className="text-[11px] font-extrabold sm:text-base">{s.label}</span></div>
           })}
         </div>
 
-        <ul className="mt-5 space-y-2 text-sm font-semibold text-ink-soft">
-          <li className="flex items-center gap-2"><Clock className="size-4 text-flame" /> 3 ile 12 dakika arası</li>
-          <li className="flex items-center gap-2"><Volume2 className="size-4 text-mint-deep" /> Dinleme soruları için sesin açık olsun</li>
-          <li className="flex items-center gap-2"><Lock className="size-4 text-lilac" /> Sonucun hesabına işlenir ve ders yolun ona göre açılır</li>
+        <ul className="mt-4 space-y-1.5 text-[13px] font-semibold text-ink-soft sm:mt-5 sm:space-y-2 sm:text-sm">
+          <li className="flex items-center gap-2"><Clock className="size-4 shrink-0 text-flame" /> 3 ile 12 dakika arası</li>
+          <li className="flex items-center gap-2"><Volume2 className="size-4 shrink-0 text-mint-deep" /> Dinleme soruları için sesin açık olsun</li>
+          <li className="flex items-center gap-2"><Lock className="size-4 shrink-0 text-lilac" /> Sonucun hesabına işlenir, ders yolun ona göre açılır</li>
         </ul>
-        <Button block size="lg" className="mt-8 gap-2" onClick={onStart}>Sınava başla <ArrowRight className="size-5" /></Button>
+      </div>
+      <div className="safe-bottom shrink-0 py-3">
+        <Button block size="lg" className="gap-2" onClick={onStart}>Sınava başla <ArrowRight className="size-5" /></Button>
       </div>
     </div>
   )

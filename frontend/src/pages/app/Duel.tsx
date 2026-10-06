@@ -538,8 +538,7 @@ function Arena({ duel, onExit, onRematch }: { duel: DuelData; onExit: () => void
 
           {phase === 'play' && item && (
             <motion.div key={idx} initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.18 }} className="relative mx-auto max-w-3xl px-4 py-6 sm:py-8">
-              <div className="absolute right-4 top-5 z-10 sm:top-7"><ClockRing left={leftMs} total={R.item_ms} /></div>
-              <ExerciseView ex={item.ex} value={value} setValue={setValue} locked={checked !== null} ttsRate={user?.preferences?.tts_rate} />
+              <ExerciseView ex={item.ex} value={value} setValue={setValue} locked={checked !== null} ttsRate={user?.preferences?.tts_rate} aside={<ClockRing left={leftMs} total={R.item_ms} />} />
               <AnimatePresence>
                 {pop && checked && (
                   <motion.p key={pop.id} initial={{ y: 0, opacity: 0, scale: 0.6 }} animate={{ y: -60, opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14 }} className="pointer-events-none absolute right-6 top-16 font-display text-4xl font-black text-mint drop-shadow-[0_0_18px_rgba(34,181,115,.6)]">
@@ -690,8 +689,8 @@ function LiveDot({ lobby }: { lobby?: Lobby }) {
   if (!lobby) return <p className="h-5" />
   const mood = lobby.searching > 0 ? 'Rakipler sıra bekliyor' : lobby.playing > 0 ? 'Düellolar sürüyor' : 'Arena açık'
   return (
-    <p className="flex items-center gap-2 text-xs font-black uppercase tracking-[0.16em] text-mint">
-      <span className="relative flex size-2.5"><span className="absolute inline-flex size-full animate-ping rounded-full bg-mint opacity-70" /><span className="relative inline-flex size-2.5 rounded-full bg-mint" /></span>
+    <p className="flex items-center gap-2 whitespace-nowrap text-[11px] font-black uppercase tracking-[0.1em] text-mint sm:text-xs sm:tracking-[0.16em]">
+      <span className="relative flex size-2.5 shrink-0"><span className="absolute inline-flex size-full animate-ping rounded-full bg-mint opacity-70" /><span className="relative inline-flex size-2.5 rounded-full bg-mint" /></span>
       Canlı · <span className="text-white/70">{mood}</span>
     </p>
   )

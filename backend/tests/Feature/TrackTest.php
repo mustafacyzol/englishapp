@@ -32,9 +32,12 @@ class TrackTest extends TestCase
         $this->assertGreaterThan($skills->count() / 2, $skills->filter(fn ($s) => in_array($s, ['vocabulary', 'grammar'], true))->count());
 
         $adult = User::factory()->create(['email_verified_at' => now(), 'school_stage' => 'universite', 'exam_target' => 'yds', 'age_group' => 'adult']);
-        $adultPath = $this->actingAs($adult)->getJson('/api/v1/path')->assertJsonPath('track.key', 'exam')->assertJsonPath('units.0.title', 'Hello!');
-        // another grade's lessons are not on an adult's path
-        $this->assertEmpty(collect($adultPath->json('units.*.lessons.*.meta.track'))->filter());
+        // an exam learner meets the exam's own units; nobody else's
+        $adultPath = $this->actingAs($adult)->getJson('/api/v1/path')->assertJsonPath('track.key', 'exam')->assertJsonPath('units.0.title', 'Science and Research');
+        $this->assertSame(['x_yds'], collect($adultPath->json('units.*.lessons.*.meta.track'))->filter()->unique()->values()->all());
+        $plain = User::factory()->create(['email_verified_at' => now(), 'school_stage' => 'yetiskin', 'age_group' => 'adult']);
+        $plainPath = $this->actingAs($plain)->getJson('/api/v1/path')->assertJsonPath('track.key', 'general')->assertJsonPath('units.0.title', 'Hello!');
+        $this->assertEmpty(collect($plainPath->json('units.*.lessons.*.meta.track'))->filter());
     }
 
     public function test_exam_changes_only_through_reonboarding_once_a_month(): void

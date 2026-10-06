@@ -9,10 +9,10 @@ use App\Models\User;
 use Illuminate\Support\Collection;
 
 /**
- * School-grade units on the CEFR path.
+ * School-grade (and exam) units on the CEFR path.
  *
  * A learner who chose a school grade (or LGS / YDT, which stand for grades 8
- * and 12) sees the unit titles of their own coursebook, and every grade unit
+ * and 12; YDS, YÖKDİL, IELTS, TOEFL and Hazırlık have tracks of their own) sees the unit titles of their own coursebook, and every grade unit
  * adds one lesson with its words and sentences to a CEFR unit. Grade units are
  * spread evenly over each course (a 10-unit grade on an 8-unit course puts two
  * of them in some units); an editor can pin a unit to a slot instead.
@@ -25,24 +25,25 @@ class GradeUnitService
 {
     /** Track key => label, in school order. */
     public const TRACKS = [
-        'g2' => '2. sınıf', 'g3' => '3. sınıf', 'g4' => '4. sınıf',
+        'g1' => '1. sınıf', 'g2' => '2. sınıf', 'g3' => '3. sınıf', 'g4' => '4. sınıf',
         'g5' => '5. sınıf', 'g6' => '6. sınıf', 'g7' => '7. sınıf', 'g8' => '8. sınıf · LGS',
         'g9' => '9. sınıf', 'g10' => '10. sınıf', 'g11' => '11. sınıf', 'g12' => '12. sınıf · YDT',
+        // exam tracks for learners past school age
+        'x_yds' => 'YDS', 'x_yokdil' => 'YÖKDİL', 'x_ielts' => 'IELTS', 'x_toefl' => 'TOEFL', 'x_prep' => 'Hazırlık',
     ];
+
+    /** The exam a learner prepares for => its track (LGS and YDT are grades 8 and 12). */
+    private const EXAM_TRACKS = ['lgs' => 'g8', 'ydt' => 'g12', 'yds' => 'x_yds', 'yokdil' => 'x_yokdil', 'ielts' => 'x_ielts', 'toefl' => 'x_toefl', 'proficiency' => 'x_prep'];
 
     /** The grade track of a learner, from the school grade or the exam they chose. */
     public static function trackFor(User $user): ?string
     {
         $grade = (int) ($user->grade ?? 0);
-        if (in_array($user->school_stage, ['ilkokul', 'ortaokul', 'lise'], true) && $grade >= 2 && $grade <= 12) {
+        if (in_array($user->school_stage, ['ilkokul', 'ortaokul', 'lise'], true) && $grade >= 1 && $grade <= 12) {
             return "g{$grade}";
         }
 
-        return match ($user->exam_target) {
-            'lgs' => 'g8',
-            'ydt' => 'g12',
-            default => null,
-        };
+        return self::EXAM_TRACKS[$user->exam_target ?? ''] ?? null;
     }
 
     /** CEFR unit index (0-based) for each published grade unit of a track, given a course size. */

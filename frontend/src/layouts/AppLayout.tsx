@@ -1,5 +1,5 @@
 import { cancelAllListening, stopVoice } from '@/lib/speech'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink, useLocation, useOutlet, Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, motion, useDragControls } from 'motion/react'
@@ -18,6 +18,25 @@ import { useLang } from '@/lib/i18n'
 import { useSiteConfig } from '@/lib/site'
 import { SideRail, type Dashboard } from './SideRail'
 import { Img } from '@/components/ui/Img'
+
+/**
+ * Publishes the header's real height as --app-header, so everything pinned under
+ * it (the "kaldığın yer" card, reader and shop toolbars) sits exactly below it on
+ * every phone: notches, safe areas and wrapped stat chips included.
+ */
+function useHeaderHeight() {
+  const ref = useRef<HTMLElement>(null)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const set = () => document.documentElement.style.setProperty('--app-header', `${Math.round(el.getBoundingClientRect().height)}px`)
+    set()
+    const ro = new ResizeObserver(set)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [])
+  return ref
+}
 import { CoachMarks } from '@/components/game/CoachMarks'
 import { PlacementReveal } from '@/components/game/PlacementReveal'
 import { examOn } from '@/lib/onboarding'
@@ -89,6 +108,7 @@ const isOn = (n: Item, path: string) => (n.match ?? [n.to]).some((m) => path ===
 
 export default function AppLayout() {
   const { user } = useAuth()
+  const headerRef = useHeaderHeight()
   const { t } = useLang()
   const { data: cfg } = useSiteConfig()
   const on = (f?: Item['feature']) => !f || (cfg?.site?.features?.[f] !== false && (f !== 'exam' || examOn(user)))
@@ -152,7 +172,7 @@ export default function AppLayout() {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="safe-top sticky top-0 z-30 border-b-2 border-line bg-paper/90 backdrop-blur-md">
+        <header ref={headerRef} className="safe-top sticky top-0 z-30 border-b-2 border-line bg-paper/90 backdrop-blur-md">
           <div className="flex h-16 items-center justify-between gap-2 px-3 sm:px-6">
             <Link to="/learn" className="shrink-0 lg:hidden" aria-label="Yol haritası">
               <span className="sm:hidden"><Logo small className="[&>span:last-child]:hidden" /></span>

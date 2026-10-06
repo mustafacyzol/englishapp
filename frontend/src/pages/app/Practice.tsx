@@ -54,8 +54,8 @@ export default function Practice() {
     <div className="mx-auto max-w-4xl">
       <PageHeader kicker="Oyunlar, setler, aralıklı tekrar" title="Kelime pratiği" />
       <div className="mb-6 grid grid-cols-3 gap-1 rounded-2xl border-2 border-line bg-paper-2 p-1 sm:inline-grid sm:min-w-[420px]">
-        {([['games', 'Oyunlar'], ['sets', 'Kelime setleri'], ['words', 'Defterim']] as const).map(([k, l]) => (
-          <button key={k} onClick={() => setTab(k)} aria-pressed={tab === k} className={clsx('rounded-xl px-2 py-2 text-sm font-extrabold transition', tab === k ? 'bg-card text-ink shadow-hard-sm' : 'text-ink-soft hover:text-ink')}>{l}</button>
+        {([['games', 'Oyunlar'], ['sets', 'Setler'], ['words', 'Defterim']] as const).map(([k, l]) => (
+          <button key={k} onClick={() => setTab(k)} aria-pressed={tab === k} className={clsx('whitespace-nowrap rounded-xl px-2 py-2 text-sm font-extrabold transition', tab === k ? 'bg-card text-ink shadow-hard-sm' : 'text-ink-soft hover:text-ink')}>{l}</button>
         ))}
       </div>
       {tab === 'games' ? <GamePicker onPick={setGame} /> : tab === 'sets' ? <SetBrowser /> : <WordList />}

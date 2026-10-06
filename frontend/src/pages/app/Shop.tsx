@@ -93,7 +93,7 @@ export default function Shop() {
       </section>
 
       {/* Categories as tiles that all fit on screen: no hidden tabs to scroll sideways for. */}
-      <div role="tablist" aria-label="Mağaza bölümleri" className="sticky top-[64px] z-20 -mx-4 mb-5 grid auto-cols-fr grid-flow-col gap-1.5 bg-paper/90 px-4 py-2 backdrop-blur sm:mx-0 sm:gap-2 sm:px-0">
+      <div role="tablist" aria-label="Mağaza bölümleri" className="sticky top-[calc(var(--app-header,66px)-2px)] z-20 -mx-4 mb-5 grid auto-cols-fr grid-flow-col gap-1.5 bg-paper/90 px-4 py-2 backdrop-blur sm:mx-0 sm:gap-2 sm:px-0">
         {GROUPS.filter((g) => data.items.some((it) => g.types.includes(it.type))).map((g) => (
           <button key={g.key} role="tab" aria-selected={tab === g.key} onClick={() => setTab(g.key)}
             className={clsx('flex min-w-0 flex-col items-center gap-0.5 rounded-2xl border-2 px-1 py-1.5 text-[11px] font-extrabold transition sm:flex-row sm:justify-center sm:gap-2 sm:py-2 sm:text-sm', tab === g.key ? 'border-ink bg-card text-ink shadow-[0_3px_0_var(--color-ink)]' : 'border-line bg-card text-ink-soft hover:text-ink')}>

@@ -108,7 +108,7 @@ export default function Learn() {
     <div className="mx-auto max-w-2xl">
       {/* The "where you left off" bar stays pinned under the header instead of popping in:
           when your stop scrolls away it simply shows which way it is. */}
-      <div className="sticky top-[66px] z-[25] -mx-1 px-1 pb-2 pt-2">
+      <div className="sticky top-[var(--app-header,66px)] z-[25] -mx-1 px-1 pb-2 pt-2">
         <ContinueCard data={data} stats={stats} onJump={jump} onPick={() => setPicker(true)} away={!currentVisible ? (curAbove ? 'up' : 'down') : null} />
       </div>
 
@@ -173,18 +173,20 @@ function ContinueCard({ data, stats, onJump, onPick, away }: { data: PathData; s
 
       {cur && unit ? (
         <button onClick={onJump} className="min-w-0 flex-1 text-left" title="Yolda göster">
-          <span className="flex items-center gap-1 text-[11px] font-black uppercase tracking-[0.12em] text-flame">
+          <span className="flex items-center gap-1 whitespace-nowrap text-[11px] font-black uppercase tracking-[0.12em] text-flame">
             {away ? (away === 'up' ? <ArrowUp className="size-3" strokeWidth={3} /> : <ArrowDown className="size-3" strokeWidth={3} />) : <MapPin className="size-3" />}
             {away ? 'Kaldığın yere git' : 'Kaldığın yer'}
+            {!away && <span className="truncate font-bold normal-case tracking-normal text-ink-soft">· Ünite {stats.unitIndex + 1}</span>}
           </span>
           <span className="block truncate font-display text-[17px] font-black leading-tight">{cur.l.title}</span>
-          <span className="mt-1 flex items-center gap-2">
-            <span className="flex gap-0.5" aria-hidden>
+          <span className="mt-1 flex min-w-0 items-center gap-2">
+            {/* one segment per stop; they share the room, so a long unit never spills over */}
+            <span className="flex min-w-0 max-w-[260px] flex-1 gap-[3px]" aria-hidden>
               {unit.lessons.map((l) => (
-                <span key={l.id} className={clsx('h-1.5 w-4 rounded-full sm:w-5', l.state !== 'completed' && l.state !== 'current' && 'bg-ink/15 dark:bg-white/20')} style={l.state === 'completed' ? { background: unitColor } : l.state === 'current' ? { background: `color-mix(in oklab, ${unitColor} 40%, transparent)` } : undefined} />
+                <span key={l.id} className={clsx('h-1.5 min-w-[5px] flex-1 rounded-full', l.state !== 'completed' && l.state !== 'current' && 'bg-ink/15 dark:bg-white/20')} style={l.state === 'completed' ? { background: unitColor } : l.state === 'current' ? { background: `color-mix(in oklab, ${unitColor} 40%, transparent)` } : undefined} />
               ))}
             </span>
-            <span className="truncate text-xs font-bold text-ink-soft">Ünite {stats.unitIndex + 1} · {stats.unitDone}/{unit.lessons.length}</span>
+            <span className="shrink-0 text-xs font-bold tabular-nums text-ink-soft">{stats.unitDone}/{unit.lessons.length}</span>
           </span>
         </button>
       ) : (

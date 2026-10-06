@@ -324,7 +324,8 @@ function SpeakerButton({ text, rate, big }: { text: string; rate?: number; big?:
   )
 }
 
-export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exercise; value: Answer; setValue: (v: Answer) => void; locked: boolean; ttsRate?: number }) {
+/** `aside` takes Higo's corner of the prompt card (the arena puts its countdown there, so the two never overlap). */
+export function ExerciseView({ ex, value, setValue, locked, ttsRate, aside }: { ex: Exercise; value: Answer; setValue: (v: Answer) => void; locked: boolean; ttsRate?: number; aside?: React.ReactNode }) {
   useEffect(() => {
     if ('audio' in ex && ex.audio) setTimeout(() => speak(ex.audio!, { rate: ttsRate }), 250)
   }, [ex, ttsRate])
@@ -361,7 +362,9 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate }: { ex: Exe
             </p>
           )}
         </div>
-        <motion.img src={higoImg(DRILL_HIGO[ex.type] ?? 'point')} alt="" initial={{ y: 30, rotate: -8 }} animate={{ y: 0, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14, delay: 0.1 }} className="absolute -bottom-2 right-2 size-16 object-contain drop-shadow-[0_6px_8px_rgba(160,40,10,.2)] sm:size-20" />
+        {aside ? <span className="absolute right-3 top-1/2 -translate-y-1/2">{aside}</span> : (
+  <motion.img src={higoImg(DRILL_HIGO[ex.type] ?? 'point')} alt="" initial={{ y: 30, rotate: -8 }} animate={{ y: 0, rotate: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 14, delay: 0.1 }} className="absolute -bottom-2 right-2 size-16 object-contain drop-shadow-[0_6px_8px_rgba(160,40,10,.2)] sm:size-20" />
+        )}
       </motion.div>
       {(ex.type === 'choice' || ex.type === 'fill' || ex.type === 'listen_choice' || ex.type === 'read') && (
         <>

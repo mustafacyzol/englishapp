@@ -72,7 +72,7 @@ export const PLACEMENT_TOKEN = 'dilgo.placement_token'
 
 /** The Turkish school ladder. The age group (safety rules) follows from stage and grade. */
 export const STAGES = [
-  { key: 'ilkokul', label: 'İlkokul', range: '2-4. sınıf', grades: [2, 3, 4], art: 'braids', tint: 'bg-mint/15', points: ['Oyunlarla, şarkılarla ilk kelimeler', 'Okuldaki konularla birlikte', 'Veli onaylı, reklamsız'], exams: [] as string[] },
+  { key: 'ilkokul', label: 'İlkokul', range: '1-4. sınıf', grades: [1, 2, 3, 4], art: 'braids', tint: 'bg-mint/15', points: ['Oyunlarla, şarkılarla ilk kelimeler', 'Okuldaki konularla birlikte', 'Veli onaylı, reklamsız'], exams: [] as string[] },
   { key: 'ortaokul', label: 'Ortaokul', range: '5-8. sınıf', grades: [5, 6, 7, 8], art: 'cap', tint: 'bg-sky/15', points: ['Okul İngilizcesi ve kelime', '8. sınıfta LGS hazırlığı', 'Yaşıtlarla lig ve düello'], exams: ['lgs'] },
   { key: 'lise', label: 'Lise', range: '9-12. sınıf', grades: [9, 10, 11, 12], art: 'headphones', tint: 'bg-lilac/15', points: ['Okul sınavlarına destek', 'YKS-YDT ve IELTS hazırlığı', 'Konuşma ve yazma pratiği'], exams: ['ydt', 'ielts', 'toefl'] },
   { key: 'universite', label: 'Üniversite', range: 'Hazırlık dahil', grades: [] as number[], art: 'glasses', tint: 'bg-butter/20', points: ['Hazırlık muafiyet sınavı', 'YDS, YÖKDİL, IELTS', 'Akademik okuma ve yazma'], exams: ['proficiency', 'yds', 'yokdil', 'ielts', 'toefl'] },

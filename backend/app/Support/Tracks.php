@@ -23,7 +23,7 @@ class Tracks
         $grade = GradeUnitService::trackFor($user);
 
         return [
-            'key' => $grade ? 'grade' : ($user->exam_target ? 'exam' : 'general'),
+            'key' => $grade && ! str_starts_with($grade, 'x_') ? 'grade' : ($user->exam_target ? 'exam' : 'general'),
             'stage' => $user->school_stage,
             'grade' => $user->grade ? (int) $user->grade : null,
             'exam' => $user->exam_target,

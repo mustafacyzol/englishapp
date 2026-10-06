@@ -166,10 +166,10 @@ export default function StoryReader() {
   return (
     <div className="mx-auto max-w-[680px] pb-16">
       {/* reading progress, a hairline under the app header */}
-      <motion.div aria-hidden className="fixed inset-x-0 top-[64px] z-30 h-[3px] origin-left bg-flame" style={{ scaleX: bar }} />
+      <motion.div aria-hidden className="fixed inset-x-0 top-[calc(var(--app-header,66px)-2px)] z-30 h-[3px] origin-left bg-flame" style={{ scaleX: bar }} />
 
       {/* toolbar */}
-      <div className="sticky top-[67px] z-20 -mx-2 mb-4 flex items-center gap-1 rounded-2xl bg-paper/90 px-2 py-1.5 backdrop-blur">
+      <div className="sticky top-[calc(var(--app-header,66px)+1px)] z-20 -mx-2 mb-4 flex items-center gap-1 rounded-2xl bg-paper/90 px-2 py-1.5 backdrop-blur">
         <Link to={lessonId ? '/learn' : '/stories'} className="grid size-10 shrink-0 place-items-center rounded-xl text-ink-soft hover:bg-paper-2" aria-label="Geri"><ArrowLeft className="size-5" /></Link>
         <p className="min-w-0 flex-1 truncate font-display font-black">{story.title}</p>
         <button onClick={() => (playing !== null ? stop() : playFrom(Math.min(read, story.paragraphs.length - 1)))} className={clsx('flex h-10 shrink-0 items-center gap-1.5 rounded-xl px-3 text-sm font-extrabold transition', playing !== null ? 'bg-sky text-white' : 'bg-sky/10 text-sky hover:bg-sky/15')} aria-label={playing !== null ? 'Durdur' : 'Sesli dinle'}>

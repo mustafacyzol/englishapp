@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowDownWideNarrow, Bookmark, Check, ChevronDown, ChevronLeft, ChevronRight, Clock, Crown, Search, X } from 'lucide-react'
+import { ArrowDownWideNarrow, Bookmark, Check, ChevronLeft, ChevronRight, Clock, Crown, Search, X } from 'lucide-react'
 import { useAuth } from '@/lib/auth'
+import { img } from '@/lib/assets'
 import { get } from '@/lib/api'
 import type { Paginated, StoryCard } from '@/lib/types'
 import { Empty, PageHeader, SkeletonPage } from '@/components/ui/Misc'
@@ -12,14 +13,12 @@ import { StoryCover } from './StoryCover'
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1'] as const
 const LEVEL_TEXT: Record<string, string> = { A1: 'Başlangıç', A2: 'Temel', B1: 'Orta', B2: 'İyi', C1: 'İleri' }
-/** Each genre has a quiet colour (a dot on the chip, the ribbon on the book); no icons. */
-const GENRE_COLOR: Record<string, string> = {
-  'Günlük Hayat': '#e8403a', Seyahat: '#2f7cf6', Eğlence: '#d99a00', Kariyer: '#4f8a6e', Gizem: '#8f7cf8',
-  'Bilim Kurgu': '#ef4e7b', Okul: '#0f766e', Aile: '#c96a12', Bilim: '#2563eb', Haber: '#475569',
+/** Each genre has its own little book cover (img/genres/*), all drawn in the one storybook style. */
+const GENRE_COVER: Record<string, string> = {
+  'Günlük Hayat': 'gunluk-hayat', Seyahat: 'seyahat', Eğlence: 'eglence', Kariyer: 'kariyer', Gizem: 'gizem',
+  'Bilim Kurgu': 'bilim-kurgu', Okul: 'okul', Aile: 'aile', Bilim: 'bilim', Haber: 'haber',
 }
-const tone = (c?: string | null) => (c && GENRE_COLOR[c]) || '#676d7c'
-/** Genres shown as chips before "Daha fazla" folds the rest away. */
-const VISIBLE_GENRES = 4
+const genreCover = (c: string) => (GENRE_COVER[c] ? img(`genres/${GENRE_COVER[c]}.webp`) : img('stories/default-2.webp'))
 type Quick = '' | 'unread' | 'saved' | 'short'
 
 /**
@@ -90,10 +89,10 @@ export default function Stories() {
         </section>
       )}
 
-      {/* --------------------------------------------------------------- Filters: one toolbar */}
-      <section className="mb-4 space-y-2 rounded-2xl border-2 border-line bg-card p-2">
+      {/* ------------------------------------------------ Filters: level, then genres as a row of book covers */}
+      <section className="mb-4 space-y-3">
         <div className="flex flex-wrap items-center gap-2">
-          <div className="grid w-full auto-cols-fr grid-flow-col rounded-xl bg-paper-2 p-1 sm:w-auto" role="radiogroup" aria-label="Seviye">
+          <div className="grid w-full auto-cols-fr grid-flow-col rounded-xl border-2 border-line bg-card p-1 sm:w-auto" role="radiogroup" aria-label="Seviye">
             {['', ...LEVELS].map((l) => {
               const on = level === l
               const mine = !!l && user?.cefr_level === l
@@ -108,14 +107,14 @@ export default function Stories() {
           </div>
           <div className="no-scrollbar -mx-0.5 flex w-full items-center gap-1 overflow-x-auto px-0.5 sm:ml-auto sm:w-auto [&>*]:shrink-0 [&>*]:whitespace-nowrap">
             {([['unread', 'Okunmamış'], ['saved', 'Kaydettiklerim'], ['short', 'Kısa']] as const).map(([k, l]) => (
-              <button key={k} onClick={() => setQuick(quick === k ? '' : k)} aria-pressed={quick === k} className={clsx('rounded-lg px-2.5 py-1.5 text-sm font-bold transition', quick === k ? 'bg-ink text-paper' : 'text-ink-soft hover:bg-paper-2 hover:text-ink')}>{l}</button>
+              <button key={k} onClick={() => setQuick(quick === k ? '' : k)} aria-pressed={quick === k} className={clsx('rounded-full border-2 px-3 py-1 text-[13px] font-bold transition', quick === k ? 'border-ink bg-ink text-paper' : 'border-line text-ink-soft hover:text-ink')}>{l}</button>
             ))}
-            <button onClick={() => setSort(sort === 'short' ? 'recommended' : 'short')} className="flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-sm font-bold text-ink-soft hover:bg-paper-2 hover:text-ink" title="Sıralama">
+            <button onClick={() => setSort(sort === 'short' ? 'recommended' : 'short')} className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[13px] font-bold text-ink-soft hover:text-ink" title="Sıralama">
               <ArrowDownWideNarrow className="size-4" /> {sort === 'short' ? 'Kısadan uzuna' : 'Önerilen'}
             </button>
           </div>
         </div>
-        <GenreChips cats={cats.data?.data ?? []} value={category} onChange={setCategory} />
+        <GenreShelf cats={cats.data?.data ?? []} value={category} onChange={setCategory} />
       </section>
 
       <div className="mb-3 flex min-h-8 flex-wrap items-center gap-2">
@@ -139,52 +138,33 @@ export default function Stories() {
   )
 }
 
-/** A few genres as chips; the rest wait in a small menu so the toolbar never crowds. */
-function GenreChips({ cats, value, onChange }: { cats: string[]; value: string; onChange: (v: string) => void }) {
-  const [more, setMore] = useState(false)
-  const ref = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    if (!more) return
-    const off = (e: PointerEvent) => { if (!ref.current?.contains(e.target as Node)) setMore(false) }
-    document.addEventListener('pointerdown', off)
-    return () => document.removeEventListener('pointerdown', off)
-  }, [more])
-  // the chosen genre always stays visible, even if it lives in the menu
-  const shown = cats.slice(0, VISIBLE_GENRES)
-  const rest = cats.slice(VISIBLE_GENRES)
-  const chips = value && !shown.includes(value) ? [...shown, value] : shown
-  const chip = (c: string, label = c) => {
-    const on = value === c
-    return (
-      <button key={c || 'all'} onClick={() => onChange(on && c ? '' : c)} aria-pressed={on} className={clsx('flex h-8 shrink-0 items-center gap-1.5 rounded-full border-2 px-3 text-[13px] font-extrabold transition', on ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink-soft hover:border-ink/25 hover:text-ink')}>
-        {c && <span className="size-2 rounded-full" style={{ background: tone(c) }} />}{label}
-      </button>
-    )
-  }
+/**
+ * Genres as small book covers on a shelf: same storybook art for all, the name
+ * set in the reading serif on a paper label. The chosen one is pulled out a
+ * little with a bookmark; tap it again to show every genre.
+ */
+function GenreShelf({ cats, value, onChange }: { cats: string[]; value: string; onChange: (v: string) => void }) {
   return (
-    <div className="flex items-center gap-1.5 px-0.5" role="group" aria-label="Tür">
-      <div className="no-scrollbar flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto sm:flex-wrap">
-        {chip('', 'Tüm türler')}
-        {chips.map((c) => chip(c))}
-      </div>
-      {rest.filter((c) => c !== value).length > 0 && (
-        <div ref={ref} className="relative shrink-0">
-          <button onClick={() => setMore((v) => !v)} aria-expanded={more} className="flex h-8 items-center gap-1 rounded-full px-2.5 text-[13px] font-extrabold text-ink-soft hover:bg-paper-2 hover:text-ink">
-            <span className="hidden min-[400px]:inline">Daha fazla</span><span className="min-[400px]:hidden">Diğer</span> <ChevronDown className={clsx('size-4 transition', more && 'rotate-180')} />
+    <div className="no-scrollbar -mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-2 pt-2.5 sm:mx-0 sm:px-0" role="radiogroup" aria-label="Tür">
+      {['', ...cats].map((c) => {
+        const on = value === c
+        return (
+          <button key={c || 'all'} role="radio" aria-checked={on} onClick={() => onChange(on ? '' : c)} className="group w-[78px] shrink-0 snap-start text-left sm:w-[92px]">
+            <span className={clsx('relative block aspect-[3/4.4] overflow-hidden rounded-[3px_8px_8px_3px] shadow-[2px_3px_0_rgba(31,36,51,.14)] transition duration-300', on ? '-translate-y-2 shadow-[3px_8px_14px_-6px_rgba(31,36,51,.55)] ring-2 ring-ink dark:ring-paper' : 'group-hover:-translate-y-1')}>
+              {c ? (
+                <img src={genreCover(c)} alt="" loading="lazy" className="size-full object-cover" />
+              ) : (
+                <span className="grid size-full place-items-center bg-[#1f2433] p-2 text-center font-read text-[13px] font-bold italic leading-tight text-[#f5ead6]">Bütün<br />kitaplar</span>
+              )}
+              <span aria-hidden className="absolute inset-y-0 left-0 w-2 bg-gradient-to-r from-black/30 to-transparent" />
+              {c && (
+                <span className="absolute inset-x-1.5 bottom-1.5 rounded-[3px] bg-[#fbf6ec]/95 px-1 py-1 text-center font-read text-[11px] font-bold leading-tight text-[#2b2620] shadow-sm sm:text-[12px]">{c}</span>
+              )}
+              {on && <span aria-hidden className="absolute right-2 top-0 h-5 w-2.5 bg-flame" style={{ clipPath: 'polygon(0 0,100% 0,100% 100%,50% 75%,0 100%)' }} />}
+            </span>
           </button>
-          <AnimatePresence>
-            {more && (
-              <motion.div initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="absolute right-0 top-[calc(100%+6px)] z-30 w-48 rounded-2xl border-2 border-line bg-card p-1.5 shadow-soft">
-                {rest.filter((c) => c !== value).map((c) => (
-                  <button key={c} onClick={() => { onChange(c); setMore(false) }} className="flex w-full items-center gap-2 rounded-xl px-2.5 py-2 text-left text-sm font-bold hover:bg-paper-2">
-                    <span className="size-2 rounded-full" style={{ background: tone(c) }} />{c}
-                  </button>
-                ))}
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      )}
+        )
+      })}
     </div>
   )
 }
@@ -229,7 +209,6 @@ function Book({ s }: { s: StoryCard }) {
         <StoryCover story={s} />
         {/* spine shading and the genre ribbon */}
         <span aria-hidden className="absolute inset-y-0 left-0 w-3 bg-gradient-to-r from-black/30 via-black/10 to-transparent" />
-        <span aria-hidden className="absolute right-3 top-0 h-7 w-3 rounded-b-sm shadow" style={{ background: tone(s.category), clipPath: 'polygon(0 0,100% 0,100% 100%,50% 78%,0 100%)' }} />
         <span className="absolute left-2 top-2 rounded-md bg-card/95 px-1.5 py-0.5 text-[10px] font-black">{s.cefr_level}</span>
         {s.is_premium && <span className="absolute bottom-2 left-2 grid size-6 place-items-center rounded-full bg-butter text-[#1f2433]" title="Premium"><Crown className="size-3.5" /></span>}
         {s.completed && <span className="absolute bottom-2 right-2 grid size-6 place-items-center rounded-full bg-mint text-white" title="Okundu"><Check className="size-4" strokeWidth={3} /></span>}
