@@ -142,10 +142,23 @@ class GameSeeder extends Seeder
         }
 
         // ---- Plans ----------------------------------------------------------
+        // Monthly and yearly for each package: Premium (the whole course), Defne AI
+        // (the speaking tutor) and both together. The old quarterly plan stays for
+        // past orders but is no longer sold.
         $plans = [
-            ['slug' => 'monthly', 'name' => 'Aylık', 'tagline' => 'Esnek başla', 'interval' => 'month', 'duration_days' => 30, 'price' => 149, 'features' => ['Sınırsız can', 'Tüm hikayeler ve sesli okumalar', 'Günde 200 AI mesajı', 'Tüm rol yapma senaryoları', 'Reklamsız'], 'position' => 0],
-            ['slug' => 'quarterly', 'name' => '3 Aylık', 'tagline' => 'Alışkanlık kur', 'interval' => 'quarter', 'duration_days' => 90, 'price' => 349, 'compare_at_price' => 447, 'features' => ['Aylık paketin tüm özellikleri', '500 bonus elmas', '1 canlı ders kuponu (Bayrak Dil Okulları)'], 'bonus_gems' => 500, 'live_lesson_credits' => 1, 'badge' => 'En popüler', 'is_featured' => true, 'position' => 1],
-            ['slug' => 'yearly', 'name' => 'Yıllık', 'tagline' => 'Akıcılığa kadar', 'interval' => 'year', 'duration_days' => 365, 'price' => 999, 'compare_at_price' => 1788, 'features' => ['Tüm Premium özellikler', '2000 bonus elmas', '4 canlı ders kuponu', 'CEFR seviye sertifikası'], 'bonus_gems' => 2000, 'live_lesson_credits' => 4, 'badge' => '%44 tasarruf', 'position' => 2],
+            ['slug' => 'monthly', 'tier' => 'premium', 'name' => 'Premium', 'tagline' => 'Bütün kurs, sınırsız can', 'interval' => 'month', 'duration_days' => 30, 'price' => 149, 'compare_at_price' => null,
+                'features' => ['Sınırsız can, reklamsız', 'Tüm hikâyeler ve sesli okumalar', 'Tüm kelime oyunları ve setler', 'Sınav modu: LGS, YDT, YDS ve daha fazlası', 'Defne ile günde 30 mesaj'], 'bonus_gems' => 0, 'live_lesson_credits' => 0, 'badge' => null, 'is_featured' => false, 'is_active' => true, 'position' => 0],
+            ['slug' => 'yearly', 'tier' => 'premium', 'name' => 'Premium', 'tagline' => 'Bütün kurs, sınırsız can', 'interval' => 'year', 'duration_days' => 365, 'price' => 999, 'compare_at_price' => 1788,
+                'features' => ['Aylık Premium\'un hepsi', '2000 bonus elmas', '2 canlı ders kuponu', 'CEFR seviye sertifikası'], 'bonus_gems' => 2000, 'live_lesson_credits' => 2, 'badge' => '%44 tasarruf', 'is_featured' => false, 'is_active' => true, 'position' => 1],
+            ['slug' => 'defne-monthly', 'tier' => 'defne', 'name' => 'Defne AI', 'tagline' => 'Konuşma öğretmenin, her an', 'interval' => 'month', 'duration_days' => 30, 'price' => 129, 'compare_at_price' => null,
+                'features' => ['Defne ile günde 300 mesaj', 'Sesli görüşme ve telaffuz geri bildirimi', 'Yazı atölyesinde ayrıntılı düzeltme', 'Tüm rol yapma senaryoları', 'Sınav konuşma ve yazma provası'], 'bonus_gems' => 0, 'live_lesson_credits' => 0, 'badge' => null, 'is_featured' => false, 'is_active' => true, 'position' => 2],
+            ['slug' => 'defne-yearly', 'tier' => 'defne', 'name' => 'Defne AI', 'tagline' => 'Konuşma öğretmenin, her an', 'interval' => 'year', 'duration_days' => 365, 'price' => 899, 'compare_at_price' => 1548,
+                'features' => ['Aylık Defne AI\'nin hepsi', 'Haftalık konuşma karnesi', 'Öncelikli yeni senaryolar'], 'bonus_gems' => 500, 'live_lesson_credits' => 0, 'badge' => '%42 tasarruf', 'is_featured' => false, 'is_active' => true, 'position' => 3],
+            ['slug' => 'plus-monthly', 'tier' => 'plus', 'name' => 'Premium + Defne', 'tagline' => 'Kurs ve öğretmen bir arada', 'interval' => 'month', 'duration_days' => 30, 'price' => 229, 'compare_at_price' => 278,
+                'features' => ['Premium\'un tamamı', 'Defne AI\'nin tamamı', 'İkisini ayrı almaktan ucuz'], 'bonus_gems' => 300, 'live_lesson_credits' => 0, 'badge' => 'En popüler', 'is_featured' => true, 'is_active' => true, 'position' => 4],
+            ['slug' => 'plus-yearly', 'tier' => 'plus', 'name' => 'Premium + Defne', 'tagline' => 'Kurs ve öğretmen bir arada', 'interval' => 'year', 'duration_days' => 365, 'price' => 1599, 'compare_at_price' => 3336,
+                'features' => ['Yıllık Premium ve Defne AI', '3000 bonus elmas', '4 canlı ders kuponu', 'CEFR seviye sertifikası'], 'bonus_gems' => 3000, 'live_lesson_credits' => 4, 'badge' => 'En avantajlı', 'is_featured' => true, 'is_active' => true, 'position' => 5],
+            ['slug' => 'quarterly', 'tier' => 'premium', 'name' => '3 Aylık', 'tagline' => 'Alışkanlık kur', 'interval' => 'quarter', 'duration_days' => 90, 'price' => 349, 'compare_at_price' => 447, 'features' => ['Aylık paketin tüm özellikleri', '500 bonus elmas'], 'bonus_gems' => 500, 'live_lesson_credits' => 1, 'badge' => null, 'is_featured' => false, 'is_active' => false, 'position' => 9],
         ];
         foreach ($plans as $p) {
             Plan::query()->updateOrCreate(['slug' => $p['slug']], $p);

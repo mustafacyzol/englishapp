@@ -51,6 +51,10 @@ class UserPresenter
                 'active' => $user->isPremium(),
                 'until' => $user->premium_until?->toIso8601String(),
             ],
+            'defne' => [
+                'active' => $user->hasDefne(),
+                'until' => $user->defne_until?->toIso8601String(),
+            ],
             'stats' => [
                 'xp_total' => $user->xp_total,
                 'level' => $level,

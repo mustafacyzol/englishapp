@@ -39,6 +39,7 @@ export interface Me {
   two_factor_enabled: boolean
   referral_code: string
   premium: { active: boolean; until: string | null }
+  defne?: { active: boolean; until: string | null }
   stats: {
     xp_total: number
     level: number
@@ -192,6 +193,7 @@ export interface ChestOdds { label: string; type: 'gems' | 'item' | 'partner'; r
 export interface Plan {
   id: number
   slug: string
+  tier?: 'premium' | 'defne' | 'plus'
   name: string
   tagline: string | null
   interval: string

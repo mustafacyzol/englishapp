@@ -65,9 +65,14 @@ export default function Register() {
   const inv = useQuery({ queryKey: ['invite', invite], queryFn: () => get<{ institution: { name: string }; email: string }>(`/invites/${invite}`), enabled: !!invite, retry: false })
   const up = (patch: Partial<Draft>) => setD((x) => ({ ...x, ...patch }))
 
+  // chosen on the pricing page: open that package once the account exists
+  const plan = params.get('plan')
   useEffect(() => {
-    if (user) nav('/learn', { replace: true })
-  }, [user, nav])
+    if (plan && /^[a-z-]{2,30}$/.test(plan)) try { sessionStorage.setItem('dilgo.plan', plan) } catch { /* private mode */ }
+  }, [plan])
+  useEffect(() => {
+    if (user) nav(plan ? `/premium?plan=${encodeURIComponent(plan)}` : '/learn', { replace: true })
+  }, [user, nav, plan])
 
   // Restore the half-finished onboarding (e.g. after the level test) and any placement result.
   useEffect(() => {
@@ -133,7 +138,7 @@ export default function Register() {
     await storage.remove('dilgo.ref')
     await storage.remove(DRAFT)
     await signIn(token, u, remember)
-    nav(u.email_verified ? '/learn' : '/verify-email', { replace: true })
+    nav(!u.email_verified ? '/verify-email' : plan ? `/premium?plan=${encodeURIComponent(plan)}` : '/learn', { replace: true })
   }
 
   const m = useMutation({

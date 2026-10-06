@@ -33,6 +33,29 @@ class RewardService
         ]);
     }
 
+    /** What a bought plan grants: Premium, Defne AI or both, for the plan's days. */
+    public function grantPlan(User $user, \App\Models\Plan $plan, string $source, ?int $orderId = null): Subscription
+    {
+        $tier = in_array($plan->tier, ['premium', 'defne', 'plus'], true) ? $plan->tier : 'premium';
+        if ($tier === 'premium') {
+            return $this->grantPremiumDays($user, $plan->duration_days, $source, $plan->id, $orderId);
+        }
+        $defneStart = $user->defne_until?->isFuture() ? $user->defne_until : now();
+        $defneEnd = $defneStart->copy()->addDays($plan->duration_days);
+        $user->forceFill(['defne_until' => $defneEnd])->save();
+        if ($tier === 'plus') {
+            $sub = $this->grantPremiumDays($user, $plan->duration_days, $source, $plan->id, $orderId);
+            $sub->forceFill(['tier' => 'plus'])->save();
+
+            return $sub;
+        }
+
+        return Subscription::query()->create([
+            'user_id' => $user->id, 'plan_id' => $plan->id, 'order_id' => $orderId, 'tier' => 'defne', 'source' => $source,
+            'starts_at' => $defneStart, 'ends_at' => $defneEnd, 'status' => 'active',
+        ]);
+    }
+
     public function grantPremiumDays(User $user, int $days, string $source, ?int $planId = null, ?int $orderId = null): Subscription
     {
         $start = $user->isPremium() ? $user->premium_until : now();

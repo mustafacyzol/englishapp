@@ -40,7 +40,8 @@ const NUM: [string, string][] = [
   ['referral.referrer_gems', 'Davet edene elmas'],
   ['referral.referrer_premium_days', 'Davet edene Premium gün (ilk alışverişte)'],
   ['ai.daily_limit_free', 'Ücretsiz AI mesaj limiti / gün'],
-  ['ai.daily_limit_premium', 'Premium AI mesaj limiti / gün'],
+  ['ai.daily_limit_premium', 'Yalnız Premium: AI mesaj limiti / gün'],
+  ['ai.daily_limit_defne', 'Defne AI paketi: AI mesaj limiti / gün'],
   ['economy.signup_gems', 'Yeni hesabın başlangıç elması'],
   ['gamification.heart_refill_gems', 'Can doldurma fiyatı (elmas)'],
 ]

@@ -76,6 +76,7 @@ class User extends Authenticatable
             'exam_date' => 'date',
             'streak_last_date' => 'date',
             'premium_until' => 'datetime',
+            'defne_until' => 'datetime',
             'age_group_changed_at' => 'datetime',
             'locked_until' => 'datetime',
             'hearts_updated_at' => 'datetime',
@@ -207,6 +208,16 @@ class User extends Authenticatable
         }
 
         // Students on an active institution seat get the full product.
+        return $this->institution_id !== null && (bool) $this->institution?->isCurrent();
+    }
+
+    /** Defne AI package (or both): the higher AI limits and voice calls. School seats include it. */
+    public function hasDefne(): bool
+    {
+        if ($this->defne_until !== null && $this->defne_until->isFuture()) {
+            return true;
+        }
+
         return $this->institution_id !== null && (bool) $this->institution?->isCurrent();
     }
 

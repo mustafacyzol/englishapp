@@ -172,7 +172,9 @@ return [
         'max_tokens' => (int) env('AI_MAX_TOKENS', 2048),
         'history_messages' => 20,
         'daily_limit_free' => (int) env('AI_DAILY_LIMIT_FREE', 10),
-        'daily_limit_premium' => (int) env('AI_DAILY_LIMIT_PREMIUM', 200),
+        // Premium alone keeps a taste of Defne; the Defne AI package (or both) is the full tutor
+        'daily_limit_premium' => (int) env('AI_DAILY_LIMIT_PREMIUM', 30),
+        'daily_limit_defne' => (int) env('AI_DAILY_LIMIT_DEFNE', 300),
     ],
 
     'payments' => [

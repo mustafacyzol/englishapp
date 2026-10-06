@@ -330,7 +330,12 @@ class AdminController extends Controller
                     $days = $sub->starts_at->diffInDays($sub->ends_at);
                     $sub->update(['status' => 'cancelled']);
                     $user = $order->user;
-                    $user->premium_until = $user->premium_until?->subDays((int) $days);
+                    if (in_array($sub->tier, ['premium', 'plus'], true)) {
+                        $user->premium_until = $user->premium_until?->subDays((int) $days);
+                    }
+                    if (in_array($sub->tier, ['defne', 'plus'], true)) {
+                        $user->defne_until = $user->defne_until?->subDays((int) $days);
+                    }
                     $user->save();
                 }
             }
@@ -454,6 +459,9 @@ class AdminController extends Controller
             'referral.referrer_premium_days' => ['sometimes', 'integer', 'min:0'],
             'ai.daily_limit_free' => ['sometimes', 'integer', 'min:0'],
             'ai.daily_limit_premium' => ['sometimes', 'integer', 'min:0'],
+            'ai.daily_limit_defne' => ['sometimes', 'integer', 'min:0'],
+            'economy.signup_gems' => ['sometimes', 'integer', 'min:0', 'max:100000'],
+            'moderation.report_hide' => ['sometimes', 'integer', 'min:1', 'max:50'],
             'gamification.heart_refill_gems' => ['sometimes', 'integer', 'min:0'],
             'school.cta_url' => ['sometimes', 'nullable', 'url'],
             'school.whatsapp' => ['sometimes', 'nullable', 'string', 'max:30'],

@@ -148,6 +148,7 @@ class ResourceController extends Controller
                 'rules' => [
                     'slug' => ['required', 'alpha_dash', 'max:80', Rule::unique('plans')->ignore($id)],
                     'name' => ['required', 'string', 'max:120'],
+                    'tier' => ['required', 'in:premium,defne,plus'],
                     'tagline' => ['nullable', 'string', 'max:190'],
                     'interval' => ['required', 'in:month,quarter,year,lifetime'],
                     'duration_days' => ['required', 'integer', 'min:1'],

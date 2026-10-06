@@ -152,4 +152,26 @@ class RoundTwelveTest extends TestCase
         ])->assertCreated();
         $this->assertSame(120, User::query()->where('email', 'can@example.com')->value('gems'));
     }
+
+    public function test_defne_package_is_its_own_entitlement(): void
+    {
+        $this->seed([GameSeeder::class]);
+        $u = $this->trusted();
+        $ai = app(\App\Services\AiTutorService::class);
+        $free = $ai->usageToday($u)['limit'];
+
+        app(\App\Services\RewardService::class)->grantPlan($u, \App\Models\Plan::query()->where('slug', 'defne-monthly')->firstOrFail(), 'purchase');
+        $u->refresh();
+        $this->assertTrue($u->hasDefne());
+        $this->assertFalse($u->isPremium());
+        $this->assertSame(300, $ai->usageToday($u)['limit']);
+        $this->assertGreaterThan($free, $ai->usageToday($u)['limit']);
+        $this->assertSame('defne', $u->subscriptions()->latest('id')->value('tier'));
+        $this->actingAs($u)->getJson('/api/v1/auth/me')->assertJsonPath('user.defne.active', true)->assertJsonPath('user.premium.active', false);
+
+        // the plans on sale: monthly and yearly for each package
+        $plans = $this->getJson('/api/v1/plans')->assertOk()->json('data');
+        $this->assertEqualsCanonicalizing(['premium', 'defne', 'plus'], array_values(array_unique(array_column($plans, 'tier'))));
+        $this->assertEqualsCanonicalizing(['month', 'year'], array_values(array_unique(array_column($plans, 'interval'))));
+    }
 }

@@ -14,7 +14,9 @@ import { Reveal } from '@/components/motion/Page'
 import { SKILL, SKILLS as SKILL_KEYS } from '@/lib/skills'
 import { Bento, TryIt } from './landing/Sections'
 import { FinalCta3D, TrustBar } from './landing/Story'
-import { AudiencesPro, HeroPro, MeetHigoPro, PricingPro, Strengths, TurkeyLadder } from './landing/Showcase'
+import { AudiencesPro, HeroPro, MeetHigoPro, Strengths, TurkeyLadder } from './landing/Showcase'
+import { higoImg } from '@/components/game/Higo'
+import { img } from '@/lib/assets'
 import { BRAND } from '@/lib/brand'
 
 export interface Review {
@@ -46,7 +48,7 @@ export default function Landing() {
       <Bento />
       <Reviews reviews={reviews} />
       <ForInstitutions />
-      <PricingPro plans={data?.plans?.length ? data.plans : FALLBACK_PLANS} />
+      <PlansTeaser />
       <Faq />
       <Ticker reviews={reviews} />
       <FinalCta3D />
@@ -146,11 +148,6 @@ function ReviewCard({ r, hidden }: { r: Review; hidden: boolean }) {
 
 /* --------------------------------------------------------------- pricing */
 
-const FALLBACK_PLANS: Plan[] = [
-  { id: 1, slug: 'monthly', name: 'Aylık', tagline: 'Esnek başla', interval: 'month', duration_days: 30, price: '149', compare_at_price: null, currency: 'TRY', features: ['Sınırsız can', 'Tüm hikayeler ve sesli okumalar', 'Günde 200 AI mesajı'], badge: null, bonus_gems: 0, live_lesson_credits: 0, is_featured: false },
-  { id: 2, slug: 'quarterly', name: '3 Aylık', tagline: 'Alışkanlık kur', interval: 'quarter', duration_days: 90, price: '349', compare_at_price: '447', currency: 'TRY', features: ['Aylık paketin tüm özellikleri', '500 bonus elmas', '1 canlı ders kuponu'], badge: 'En popüler', bonus_gems: 500, live_lesson_credits: 1, is_featured: true },
-  { id: 3, slug: 'yearly', name: 'Yıllık', tagline: 'Akıcılığa kadar', interval: 'year', duration_days: 365, price: '999', compare_at_price: '1788', currency: 'TRY', features: ['Tüm Premium özellikler', '4 canlı ders kuponu', 'CEFR seviye sertifikası'], badge: '%44 tasarruf', bonus_gems: 2000, live_lesson_credits: 4, is_featured: false },
-]
 
 
 /* ------------------------------------------------------------------- faq */
@@ -257,6 +254,43 @@ function ForInstitutions() {
             <p className="bg-paper-2 px-5 py-2 text-center text-xs text-ink-soft">Örnek görünüm, isimler temsilidir.</p>
           </div>
         </Reveal>
+      </div>
+    </section>
+  )
+}
+
+/**
+ * The packages without prices: what each one is for, and a way to the
+ * pricing page (prices live there, not on the landing page).
+ */
+function PlansTeaser() {
+  const cards = [
+    { name: 'Ücretsiz', line: 'Ders yolunun tamamı, her gün biraz.', face: higoImg('wave'), tone: 'from-paper-2 to-card', chip: 'text-ink-soft' },
+    { name: 'Premium', line: 'Sınırsız can, tüm hikâyeler, sınav modu.', face: higoImg('books'), tone: 'from-flame/10 to-card', chip: 'text-flame' },
+    { name: 'Defne AI', line: 'Yapay zekâ öğretmenle her gün konuş.', face: img('defne/avatar.webp'), tone: 'from-sage/15 to-card', chip: 'text-sage', round: true },
+    { name: 'Okullar', line: 'Müdür ve öğretmen panelleri, ödev, okul ligi.', face: img('schools/teacher.webp'), tone: 'from-sky/10 to-card', chip: 'text-sky', round: true, to: '/okullar' },
+  ]
+  return (
+    <section id="paketler" className="mx-auto max-w-6xl scroll-mt-24 px-4 py-20 sm:px-6">
+      <Reveal className="text-center">
+        <p className="text-[12px] font-black uppercase tracking-[0.22em] text-flame">Paketler</p>
+        <h2 className="mx-auto mt-3 max-w-2xl font-display text-4xl font-black leading-tight sm:text-5xl">Ücretsiz başla, istediğinde yüksel.</h2>
+        <p className="mx-auto mt-3 max-w-xl text-lg text-ink-soft">Aylık ya da yıllık; Premium, Defne AI veya ikisi birlikte.</p>
+      </Reveal>
+      <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {cards.map((c, i) => (
+          <motion.div key={c.name} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-40px' }} transition={{ delay: i * 0.07 }}>
+            <Link to={c.to ?? '/fiyatlar'} className={clsx('group relative flex h-full flex-col overflow-hidden rounded-[28px] border-2 border-line bg-gradient-to-b p-5 transition hover:-translate-y-1 hover:shadow-soft', c.tone)}>
+              <img src={c.face} alt="" className={clsx('mb-4 size-16 object-contain', c.round && 'rounded-2xl object-cover')} />
+              <p className={clsx('font-display text-xl font-black', c.chip)}>{c.name}</p>
+              <p className="mt-1 flex-1 text-[15px] text-ink-soft">{c.line}</p>
+              <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-extrabold">{c.to ? 'Okullar sayfası' : 'Paketleri incele'} <span className="transition group-hover:translate-x-1">→</span></span>
+            </Link>
+          </motion.div>
+        ))}
+      </div>
+      <div className="mt-8 text-center">
+        <LinkButton to="/fiyatlar" size="lg">Fiyatları gör</LinkButton>
       </div>
     </section>
   )

@@ -22,6 +22,7 @@ class Settings
         'referral.referrer_premium_days' => 'dilgo.referral.referrer_premium_days',
         'ai.daily_limit_free' => 'dilgo.ai.daily_limit_free',
         'ai.daily_limit_premium' => 'dilgo.ai.daily_limit_premium',
+        'ai.daily_limit_defne' => 'dilgo.ai.daily_limit_defne',
         'gamification.heart_refill_gems' => 'dilgo.gamification.heart_refill_gems',
         'school.cta_url' => null,
         'school.whatsapp' => null,

@@ -118,7 +118,7 @@ TXT;
     public function usageToday(User $user): array
     {
         $used = (int) DailyActivity::query()->where('user_id', $user->id)->where('date', Period::today())->value('ai_messages');
-        $limit = (int) Settings::get($user->isPremium() ? 'ai.daily_limit_premium' : 'ai.daily_limit_free');
+        $limit = (int) Settings::get($user->hasDefne() ? 'ai.daily_limit_defne' : ($user->isPremium() ? 'ai.daily_limit_premium' : 'ai.daily_limit_free'));
 
         return ['used' => $used, 'limit' => $limit, 'remaining' => max(0, $limit - $used)];
     }
@@ -129,9 +129,9 @@ TXT;
             throw new HttpException(503, 'AI öğretmen şu anda bakımda.');
         }
         if ($this->usageToday($user)['remaining'] <= 0) {
-            throw new HttpException(429, $user->isPremium()
+            throw new HttpException(429, $user->hasDefne()
                 ? 'Bugünkü AI mesaj limitine ulaştın. Yarın görüşürüz!'
-                : 'Ücretsiz günlük AI limitin doldu. Premium ile her gün çok daha fazla pratik yap!');
+                : 'Bugünkü Defne hakkın doldu. Defne AI paketiyle her gün çok daha fazla konuşabilirsin.');
         }
     }
 

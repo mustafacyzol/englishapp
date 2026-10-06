@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Ticket } from 'lucide-react'
 import { ApiError, get, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
@@ -9,7 +9,8 @@ import type { Plan } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Field'
 import { Alert, Modal, PageHeader, SkeletonPage } from '@/components/ui/Misc'
-import { PricingPro } from '../public/landing/Showcase'
+import { PlanBoard } from '@/components/pricing/PlanBoard'
+import clsx from 'clsx'
 import { BRAND } from '@/lib/brand'
 
 interface Quote { amount: number; discount: number; total: number; currency: string; coupon: { code: string; description: string | null } | null }
@@ -54,21 +55,42 @@ export default function Premium() {
     setQuote(null)
     q.mutate({ plan_id: p.id })
   }
+  // arriving from the public pricing page (or a link) with a package already picked
+  const [params, setParams] = useSearchParams()
+  useEffect(() => {
+    if (!data) return
+    let slug = params.get('plan')
+    try { slug ??= sessionStorage.getItem('dilgo.plan'); sessionStorage.removeItem('dilgo.plan') } catch { /* private mode */ }
+    const p = slug ? data.data.find((x) => x.slug === slug) : null
+    if (p) choose(p)
+    if (params.get('plan')) setParams({}, { replace: true })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [data])
+  const TIER_LABEL = { premium: 'Premium', defne: 'Defne AI', plus: 'Premium + Defne' } as const
 
   if (isLoading || !data) return <SkeletonPage variant="cards" />
   return (
     <div className="mx-auto max-w-5xl">
-      {user?.premium.active && <PageHeader kicker={`${BRAND} Premium`} title="Premium üyesisin" />}
-      {user?.premium.active && <div className="mb-6"><Alert tone="success">Premium üyeliğin {dateTR(user.premium.until)} tarihine kadar aktif. Yeni paket alırsan süren üzerine eklenir.</Alert></div>}
-
-      <PricingPro embedded plans={data.data} title="Sınırsız pratik, tek dokunuşla." sub="Sınırsız can, tüm hikâyeler, daha fazla Defne pratiği ve canlı ders kuponları." cta={(p) => <Button block variant={p.is_featured ? 'primary' : 'dark'} onClick={() => choose(p)}>{p.is_featured ? 'Premium’a geç' : 'Seç'}</Button>} />
-
+      <PageHeader kicker={`${BRAND} paketleri`} title="Sana uygun paketi seç" />
+      {(user?.premium.active || user?.defne?.active) && (
+        <div className="mb-6 grid gap-2">
+          {user?.premium.active && <Alert tone="success">Premium üyeliğin {dateTR(user.premium.until)} tarihine kadar aktif.</Alert>}
+          {user?.defne?.active && <Alert tone="success">Defne AI paketin {user.defne.until ? `${dateTR(user.defne.until)} tarihine kadar` : 'okulun üzerinden'} aktif.</Alert>}
+          <p className="text-sm text-ink-soft">Yeni paket alırsan süren kaldığı yerden uzar.</p>
+        </div>
+      )}
+      <PlanBoard
+        plans={data.data}
+        cta={(tier, p) => tier === 'free'
+          ? <Link to="/learn" className="flex h-12 w-full items-center justify-center rounded-2xl border-2 border-line font-display font-extrabold uppercase tracking-wide">Ücretsiz devam et</Link>
+          : <Button block onClick={() => p && choose(p)} className={clsx(tier === 'defne' && '!bg-sage !shadow-[0_4px_0_0_var(--color-sage-deep)]', tier === 'plus' && '!bg-butter !text-[#1f2433] !shadow-[0_4px_0_0_var(--color-butter-deep)]')}>{tier === 'plus' ? 'İkisini birden al' : `${TIER_LABEL[tier]} al`}</Button>}
+      />
 
       <Modal open={!!plan && !form} onClose={() => setPlan(null)}>
         {plan && (
           <div>
-            <h2 className="text-2xl font-extrabold">{plan.name} paket</h2>
-            <p className="mb-5 text-ink-soft">{plan.duration_days} gün Premium · {plan.tagline}</p>
+            <h2 className="text-2xl font-extrabold">{plan.name} · {plan.interval === 'year' ? 'Yıllık' : 'Aylık'}</h2>
+            <p className="mb-5 text-ink-soft">{plan.duration_days} gün {TIER_LABEL[plan.tier ?? 'premium']} · {plan.tagline}</p>
             <form className="mb-4 flex gap-2" onSubmit={(e) => { e.preventDefault(); q.mutate({ plan_id: plan.id, coupon }) }}>
               <Input value={coupon} onChange={(e) => setCoupon(e.target.value.toUpperCase())} placeholder="Kupon kodu" className="flex-1" />
               <Button type="submit" variant="secondary" loading={q.isPending} icon={<Ticket className="size-4" />}>Uygula</Button>

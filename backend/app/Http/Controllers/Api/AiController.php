@@ -22,7 +22,7 @@ class AiController extends Controller
         return response()->json([
             'data' => AiScenario::query()->where('is_active', true)->orderBy('position')
                 ->get(['id', 'key', 'title', 'description', 'emoji', 'category', 'cefr_min', 'goals', 'is_premium'])
-                ->map(fn ($s) => $s->toArray() + ['locked' => $s->is_premium && ! $user->isPremium()]),
+                ->map(fn ($s) => $s->toArray() + ['locked' => $s->is_premium && ! $user->isPremium() && ! $user->hasDefne()]),
             'usage' => $this->tutor->usageToday($user),
         ]);
     }
@@ -42,7 +42,7 @@ class AiController extends Controller
         ]);
         $user = $request->user();
         $scenario = isset($data['scenario_key']) ? AiScenario::query()->where('key', $data['scenario_key'])->first() : null;
-        abort_if($scenario?->is_premium && ! $user->isPremium(), 402, 'Bu senaryo Premium üyelere özel.');
+        abort_if($scenario?->is_premium && ! $user->isPremium() && ! $user->hasDefne(), 402, 'Bu senaryo Premium ve Defne AI üyelerine özel.');
 
         $conversation = $user->conversations()->create([
             'mode' => $data['mode'],

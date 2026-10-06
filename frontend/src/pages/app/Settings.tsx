@@ -301,7 +301,7 @@ function NotifyTab({ save }: { save: Save }) {
   return (
     <Section title="Bildirimler" hint="Az ama zamanında: yalnızca serin tehlikedeyken ve önemli bir şey olduğunda.">
       <div className="divide-y-2 divide-line/10">
-        <Toggle label="Seri hatırlatma e-postaları" description="Serin bitmek üzereyken akşam 20:00'de haber veririz." checked={prefs.email_reminders !== false} onChange={(v) => save.mutate({ preferences: { email_reminders: v } })} />
+        <Toggle label="Seri hatırlatma e-postaları" description="Serin bitmek üzereyken, seçtiğin çalışma zamanında haber veririz." checked={prefs.email_reminders !== false} onChange={(v) => save.mutate({ preferences: { email_reminders: v } })} />
         <Toggle label="Haftalık karne e-postası" description="Pazartesi sabahı geçen haftanın özeti: XP, çalıştığın günler, yeni kelimeler." checked={prefs.email_weekly !== false} onChange={(v) => save.mutate({ preferences: { email_weekly: v } })} />
         {user.age_group !== 'kid' && <Toggle label="Kampanya e-postaları" description="Yeni paketler ve indirimler. Ayda en fazla iki kez." checked={user.marketing_opt_in} onChange={(v) => save.mutate({ marketing_opt_in: v })} />}
       </div>

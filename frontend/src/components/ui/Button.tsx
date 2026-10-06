@@ -13,7 +13,7 @@ const VARIANTS: Record<Variant, string> = {
   success: 'bg-mint text-white border-mint shadow-[0_4px_0_0_var(--color-mint-deep)] hover:brightness-105',
   danger: 'bg-berry text-white border-berry shadow-[0_4px_0_0_var(--color-berry-deep)] hover:brightness-105',
   butter: 'bg-butter text-[#1f2433] border-butter shadow-[0_4px_0_0_var(--color-butter-deep)] hover:brightness-105',
-  dark: 'bg-[#1f2433] text-white border-[#1f2433] shadow-[0_4px_0_0_#000] hover:brightness-125 dark:bg-white dark:text-[#1f2433] dark:border-white dark:shadow-[0_4px_0_0_#9aa1b2]',
+  dark: 'bg-[#1f2433] text-white border-[#1f2433] shadow-[0_4px_0_0_#000] hover:brightness-125 dark:bg-[#353d55] dark:text-white dark:border-[#4a5370] dark:shadow-[0_4px_0_0_#0b0e15]',
 }
 const SIZES: Record<Size, string> = {
   sm: 'h-10 px-4 text-sm rounded-xl gap-1.5',

@@ -139,18 +139,23 @@ class LearningLoopTest extends TestCase
 
     public function test_checkout_with_coupon_through_fake_gateway(): void
     {
-        $plan = Plan::query()->where('slug', 'quarterly')->first();
+        // the old quarterly plan is no longer sold
+        $this->postJson('/api/v1/checkout/quote', ['plan_id' => Plan::query()->where('slug', 'quarterly')->value('id')])->assertNotFound();
+        $plan = Plan::query()->where('slug', 'plus-yearly')->first();
         $this->postJson('/api/v1/checkout/quote', ['plan_id' => $plan->id, 'coupon' => 'hosgeldin'])
-            ->assertOk()->assertJsonPath('total', 261.75);
+            ->assertOk()->assertJsonPath('total', 1199.25);
 
         $res = $this->postJson('/api/v1/checkout', ['plan_id' => $plan->id, 'coupon' => 'HOSGELDIN'])->assertCreated();
         $url = $res->json('checkout.payment_page_url');
         $this->get(parse_url($url, PHP_URL_PATH).'?'.parse_url($url, PHP_URL_QUERY))->assertRedirect();
 
         $user = $this->user->fresh();
+        // Premium + Defne grants both, for a year
         $this->assertTrue($user->isPremium());
-        $this->assertSame(1500, $user->gems); // 1000 + 500 bonus
-        $this->assertSame(1, $user->items()->whereHas('item', fn ($q) => $q->where('key', 'live_lesson'))->count());
+        $this->assertTrue($user->hasDefne());
+        $this->assertTrue($user->defne_until->gt(now()->addDays(360)));
+        $this->assertSame(4000, $user->gems); // 1000 + 3000 bonus
+        $this->assertSame(4, $user->items()->whereHas('item', fn ($q) => $q->where('key', 'live_lesson'))->count());
 
         // coupon is first-order-only now
         $this->postJson('/api/v1/checkout/quote', ['plan_id' => $plan->id, 'coupon' => 'HOSGELDIN'])->assertUnprocessable();

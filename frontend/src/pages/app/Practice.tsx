@@ -394,6 +394,7 @@ function GameIntro({ meta, onStart, src, onSrc, count, title }: { meta: (typeof 
         </span>
       </div>
       <div className="p-5 sm:p-6">
+        {src && <SourcePicker src={src} onSrc={onSrc} count={count} title={title} />}
         <p className="text-xs font-black uppercase tracking-widest text-ink-soft">Nasıl oynanır?</p>
         <ol className="mt-3 space-y-2.5">
           {meta.rules.map((r, i) => (
@@ -408,8 +409,7 @@ function GameIntro({ meta, onStart, src, onSrc, count, title }: { meta: (typeof 
           <span className="inline-flex items-center gap-1.5 rounded-full bg-paper-2 px-3 py-1.5">Kelime XP'si günde en fazla {e?.daily_caps.words ?? 60}</span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-berry/10 px-3 py-1.5 text-berry"><Heart className="size-3.5" /> 5+ doğru = 1 can</span>
         </div>
-        <div className="mt-6">{src && <SourcePicker src={src} onSrc={onSrc} count={count} title={title} />}</div>
-        <Button block size="lg" onClick={onStart} disabled={count < 4} icon={<ArrowRight className="size-5" />}>{count < 4 ? 'Bu kaynakta kelime yetersiz' : 'Başla'}</Button>
+        <Button className="mt-6" block size="lg" onClick={onStart} disabled={count < 4} icon={<ArrowRight className="size-5" />}>{count < 4 ? 'Bu kaynakta kelime yetersiz' : 'Başla'}</Button>
       </div>
     </motion.div>
   )

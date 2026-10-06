@@ -125,7 +125,7 @@ class CheckoutService
             $order->update(['status' => 'paid', 'paid_at' => now(), 'gateway_ref' => $reference]);
 
             if ($plan) {
-                $this->rewards->grantPremiumDays($user, $plan->duration_days, 'purchase', $plan->id, $order->id);
+                $this->rewards->grantPlan($user, $plan, 'purchase', $order->id);
                 if ($plan->bonus_gems) {
                     $user->increment('gems', $plan->bonus_gems);
                 }

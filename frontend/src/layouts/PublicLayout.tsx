@@ -21,7 +21,7 @@ import { rewardImg } from '@/lib/assets'
 /** A short main menu: who we are, who it's for, what it costs, and the blog. */
 const LINKS = [
   { to: '/okullar', label: 'Okullar için' },
-  { to: '/#paketler', label: 'Fiyatlar' },
+  { to: '/fiyatlar', label: 'Fiyatlar' },
   { to: '/yardim', label: 'Yardım' },
   { to: '/blog', label: 'Blog' },
 ]
@@ -317,7 +317,7 @@ const SOCIAL_ICON: Record<string, (p: { className?: string }) => React.JSX.Eleme
 }
 
 const COLS: { title: string; links: [string, string][] }[] = [
-  { title: 'Ürün', links: [['/#nasil', 'Nasıl çalışır'], ['/#paketler', 'Paketler'], ['/placement', 'Seviye testi']] },
+  { title: 'Ürün', links: [['/#nasil', 'Nasıl çalışır'], ['/fiyatlar', 'Fiyatlar'], ['/placement', 'Seviye testi']] },
   { title: 'Şirket', links: [['/about', 'Hakkımızda'], ['/blog', 'Blog'], ['/contact?konu=partnership', 'İş birliği'], ['/contact', 'İletişim']] },
   { title: 'Destek', links: [['/yardim', 'Yardım merkezi'], ['/contact?konu=support', 'Teknik destek'], ['/contact?konu=course', 'Kurs bilgisi'], ['/okullar', 'Okul paneli']] },
   { title: 'Yasal', links: [['/terms', 'Kullanım koşulları'], ['/privacy', 'Gizlilik ve KVKK'], ['/distance-sales', 'Mesafeli satış'], ['/refund', 'İptal ve iade']] },
