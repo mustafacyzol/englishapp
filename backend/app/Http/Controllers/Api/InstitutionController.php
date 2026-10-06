@@ -290,12 +290,12 @@ class InstitutionController extends Controller
     {
         $this->school->staff($request->user());
         $tracks = \App\Services\GradeUnitService::TRACKS;
-        $units = \App\Models\GradeUnit::query()->where('is_published', true)->orderBy('position')->orderBy('id')->get(['id', 'track', 'title', 'title_tr', 'cefr_level']);
+        $units = \App\Models\GradeUnit::query()->where('is_published', true)->orderBy('position')->orderBy('id')->get(['id', 'track', 'title', 'title_tr']);
 
         return response()->json([
             'units' => collect($tracks)->map(fn ($label, $track) => [
                 'track' => $track, 'label' => $label,
-                'units' => $units->where('track', $track)->values()->map(fn ($u, $i) => ['id' => $u->id, 'n' => $i + 1, 'title' => $u->title, 'title_tr' => $u->title_tr, 'level' => $u->cefr_level]),
+                'units' => $units->where('track', $track)->values()->map(fn ($u, $i) => ['id' => $u->id, 'n' => $i + 1, 'title' => $u->title, 'title_tr' => $u->title_tr]),
             ])->filter(fn ($t) => $t['units']->isNotEmpty())->values(),
             // the general path, without the generated coursebook copies
             'lessons' => \App\Models\Lesson::query()->whereNull('meta->grade_unit')->with('unit:id,course_id,title,position', 'unit.course:id,cefr_level')

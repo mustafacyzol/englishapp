@@ -48,6 +48,14 @@ DilGO üç katmanla korunur: önde **Cloudflare WAF** (veya Hostinger'ın kendi 
 | `WAF_BAN_MINUTES` | `60` | Engel süresi (dk) |
 | `WAF_ALLOW_IPS` | boş | Virgülle ayrılmış, hiç engellenmeyecek IP'ler (ofis, izleme) |
 
+- **Topluluk içeriği ve spam** (herkese açık kelime setleri):
+  - Paylaşmak için doğrulanmış ve en az bir günlük hesap, kişi başı açık set sınırı, günlük set kotası.
+  - Paylaşılan sette en az 5 farklı kelime; kendisiyle "çevrilmiş" ya da anlamsız (aaaa, sayı dizisi) girdiler reddedilir.
+  - Aynı kelime listesi aynı kişide iki kez oluşturulamaz; başkasının açık seti kendi adına yeniden paylaşılamaz (kelime listesi parmak izi, `word_sets.content_hash`).
+  - Bağlantı, telefon, e-posta ve yasak kelimeler paylaşılan içerikte engellenir (`moderation.blocked_words`).
+  - Öğrenciler seti şikâyet eder (kişi başı bir kez, günde 20). Doğrulanmış ve bir günden eski hesaplardan gelen şikâyet sayısı `moderation.report_hide` (varsayılan 3) değerine ulaşınca set kendiliğinden gizlenir.
+  - Yönetim > Topluluk moderasyonu: yayına geri al, gizle, sil ya da sahibinin paylaşımını kapat. Her işlem denetim kaydına yazılır.
+- **Anahtarlar**: AI, ses ve ödeme anahtarları Yönetim > Entegrasyonlar'da şifreli saklanır, panelde yalnızca maskeli görünür ve hiçbir API yanıtında istemciye gönderilmez.
 - Diğer korumalar: oran sınırlama (giriş, OTP, AI, kod kullanma), hesap kilitleme, yöneticiler için e-posta OTP ve 2FA, Sanctum token ömrü ve cihaz sınırı, güvenlik başlıkları (`SecurityHeaders`), denetim kaydı (Admin > Denetim kaydı).
 
 ## Kontrol listesi (yayına almadan önce)

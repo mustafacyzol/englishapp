@@ -236,7 +236,7 @@ function HomeworkDetail({ a, data }: { a: Assignment; data: InstitutionReport })
 }
 
 interface Catalog {
-  units: { track: string; label: string; units: { id: number; n: number; title: string; title_tr: string | null; level: string }[] }[]
+  units: { track: string; label: string; units: { id: number; n: number; title: string; title_tr: string | null }[] }[]
   lessons: { id: number; title: string; kind?: string; unit?: string | null; level?: string }[]
   stories: { slug: string; title: string; cefr_level: string }[]
   word_sets?: { id: number; title: string; level: string | null; exam: string | null; words_count: number }[]

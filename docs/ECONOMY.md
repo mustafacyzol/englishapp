@@ -11,7 +11,7 @@ Rakamları değiştirmek için kod değil, bu dosya düzenlenir. Sunucu her öd�
 | XP | 0 | |
 | Seviye | 1 | |
 | Seri | 0 (gri alev) | |
-| Elmas | 50 | `users.gems` varsayılanı (hoş geldin elmasları) |
+| Elmas | 300 | Yönetim > Site ayarları > Ekonomi > "Yeni hesabın başlangıç elması" (`SIGNUP_GEMS`). Bir seri dondurucu ya da ilk profil kapağı alınabilir. |
 | Can | 5 | 30 dakikada 1 dolar |
 | Lig | Bronz, yeni grup | ilk XP ile gruba yerleşir |
 | Kasa, kuponlar, rozetler | boş | |
@@ -84,3 +84,17 @@ kaydına yazılır. Yaş grubu şunları belirler:
 - Aynı anda en fazla 3 cihazda oturum açık kalır; 4. cihazda giriş yapılınca en eski oturum kapanır.
 - Yaş grubu 30 günde bir değiştirilebilir. Çocuk hesabı yalnızca kayıtta veli onayıyla açılır; çocuk hesabından büyük yaş grubuna geçiş destek ekibi üzerinden yapılır.
 - Sınav modu çocuk hesaplarında sunucu tarafında da kapalıdır.
+
+## 8. Paketler (aylık ve yıllık)
+
+| Paket | Ne açar | Defne mesajı / gün |
+| --- | --- | --- |
+| Ücretsiz | Ders yolu, 5 can, seçili hikâyeler, kelime oyunları | 10 |
+| Premium | Sınırsız can, tüm hikâyeler, sınav modu, reklamsız | 30 |
+| Defne AI | Defne ile konuşma, sesli görüşme, ayrıntılı yazı düzeltmesi, tüm senaryolar | 300 |
+| Premium + Defne | İkisinin tamamı, ayrı almaktan ucuz | 300 |
+
+- Her paketin kendi bitiş tarihi vardır: `users.premium_until` ve `users.defne_until`. Okul koltuğu ikisini de açar.
+- Paketler `plans.tier` (premium, defne, plus) ve `interval` (month, year) ile Yönetim > Paketler ve fiyatlar sayfasından düzenlenir.
+- Yeni paket alınca süre kaldığı yerden uzar. Otomatik yenileme yoktur. İade 14 gün içinde istenir; iade edilen siparişin verdiği günler (Premium, Defne ya da ikisi) geri alınır.
+- Limitler Yönetim > Site ayarları > Ekonomi ve limitler'den değiştirilir (`ai.daily_limit_free`, `ai.daily_limit_premium`, `ai.daily_limit_defne`).

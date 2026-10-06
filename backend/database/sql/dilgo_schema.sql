@@ -1052,6 +1052,7 @@ DROP TABLE IF EXISTS `plans`;
 CREATE TABLE `plans` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `slug` varchar(255) NOT NULL,
+  `tier` varchar(12) NOT NULL DEFAULT 'premium',
   `name` varchar(255) NOT NULL,
   `tagline` varchar(255) DEFAULT NULL,
   `interval` varchar(12) NOT NULL DEFAULT 'month',
@@ -1069,7 +1070,8 @@ CREATE TABLE `plans` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
-  UNIQUE KEY `plans_slug_unique` (`slug`)
+  UNIQUE KEY `plans_slug_unique` (`slug`),
+  KEY `plans_tier_interval_index` (`tier`,`interval`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -1379,6 +1381,7 @@ CREATE TABLE `subscriptions` (
   `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   `user_id` bigint(20) unsigned NOT NULL,
   `plan_id` bigint(20) unsigned DEFAULT NULL,
+  `tier` varchar(12) NOT NULL DEFAULT 'premium',
   `order_id` bigint(20) unsigned DEFAULT NULL,
   `source` varchar(20) NOT NULL DEFAULT 'purchase',
   `starts_at` timestamp NOT NULL,
@@ -1590,6 +1593,7 @@ CREATE TABLE `users` (
   `referral_code` varchar(16) NOT NULL,
   `referred_by_id` bigint(20) unsigned DEFAULT NULL,
   `premium_until` timestamp NULL DEFAULT NULL,
+  `defne_until` timestamp NULL DEFAULT NULL,
   `is_banned` tinyint(1) NOT NULL DEFAULT 0,
   `banned_reason` varchar(255) DEFAULT NULL,
   `failed_logins` smallint(5) unsigned NOT NULL DEFAULT 0,
@@ -1680,6 +1684,28 @@ CREATE TABLE `word_set_plays` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `word_set_reports`
+--
+
+DROP TABLE IF EXISTS `word_set_reports`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `word_set_reports` (
+  `id` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  `word_set_id` bigint(20) unsigned NOT NULL,
+  `user_id` bigint(20) unsigned NOT NULL,
+  `reason` varchar(20) NOT NULL,
+  `note` varchar(300) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `word_set_reports_word_set_id_user_id_unique` (`word_set_id`,`user_id`),
+  KEY `word_set_reports_user_id_foreign` (`user_id`),
+  CONSTRAINT `word_set_reports_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `word_set_reports_word_set_id_foreign` FOREIGN KEY (`word_set_id`) REFERENCES `word_sets` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `word_set_saves`
 --
 
@@ -1715,9 +1741,12 @@ CREATE TABLE `word_sets` (
   `exam` varchar(16) DEFAULT NULL,
   `cover` varchar(40) DEFAULT NULL,
   `is_public` tinyint(1) NOT NULL DEFAULT 0,
+  `hidden_at` timestamp NULL DEFAULT NULL,
   `words_count` int(10) unsigned NOT NULL DEFAULT 0,
   `saves_count` int(10) unsigned NOT NULL DEFAULT 0,
+  `reports_count` int(10) unsigned NOT NULL DEFAULT 0,
   `copied_from_id` bigint(20) unsigned DEFAULT NULL,
+  `content_hash` varchar(40) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -1725,6 +1754,8 @@ CREATE TABLE `word_sets` (
   KEY `word_sets_copied_from_id_foreign` (`copied_from_id`),
   KEY `word_sets_category_level_index` (`category`,`level`),
   KEY `word_sets_user_id_updated_at_index` (`user_id`,`updated_at`),
+  KEY `word_sets_user_id_content_hash_index` (`user_id`,`content_hash`),
+  KEY `word_sets_is_public_hidden_at_index` (`is_public`,`hidden_at`),
   CONSTRAINT `word_sets_copied_from_id_foreign` FOREIGN KEY (`copied_from_id`) REFERENCES `word_sets` (`id`) ON DELETE SET NULL,
   CONSTRAINT `word_sets_user_id_foreign` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
