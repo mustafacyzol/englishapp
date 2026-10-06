@@ -92,7 +92,7 @@ export default function Help() {
               const on = !q && topicKey === t.key
               return (
                 <button key={t.key} onClick={() => pick(t.key)} aria-current={on ? 'true' : undefined}
-                  className={clsx('group relative flex items-center gap-2.5 rounded-full border-2 px-3 py-1.5 text-left text-sm font-extrabold transition lg:rounded-xl lg:border-0 lg:px-3 lg:py-2.5 lg:text-[15px]', on ? 'border-ink bg-ink text-paper lg:bg-paper-2 lg:text-ink' : 'border-line bg-card text-ink-soft hover:text-ink lg:bg-transparent lg:hover:bg-paper-2/70')}>
+                  className={clsx('group relative flex items-center gap-2.5 rounded-full border-2 px-3 py-1.5 text-left text-sm font-extrabold transition lg:rounded-xl lg:border-0 lg:px-3 lg:py-2.5 lg:text-[15px]', on ? 'border-inv bg-inv text-on-inv lg:bg-paper-2 lg:text-ink' : 'border-line bg-card text-ink-soft hover:text-ink lg:bg-transparent lg:hover:bg-paper-2/70')}>
                   {on && <motion.span layoutId="help-bar" className="absolute -left-2 top-1/2 hidden h-5 w-1 -translate-y-1/2 rounded-r-full bg-flame lg:block" />}
                   <Icon className={clsx('size-4 shrink-0 lg:size-[18px]', on ? 'lg:text-flame' : '')} />
                   <span className="flex-1">{t.title}</span>
@@ -146,17 +146,17 @@ export default function Help() {
           )}
 
           {/* a person, when the answers are not enough */}
-          <section className="relative mt-4 overflow-hidden rounded-[28px] bg-ink p-6 text-paper sm:p-8">
+          <section className="relative mt-4 overflow-hidden rounded-[28px] bg-inv p-6 text-on-inv sm:p-8">
             <div aria-hidden className="absolute -right-10 -top-10 size-48 rounded-full bg-flame/30 blur-3xl" />
             <div className="relative flex flex-col gap-5 sm:flex-row sm:items-center">
               <img src={higoImg('wave')} alt="" className="size-20 shrink-0 object-contain" />
               <div className="min-w-0 flex-1">
                 <p className="font-display text-2xl font-black">Hâlâ sorunuz mu var?</p>
-                <p className="mt-1 text-paper/75">Ekibimiz hafta içi her gün yanıt veriyor. Okullar için ayrı bir ekibimiz var.</p>
+                <p className="mt-1 text-on-inv/75">Ekibimiz hafta içi her gün yanıt veriyor. Okullar için ayrı bir ekibimiz var.</p>
               </div>
               <div className="flex flex-col gap-2 sm:items-end">
                 <Link to="/contact?konu=support" className="press flex h-11 items-center justify-center gap-2 rounded-xl bg-flame px-5 font-extrabold text-white shadow-[0_3px_0_var(--color-flame-deep)]"><MessageCircle className="size-4" /> Bize yazın</Link>
-                <a href={`mailto:${email}`} className="flex items-center gap-1.5 text-sm font-bold text-paper/80 hover:text-paper"><Mail className="size-4" />{email}</a>
+                <a href={`mailto:${email}`} className="flex items-center gap-1.5 text-sm font-bold text-on-inv/80 hover:text-on-inv"><Mail className="size-4" />{email}</a>
               </div>
             </div>
           </section>

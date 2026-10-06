@@ -97,17 +97,17 @@ export default function Stories() {
               const on = level === l
               const mine = !!l && user?.cefr_level === l
               return (
-                <button key={l || 'all'} role="radio" aria-checked={on} onClick={() => setLevel(l)} title={l ? LEVEL_TEXT[l] : undefined} className={clsx('relative min-w-0 rounded-lg px-1.5 py-1.5 text-sm font-extrabold transition sm:px-3', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
-                  {on && <motion.span layoutId="lvl" className="absolute inset-0 rounded-lg bg-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+                <button key={l || 'all'} role="radio" aria-checked={on} onClick={() => setLevel(l)} title={l ? LEVEL_TEXT[l] : undefined} className={clsx('relative min-w-0 rounded-lg px-1.5 py-1.5 text-sm font-extrabold transition sm:px-3', on ? 'text-on-inv' : 'text-ink-soft hover:text-ink')}>
+                  {on && <motion.span layoutId="lvl" className="absolute inset-0 rounded-lg bg-inv" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
                   <span className="relative">{l || 'Tümü'}</span>
-                  {mine && <span className={clsx('absolute bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full', on ? 'bg-paper' : 'bg-flame')} aria-label="senin seviyen" />}
+                  {mine && <span className={clsx('absolute bottom-0.5 left-1/2 size-1 -translate-x-1/2 rounded-full', on ? 'bg-on-inv' : 'bg-flame')} aria-label="senin seviyen" />}
                 </button>
               )
             })}
           </div>
           <div className="no-scrollbar -mx-0.5 flex w-full items-center gap-1 overflow-x-auto px-0.5 sm:ml-auto sm:w-auto [&>*]:shrink-0 [&>*]:whitespace-nowrap">
             {([['unread', 'Okunmamış'], ['saved', 'Kaydettiklerim'], ['short', 'Kısa']] as const).map(([k, l]) => (
-              <button key={k} onClick={() => setQuick(quick === k ? '' : k)} aria-pressed={quick === k} className={clsx('rounded-full border-2 px-3 py-1 text-[13px] font-bold transition', quick === k ? 'border-ink bg-ink text-paper' : 'border-line text-ink-soft hover:text-ink')}>{l}</button>
+              <button key={k} onClick={() => setQuick(quick === k ? '' : k)} aria-pressed={quick === k} className={clsx('rounded-full border-2 px-3 py-1 text-[13px] font-bold transition', quick === k ? 'border-inv bg-inv text-on-inv' : 'border-line text-ink-soft hover:text-ink')}>{l}</button>
             ))}
             <button onClick={() => setSort(sort === 'short' ? 'recommended' : 'short')} className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[13px] font-bold text-ink-soft hover:text-ink" title="Sıralama">
               <ArrowDownWideNarrow className="size-4" /> {sort === 'short' ? 'Kısadan uzuna' : 'Önerilen'}

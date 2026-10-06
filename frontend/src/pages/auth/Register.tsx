@@ -255,7 +255,7 @@ export default function Register() {
                     <p className="mb-2 text-sm font-bold">Kaçıncı sınıftasın?</p>
                     <div className="grid grid-cols-4 gap-2">
                       {STAGES.find((x) => x.key === d.stage)!.grades.map((g) => (
-                        <button key={g} onClick={() => up({ grade: g, age: ageFromStage(d.stage, g) })} aria-pressed={d.grade === g} className={clsx('h-11 rounded-xl border-2 px-1 font-display text-sm font-black transition sm:text-base', d.grade === g ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink/30')}>{g}. sınıf</button>
+                        <button key={g} onClick={() => up({ grade: g, age: ageFromStage(d.stage, g) })} aria-pressed={d.grade === g} className={clsx('h-11 rounded-xl border-2 px-1 font-display text-sm font-black transition sm:text-base', d.grade === g ? 'border-inv bg-inv text-on-inv' : 'border-line hover:border-ink/30')}>{g}. sınıf</button>
                       ))}
                     </div>
                     {d.grade && (
@@ -429,7 +429,7 @@ export default function Register() {
 }
 
 function Tick({ small }: { small?: boolean }) {
-  return <span className={clsx('absolute grid place-items-center rounded-full bg-ink text-paper shadow-soft', small ? 'right-1.5 top-1.5 size-5 sm:right-3 sm:top-3 sm:size-7' : 'right-3 top-3 size-7')}><Check className={small ? 'size-3 sm:size-4' : 'size-4'} strokeWidth={3} /></span>
+  return <span className={clsx('absolute grid place-items-center rounded-full bg-inv text-on-inv shadow-soft', small ? 'right-1.5 top-1.5 size-5 sm:right-3 sm:top-3 sm:size-7' : 'right-3 top-3 size-7')}><Check className={small ? 'size-3 sm:size-4' : 'size-4'} strokeWidth={3} /></span>
 }
 
 function PhotoCard({ photo, title, text, selected, onClick, compact, multi }: { photo: string; title: string; text?: string; selected: boolean; onClick: () => void; compact?: boolean; multi?: boolean }) {

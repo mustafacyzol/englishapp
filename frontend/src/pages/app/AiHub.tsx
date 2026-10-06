@@ -140,7 +140,7 @@ export default function AiHub() {
           </div>
           <div className="flex max-w-full flex-wrap gap-1.5">
             {cats.map((c) => (
-              <button key={c} onClick={() => setCat(c)} className={clsx('shrink-0 rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', cat === c ? 'border-ink bg-ink text-paper' : 'border-line text-ink-soft hover:text-ink')}>
+              <button key={c} onClick={() => setCat(c)} className={clsx('shrink-0 rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', cat === c ? 'border-inv bg-inv text-on-inv' : 'border-line text-ink-soft hover:text-ink')}>
                 {c === 'all' ? 'Tümü' : CAT[c] ?? c}
               </button>
             ))}

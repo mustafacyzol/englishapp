@@ -176,7 +176,7 @@ function SiteHeader({ onMenu }: { onMenu: () => void }) {
                     {COMPANY.map((c) => (
                       <Link key={c.to} to={c.to} onClick={() => setMega(false)} className="rounded-lg py-1.5 text-[15px] font-bold text-ink/80 transition hover:text-flame">{c.label}</Link>
                     ))}
-                    <Link to="/placement" onClick={() => setMega(false)} className="group mt-auto flex items-center gap-3 rounded-2xl bg-ink p-3 text-paper">
+                    <Link to="/placement" onClick={() => setMega(false)} className="group mt-auto flex items-center gap-3 rounded-2xl bg-inv p-3 text-on-inv">
                       <img src={higoImg('point')} alt="" className="size-12 shrink-0 object-contain transition group-hover:-rotate-6" />
                       <span className="min-w-0">
                         <span className="block font-display text-[15px] font-black leading-tight">Seviyeni bul</span>
@@ -339,7 +339,7 @@ export function StoreBadges({ className, label }: { className?: string; label?: 
   const row = (
     <div className={clsx('flex flex-wrap gap-2', !label && className)}>
       {items.map((x) => (
-        <a key={x.top} href={x.href!} target="_blank" rel="noreferrer" className="press flex h-12 items-center gap-2.5 rounded-xl bg-ink px-3.5 text-paper shadow-[0_3px_0_rgba(0,0,0,.25)] transition hover:-translate-y-0.5">
+        <a key={x.top} href={x.href!} target="_blank" rel="noreferrer" className="press flex h-12 items-center gap-2.5 rounded-xl bg-inv px-3.5 text-on-inv shadow-[0_3px_0_rgba(0,0,0,.25)] transition hover:-translate-y-0.5">
           {x.icon}
           <span className="leading-none">
             <span className="block text-[10px] font-semibold opacity-80">{x.top}</span>

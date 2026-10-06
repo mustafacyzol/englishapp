@@ -57,6 +57,7 @@ class Settings
         'corporate.cta' => 'Okulunuz için teklif alın',
         'corporate.url' => '/okullar#basvuru',
         // Economy
+        'economy.signup_gems' => 'dilgo.economy.signup_gems',
         'gamification.daily_chest' => true,
         'auth.remember_days' => 'dilgo.security.token_ttl_days',
         // Anti-spam: what one learner may create, and words never allowed in shared content
@@ -66,6 +67,7 @@ class Settings
         'limits.words_per_day' => 300,
         'limits.notebook_size' => 5000,
         'moderation.blocked_words' => null,
+        'moderation.report_hide' => 3,
     ];
 
     /** The subset safe to expose on the public /config endpoint. */

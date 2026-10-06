@@ -99,7 +99,7 @@ function PanelMock() {
           <span className="tabular-nums">{done}/27</span>
         </div>
       </motion.div>
-      <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.5, type: 'spring', stiffness: 220, damping: 20 }} className="absolute -right-2 -top-6 flex items-center gap-2 rounded-2xl bg-ink px-3 py-2.5 text-paper shadow-xl sm:-right-8">
+      <motion.div initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 1.5, type: 'spring', stiffness: 220, damping: 20 }} className="absolute -right-2 -top-12 flex sm:-top-6 items-center gap-2 rounded-2xl bg-inv px-3 py-2.5 text-on-inv shadow-xl sm:-right-8">
         <span className="grid size-8 place-items-center rounded-xl bg-mint"><Bell className="size-4 text-white" /></span>
         <span className="text-xs font-bold leading-tight">Yeni ödev:<br /><span className="opacity-75">Unit 3 kelimeleri</span></span>
       </motion.div>
@@ -171,8 +171,8 @@ function Roles() {
       </Rise>
       <div className="mt-8 inline-flex rounded-2xl border-2 border-line bg-card p-1" role="tablist">
         {ROLES.map((x, i) => (
-          <button key={x.key} role="tab" aria-selected={k === i} onClick={() => setK(i)} className={clsx('relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-extrabold transition sm:px-5 sm:text-[15px]', k === i ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
-            {k === i && <motion.span layoutId="role-tab" className="absolute inset-0 rounded-xl bg-ink" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+          <button key={x.key} role="tab" aria-selected={k === i} onClick={() => setK(i)} className={clsx('relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-extrabold transition sm:px-5 sm:text-[15px]', k === i ? 'text-on-inv' : 'text-ink-soft hover:text-ink')}>
+            {k === i && <motion.span layoutId="role-tab" className="absolute inset-0 rounded-xl bg-inv" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
             <x.icon className="relative size-4" /><span className="relative">{x.label}</span>
           </button>
         ))}
@@ -270,7 +270,7 @@ const SIZES: [number, string][] = [[100, '1-100'], [300, '100-300'], [600, '300-
 
 function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; children: ReactNode }) {
   return (
-    <button type="button" onClick={onClick} aria-pressed={on} className={clsx('rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', on ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink-soft hover:border-ink/30 hover:text-ink')}>
+    <button type="button" onClick={onClick} aria-pressed={on} className={clsx('rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', on ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card text-ink-soft hover:border-ink/30 hover:text-ink')}>
       {children}
     </button>
   )
@@ -312,7 +312,7 @@ function ApplyForm() {
       </div>
       <div>
         <p className="mb-2 text-sm font-bold">Öğrenci sayısı</p>
-        <div className="grid grid-cols-4 gap-1.5">{SIZES.map(([n, l]) => <button type="button" key={n} onClick={() => set('students', String(n))} aria-pressed={Number(f.students) === n} className={clsx('rounded-xl border-2 px-1 py-2 text-xs font-extrabold transition sm:text-sm', Number(f.students) === n ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink-soft hover:text-ink')}>{l}</button>)}</div>
+        <div className="grid grid-cols-4 gap-1.5">{SIZES.map(([n, l]) => <button type="button" key={n} onClick={() => set('students', String(n))} aria-pressed={Number(f.students) === n} className={clsx('rounded-xl border-2 px-1 py-2 text-xs font-extrabold transition sm:text-sm', Number(f.students) === n ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card text-ink-soft hover:text-ink')}>{l}</button>)}</div>
         {e('students') && <p className="mt-1 text-sm font-semibold text-berry">Lütfen bir aralık seçin.</p>}
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -452,19 +452,19 @@ export default function Schools() {
       </section>
 
       {/* grade ladder */}
-      <section className="relative overflow-hidden bg-ink py-20 text-paper">
+      <section className="relative overflow-hidden bg-inv py-20 text-on-inv">
         <div className="mx-auto max-w-6xl px-5">
           <Rise className="max-w-2xl">
             <Kicker tone="text-butter">Her sınıfa uygun</Kicker>
             <h2 className="mt-2 font-display text-[clamp(2rem,4vw,3rem)] font-black leading-tight">İlkokuldan liseye, bir merdiven</h2>
-            <p className="mt-3 text-lg text-paper/70">Her öğrenci seviye testiyle kendi basamağından başlar. Sınıf düzeyleri için önerilen hedefler:</p>
+            <p className="mt-3 text-lg text-on-inv/70">Her öğrenci seviye testiyle kendi basamağından başlar. Sınıf düzeyleri için önerilen hedefler:</p>
           </Rise>
           <div className="mt-10 grid gap-3 md:grid-cols-5 md:items-end">
             {LADDER.map((l, i) => (
               <motion.div key={l.g} initial={{ opacity: 0, y: 40 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.4 }} transition={{ delay: i * 0.1, duration: 0.6, ease }} className="rounded-3xl bg-paper/[0.06] p-5 ring-1 ring-paper/10" style={{ minHeight: `${150 + i * 26}px` }}>
                 <span className="inline-block rounded-full px-2.5 py-1 font-display text-sm font-black text-white" style={{ background: l.c }}>{l.l}</span>
                 <p className="mt-3 font-display text-xl font-black">{l.g}</p>
-                <p className="mt-1 text-sm text-paper/70">{l.t}</p>
+                <p className="mt-1 text-sm text-on-inv/70">{l.t}</p>
               </motion.div>
             ))}
           </div>

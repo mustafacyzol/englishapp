@@ -120,7 +120,7 @@ export default function Placement() {
             <div className="grid gap-2.5" role="radiogroup">
               {q.options.map((o, oi) => (
                 <button key={oi} role="radio" aria-checked={pick === oi} onClick={() => setPick(oi)} className={clsx('flex items-center gap-3 rounded-2xl border-2 px-4 py-3 text-left text-base font-bold transition sm:gap-4 sm:py-3.5 sm:text-[17px]', pick === oi ? 'border-ink bg-card shadow-[0_3px_0_0_var(--ink)]' : 'border-line bg-card hover:border-ink/30')}>
-                  <span className={clsx('grid size-8 shrink-0 place-items-center rounded-lg font-mono text-sm font-black', pick === oi ? 'bg-ink text-paper' : 'bg-paper-2')}>{'ABCD'[oi]}</span>
+                  <span className={clsx('grid size-8 shrink-0 place-items-center rounded-lg font-mono text-sm font-black', pick === oi ? 'bg-inv text-on-inv' : 'bg-paper-2')}>{'ABCD'[oi]}</span>
                   {o}
                 </button>
               ))}

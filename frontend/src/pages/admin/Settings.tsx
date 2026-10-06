@@ -41,6 +41,7 @@ const NUM: [string, string][] = [
   ['referral.referrer_premium_days', 'Davet edene Premium gün (ilk alışverişte)'],
   ['ai.daily_limit_free', 'Ücretsiz AI mesaj limiti / gün'],
   ['ai.daily_limit_premium', 'Premium AI mesaj limiti / gün'],
+  ['economy.signup_gems', 'Yeni hesabın başlangıç elması'],
   ['gamification.heart_refill_gems', 'Can doldurma fiyatı (elmas)'],
 ]
 const SOCIAL: [string, string][] = [
@@ -107,7 +108,7 @@ export default function AdminSettings() {
 
       <div className="no-scrollbar -mx-1 mb-6 flex gap-1.5 overflow-x-auto px-1" role="tablist">
         {TABS.map((t) => (
-          <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)} className={clsx('flex shrink-0 items-center gap-2 rounded-xl border-2 px-3.5 py-2 text-sm font-extrabold transition', tab === t.key ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink-soft hover:text-ink')}>
+          <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => setTab(t.key)} className={clsx('flex shrink-0 items-center gap-2 rounded-xl border-2 px-3.5 py-2 text-sm font-extrabold transition', tab === t.key ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card text-ink-soft hover:text-ink')}>
             <t.icon className="size-4" /> {t.label}
           </button>
         ))}
@@ -194,7 +195,7 @@ export default function AdminSettings() {
         {tab === 'economy' && (
           <Card title="Spam ve kötüye kullanım sınırları" text="Bir öğrencinin oluşturabileceği içerik. Sınır dolunca öğrenci ne kadar beklemesi gerektiğini açıkça görür.">
             <div className="grid gap-4 sm:grid-cols-2">
-              {([['limits.word_sets_per_day', 'Günde yeni set (kopya dahil)', 20], ['limits.word_sets_total', 'Bir öğrencinin en çok seti', 60], ['limits.public_sets', 'Herkese açık set sayısı', 10], ['limits.words_per_day', 'Günde deftere yeni kelime', 300], ['limits.notebook_size', 'Kelime defteri kapasitesi', 5000]] as const).map(([k, l, d]) => (
+              {([['limits.word_sets_per_day', 'Günde yeni set (kopya dahil)', 20], ['limits.word_sets_total', 'Bir öğrencinin en çok seti', 60], ['limits.public_sets', 'Herkese açık set sayısı', 10], ['limits.words_per_day', 'Günde deftere yeni kelime', 300], ['limits.notebook_size', 'Kelime defteri kapasitesi', 5000], ['moderation.report_hide', 'Kaç şikâyette set otomatik gizlensin', 3]] as const).map(([k, l, d]) => (
                 <Input key={k} type="number" min={1} label={l} value={Number(s[k] ?? d)} onChange={(e) => set(k, Number(e.target.value))} />
               ))}
             </div>

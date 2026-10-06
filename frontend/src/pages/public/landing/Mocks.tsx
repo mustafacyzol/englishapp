@@ -82,7 +82,7 @@ export function PathMock() {
             <n.icon className="size-5" strokeWidth={3} />
           </motion.span>
         ))}
-        <span className="absolute left-1/2 top-[102px] ml-[-8px] -translate-y-full rounded-lg bg-ink px-2 py-1 text-[9px] font-black uppercase text-paper">Buradasın</span>
+        <span className="absolute left-1/2 top-[102px] ml-[-8px] -translate-y-full rounded-lg bg-inv px-2 py-1 text-[9px] font-black uppercase text-on-inv">Buradasın</span>
       </div>
     </div>
   )

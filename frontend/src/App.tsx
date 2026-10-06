@@ -8,6 +8,7 @@ import AppLayout from './layouts/AppLayout'
 import AdminLayout from './layouts/AdminLayout'
 import PublicLayout from './layouts/PublicLayout'
 import { setMuted } from './lib/fx'
+import { setSpeechDefaults } from './lib/speech'
 import { DEMO } from './lib/api'
 
 const DemoBar = lazy(() => import('./demo/DemoBar').then((m) => ({ default: m.DemoBar })))
@@ -69,6 +70,7 @@ const AdminUsers = lazy(() => import('./pages/admin/Users'))
 const AdminUser = lazy(() => import('./pages/admin/UserDetail'))
 const AdminResource = lazy(() => import('./pages/admin/Resource'))
 const AdminGradeUnits = lazy(() => import('./pages/admin/GradeUnits'))
+const AdminModeration = lazy(() => import('./pages/admin/Moderation'))
 const AdminOrders = lazy(() => import('./pages/admin/Orders'))
 const AdminVouchers = lazy(() => import('./pages/admin/Vouchers'))
 const AdminCodes = lazy(() => import('./pages/admin/CodeGenerator'))
@@ -115,6 +117,7 @@ function usePreloadPages(staff: boolean) {
 export default function App() {
   const { user } = useAuth()
   useEffect(() => setMuted(user?.preferences?.sound === false), [user?.preferences?.sound])
+  useEffect(() => setSpeechDefaults({ rate: user?.preferences?.tts_rate, voice: user?.preferences?.tts_voice }), [user?.preferences?.tts_rate, user?.preferences?.tts_voice])
   usePreloadPages(!!user?.is_staff || user?.institution_role === 'manager')
 
   return (
@@ -203,6 +206,7 @@ export default function App() {
           <Route path="blog" element={<AdminBlogList />} />
           <Route path="blog/:id" element={<AdminBlogEdit />} />
           <Route path="grade-units" element={<AdminGradeUnits />} />
+          <Route path="moderation" element={<AdminModeration />} />
           <Route path="r/:resource" element={<AdminResource />} />
           <Route path="institutions/:id" element={<InstitutionDetail />} />
         </Route>

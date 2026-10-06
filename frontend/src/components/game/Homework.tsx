@@ -36,7 +36,7 @@ export function HomeworkCard() {
       <ul>
         {list.slice(0, 4).map((h) => (
           <li key={h.id} className="flex items-center gap-3 border-b-2 border-line/40 px-4 py-2.5 last:border-b-0">
-            <button disabled={h.done || h.kind === 'lesson' || h.kind === 'story'} onClick={() => done.mutate(h.id)} aria-label={h.done ? 'Tamamlandı' : 'Yaptım olarak işaretle'} className={clsx('grid size-7 shrink-0 place-items-center rounded-lg border-2 transition', h.done ? 'border-mint bg-mint text-white' : 'border-line enabled:hover:border-mint')}>
+            <button disabled={h.done || ['unit', 'lesson', 'story', 'words'].includes(h.kind)} onClick={() => done.mutate(h.id)} aria-label={h.done ? 'Tamamlandı' : 'Yaptım olarak işaretle'} className={clsx('grid size-7 shrink-0 place-items-center rounded-lg border-2 transition', h.done ? 'border-mint bg-mint text-white' : 'border-line enabled:hover:border-mint')}>
               {h.done && <Check className="size-4" strokeWidth={3} />}
             </button>
             <Link to={h.link} className={clsx('min-w-0 flex-1', h.done && 'opacity-55')}>

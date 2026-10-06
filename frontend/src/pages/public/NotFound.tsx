@@ -45,7 +45,7 @@ export default function NotFound() {
             animate={still ? undefined : { rotate: [0, -4, 4, 0], y: [0, -4, 0] }}
             transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
           />
-          <motion.span initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.8 }} className="absolute -right-4 -top-2 rounded-2xl rounded-bl-md bg-ink px-3 py-1.5 text-xs font-black text-paper shadow-lg sm:text-sm">Hmm, burası neresi?</motion.span>
+          <motion.span initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.8 }} className="absolute -right-4 -top-2 rounded-2xl rounded-bl-md bg-inv px-3 py-1.5 text-xs font-black text-on-inv shadow-lg sm:text-sm">Hmm, burası neresi?</motion.span>
         </motion.div>
         <motion.span initial={{ opacity: 0, x: 30, rotate: 8 }} animate={{ opacity: 1, x: 0, rotate: 6 }} transition={{ type: 'spring', stiffness: 160, damping: 14 }} className="font-display text-[clamp(6rem,24vw,12rem)] font-black leading-none tracking-tighter text-flame">4</motion.span>
       </div>

@@ -11,7 +11,7 @@ class GhostDuelResult extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return \App\Support\NotifyPrefs::via($notifiable, 'duel');
     }
 
     public function toArray(object $notifiable): array

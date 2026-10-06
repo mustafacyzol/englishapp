@@ -120,7 +120,7 @@ export function MobilePass({ name, mot, exam, focus, level, slot, minutes, weeks
     <div className="rounded-3xl border-2 border-line p-4 lg:hidden">
       <div className="flex items-center justify-between">
         <p className="text-[11px] font-black uppercase tracking-[0.16em] text-flame">Kişisel planın</p>
-        <span className="rounded-full bg-ink px-2.5 py-1 font-mono text-xs font-bold text-paper">{level} → {exam ?? NEXT[level]}</span>
+        <span className="rounded-full bg-inv px-2.5 py-1 font-mono text-xs font-bold text-on-inv">{level} → {exam ?? NEXT[level]}</span>
       </div>
       {name && <p className="mt-1 truncate font-display text-xl font-black">{name}</p>}
       <div className="mt-2 flex flex-wrap gap-1.5 text-xs font-extrabold">

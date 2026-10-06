@@ -1,6 +1,8 @@
 export type Cefr = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2'
 export type Skill = 'reading' | 'listening' | 'speaking' | 'writing' | 'vocabulary' | 'grammar' | 'mixed'
 
+export type NotifyGroup = 'homework' | 'achievements' | 'league' | 'duel' | 'gifts'
+
 export interface Me {
   id: number
   name: string
@@ -20,7 +22,7 @@ export interface Me {
   learning_goal: string | null
   daily_goal_xp: number
   onboarded: boolean
-  preferences: { email_reminders?: boolean; email_weekly?: boolean; sound?: boolean; tts_rate?: number; tts_voice?: string; theme?: 'light' | 'dark' | 'system'; frame?: string; tour_done?: boolean; language?: 'tr' | 'en'; exam_mode?: boolean }
+  preferences: { email_reminders?: boolean; email_weekly?: boolean; sound?: boolean; tts_rate?: number; tts_voice?: string; theme?: 'light' | 'dark' | 'system'; frame?: string; tour_done?: boolean; language?: 'tr' | 'en'; exam_mode?: boolean; notify?: Partial<Record<NotifyGroup, boolean>> }
   focus_skill: SkillKey | null
   interests: string[]
   study_time: 'morning' | 'lunch' | 'evening' | 'night' | null

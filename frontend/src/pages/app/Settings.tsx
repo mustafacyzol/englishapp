@@ -10,7 +10,7 @@ import { ApiError, del, get, patch, post } from '@/lib/api'
 import { useAuth } from '@/lib/auth'
 import { dateTR, GOALS, tl } from '@/lib/format'
 import { speak } from '@/lib/speech'
-import type { Me } from '@/lib/types'
+import type { Me, NotifyGroup } from '@/lib/types'
 import { SubscriptionCard } from '@/components/game/Subscription'
 import { EXAMS, INTERESTS, PACES, STAGES, STUDY_TIMES, examOn } from '@/lib/onboarding'
 import { SKILL, SKILLS } from '@/lib/skills'
@@ -35,7 +35,7 @@ function Label({ children, note }: { children: ReactNode; note?: string }) {
   return <p className="mb-2 text-sm font-bold">{children} {note && <span className="font-normal text-ink-soft">{note}</span>}</p>
 }
 
-const pill = (on: boolean) => clsx('rounded-xl border-2 py-2 text-sm font-bold transition', on ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')
+const pill = (on: boolean) => clsx('rounded-xl border-2 py-2 text-sm font-bold transition', on ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card hover:border-ink/25')
 
 type Tab = 'hesap' | 'ogrenme' | 'sinav' | 'gorunum' | 'bildirim' | 'guvenlik' | 'abonelik'
 
@@ -83,12 +83,12 @@ export default function Settings() {
           {tabs.map((t) => {
             const on = t.key === tab
             return (
-              <button key={t.key} onClick={() => go(t.key)} aria-current={on ? 'page' : undefined} className={clsx('relative flex min-w-0 flex-col items-center gap-1 rounded-2xl border-2 px-1.5 py-2 text-center transition lg:flex-row lg:gap-3 lg:border-0 lg:px-3.5 lg:py-3 lg:text-left', on ? 'border-ink text-paper' : 'border-line bg-card text-ink hover:bg-ink/[0.05] lg:bg-transparent')}>
-                {on && <motion.span layoutId="set-tab" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className="absolute inset-0 rounded-2xl bg-ink" />}
+              <button key={t.key} onClick={() => go(t.key)} aria-current={on ? 'page' : undefined} className={clsx('relative flex min-w-0 flex-col items-center gap-1 rounded-2xl border-2 px-1.5 py-2 text-center transition lg:flex-row lg:gap-3 lg:border-0 lg:px-3.5 lg:py-3 lg:text-left', on ? 'border-ink text-on-inv' : 'border-line bg-card text-ink hover:bg-ink/[0.05] lg:bg-transparent')}>
+                {on && <motion.span layoutId="set-tab" transition={{ type: 'spring', stiffness: 420, damping: 36 }} className="absolute inset-0 rounded-2xl bg-inv" />}
                 <t.icon className="relative size-[18px] shrink-0" />
                 <span className="relative min-w-0 max-w-full">
                   <span className="block truncate text-xs font-extrabold sm:text-sm">{t.label}</span>
-                  <span className={clsx('hidden text-xs lg:block', on ? 'text-paper/70' : 'text-ink-soft')}>{t.text}</span>
+                  <span className={clsx('hidden text-xs lg:block', on ? 'text-on-inv/70' : 'text-ink-soft')}>{t.text}</span>
                 </span>
               </button>
             )
@@ -136,7 +136,7 @@ function AccountTab({ save }: { save: Save }) {
             <button key={a.key} onClick={() => a.key !== user.age_group && save.mutate({ age_group: a.key })} disabled={user.age_group === 'kid' ? a.key !== 'kid' : a.key === 'kid'} aria-pressed={user.age_group === a.key} className={clsx(pill(user.age_group === a.key), 'flex flex-col items-center gap-0.5 py-3 disabled:opacity-40')}>
               <img src={img(`avatars/${a.art}.webp`)} alt="" className="mb-1 size-12 rounded-2xl object-cover" />
               <span>{a.label}</span>
-              <span className={clsx('text-[11px] font-semibold', user.age_group === a.key ? 'text-paper/70' : 'text-ink-soft')}>{a.text}</span>
+              <span className={clsx('text-[11px] font-semibold', user.age_group === a.key ? 'text-on-inv/70' : 'text-ink-soft')}>{a.text}</span>
             </button>
           ))}
         </div>
@@ -164,7 +164,7 @@ function LearningTab({ save }: { save: Save }) {
           {PACES.map((p) => (
             <button key={p.xp} onClick={() => save.mutate({ daily_goal_xp: p.xp })} className={clsx(pill(user.daily_goal_xp === p.xp), 'flex flex-col items-center py-2.5')}>
               <span>{p.label}</span>
-              <span className={clsx('text-[11px] font-semibold', user.daily_goal_xp === p.xp ? 'text-paper/70' : 'text-ink-soft')}>{p.xp} XP · ~{p.minutes} dk</span>
+              <span className={clsx('text-[11px] font-semibold', user.daily_goal_xp === p.xp ? 'text-on-inv/70' : 'text-ink-soft')}>{p.xp} XP · ~{p.minutes} dk</span>
             </button>
           ))}
         </div>
@@ -172,7 +172,7 @@ function LearningTab({ save }: { save: Save }) {
       <Section title="Seviye ve hedef">
         <Label>Seviye</Label>
         <div className="mb-5 flex flex-wrap items-center gap-3 rounded-2xl border-2 border-line bg-card p-3">
-          <span className="grid size-12 place-items-center rounded-xl bg-ink font-mono text-lg font-black text-paper">{user.cefr_level}</span>
+          <span className="grid size-12 place-items-center rounded-xl bg-inv font-mono text-lg font-black text-on-inv">{user.cefr_level}</span>
           <span className="min-w-0 flex-1 text-sm font-semibold text-ink-soft">Seviyen seviye testinden gelir. Seviyendeki dersleri bitirince bir üst seviyeye kendiliğinden geçersin.</span>
           <Link to="/placement" className="rounded-xl bg-paper-2 px-3 py-2 text-sm font-extrabold hover:bg-ink/[0.06]">Seviye testine gir</Link>
         </div>
@@ -190,7 +190,7 @@ function LearningTab({ save }: { save: Save }) {
             const on = user.interests?.includes(o.key)
             const next = on ? user.interests.filter((x) => x !== o.key) : [...(user.interests ?? []), o.key]
             return (
-              <button key={o.key} onClick={() => next.length && save.mutate({ interests: next })} aria-pressed={on} className={clsx('flex items-center gap-2 rounded-full border-2 py-1 pl-1 pr-3 text-sm font-bold transition', on ? 'border-ink bg-ink text-paper' : 'border-line hover:border-ink/30')}>
+              <button key={o.key} onClick={() => next.length && save.mutate({ interests: next })} aria-pressed={on} className={clsx('flex items-center gap-2 rounded-full border-2 py-1 pl-1 pr-3 text-sm font-bold transition', on ? 'border-inv bg-inv text-on-inv' : 'border-line hover:border-ink/30')}>
                 <img src={o.photo} alt="" className="size-7 rounded-full object-cover" /> {o.label}
               </button>
             )
@@ -286,6 +286,14 @@ function LookTab({ save }: { save: Save }) {
   )
 }
 
+const NOTIFY: [NotifyGroup, string, string][] = [
+  ['homework', 'Ödevler', 'Öğretmenin yeni ödev verdiğinde.'],
+  ['achievements', 'Rozetler', 'Yeni bir rozet kazandığında.'],
+  ['league', 'Lig sonuçları', 'Hafta bitince yükseldin mi, kaldın mı.'],
+  ['duel', 'Arena', 'Gölge düellosu sonuçları.'],
+  ['gifts', 'Hediyeler', 'Sandıktan iş ortağı hediyesi çıktığında.'],
+]
+
 function NotifyTab({ save }: { save: Save }) {
   const { user } = useAuth()
   if (!user) return null
@@ -297,6 +305,13 @@ function NotifyTab({ save }: { save: Save }) {
         <Toggle label="Haftalık karne e-postası" description="Pazartesi sabahı geçen haftanın özeti: XP, çalıştığın günler, yeni kelimeler." checked={prefs.email_weekly !== false} onChange={(v) => save.mutate({ preferences: { email_weekly: v } })} />
         {user.age_group !== 'kid' && <Toggle label="Kampanya e-postaları" description="Yeni paketler ve indirimler. Ayda en fazla iki kez." checked={user.marketing_opt_in} onChange={(v) => save.mutate({ marketing_opt_in: v })} />}
       </div>
+      <p className="mb-1 mt-6 text-xs font-black uppercase tracking-widest text-ink-soft">Uygulama içi bildirimler</p>
+      <div className="divide-y-2 divide-line/10">
+        {NOTIFY.map(([k, l, d]) => (
+          <Toggle key={k} label={l} description={d} checked={prefs.notify?.[k] !== false} onChange={(v) => save.mutate({ preferences: { notify: { [k]: v } } })} />
+        ))}
+      </div>
+      <p className="mt-4 text-sm text-ink-soft">Seri hatırlatmasının saati, <b>Öğrenme</b> sekmesindeki çalışma zamanına göre gelir.</p>
     </Section>
   )
 }

@@ -12,7 +12,7 @@ class AssignmentGiven extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return \App\Support\NotifyPrefs::via($notifiable, 'homework');
     }
 
     public function toArray(object $notifiable): array

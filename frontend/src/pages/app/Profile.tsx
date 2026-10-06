@@ -18,6 +18,7 @@ import { Img } from '@/components/ui/Img'
 import { UserAvatar } from '@/components/game/UserAvatar'
 import { AvatarPicker } from '@/components/game/AvatarPicker'
 import { BRAND } from '@/lib/brand'
+import { SchoolCard } from '@/components/game/SchoolCard'
 
 /** Kept for other screens: the profile picture at the large profile size. */
 export function Avatar({ name, avatar, frame, size = 'size-24' }: { name: string; avatar?: string | null; frame?: string | null; size?: string }) {
@@ -63,7 +64,7 @@ export default function Profile() {
           <div className="-mt-12 flex items-end gap-4">
             <button onClick={() => setPicker('avatar')} className="group relative shrink-0 rounded-full focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky/30" aria-label="Avatarını değiştir">
               <Avatar name={user.name} avatar={user.avatar} frame={user.frame} />
-              <span className="absolute -bottom-1 -right-1 grid size-9 place-items-center rounded-full border-4 border-card bg-ink text-paper transition group-hover:scale-110"><Pencil className="size-3.5" /></span>
+              <span className="absolute -bottom-1 -right-1 grid size-9 place-items-center rounded-full border-4 border-card bg-inv text-on-inv transition group-hover:scale-110"><Pencil className="size-3.5" /></span>
             </button>
           </div>
 
@@ -77,7 +78,7 @@ export default function Profile() {
             </div>
             {/* one primary action, two quiet ones, all below the cover */}
             <div className="flex shrink-0 gap-2">
-              <button onClick={() => setPicker('avatar')} className="press flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-ink px-4 text-sm font-extrabold text-paper shadow-hard-sm sm:flex-none"><Pencil className="size-4" /> Profili düzenle</button>
+              <button onClick={() => setPicker('avatar')} className="press flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-inv px-4 text-sm font-extrabold text-on-inv shadow-hard-sm sm:flex-none"><Pencil className="size-4" /> Profili düzenle</button>
               <button onClick={share} className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card" aria-label="Profilini paylaş" title="Paylaş"><Share2 className="size-5" /></button>
               <Link to="/settings" className="press grid size-11 place-items-center rounded-xl border-2 border-line bg-card" aria-label="Ayarlar" title="Ayarlar"><Settings className="size-5" /></Link>
             </div>
@@ -107,6 +108,7 @@ export default function Profile() {
         <StatTile icon={<Target className="size-6 text-mint-deep" />} value={user.stats.streak_longest} label="En uzun seri" />
       </div>
 
+      <SchoolCard className="mb-6" />
       <SkillMeter className="mb-6" />
 
       <Link to="/settings?s=abonelik" className="ink-card press mb-6 flex items-center gap-4 p-4">

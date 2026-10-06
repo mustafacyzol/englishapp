@@ -78,7 +78,7 @@ export default function Notifications() {
       {!!all.length && (
         <div className="mb-5 flex flex-wrap items-center gap-2">
           {KINDS.map((k) => (
-            <button key={k.value} onClick={() => setKind(k.value)} aria-pressed={kind === k.value} className={clsx('rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', kind === k.value ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink-soft hover:text-ink')}>
+            <button key={k.value} onClick={() => setKind(k.value)} aria-pressed={kind === k.value} className={clsx('rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', kind === k.value ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card text-ink-soft hover:text-ink')}>
               {k.label}
             </button>
           ))}
@@ -102,7 +102,7 @@ export default function Notifications() {
               <AnimatePresence initial={false}>
                 {items.map((n) => {
                   const Icon = iconFor(n.data.icon ?? 'bell')
-                  const tone = TONE[n.data.kind ?? ''] ?? 'bg-ink text-paper'
+                  const tone = TONE[n.data.kind ?? ''] ?? 'bg-inv text-on-inv'
                   return (
                     <motion.li key={n.id} layout exit={{ opacity: 0, x: 60, height: 0, marginTop: 0 }} transition={{ duration: 0.2 }}
                       className={clsx('group relative flex items-center gap-3 rounded-2xl border-2 bg-card px-3 py-3 sm:px-4', n.read ? 'border-line' : 'border-ink/80 shadow-[0_3px_0_var(--color-ink)]')}>

@@ -186,7 +186,7 @@ export default function Duel() {
         return (
           <section className="rounded-3xl border-2 border-line bg-card p-4">
             <div className="flex items-center gap-3">
-              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-ink text-paper"><Shield className="size-6" /></span>
+              <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-inv text-on-inv"><Shield className="size-6" /></span>
               <div className="min-w-0 flex-1">
                 <p className="font-black leading-tight">Sen yokken gölgen oynadı</p>
                 <p className="text-xs text-ink-soft">Gölgen, senin kayıtlı turların. Başkaları ona meydan okuyabilir.</p>
@@ -820,7 +820,7 @@ function LeagueCard() {
           <span>{timeLeft(data.ends_at)} kaldı</span>
         </span>
       </span>
-      <span className="hidden shrink-0 rounded-xl bg-ink px-3.5 py-2 text-sm font-extrabold text-paper sm:block">Ligi gör</span>
+      <span className="hidden shrink-0 rounded-xl bg-inv px-3.5 py-2 text-sm font-extrabold text-on-inv sm:block">Ligi gör</span>
     </Link>
   )
 }

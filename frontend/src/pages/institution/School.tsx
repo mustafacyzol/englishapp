@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { BookOpen, CalendarClock, Layers, Check, ClipboardList, GraduationCap, MessageCircle, Pencil, Plus, Target, Trash2, UserPlus, Users } from 'lucide-react'
+import { BookOpen, CalendarClock, Layers, Check, ClipboardList, GraduationCap, Library, MessageCircle, Pencil, PenLine, Plus, Route, Target, Trash2, UserPlus, Users } from 'lucide-react'
 import { ApiError, del, get, patch, post } from '@/lib/api'
 import { dateTR } from '@/lib/format'
 import { Button } from '@/components/ui/Button'
@@ -15,11 +15,13 @@ import { useInstitution } from '@/layouts/InstitutionLayout'
 interface Assignment { id: number; title: string; kind: string; target: string | null; note: string | null; class_name: string | null; due_at: string | null; created_at: string; students: number; done: number; done_ids: number[]; author: string | null }
 
 const KINDS = [
-  { key: 'lesson', label: 'Ders', icon: BookOpen, text: 'Yol haritasından bir ders. Bitirince kendiliğinden işaretlenir.' },
-  { key: 'story', label: 'Hikâye', icon: BookOpen, text: 'Bir hikâye ve soruları. Okuyunca kendiliğinden işaretlenir.' },
-  { key: 'words', label: 'Kelime seti', icon: Layers, text: 'Hazır ya da kendi setin. Öğrenci setle bir oyun bitirince işaretlenir.' },
-  { key: 'practice', label: 'Tekrar', icon: Target, text: 'Kelime defterinden serbest tekrar.' },
-  { key: 'exam', label: 'Sınav', icon: GraduationCap, text: 'Sınav modunda soru çözümü (LGS, YDT...).' },
+  { key: 'unit', label: 'Ünite', icon: BookOpen, text: 'Ders kitabındaki bir ünitenin kelime ve kalıp dersi (1-12. sınıf, YDS, IELTS...). Öğrencinin kendi seviyesindeki kopyası açılır.' },
+  { key: 'lesson', label: 'Yol dersi', icon: Route, text: 'Öğren sekmesindeki yoldan bir ders, okuma ya da ünite sınavı. Bitirince kendiliğinden işaretlenir.' },
+  { key: 'story', label: 'Hikâye', icon: Library, text: 'Pratik > Hikâyeler bölümünden bir hikâye ve soruları. Okuyunca kendiliğinden işaretlenir.' },
+  { key: 'words', label: 'Kelime seti', icon: Layers, text: 'Pratik > Setler bölümünden hazır ya da kendi setin. Setle bir oyun bitirince işaretlenir.' },
+  { key: 'practice', label: 'Tekrar', icon: Target, text: 'Pratik > Defterim: kelime defterinden serbest tekrar.' },
+  { key: 'exam', label: 'Sınav', icon: GraduationCap, text: 'Pratik > Sınav bölümünde soru çözümü; bölüm seçebilirsin.' },
+  { key: 'writing', label: 'Yazı', icon: PenLine, text: 'Yazı atölyesinde bir metin yazıp geri bildirim alma.' },
   { key: 'ai', label: 'Konuşma', icon: MessageCircle, text: 'Defne ile konuşma pratiği.' },
   { key: 'custom', label: 'Serbest', icon: ClipboardList, text: 'Kendi yazdığın bir görev.' },
 ] as const
@@ -233,17 +235,32 @@ function HomeworkDetail({ a, data }: { a: Assignment; data: InstitutionReport })
   )
 }
 
+interface Catalog {
+  units: { track: string; label: string; units: { id: number; n: number; title: string; title_tr: string | null; level: string }[] }[]
+  lessons: { id: number; title: string; kind?: string; unit?: string | null; level?: string }[]
+  stories: { slug: string; title: string; cefr_level: string }[]
+  word_sets?: { id: number; title: string; level: string | null; exam: string | null; words_count: number }[]
+  exam_sections?: { key: string; label: string }[]
+}
+
 function NewHomework({ open, onClose, data, onDone }: { open: boolean; onClose: () => void; data: InstitutionReport; onDone: (r: { data: Assignment[] }) => void }) {
   const toast = useToast()
   const classes = (data.school_classes ?? []).map((c) => c.name).concat(data.classes.filter((c) => !(data.school_classes ?? []).some((s) => s.name === c)))
-  const [f, setF] = useState({ class_name: classes[0] ?? '', kind: 'lesson', target: '', title: '', note: '', due_at: '' })
-  const catalog = useQuery({ queryKey: ['inst-catalog'], queryFn: () => get<{ lessons: { id: number; title: string; level?: string }[]; stories: { slug: string; title: string; cefr_level: string }[]; word_sets?: { id: number; title: string; level: string | null; exam: string | null; words_count: number }[] }>('/institution/catalog'), enabled: open })
+  const [f, setF] = useState({ class_name: classes[0] ?? '', kind: 'unit', target: '', title: '', note: '', due_at: '' })
+  const catalog = useQuery({ queryKey: ['inst-catalog'], queryFn: () => get<Catalog>('/institution/catalog'), enabled: open })
+  // the coursebook of the chosen class's grade comes first
+  const grade = (data.school_classes ?? []).find((c) => c.name === f.class_name)?.grade
+  const [track, setTrack] = useState('')
+  const tracks = catalog.data?.units ?? []
+  const activeTrack = track || (grade ? `g${grade}` : '') || tracks[0]?.track || ''
+  const units = tracks.find((t) => t.track === activeTrack)?.units ?? []
+  const lessonsByLevel = (catalog.data?.lessons ?? []).reduce<Record<string, Catalog['lessons']>>((a, l) => ((a[l.level ?? '-'] ??= []).push(l), a), {})
   const create = useMutation({
     mutationFn: () => post<{ data: Assignment[] }>('/institution/assignments', { ...f, class_name: f.class_name || null, target: f.target || null, title: f.title || null, note: f.note || null, due_at: f.due_at ? new Date(f.due_at).toISOString() : null }),
     onSuccess: onDone,
     onError: (e: ApiError) => toast(e.first(), 'error'),
   })
-  const needsTarget = f.kind === 'lesson' || f.kind === 'story' || f.kind === 'words'
+  const needsTarget = f.kind === 'unit' || f.kind === 'lesson' || f.kind === 'story' || f.kind === 'words'
   return (
     <Modal open={open} onClose={onClose} className="sm:max-w-xl">
       <h2 className="mb-4 text-2xl">Yeni ödev</h2>
@@ -257,7 +274,7 @@ function NewHomework({ open, onClose, data, onDone }: { open: boolean; onClose: 
         </label>
         <div>
           <span className="mb-1.5 block text-sm font-bold">Ödev türü</span>
-          <div className="grid grid-cols-4 gap-2">
+          <div className="grid grid-cols-3 gap-2 sm:grid-cols-5">
             {KINDS.map((k) => (
               <button type="button" key={k.key} onClick={() => setF({ ...f, kind: k.key, target: '' })} aria-pressed={f.kind === k.key} className={clsx('flex flex-col items-center gap-1 rounded-2xl border-2 p-2 text-center text-[11px] font-extrabold leading-tight transition sm:text-xs', f.kind === k.key ? 'border-ink bg-paper-2' : 'border-line hover:border-ink/30')}>
                 <k.icon className="size-5" />{k.label}
@@ -267,12 +284,41 @@ function NewHomework({ open, onClose, data, onDone }: { open: boolean; onClose: 
           <p className="mt-1.5 text-xs text-ink-soft">{KINDS.find((k) => k.key === f.kind)?.text}</p>
         </div>
         <AnimatePresence initial={false}>
-          {needsTarget && (
+          {f.kind === 'unit' && (
+            <motion.div key="unit" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="grid gap-2 overflow-hidden sm:grid-cols-[150px_1fr]">
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-bold">Sınıf / sınav</span>
+                <select value={activeTrack} onChange={(e) => { setTrack(e.target.value); setF({ ...f, target: '' }) }} className="h-12 w-full rounded-2xl border-2 border-line bg-card px-3 font-semibold">
+                  {tracks.map((t) => <option key={t.track} value={t.track}>{t.label}</option>)}
+                </select>
+              </label>
+              <label className="block">
+                <span className="mb-1.5 block text-sm font-bold">Ünite</span>
+                <select required value={f.target} onChange={(e) => setF({ ...f, target: e.target.value })} className="h-12 w-full rounded-2xl border-2 border-line bg-card px-3 font-semibold">
+                  <option value="">Seç…</option>
+                  {units.map((u) => <option key={u.id} value={u.id}>{u.n}. {u.title}{u.title_tr ? ` (${u.title_tr})` : ''}</option>)}
+                </select>
+              </label>
+            </motion.div>
+          )}
+          {needsTarget && f.kind !== 'unit' && (
             <motion.label key={f.kind} initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="block overflow-hidden">
               <span className="mb-1.5 block text-sm font-bold">{f.kind === 'lesson' ? 'Ders' : f.kind === 'words' ? 'Kelime seti' : 'Hikâye'}</span>
               <select required value={f.target} onChange={(e) => setF({ ...f, target: e.target.value })} className="h-12 w-full rounded-2xl border-2 border-line bg-card px-3 font-semibold">
                 <option value="">Seç…</option>
-                {f.kind === 'lesson' ? catalog.data?.lessons.map((l) => <option key={l.id} value={l.id}>{l.level ? `${l.level} · ` : ''}{l.title}</option>) : f.kind === 'words' ? catalog.data?.word_sets?.map((w) => <option key={w.id} value={w.id}>{[w.exam?.toUpperCase(), w.level].filter(Boolean).join(' · ') || 'Set'} · {w.title} ({w.words_count})</option>) : catalog.data?.stories.map((s) => <option key={s.slug} value={s.slug}>{s.cefr_level} · {s.title}</option>)}
+                {f.kind === 'lesson'
+                  ? Object.entries(lessonsByLevel).map(([lv, ls]) => <optgroup key={lv} label={`${lv} seviyesi`}>{ls.map((l) => <option key={l.id} value={l.id}>{l.unit ? `${l.unit} · ` : ''}{l.title}</option>)}</optgroup>)
+                  : f.kind === 'words'
+                    ? catalog.data?.word_sets?.map((w) => <option key={w.id} value={w.id}>{[w.exam?.toUpperCase(), w.level].filter(Boolean).join(' · ') || 'Set'} · {w.title} ({w.words_count})</option>)
+                    : catalog.data?.stories.map((s) => <option key={s.slug} value={s.slug}>{s.cefr_level} · {s.title}</option>)}
+              </select>
+            </motion.label>
+          )}
+          {f.kind === 'exam' && (
+            <motion.label key="exam" initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="block overflow-hidden">
+              <span className="mb-1.5 block text-sm font-bold">Bölüm</span>
+              <select value={f.target || 'mix'} onChange={(e) => setF({ ...f, target: e.target.value })} className="h-12 w-full rounded-2xl border-2 border-line bg-card px-3 font-semibold">
+                {(catalog.data?.exam_sections ?? [{ key: 'mix', label: 'Karışık' }]).map((x) => <option key={x.key} value={x.key}>{x.label}</option>)}
               </select>
             </motion.label>
           )}

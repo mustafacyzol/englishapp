@@ -4,7 +4,7 @@ import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import clsx from 'clsx'
 import { AnimatePresence, motion } from 'motion/react'
-import { ArrowLeft, ChevronDown, Building2, Menu, X, BookOpen, Boxes, ClipboardList, Crown, FileQuestion, Gift, Handshake, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Package, Plug, Quote, Receipt, School, ScrollText, Send, Settings, ShieldCheck, SmilePlus, Swords, Ticket, Trophy, UserCog, Users, Wallet } from 'lucide-react'
+import { ArrowLeft, ChevronDown, Building2, Flag, Menu, X, BookOpen, Boxes, ClipboardList, Crown, FileQuestion, Gift, Handshake, Gauge, GraduationCap, KeyRound, LayoutList, Layers, Mail, MessagesSquare, Newspaper, Package, Plug, Quote, Receipt, School, ScrollText, Send, Settings, ShieldCheck, SmilePlus, Swords, Ticket, Trophy, UserCog, Users, Wallet } from 'lucide-react'
 import { can, roleLabel } from '@/lib/adminAccess'
 import type { Me } from '@/lib/types'
 import { useAuth } from '@/lib/auth'
@@ -37,6 +37,7 @@ const GROUPS: { title: string; icon: typeof Gauge; items: Item[] }[] = [
     { to: '/admin/grade-units', label: 'Sınıf üniteleri (MEB)', icon: School, perm: 'content' },
     { to: '/admin/r/lessons', label: 'Dersler', icon: ClipboardList, perm: 'content' },
     { to: '/admin/r/stories', label: 'Hikâyeler', icon: BookOpen, perm: 'content' },
+    { to: '/admin/moderation', label: 'Topluluk moderasyonu', icon: Flag, perm: 'content' },
     { to: '/admin/r/exam-questions', label: 'Sınav soruları', icon: FileQuestion, perm: 'content' },
     { to: '/admin/r/placement-results', label: 'Seviye testi sonuçları', icon: Gauge, perm: 'content' },
     { to: '/admin/r/scenarios', label: 'AI senaryoları', icon: MessagesSquare, perm: 'content' },
@@ -111,7 +112,7 @@ function StepUp({ onDone }: { onDone: () => void }) {
   return (
     <div className="grid min-h-dvh place-items-center p-6">
       <div className="ink-card w-full max-w-md p-8 text-center">
-        <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl border-2 border-line bg-ink text-butter shadow-hard">
+        <div className="mx-auto mb-4 grid size-16 place-items-center rounded-2xl border-2 border-line bg-inv text-butter shadow-hard">
           <ShieldCheck className="size-8" />
         </div>
         <h1 className="text-2xl font-extrabold">Yönetici doğrulaması</h1>
@@ -300,7 +301,7 @@ function MobileTabs({ user }: { user: Me }) {
       <AnimatePresence mode="wait" initial={false}>
         <motion.div key={active?.title} initial={{ opacity: 0, x: 16 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -16 }} transition={{ duration: 0.18 }} className="no-scrollbar flex snap-x gap-1.5 overflow-x-auto border-t border-line/10 px-3 py-2">
           {active?.items.map((i) => (
-            <NavLink key={i.to} to={i.to} end={i.end} className={({ isActive }) => clsx('flex shrink-0 snap-start items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-[13px] font-bold transition', isActive ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink-soft')}>
+            <NavLink key={i.to} to={i.to} end={i.end} className={({ isActive }) => clsx('flex shrink-0 snap-start items-center gap-1.5 rounded-full border-2 px-3 py-1.5 text-[13px] font-bold transition', isActive ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card text-ink-soft')}>
               <i.icon className="size-3.5" />{i.label}
             </NavLink>
           ))}

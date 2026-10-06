@@ -21,7 +21,7 @@ export function ThemeToggle({ className }: { className?: string }) {
           aria-label={o.label}
           title={o.label}
           onClick={() => setTheme(o.v)}
-          className={clsx('grid size-8 place-items-center rounded-full transition', theme === o.v ? 'bg-ink text-paper' : 'text-ink-soft hover:text-ink')}
+          className={clsx('grid size-8 place-items-center rounded-full transition', theme === o.v ? 'bg-inv text-on-inv' : 'text-ink-soft hover:text-ink')}
         >
           <o.icon className="size-4" />
         </button>

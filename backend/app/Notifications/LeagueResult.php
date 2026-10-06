@@ -10,7 +10,7 @@ class LeagueResult extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return \App\Support\NotifyPrefs::via($notifiable, 'league');
     }
 
     public function toArray(object $notifiable): array

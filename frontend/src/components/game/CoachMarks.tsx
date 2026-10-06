@@ -223,7 +223,7 @@ export function CoachMarks() {
             </div>
             <div className="flex items-center gap-2">
               <button onClick={finish} className="rounded-xl px-3 py-2 text-sm font-bold text-ink-soft hover:text-ink">Geç</button>
-              <button onClick={next} className="press flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-sm font-extrabold text-paper">
+              <button onClick={next} className="press flex items-center gap-1.5 rounded-xl bg-inv px-4 py-2 text-sm font-extrabold text-on-inv">
                 {i === marks.length - 1 ? 'Başlayalım' : 'İleri'} <ArrowRight className="size-4" />
               </button>
             </div>

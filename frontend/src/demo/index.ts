@@ -385,6 +385,13 @@ function getRoute(path: string, admin: boolean): Json {
     const deck = [...(s?.items ?? [])].sort(() => Math.random() - 0.5).slice(0, 24).map((i: Json) => ({ id: null, word: i.word, translation: i.translation, example: i.example, interval_days: 0 }))
     return { data: deck, saved: 0, set: s ? { id: s.id, title: s.title } : null }
   }
+  if (path.startsWith('/words/deck') && /[?&]level=[A-C][12]/.test(path)) {
+    const lv = path.match(/[?&]level=([A-C][12])/)![1]
+    const pool = Object.values(sets() as Record<string, Json>).filter((s: Json) => s.level === lv).flatMap((s: Json) => s.items ?? [])
+    const seen = new Set<string>()
+    const deck = pool.filter((i: Json) => !seen.has(i.word) && seen.add(i.word)).sort(() => Math.random() - 0.5).slice(0, 24).map((i: Json) => ({ id: null, word: i.word, translation: i.translation, example: i.example, interval_days: 0 }))
+    return { data: deck.length >= 4 ? deck : db['/words/deck?n=16'].data, saved: 0, level: lv }
+  }
   if (db[path] !== undefined) return db[path]
   const [base, qs = ''] = path.split('?')
   const params = new URLSearchParams(qs)
@@ -493,6 +500,8 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     return { user: me() }
   }
   if (path === '/word-sets' && method === 'POST') return wsWrite(null, body)
+  if (/^\/word-sets\/\d+\/report$/.test(path)) return { ok: true, message: 'Teşekkürler, ekibimiz inceleyecek.' }
+  if (/^\/admin\/moderation\/word-sets\/\d+$/.test(path)) return { ok: true }
   if ((m = path.match(/^\/word-sets\/(\d+)(?:\/(save|copy|learn|played))?$/))) {
     const s = sets()[+m[1]]
     if (!s) throw new DemoError(404, 'Set bulunamadı.')
@@ -855,7 +864,7 @@ async function postRoute(method: string, path: string, body: Json): Promise<Json
     if (body.banner && !own.banners.includes(body.banner)) throw new DemoError(403, 'Önce mağazadan edinmelisin.')
     // keep the league table in step with the new look
     for (const r of db['/league']?.rows ?? []) if (r.is_me) Object.assign(r, 'frame' in body ? { frame: body.frame } : {}, body.avatar ? { avatar: body.avatar } : {})
-    Object.assign(me(), body, body.preferences ? { preferences: { ...me().preferences, ...body.preferences } } : {})
+    Object.assign(me(), body, body.preferences ? { preferences: { ...me().preferences, ...body.preferences, ...(body.preferences.notify ? { notify: { ...me().preferences?.notify, ...body.preferences.notify } } : {}) } } : {})
     if (db['/exam'] && 'exam_target' in body) db['/exam'].target = body.exam_target
     if (db['/exam'] && 'exam_date' in body) {
       db['/exam'].exam_date = body.exam_date

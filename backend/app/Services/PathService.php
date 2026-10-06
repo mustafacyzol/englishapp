@@ -124,7 +124,24 @@ class PathService
             return true;
         }
 
-        return in_array($this->states($user, $course)[$lesson->id] ?? 'locked', ['completed', 'current', 'open'], true);
+        return in_array($this->states($user, $course)[$lesson->id] ?? 'locked', ['completed', 'current', 'open'], true)
+            || $this->assigned($user, $lesson);
+    }
+
+    /** Homework opens the lesson even ahead of the path (or from another grade's unit). */
+    private function assigned(User $user, Lesson $lesson): bool
+    {
+        $m = \App\Models\InstitutionMember::query()->where('user_id', $user->id)->where('role', 'student')->where('status', 'active')->first();
+        if (! $m) {
+            return false;
+        }
+        $gradeUnit = $lesson->meta['grade_unit'] ?? null;
+
+        return \App\Models\Assignment::query()->where('institution_id', $m->institution_id)
+            ->where(fn ($q) => $q->whereNull('class_name')->orWhere('class_name', $m->class_name))
+            ->where(fn ($q) => $q->where(fn ($w) => $w->where('kind', 'lesson')->where('target', (string) $lesson->id))
+                ->when($gradeUnit, fn ($w) => $w->orWhere(fn ($x) => $x->where('kind', 'unit')->where('target', (string) $gradeUnit))))
+            ->exists();
     }
 
     /** Finished every lesson of your level? Move up one level (once). */

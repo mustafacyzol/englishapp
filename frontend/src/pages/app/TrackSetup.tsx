@@ -70,8 +70,8 @@ export default function TrackSetup() {
           {step === 'Okul' && (
             <div className="grid gap-2">
               {STAGES.map((s) => (
-                <button key={s.key} onClick={() => pickStage(s.key)} aria-pressed={stage === s.key} className={clsx('flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition', stage === s.key ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>
-                  <span className="min-w-0 flex-1"><span className="block font-display text-lg font-black">{s.label}</span><span className={clsx('block text-xs font-bold', stage === s.key ? 'text-paper/70' : 'text-ink-soft')}>{s.range} · {s.points[0]}</span></span>
+                <button key={s.key} onClick={() => pickStage(s.key)} aria-pressed={stage === s.key} className={clsx('flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition', stage === s.key ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card hover:border-ink/25')}>
+                  <span className="min-w-0 flex-1"><span className="block font-display text-lg font-black">{s.label}</span><span className={clsx('block text-xs font-bold', stage === s.key ? 'text-on-inv/70' : 'text-ink-soft')}>{s.range} · {s.points[0]}</span></span>
                   {stage === s.key && <Check className="size-5" strokeWidth={3} />}
                 </button>
               ))}
@@ -80,7 +80,7 @@ export default function TrackSetup() {
           {step === 'Sınıf' && (
             <div className="grid grid-cols-2 gap-2">
               {st.grades.map((g) => (
-                <button key={g} onClick={() => setGrade(g)} aria-pressed={grade === g} className={clsx('rounded-2xl border-2 py-5 font-display text-2xl font-black transition', grade === g ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>{g}. sınıf</button>
+                <button key={g} onClick={() => setGrade(g)} aria-pressed={grade === g} className={clsx('rounded-2xl border-2 py-5 font-display text-2xl font-black transition', grade === g ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card hover:border-ink/25')}>{g}. sınıf</button>
               ))}
               {stage === 'ortaokul' && <p className="col-span-2 mt-2 flex gap-2 rounded-2xl bg-sky/10 p-3 text-sm font-semibold text-ink"><Info className="mt-0.5 size-4 shrink-0 text-sky" /> Yolunda kendi sınıfının MEB İngilizce ünite başlıklarını ve kelimelerini görürsün.</p>}
             </div>
@@ -88,12 +88,12 @@ export default function TrackSetup() {
           {step === 'Sınav' && (
             <div className="grid gap-2">
               {exams.map((e) => (
-                <button key={e.key} onClick={() => setExam(e.key)} aria-pressed={exam === e.key} className={clsx('flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition', exam === e.key ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>
+                <button key={e.key} onClick={() => setExam(e.key)} aria-pressed={exam === e.key} className={clsx('flex items-center gap-3 rounded-2xl border-2 p-3 text-left transition', exam === e.key ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card hover:border-ink/25')}>
                   <span className="grid h-10 min-w-14 place-items-center rounded-xl px-2 text-sm font-black text-white" style={{ background: e.color }}>{e.name}</span>
-                  <span className="min-w-0 flex-1 text-sm font-bold leading-tight">{e.label}<span className={clsx('block text-xs font-semibold', exam === e.key ? 'text-paper/70' : 'text-ink-soft')}>{e.text}</span></span>
+                  <span className="min-w-0 flex-1 text-sm font-bold leading-tight">{e.label}<span className={clsx('block text-xs font-semibold', exam === e.key ? 'text-on-inv/70' : 'text-ink-soft')}>{e.text}</span></span>
                 </button>
               ))}
-              <button onClick={() => setExam(null)} aria-pressed={!exam} className={clsx('rounded-2xl border-2 p-3 text-left text-sm font-bold transition', !exam ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/25')}>Şimdilik sınav yok, genel İngilizce</button>
+              <button onClick={() => setExam(null)} aria-pressed={!exam} className={clsx('rounded-2xl border-2 p-3 text-left text-sm font-bold transition', !exam ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card hover:border-ink/25')}>Şimdilik sınav yok, genel İngilizce</button>
               {exam && (
                 <label className="mt-2 block text-sm font-bold">Sınav tarihi (isteğe bağlı)
                   <input type="date" value={date} min={new Date(Date.now() + 864e5).toISOString().slice(0, 10)} onChange={(e) => setDate(e.target.value)} className="mt-1.5 block h-12 w-full rounded-2xl border-2 border-line bg-card px-3 font-semibold" />

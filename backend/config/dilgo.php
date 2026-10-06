@@ -64,6 +64,8 @@ return [
     | See docs/ECONOMY.md for the reasoning behind each number.
     */
     'economy' => [
+        // gems a new learner starts with: enough for one streak freeze or a first profile cover
+        'signup_gems' => (int) env('SIGNUP_GEMS', 300),
         'xp' => [
             'lesson_min' => 10,          // per lesson, from the lesson's own xp_reward (10-20)
             'perfect_bonus' => 5,

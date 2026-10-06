@@ -38,7 +38,7 @@ export class PageBoundary extends Component<{ children: ReactNode; resetKey?: st
         <Higo pose="think" className="size-28" />
         <p className="mt-4 font-display text-2xl font-black">Bu sayfa takıldı</p>
         <p className="mt-1 text-sm text-ink-soft">Bir şeyler ters gitti. Tekrar denemek genelde yeter.</p>
-        <button onClick={() => location.reload()} className="press mt-5 rounded-xl bg-ink px-5 py-2.5 font-extrabold text-paper">Tekrar dene</button>
+        <button onClick={() => location.reload()} className="press mt-5 rounded-xl bg-inv px-5 py-2.5 font-extrabold text-on-inv">Tekrar dene</button>
       </div>
     )
   }

@@ -79,6 +79,8 @@ class WordSetController extends Controller
         $data = $this->validated($request);
         // content first, so a refused share does not use up the day's quota
         $this->guardPublic($request->user(), $data);
+        $hash = WordSet::hashOf(array_column($data['items'], 'word'));
+        abort_if(WordSet::query()->where('user_id', $request->user()->id)->where('content_hash', $hash)->exists(), 422, 'Bu kelimelerle bir setin zaten var. Onu düzenleyebilirsin.');
         $this->guardNew($request->user());
         $set = WordSet::query()->create($this->fields($data) + ['user_id' => $request->user()->id, 'category' => 'mine']);
         $this->syncItems($set, $data['items']);
@@ -173,6 +175,36 @@ class WordSetController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    /**
+     * Report a shared set. One report per learner per set; enough reports from
+     * different learners hide it until a moderator restores or removes it.
+     */
+    public function report(Request $request, WordSet $set): JsonResponse
+    {
+        $user = $request->user();
+        abort_unless($set->isVisibleTo($user) && $set->user_id !== null && $set->user_id !== $user->id, 404);
+        $data = $request->validate([
+            'reason' => ['required', Rule::in(array_keys(\App\Models\WordSetReport::REASONS))],
+            'note' => ['nullable', 'string', 'max:300'],
+        ]);
+        Quota::take($user, 'word-sets.report', 20, 'day', 'Bugün yeterince şikâyet gönderdin, teşekkürler. Ekibimiz inceliyor.');
+        $new = \App\Models\WordSetReport::query()->firstOrCreate(['word_set_id' => $set->id, 'user_id' => $user->id], [
+            'reason' => $data['reason'], 'note' => isset($data['note']) ? strip_tags($data['note']) : null, 'created_at' => now(),
+        ])->wasRecentlyCreated;
+        if ($new) {
+            $set->increment('reports_count');
+            // reports only count from accounts that could not have been made a minute ago
+            $trusted = \App\Models\WordSetReport::query()->where('word_set_id', $set->id)
+                ->whereHas('user', fn ($q) => $q->whereNotNull('email_verified_at')->where('created_at', '<', now()->subDay()))->count();
+            if ($set->hidden_at === null && $trusted >= max(1, (int) Settings::get('moderation.report_hide', 3))) {
+                $set->forceFill(['hidden_at' => now()])->save();
+                \App\Support\Audit::log('word_set.auto_hidden', null, $set, ['reports' => $trusted]);
+            }
+        }
+
+        return response()->json(['ok' => true, 'message' => 'Teşekkürler, ekibimiz inceleyecek.']);
+    }
+
     private function validated(Request $request): array
     {
         return $request->validate([
@@ -212,6 +244,17 @@ class WordSetController extends Controller
         $cap = (int) Settings::get('limits.public_sets', 10);
         $public = WordSet::query()->where('user_id', $user->id)->where('is_public', true)->when($set, fn ($q) => $q->whereKeyNot($set->id))->count();
         abort_if($public >= $cap, 422, "En fazla {$cap} setini herkese açık paylaşabilirsin.");
+        abort_if(! empty($user->preferences['share_blocked']), 403, 'Set paylaşımın bir moderatör tarafından kapatıldı. Setlerini gizli olarak kullanmaya devam edebilirsin.');
+        // a shared set has to be a real word list: enough distinct words, real translations, no keyboard mashing
+        $words = collect($data['items'])->map(fn ($i) => mb_strtolower(trim((string) ($i['word'] ?? ''))))->filter()->unique();
+        abort_if($words->count() < 5, 422, 'Paylaşılan bir sette en az 5 farklı kelime olmalı.');
+        $same = collect($data['items'])->filter(fn ($i) => mb_strtolower(trim((string) $i['word'])) === mb_strtolower(trim((string) $i['translation'])))->count();
+        abort_if($same > count($data['items']) * 0.4, 422, 'Kelimelerin çoğunun çevirisi kendisiyle aynı. Türkçe karşılıklarını yazıp paylaşabilirsin.');
+        $junk = $words->filter(fn ($w) => ! preg_match('/\p{L}/u', $w) || preg_match('/(.)\1{3,}/u', $w))->count();
+        abort_if($junk > max(1, $words->count() * 0.2), 422, 'Sette kelime olmayan girdiler var. Düzeltip paylaşabilirsin.');
+        // someone else's list re-posted as new: save theirs instead
+        $hash = WordSet::hashOf($words->all());
+        abort_if(WordSet::query()->where('content_hash', $hash)->where('is_public', true)->where('user_id', '!=', $user->id)->exists(), 422, 'Aynı kelimelerle paylaşılmış bir set zaten var. Onu kaydedebilir ya da kopyalayıp kendine göre değiştirebilirsin.');
         $text = implode("\n", [$data['title'], $data['description'] ?? '', ...array_map(fn ($i) => ($i['word'] ?? '').' '.($i['translation'] ?? '').' '.($i['example'] ?? ''), $data['items'])]);
         if ($why = ContentGuard::problem($text)) {
             abort(422, $why.' Setini gizli tutabilir ya da düzeltip paylaşabilirsin.');
@@ -241,7 +284,7 @@ class WordSetController extends Controller
         foreach (array_chunk($rows, 200) as $chunk) {
             DB::table('word_set_items')->insert($chunk);
         }
-        $set->forceFill(['words_count' => count($rows)])->save();
+        $set->forceFill(['words_count' => count($rows), 'content_hash' => WordSet::hashOf(array_column($rows, 'word'))])->save();
     }
 
     private function card(WordSet $s, int $me, array $saved): array
@@ -249,6 +292,8 @@ class WordSetController extends Controller
         return ['id' => $s->id, 'title' => $s->title, 'description' => $s->description, 'level' => $s->level, 'category' => $s->category, 'exam' => $s->exam,
             'cover' => $s->cover, 'is_public' => $s->is_public, 'words_count' => $s->words_count, 'saves_count' => $s->saves_count,
             'official' => $s->user_id === null, 'mine' => $s->user_id === $me, 'saved' => in_array($s->id, $saved, true),
-            'owner' => $s->owner ? ['name' => $s->owner->name, 'username' => $s->owner->username] : null, 'updated_at' => $s->updated_at?->toIso8601String()];
+            'owner' => $s->owner ? ['name' => $s->owner->name, 'username' => $s->owner->username] : null, 'updated_at' => $s->updated_at?->toIso8601String(),
+            // the owner sees that a shared set was taken down; nobody else sees counts
+            'hidden' => $s->user_id === $me && $s->hidden_at !== null];
     }
 }

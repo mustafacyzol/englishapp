@@ -66,7 +66,7 @@ export function SwipeDeck({ deck, onFinish }: { deck: DeckWord[]; onFinish: Fini
         <span className="flex items-center gap-1.5 rounded-full bg-mint/12 px-3 py-1.5 text-mint-deep"><span className="tabular-nums opacity-70">{known}</span> Biliyorum <ArrowRight className="size-4" strokeWidth={3} /></span>
       </div>
 
-      <div className="relative h-[min(380px,calc(100dvh-340px))] min-h-[260px] sm:h-[400px]">
+      <div className="relative h-[min(380px,calc(100dvh-340px))] min-h-[260px] touch-none overscroll-contain sm:h-[400px]">
         {deck.slice(i, i + 3).reverse().map((w, k, arr) => {
           const depth = arr.length - 1 - k
           return depth === 0 ? (
@@ -90,6 +90,7 @@ export function SwipeDeck({ deck, onFinish }: { deck: DeckWord[]; onFinish: Fini
 
 function TopCard({ w, flipped, onFlip, onDecide, exit, hint }: { w: DeckWord; flipped: boolean; onFlip: () => void; onDecide: (known: boolean) => void; exit: 1 | -1; hint?: boolean }) {
   const x = useMotionValue(0)
+  const y = useMotionValue(0)
   // First card: a small nudge right then left shows it can be swiped.
   useEffect(() => {
     if (!hint) return
@@ -105,19 +106,30 @@ function TopCard({ w, flipped, onFlip, onDecide, exit, hint }: { w: DeckWord; fl
   const tint = useTransform(x, [-160, 0, 160], ['rgba(239,78,123,.16)', 'rgba(0,0,0,0)', 'rgba(34,181,115,.16)'])
   const dragged = useRef(false)
 
+  // a light tick when the card crosses the decision line, like a native deck
+  const armed = useRef(0)
+  useEffect(() => x.on('change', (v) => {
+    const side = v > 110 ? 1 : v < -110 ? -1 : 0
+    if (side !== armed.current) {
+      armed.current = side
+      if (side) navigator.vibrate?.(8)
+    }
+  }), [x])
   const end = (_: unknown, info: PanInfo) => {
-    const swipe = Math.abs(info.offset.x) > 110 || Math.abs(info.velocity.x) > 650
+    const swipe = Math.abs(info.offset.x) > 110 || Math.abs(info.velocity.x) > 500
     if (swipe) onDecide(info.offset.x > 0)
     setTimeout(() => (dragged.current = false), 0)
   }
 
   return (
     <motion.div
-      className="absolute inset-0 cursor-grab touch-pan-y active:cursor-grabbing"
-      style={{ x, rotate }}
-      drag="x"
+      className="absolute inset-0 cursor-grab touch-none active:cursor-grabbing"
+      style={{ x, y, rotate }}
+      drag
       dragSnapToOrigin
-      dragElastic={0.9}
+      dragElastic={{ left: 0.9, right: 0.9, top: 0.25, bottom: 0.25 }}
+      dragTransition={{ bounceStiffness: 420, bounceDamping: 28 }}
+      whileDrag={{ scale: 1.03 }}
       onDragStart={() => (dragged.current = true)}
       onDragEnd={end}
       initial={{ scale: 0.95, y: 14, opacity: 0.6 }}
@@ -694,23 +706,29 @@ export function Kelimle({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finish
 }
 
 // ---------------------------------------------------------------------------
-// Kelime avı: five words are hidden in a letter grid (across, down or diagonal).
-// Read the Turkish clues, tap a word's first letter, then its last letter.
+// Kelime avı: words hide in a letter grid (across, down, diagonal and, with
+// more words, backwards too). Read the Turkish clues and draw a line over a
+// word with your finger or mouse: press on its first letter, slide to the last.
 // ---------------------------------------------------------------------------
-const SIZE = 9
-const DIRS = [[0, 1], [1, 0], [1, 1]]
-function buildGrid(words: string[]) {
-  for (let attempt = 0; attempt < 60; attempt++) {
-    const g: string[][] = Array.from({ length: SIZE }, () => Array(SIZE).fill(''))
-    const placed: { word: string; cells: [number, number][] }[] = []
+type Cell = [number, number]
+const HUNT_TONES = ['#22b573', '#2f7cf6', '#ef4e7b', '#8f7cf8', '#e5a92a', '#e8403a', '#14a3b8']
+function buildGrid(words: string[], size: number, hard: boolean) {
+  const dirs: Cell[] = hard ? [[0, 1], [1, 0], [1, 1], [-1, 1], [0, -1], [1, -1]] : [[0, 1], [1, 0], [1, 1]]
+  for (let attempt = 0; attempt < 80; attempt++) {
+    const g: string[][] = Array.from({ length: size }, () => Array(size).fill(''))
+    const placed: { word: string; cells: Cell[] }[] = []
     let ok = true
     for (const word of words) {
       let done = false
-      for (let t = 0; t < 120 && !done; t++) {
-        const [dr, dc] = DIRS[Math.floor(Math.random() * DIRS.length)]
-        const r0 = Math.floor(Math.random() * (SIZE - (dr ? word.length - 1 : 0)))
-        const c0 = Math.floor(Math.random() * (SIZE - (dc ? word.length - 1 : 0)))
-        const cells: [number, number][] = [...word].map((_, k) => [r0 + dr * k, c0 + dc * k])
+      for (let t = 0; t < 160 && !done; t++) {
+        const [dr, dc] = dirs[Math.floor(Math.random() * dirs.length)]
+        const span = word.length - 1
+        const rMin = dr < 0 ? span : 0, rMax = dr > 0 ? size - 1 - span : size - 1
+        const cMin = dc < 0 ? span : 0, cMax = dc > 0 ? size - 1 - span : size - 1
+        if (rMax < rMin || cMax < cMin) continue
+        const r0 = rMin + Math.floor(Math.random() * (rMax - rMin + 1))
+        const c0 = cMin + Math.floor(Math.random() * (cMax - cMin + 1))
+        const cells: Cell[] = [...word].map((_, k) => [r0 + dr * k, c0 + dc * k])
         if (cells.every(([r, c], k) => !g[r][c] || g[r][c] === word[k])) {
           cells.forEach(([r, c], k) => (g[r][c] = word[k]))
           placed.push({ word, cells })
@@ -721,78 +739,172 @@ function buildGrid(words: string[]) {
     }
     if (!ok) continue
     const abc = 'abcdefghijklmnoprstuvyz'
-    for (const row of g) for (let c = 0; c < SIZE; c++) if (!row[c]) row[c] = abc[Math.floor(Math.random() * abc.length)]
+    for (const row of g) for (let c = 0; c < size; c++) if (!row[c]) row[c] = abc[Math.floor(Math.random() * abc.length)]
     return { g, placed }
   }
   return null
 }
 
+/** The straight line (row, column or diagonal) from a to the cell nearest b. */
+function lineCells(a: Cell, b: Cell, size: number): Cell[] {
+  const dr = b[0] - a[0], dc = b[1] - a[1]
+  if (!dr && !dc) return [a]
+  // snap the finger to the nearest of the eight directions
+  const ang = Math.round(Math.atan2(dr, dc) / (Math.PI / 4))
+  const sr = Math.round(Math.sin((ang * Math.PI) / 4)), sc = Math.round(Math.cos((ang * Math.PI) / 4))
+  const len = Math.max(Math.abs(dr), Math.abs(dc))
+  const out: Cell[] = []
+  for (let k = 0; k <= len; k++) {
+    const r = a[0] + sr * k, c = a[1] + sc * k
+    if (r < 0 || c < 0 || r >= size || c >= size) break
+    out.push([r, c])
+  }
+  return out
+}
+
 export function WordSearch({ deck, onFinish }: { deck: DeckWord[]; onFinish: Finish }) {
-  const items = useMemo(() => shuffle(deck.filter((d) => /^[a-z]{3,8}$/i.test(d.word))).slice(0, 5), [deck])
-  const board = useMemo(() => buildGrid(items.map((x) => x.word.toLowerCase())), [items])
+  // more words in the deck = a bigger board with backwards and up-going words
+  const pool = useMemo(() => deck.filter((d) => /^[a-z]{3,9}$/i.test(d.word)), [deck])
+  const hard = pool.length >= 10
+  const size = hard ? 10 : 9
+  const items = useMemo(() => shuffle(pool).slice(0, hard ? 7 : 5), [pool, hard])
+  const board = useMemo(() => buildGrid(items.map((x) => x.word.toLowerCase()), size, hard), [items, size, hard])
+  const TOTAL = hard ? 180 : 120
   const [found, setFound] = useState<string[]>([])
-  const [start, setStart] = useState<[number, number] | null>(null)
-  const [flash, setFlash] = useState<[number, number][] | null>(null)
-  const [time, setTime] = useState(120)
+  const [sel, setSel] = useState<Cell[]>([])
+  const [flash, setFlash] = useState<Cell[] | null>(null)
+  const [hint, setHint] = useState<string | null>(null)
+  const [hints, setHints] = useState(0)
+  const [time, setTime] = useState(TOTAL)
+  const anchor = useRef<Cell | null>(null)
+  const gridRef = useRef<HTMLDivElement>(null)
   const finished = useRef(false)
   const finish = useCallback((f: string[]) => {
     if (finished.current) return
     finished.current = true
-    onFinish(items.map((w) => ({ w, known: f.includes(w.word.toLowerCase()) })))
-  }, [items, onFinish])
+    onFinish(items.map((w) => ({ w, known: f.includes(w.word.toLowerCase()) })), f.length * 10 - hints * 5)
+  }, [items, onFinish, hints])
   useEffect(() => {
     if (time <= 0) return finish(found)
     const t = setTimeout(() => setTime((x) => x - 1), 1000)
     return () => clearTimeout(t)
   }, [time, found, finish])
   if (!board || items.length < 3) return <p className="text-center text-ink-soft">Bu oyun için yeterli kelime yok.</p>
-  const foundCells = new Set(board.placed.filter((p) => found.includes(p.word)).flatMap((p) => p.cells.map(([r, c]) => `${r}-${c}`)))
-  const tap = (r: number, c: number) => {
-    if (!start) { setStart([r, c]); return }
-    const [r0, c0] = start
-    setStart(null)
-    const hit = board.placed.find((p) => !found.includes(p.word) && ((p.cells[0][0] === r0 && p.cells[0][1] === c0 && p.cells.at(-1)![0] === r && p.cells.at(-1)![1] === c) || (p.cells[0][0] === r && p.cells[0][1] === c && p.cells.at(-1)![0] === r0 && p.cells.at(-1)![1] === c0)))
+
+  const colorOf = new Map<string, string>()
+  board.placed.forEach((p) => found.includes(p.word) && p.cells.forEach(([r, c]) => colorOf.set(`${r}-${c}`, HUNT_TONES[found.indexOf(p.word) % HUNT_TONES.length])))
+  const selSet = new Set(sel.map(([r, c]) => `${r}-${c}`))
+  const cellAt = (e: React.PointerEvent): Cell | null => {
+    const el = gridRef.current
+    if (!el) return null
+    const rect = el.getBoundingClientRect()
+    const c = Math.floor(((e.clientX - rect.left) / rect.width) * size), r = Math.floor(((e.clientY - rect.top) / rect.height) * size)
+    return r >= 0 && c >= 0 && r < size && c < size ? [r, c] : null
+  }
+  const down = (e: React.PointerEvent) => {
+    const at = cellAt(e)
+    if (!at) return
+    e.currentTarget.setPointerCapture(e.pointerId)
+    anchor.current = at
+    setSel([at])
+    navigator.vibrate?.(5)
+  }
+  const move = (e: React.PointerEvent) => {
+    if (!anchor.current) return
+    const at = cellAt(e)
+    if (!at) return
+    const next = lineCells(anchor.current, at, size)
+    if (next.length !== sel.length) navigator.vibrate?.(3)
+    setSel(next)
+  }
+  const up = () => {
+    if (!anchor.current) return
+    anchor.current = null
+    const picked = sel.map(([r, c]) => board.g[r][c]).join('')
+    const same = (p: { cells: Cell[] }) => p.cells.length === sel.length && p.cells.every(([r, c], k) => r === sel[k][0] && c === sel[k][1])
+    const rev = (p: { cells: Cell[] }) => p.cells.length === sel.length && p.cells.every(([r, c], k) => r === sel[sel.length - 1 - k][0] && c === sel[sel.length - 1 - k][1])
+    const hit = sel.length > 1 && board.placed.find((p) => !found.includes(p.word) && (same(p) || rev(p) || p.word === picked))
     if (hit) {
       const f = [...found, hit.word]
       setFound(f)
+      setHint(null)
       sfx.correct(f.length)
       speak(hit.word)
-      if (f.length === board.placed.length) setTimeout(() => finish(f), 700)
-    } else {
+      navigator.vibrate?.(14)
+      if (f.length === board.placed.length) setTimeout(() => finish(f), 800)
+    } else if (sel.length > 1) {
       sfx.wrong()
-      setFlash([[r0, c0], [r, c]])
-      setTimeout(() => setFlash(null), 400)
+      setFlash(sel)
+      setTimeout(() => setFlash(null), 380)
     }
+    setSel([])
   }
+  const useHint = () => {
+    const left = board.placed.filter((p) => !found.includes(p.word))
+    if (!left.length) return
+    setHint(left[0].word)
+    setHints((h) => h + 1)
+  }
+  const hintCell = hint ? board.placed.find((p) => p.word === hint)?.cells[0] : null
+  const live = sel.map(([r, c]) => board.g[r][c]).join('')
+
   return (
-    <div lang="en" className="mx-auto max-w-lg select-none">
-      <GameBar time={time} total={120} score={found.length * 10} combo={0} />
-      <div className="grid gap-5 sm:grid-cols-[1fr_170px]">
-        <div className="mx-auto grid w-full max-w-[400px] gap-1" style={{ gridTemplateColumns: `repeat(${SIZE}, minmax(0, 1fr))` }}>
-          {board.g.map((row, r) => row.map((ch, c) => {
-            const k = `${r}-${c}`
-            const isStart = start && start[0] === r && start[1] === c
-            const bad = flash?.some(([a, b]) => a === r && b === c)
-            return (
-              <motion.button key={k} whileTap={{ scale: 0.9 }} onClick={() => tap(r, c)} className={clsx('grid aspect-square place-items-center rounded-lg font-display text-base font-black uppercase transition sm:text-lg', foundCells.has(k) ? 'bg-mint text-white' : isStart ? 'bg-flame text-white' : bad ? 'bg-berry/20 text-berry' : 'bg-paper-2 hover:bg-line')}>
-                {ch}
-              </motion.button>
-            )
-          }))}
+    <div lang="en" className="mx-auto max-w-2xl select-none">
+      <GameBar time={time} total={TOTAL} score={found.length * 10} combo={0} />
+      <div className="grid gap-5 sm:grid-cols-[1fr_190px]">
+        <div className="relative mx-auto w-full max-w-[420px]">
+          {/* the word your finger is drawing */}
+          <div className="mb-2 flex h-9 items-center justify-center">
+            <AnimatePresence>{live.length > 1 && <motion.span initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="rounded-full bg-inv px-4 py-1 font-display text-lg font-black uppercase tracking-[0.2em] text-on-inv">{live}</motion.span>}</AnimatePresence>
+          </div>
+          <div
+            ref={gridRef}
+            onPointerDown={down}
+            onPointerMove={move}
+            onPointerUp={up}
+            onPointerCancel={up}
+            className="grid touch-none gap-1 rounded-2xl border-2 border-line bg-card p-1.5 shadow-hard"
+            style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}
+          >
+            {board.g.map((row, r) => row.map((ch, c) => {
+              const k = `${r}-${c}`
+              const tone = colorOf.get(k)
+              const on = selSet.has(k)
+              const bad = flash?.some(([a, b]) => a === r && b === c)
+              const isHint = hintCell && hintCell[0] === r && hintCell[1] === c
+              return (
+                <motion.span
+                  key={k}
+                  animate={on ? { scale: 1.08 } : bad ? { x: [0, -3, 3, 0] } : { scale: 1 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 26 }}
+                  style={tone && !on ? { backgroundColor: tone, color: '#fff' } : undefined}
+                  className={clsx('pointer-events-none grid aspect-square place-items-center rounded-lg font-display text-[15px] font-black uppercase sm:text-lg', on ? 'bg-flame text-white shadow-[0_3px_0_0_var(--color-flame-deep)]' : bad ? 'bg-berry/20 text-berry' : isHint ? 'animate-pulse bg-butter/40 ring-2 ring-butter' : !tone && 'bg-paper-2')}
+                >
+                  {ch}
+                </motion.span>
+              )
+            }))}
+          </div>
         </div>
-        <ul className="grid grid-cols-2 gap-1.5 sm:grid-cols-1 sm:content-start">
-          {items.map((w) => {
-            const ok = found.includes(w.word.toLowerCase())
-            return (
-              <li key={w.word} className={clsx('rounded-xl border-2 px-3 py-2 text-sm font-bold transition', ok ? 'border-mint bg-mint/10' : 'border-line bg-card')}>
-                <span className="block text-ink-soft">{w.translation}</span>
-                <span className={clsx('block font-display font-black', ok ? 'text-mint-deep' : 'text-ink/30')}>{ok ? w.word : '·'.repeat(w.word.length)}</span>
-              </li>
-            )
-          })}
-        </ul>
+        <div>
+          <ul className="grid grid-cols-2 gap-1.5 sm:grid-cols-1 sm:content-start">
+            {items.map((w) => {
+              const ok = found.includes(w.word.toLowerCase())
+              const tone = ok ? HUNT_TONES[found.indexOf(w.word.toLowerCase()) % HUNT_TONES.length] : undefined
+              return (
+                <li key={w.word} className={clsx('rounded-xl border-2 px-3 py-2 text-sm font-bold transition', ok ? 'bg-card' : 'border-line bg-card')} style={tone ? { borderColor: tone } : undefined}>
+                  <span className="block text-ink-soft">{w.translation}</span>
+                  <span className={clsx('block font-display font-black tracking-wider', !ok && 'text-ink/30')} style={tone ? { color: tone } : undefined}>{ok ? w.word : `${w.word.length} harf`}</span>
+                </li>
+              )
+            })}
+          </ul>
+          <button onClick={useHint} disabled={found.length === board.placed.length} className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-line py-2 text-sm font-extrabold text-ink-soft transition hover:border-butter hover:text-ink disabled:opacity-40">
+            <Lightbulb className="size-4 text-butter-deep" /> İpucu <span className="text-xs opacity-70">(-5 puan)</span>
+          </button>
+        </div>
       </div>
-      <p className="mt-4 text-center text-sm text-ink-soft">{start ? 'Şimdi kelimenin son harfine dokun.' : 'Bir kelimenin ilk harfine dokun.'}</p>
+      <p className="mt-4 text-center text-sm font-bold text-ink-soft">İlk harfe bas, parmağını son harfe kadar kaydır.{hard ? ' Bazı kelimeler ters ya da yukarı doğru yazılı.' : ''}</p>
     </div>
   )
 }

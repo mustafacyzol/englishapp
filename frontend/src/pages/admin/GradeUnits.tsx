@@ -60,7 +60,7 @@ export default function GradeUnits() {
       {/* grades */}
       <div className="no-scrollbar -mx-1 mb-5 flex gap-2 overflow-x-auto px-1 pb-1">
         {(data?.tracks ?? []).map((t) => (
-          <button key={t.key} onClick={() => setTrack(t.key)} className={clsx('flex shrink-0 items-center gap-2 rounded-2xl border-2 px-3.5 py-2 text-sm font-extrabold transition', t.key === track ? 'border-ink bg-ink text-paper' : 'border-line bg-card hover:border-ink/30')}>
+          <button key={t.key} onClick={() => setTrack(t.key)} className={clsx('flex shrink-0 items-center gap-2 rounded-2xl border-2 px-3.5 py-2 text-sm font-extrabold transition', t.key === track ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card hover:border-ink/30')}>
             {t.label}
             <span className={clsx('rounded-full px-1.5 text-[11px] tabular-nums', t.key === track ? 'bg-paper/20' : 'bg-paper-2')}>{t.count}</span>
           </button>

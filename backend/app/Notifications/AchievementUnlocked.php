@@ -11,7 +11,7 @@ class AchievementUnlocked extends Notification
 
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return \App\Support\NotifyPrefs::via($notifiable, 'achievements');
     }
 
     public function toArray(object $notifiable): array

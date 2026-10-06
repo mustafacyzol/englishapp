@@ -47,7 +47,7 @@ export function GuideField({ value, onChange }: { value: string; onChange: (v: s
         ))}
         <span className="ml-auto flex rounded-lg bg-card p-0.5">
           {(['write', 'preview'] as const).map((k) => (
-            <button key={k} type="button" onClick={() => { setView(k); setPage(0) }} className={clsx('flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-extrabold transition', view === k ? 'bg-ink text-paper' : 'text-ink-soft')}>
+            <button key={k} type="button" onClick={() => { setView(k); setPage(0) }} className={clsx('flex items-center gap-1 rounded-md px-2.5 py-1 text-xs font-extrabold transition', view === k ? 'bg-inv text-on-inv' : 'text-ink-soft')}>
               {k === 'write' ? <PenLine className="size-3.5" /> : <Eye className="size-3.5" />}{k === 'write' ? 'Yaz' : 'Önizle'}
             </button>
           ))}
@@ -60,7 +60,7 @@ export function GuideField({ value, onChange }: { value: string; onChange: (v: s
           {list.length ? (
             <>
               <div className="mb-3 flex flex-wrap gap-1">
-                {list.map((p, i) => <button key={i} type="button" onClick={() => setPage(i)} className={clsx('rounded-full px-2.5 py-1 text-[11px] font-extrabold', i === page ? 'bg-ink text-paper' : 'bg-black/5')}>{i + 1}. {p.match(/^## (.+)$/m)?.[1]?.slice(0, 22) ?? 'Sayfa'}</button>)}
+                {list.map((p, i) => <button key={i} type="button" onClick={() => setPage(i)} className={clsx('rounded-full px-2.5 py-1 text-[11px] font-extrabold', i === page ? 'bg-inv text-on-inv' : 'bg-black/5')}>{i + 1}. {p.match(/^## (.+)$/m)?.[1]?.slice(0, 22) ?? 'Sayfa'}</button>)}
               </div>
               <div className="max-h-[50vh] overflow-y-auto rounded-xl bg-white/60 p-4 [&_em]:italic"><Markdown source={list[Math.min(page, list.length - 1)].split('\n').filter((l) => !/^>\s*Higo'nun ipucu:/i.test(l)).join('\n')} />
                 {list[Math.min(page, list.length - 1)].split('\n').filter((l) => /^>\s*Higo'nun ipucu:/i.test(l)).map((l, i) => <div key={i} className="mt-3 flex gap-2 rounded-2xl bg-butter/25 p-3 text-sm font-semibold"><Lightbulb className="mt-0.5 size-4 shrink-0" /><span className="min-w-0 [&_p]:m-0"><Markdown source={l.replace(/^>\s*Higo'nun ipucu:\s*/i, '')} /></span></div>)}

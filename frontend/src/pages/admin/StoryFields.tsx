@@ -53,7 +53,7 @@ export function VocabField({ value, onChange, paragraphs }: { value: Vocab[]; on
       <div className="rounded-2xl border-2 border-dashed border-line p-3">
         <p className="mb-1.5 text-sm font-bold">Toplu ekle <span className="font-semibold text-ink-soft">(her satıra bir kelime: <code className="rounded bg-paper-2 px-1">kelime = anlam</code>)</span></p>
         <textarea value={bulk} onChange={(e) => setBulk(e.target.value)} rows={3} placeholder={'umbrella = şemsiye\nsuddenly = aniden\nborrow = ödünç almak'} className="w-full rounded-xl border-2 border-line bg-card px-3 py-2 font-mono text-sm focus:border-sky focus:outline-none" />
-        <button type="button" disabled={!bulk.trim()} onClick={addBulk} className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-ink px-3 py-2 text-sm font-extrabold text-paper disabled:opacity-40"><Plus className="size-4" /> Listeye ekle</button>
+        <button type="button" disabled={!bulk.trim()} onClick={addBulk} className="mt-2 inline-flex items-center gap-1.5 rounded-xl bg-inv px-3 py-2 text-sm font-extrabold text-on-inv disabled:opacity-40"><Plus className="size-4" /> Listeye ekle</button>
       </div>
 
       {suggestions.length > 0 && (

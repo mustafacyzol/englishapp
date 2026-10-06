@@ -287,8 +287,8 @@ function HubTabs({ tabs, path }: { tabs: (typeof HUBS)[number]['tabs']; path: st
         {tabs.map((x) => {
           const on = path === x.to
           return (
-            <Link key={x.to} to={x.to} role="tab" aria-selected={on} className={clsx('relative flex min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-1.5 py-2 text-[13px] font-extrabold transition sm:px-4 sm:text-sm', on ? 'text-paper' : 'text-ink-soft hover:text-ink')}>
-              {on && <motion.span layoutId="hub-tab" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="absolute inset-0 rounded-xl bg-ink" />}
+            <Link key={x.to} to={x.to} role="tab" aria-selected={on} className={clsx('relative flex min-w-0 items-center justify-center gap-2 whitespace-nowrap rounded-xl px-1.5 py-2 text-[13px] font-extrabold transition sm:px-4 sm:text-sm', on ? 'text-on-inv' : 'text-ink-soft hover:text-ink')}>
+              {on && <motion.span layoutId="hub-tab" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="absolute inset-0 rounded-xl bg-inv" />}
               <x.icon className="relative hidden size-[18px] sm:block" />
               <span className="relative">{t(x.label)}</span>
             </Link>

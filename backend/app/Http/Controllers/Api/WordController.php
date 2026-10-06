@@ -109,6 +109,24 @@ class WordController extends Controller
 
             return response()->json(['data' => $deck->shuffle()->take($n)->values(), 'saved' => $saved->count(), 'lesson' => $lesson->only(['id', 'title']), 'set' => $set?->only(['id', 'title'])]);
         }
+        // a level: words from the ready-made sets of that level (and the starter list),
+        // so the games can be played at any level, not only with the notebook
+        $level = strtoupper((string) $request->query('level'));
+        if (in_array($level, ['A1', 'A2', 'B1', 'B2', 'C1'], true)) {
+            $items = \App\Models\WordSetItem::query()
+                ->whereIn('word_set_id', \App\Models\WordSet::query()->whereNull('user_id')->where('level', $level)->select('id'))
+                ->inRandomOrder()->limit($n * 3)->get(['word', 'translation', 'example']);
+            $starter = json_decode(file_get_contents(database_path('data/starter_words.json')), true)[$level] ?? [];
+            $list = $items->map(fn ($i) => ['word' => $i->word, 'translation' => $i->translation, 'example' => $i->example])
+                ->concat(collect($starter)->map(fn ($w) => ['word' => $w[0], 'translation' => $w[1], 'example' => $w[2] ?? null]))
+                ->unique(fn ($w) => mb_strtolower($w['word']))->shuffle()->take($n)->values();
+            $saved = $user->words()->whereIn('word', $list->pluck('word'))->get(['id', 'word', 'translation', 'example', 'interval_days'])->keyBy(fn ($w) => mb_strtolower($w->word));
+            $deck = $list->map(fn ($w) => $saved->has(mb_strtolower($w['word']))
+                ? $saved[mb_strtolower($w['word'])]->only(['id', 'word', 'translation', 'example', 'interval_days'])
+                : ['id' => null] + $w + ['interval_days' => 0]);
+
+            return response()->json(['data' => $deck->values(), 'saved' => $saved->count(), 'level' => $level]);
+        }
         $mine = $user->words()->whereNotNull('translation')
             ->orderByRaw('CASE WHEN due_at <= ? THEN 0 ELSE 1 END', [now()])
             ->orderBy('interval_days')->orderBy('due_at')

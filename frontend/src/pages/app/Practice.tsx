@@ -11,6 +11,7 @@ import type { RewardSummary } from '@/lib/types'
 import { Button } from '@/components/ui/Button'
 import { Empty, PageHeader, SkeletonPage, Spinner, Tabs } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
+import { useAuth } from '@/lib/auth'
 import { useReward } from '@/components/game/RewardProvider'
 import { useEconomy, XpGuide } from '@/components/game/XpGuide'
 import { SetBrowser } from './WordSets'
@@ -29,7 +30,7 @@ const GAMES: { key: GameKey; title: string; text: string; icon: typeof Layers; t
   { group: 'memory', key: 'memory', title: 'Hafıza kartları', text: 'Kartları çevir, İngilizceyi Türkçesiyle eşle.', icon: SquareStack, tone: 'from-berry to-lilac', rules: ['Kartları ikişer ikişer çevir.', 'İngilizce kelimeyi Türkçesiyle eşle, eşleşen çift açık kalır.', '100 puanla başlarsın; her fazla hamle 8 puan düşürür.'] },
   { group: 'spell', key: 'cloze', title: 'Cümlede boşluk', text: 'Kelimeyi kendi örnek cümlesinde yerine koy.', icon: TextCursorInput, tone: 'from-sage to-mint', rules: ['Örnek cümledeki boşluğa gelen kelimeyi seç.', 'Dört seçenekten doğrusunu seç.', 'Yanlış seçimde doğru cümleyi görürsün.'] },
   { group: 'spell', key: 'kelimle', title: 'Kelimle', text: 'Türkçe ipucundan İngilizce kelimeyi 6 denemede bul.', icon: Grid3x3, tone: 'from-mint to-sky', badge: 'Yeni', rules: ['Türkçe ipucuna bakıp İngilizce kelimeyi tahmin et, her kelime için 6 hakkın var.', 'Yeşil: harf doğru yerde. Sarı: harf kelimede var ama başka yerde. Gri: kelimede yok.', 'Üç kelime çözersin; 5 denemede bulduğun kelime "biliyorum" sayılır.'] },
-  { group: 'memory', key: 'search', title: 'Kelime avı', text: 'Harf tablosunda saklı 5 kelimeyi 2 dakikada bul.', icon: Search, tone: 'from-lilac to-berry', badge: 'Yeni', rules: ['Harf tablosunda 5 kelime saklı: yatay, dikey ya da çapraz.', 'Kelimenin ilk harfine, sonra son harfine dokun.', '2 dakikan var. Bulamadıkların tekrar listene girer.'] },
+  { group: 'memory', key: 'search', title: 'Kelime avı', text: 'Harf tablosunda saklı kelimeleri parmağınla çizerek bul.', icon: Search, tone: 'from-lilac to-berry', badge: 'Yeni', rules: ['Harf tablosunda 5 ile 7 kelime saklı: yatay, dikey, çapraz, büyük setlerde ters de olabilir.', 'İlk harfe bas, parmağını kelimenin son harfine kadar kaydır.', 'Süren 2 dakika, büyük setlerde 3 dakika. Bulamadıkların tekrar listene girer.'] },
   { group: 'quick', key: 'balloon', title: 'Balon patlat', text: 'Doğru anlamın balonunu kaçmadan patlat.', icon: PartyPopper, tone: 'from-sky to-lilac', badge: 'Yeni', rules: ['Üstte Türkçe anlam yazar, aşağıdan İngilizce kelimeli balonlar yükselir.', 'Doğru balona dokun ve patlat. Balonlar giderek hızlanır.', 'Yanlış balon ya da kaçan doğru balon bir hak götürür. 3 hakkın var.'] },
   { group: 'quick', key: 'choice', title: 'Hızlı anlam', text: 'On kelime, dört seçenek. Klavyede 1-4.', icon: Zap, tone: 'from-flame to-butter', rules: ['On kelime, her birinde dört seçenek.', 'Doğru anlamı seç; klavyede 1-4 tuşları da çalışır.', 'Art arda doğrular seri yapar; yanlışlar tekrar listene girer.'] },
 ]
@@ -255,7 +256,10 @@ function GameRun({ game, lesson, set, onExit, onSwitch }: { game: GameKey; lesso
   const [round, setRound] = useState(0)
   const [started, setStarted] = useState(false)
   const [result, setResult] = useState<{ outcomes: Outcome[]; score?: number; saved: number } | null>(null)
-  const { data, isLoading } = useQuery({ queryKey: ['deck', game, round, set], queryFn: () => get<{ data: DeckWord[]; set?: { id: number; title: string } }>(`/words/deck?n=${game === 'match' ? 24 : 16}${lesson ? `&lesson=${lesson}` : ''}${set ? `&set=${set}` : ''}`), gcTime: 0, staleTime: Infinity })
+  // where the words come from: the notebook, a level, or any set (picked on the intro card)
+  const [src, setSrc] = useState<Source>(() => (set ? { kind: 'set', id: set } : { kind: 'mine' }))
+  const q = lesson ? `&lesson=${lesson}` : src.kind === 'set' ? `&set=${src.id}` : src.kind === 'level' ? `&level=${src.level}` : ''
+  const { data, isLoading } = useQuery({ queryKey: ['deck', game, round, q], queryFn: () => get<{ data: DeckWord[]; set?: { id: number; title: string }; level?: string }>(`/words/deck?n=${game === 'match' ? 24 : game === 'search' ? 20 : 16}${q}`), gcTime: 0, staleTime: Infinity, placeholderData: (p) => p })
   const meta = GAMES.find((g) => g.key === game)!
 
   const submit = useMutation({
@@ -269,7 +273,7 @@ function GameRun({ game, lesson, set, onExit, onSwitch }: { game: GameKey; lesso
       // Practice also refills hearts (5+ right answers earn one back).
       const correct = outcomes.filter((o) => o.known).length
       // a word-set game counts towards homework that assigned the set
-      if (set && outcomes.length) await post(`/word-sets/${set}/played`, { game, correct, total: outcomes.length }).catch(() => null)
+      if (src.kind === 'set' && outcomes.length) await post(`/word-sets/${src.id}/played`, { game, correct, total: outcomes.length }).catch(() => null)
       if (correct >= 5) await post('/hearts/earn', { correct }).catch(() => null)
       // played from the path: the server checks the result (half right, a real game) and completes the stop
       let path: { reward?: RewardSummary; level_up?: string | null } | null = null
@@ -305,14 +309,14 @@ function GameRun({ game, lesson, set, onExit, onSwitch }: { game: GameKey; lesso
     <div className="mx-auto max-w-3xl">
       <div className="mb-6 flex items-center gap-3">
         <button onClick={onExit} aria-label="Oyunlardan çık" className="grid size-10 place-items-center rounded-xl text-ink-soft hover:bg-paper-2"><X className="size-6" /></button>
-        <p className="min-w-0 font-display text-xl font-black leading-tight">{meta.title}{data?.set && <span className="block truncate text-sm font-bold text-ink-soft">{data.set.title}</span>}</p>
+        <p className="min-w-0 font-display text-xl font-black leading-tight">{meta.title}{(data?.set || data?.level) && <span className="block truncate text-sm font-bold text-ink-soft">{data.set?.title ?? `${data.level} seviyesi`}</span>}</p>
       </div>
       {isLoading || !data ? (
         <Spinner className="min-h-[40vh]" />
-      ) : data.data.length < 4 ? (
+      ) : data.data.length < 4 && (started || src.kind !== 'mine') ? (
         <Empty icon={<Layers className="size-8" />} title="Kelime yetersiz" text="Hikâyelerde kelimelere dokunup deftere ekle, sonra geri gel." action={<Link to="/stories" className="font-bold text-flame">Hikâyelere git</Link>} />
       ) : !started ? (
-        <GameIntro meta={meta} onStart={() => setStarted(true)} />
+        <GameIntro meta={meta} onStart={() => setStarted(true)} src={lesson ? null : src} onSrc={setSrc} count={data.data.length} title={data.set?.title} />
       ) : result ? (
         <Result r={result} onAgain={again} onExit={onExit} onSwitch={onSwitch} current={game} />
       ) : submit.isPending ? (
@@ -339,7 +343,45 @@ function GameRun({ game, lesson, set, onExit, onSwitch }: { game: GameKey; lesso
 }
 
 /** Rules first, so nobody has to guess how a game works or what it pays. */
-function GameIntro({ meta, onStart }: { meta: (typeof GAMES)[number]; onStart: () => void }) {
+type Source = { kind: 'mine' } | { kind: 'level'; level: string } | { kind: 'set'; id: number }
+const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1']
+
+/** Notebook, a level or a set: the words every game is played with. */
+function SourcePicker({ src, onSrc, count, title }: { src: Source; onSrc: (s: Source) => void; count: number; title?: string }) {
+  const { user } = useAuth()
+  const [open, setOpen] = useState(false)
+  const sets = useQuery({ queryKey: ['word-sets', 'pick'], queryFn: () => get<{ data: { id: number; title: string; level: string | null; words_count: number; is_mine?: boolean; is_saved?: boolean }[] }>('/word-sets'), enabled: open, staleTime: 60_000 })
+  const tabs: [Source['kind'], string][] = [['mine', 'Defterim'], ['level', 'Seviye'], ['set', 'Set']]
+  return (
+    <div className="mb-5 rounded-2xl border-2 border-line bg-paper-2/60 p-3">
+      <p className="mb-2 flex items-center justify-between text-xs font-black uppercase tracking-widest text-ink-soft">Kelimeler nereden? <span className="normal-case tracking-normal">{count} kelime</span></p>
+      <div className="grid grid-cols-3 gap-1 rounded-xl bg-card p-1">
+        {tabs.map(([k, l]) => (
+          <button key={k} onClick={() => { if (k === 'mine') onSrc({ kind: 'mine' }); if (k === 'level') onSrc({ kind: 'level', level: user?.cefr_level && LEVELS.includes(user.cefr_level) ? user.cefr_level : 'A1' }); if (k === 'set') setOpen(true) }} aria-pressed={src.kind === k} className={clsx('rounded-lg py-2 text-sm font-extrabold transition', src.kind === k ? 'bg-inv text-on-inv' : 'text-ink-soft hover:text-ink')}>{l}</button>
+        ))}
+      </div>
+      {src.kind === 'level' && (
+        <div className="mt-2 flex gap-1.5">
+          {LEVELS.map((l) => <button key={l} onClick={() => onSrc({ kind: 'level', level: l })} aria-pressed={src.level === l} className={clsx('flex-1 rounded-lg border-2 py-1.5 font-mono text-sm font-black transition', src.level === l ? 'border-flame bg-flame/10 text-flame' : 'border-line bg-card')}>{l}</button>)}
+        </div>
+      )}
+      {src.kind === 'set' && !open && <button onClick={() => setOpen(true)} className="mt-2 w-full truncate rounded-lg border-2 border-line bg-card px-3 py-2 text-left text-sm font-bold">{title ?? 'Set seç'} <span className="float-right text-flame">Değiştir</span></button>}
+      {open && (
+        <div className="mt-2 max-h-60 overflow-y-auto overscroll-contain rounded-xl border-2 border-line bg-card">
+          {sets.isLoading ? <Spinner className="py-6" /> : (sets.data?.data ?? []).filter((x) => x.words_count >= 4).map((x) => (
+            <button key={x.id} onClick={() => { onSrc({ kind: 'set', id: x.id }); setOpen(false) }} className={clsx('flex w-full items-center gap-2 border-b border-line px-3 py-2.5 text-left text-sm last:border-0 hover:bg-paper-2', src.kind === 'set' && src.id === x.id && 'bg-flame/5')}>
+              {x.level && <span className="rounded-md bg-paper-2 px-1.5 py-0.5 font-mono text-[11px] font-black">{x.level}</span>}
+              <span className="min-w-0 flex-1 truncate font-bold">{x.title}</span>
+              <span className="shrink-0 text-xs text-ink-soft">{x.words_count} kelime</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function GameIntro({ meta, onStart, src, onSrc, count, title }: { meta: (typeof GAMES)[number]; onStart: () => void; src: Source | null; onSrc: (s: Source) => void; count: number; title?: string }) {
   const { data: e } = useEconomy()
   return (
     <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} className="overflow-hidden rounded-[28px] border-2 border-line bg-card">
@@ -356,7 +398,7 @@ function GameIntro({ meta, onStart }: { meta: (typeof GAMES)[number]; onStart: (
         <ol className="mt-3 space-y-2.5">
           {meta.rules.map((r, i) => (
             <li key={i} className="flex gap-3">
-              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-ink font-display text-xs font-black text-paper">{i + 1}</span>
+              <span className="grid size-6 shrink-0 place-items-center rounded-full bg-inv font-display text-xs font-black text-on-inv">{i + 1}</span>
               <span className="text-[15px] leading-snug">{r}</span>
             </li>
           ))}
@@ -366,7 +408,8 @@ function GameIntro({ meta, onStart }: { meta: (typeof GAMES)[number]; onStart: (
           <span className="inline-flex items-center gap-1.5 rounded-full bg-paper-2 px-3 py-1.5">Kelime XP'si günde en fazla {e?.daily_caps.words ?? 60}</span>
           <span className="inline-flex items-center gap-1.5 rounded-full bg-berry/10 px-3 py-1.5 text-berry"><Heart className="size-3.5" /> 5+ doğru = 1 can</span>
         </div>
-        <Button className="mt-6" block size="lg" onClick={onStart} icon={<ArrowRight className="size-5" />}>Başla</Button>
+        <div className="mt-6">{src && <SourcePicker src={src} onSrc={onSrc} count={count} title={title} />}</div>
+        <Button block size="lg" onClick={onStart} disabled={count < 4} icon={<ArrowRight className="size-5" />}>{count < 4 ? 'Bu kaynakta kelime yetersiz' : 'Başla'}</Button>
       </div>
     </motion.div>
   )

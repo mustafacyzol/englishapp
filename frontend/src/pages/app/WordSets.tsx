@@ -3,17 +3,17 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { AnimatePresence, motion } from 'motion/react'
 import clsx from 'clsx'
-import { ArrowLeft, Bookmark, BookmarkCheck, Check, ClipboardPaste, Copy, Globe2, Grid3x3, Headphones, Layers, Lock, Pencil, Play, Plus, Puzzle, Search, Timer, Trash2, Volume2, X, PartyPopper, SquareStack, Zap } from 'lucide-react'
+import { ArrowLeft, Bookmark, BookmarkCheck, Check, ClipboardPaste, Copy, Flag, Globe2, Grid3x3, Headphones, Layers, Lock, Pencil, Play, Plus, Puzzle, Search, Timer, Trash2, Volume2, X, PartyPopper, SquareStack, Zap } from 'lucide-react'
 import { del, get, post, put, type ApiError } from '@/lib/api'
 import { img } from '@/lib/assets'
 import { speak } from '@/lib/speech'
 import { Button } from '@/components/ui/Button'
-import { Empty, Spinner } from '@/components/ui/Misc'
+import { Empty, Modal, Spinner } from '@/components/ui/Misc'
 import { useToast } from '@/components/ui/Toast'
 
 export interface WordSetCard {
   id: number; title: string; description: string | null; level: string | null; category: string; exam: string | null; cover: string
-  is_public: boolean; words_count: number; saves_count: number; official: boolean; mine: boolean; saved: boolean; owner: { name: string; username: string } | null
+  is_public: boolean; words_count: number; saves_count: number; official: boolean; mine: boolean; saved: boolean; owner: { name: string; username: string } | null; hidden?: boolean
 }
 interface SetItem { id: number; word: string; translation: string; example: string | null; in_library: boolean }
 type SetDetail = WordSetCard & { items: SetItem[]; plays: number }
@@ -66,7 +66,7 @@ export function SetBrowser() {
           <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-ink-soft" />
           <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Set ya da kelime ara (ör. seyahat, LGS)" className="h-11 w-full rounded-2xl border-2 border-line bg-card pl-10 pr-3 text-sm font-semibold focus:border-sky focus:outline-none" />
         </label>
-        <Link to="/practice/sets/new" className="press inline-flex h-11 shrink-0 items-center gap-1.5 rounded-2xl bg-ink px-3.5 text-sm font-extrabold text-paper"><Plus className="size-4" /><span className="hidden sm:inline">Yeni set</span><span className="sm:hidden">Yeni</span></Link>
+        <Link to="/practice/sets/new" className="press inline-flex h-11 shrink-0 items-center gap-1.5 rounded-2xl bg-inv px-3.5 text-sm font-extrabold text-on-inv"><Plus className="size-4" /><span className="hidden sm:inline">Yeni set</span><span className="sm:hidden">Yeni</span></Link>
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
@@ -174,6 +174,7 @@ export function SetDetailPage() {
   const toast = useToast()
   const [view, setView] = useState<'cards' | 'list'>('cards')
   const [picking, setPicking] = useState(false)
+  const [reporting, setReporting] = useState(false)
   const { data, isLoading, isError } = useQuery({ queryKey: ['word-set', id], queryFn: () => get<{ data: SetDetail }>(`/word-sets/${id}`) })
   const s = data?.data
   const refresh = () => { qc.invalidateQueries({ queryKey: ['word-set', id] }); qc.invalidateQueries({ queryKey: ['word-sets'] }) }
@@ -217,7 +218,9 @@ export function SetDetailPage() {
               {s.mine ? <Act onClick={() => nav(`/practice/sets/${s.id}/edit`)} icon={Pencil} label="Düzenle" sub="kelime ekle" /> : <Act onClick={() => copy.mutate()} busy={copy.isPending} icon={Copy} label="Kopyala" sub="kendi setin olsun" />}
             </div>
           </div>
+          {s.hidden && <p className="mt-3 flex items-start gap-2 rounded-2xl bg-berry/10 px-3 py-2.5 text-sm font-semibold text-berry"><Flag className="mt-0.5 size-4 shrink-0" /> Bu set şikâyetler nedeniyle herkese kapatıldı. Bir moderatör inceleyince yeniden açılabilir; sen kullanmaya devam edebilirsin.</p>}
           {s.mine && <button onClick={() => confirm('Bu set silinsin mi?') && remove.mutate()} className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-ink-soft hover:text-berry"><Trash2 className="size-3.5" /> Seti sil</button>}
+          {!s.mine && !s.official && <button onClick={() => setReporting(true)} className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-ink-soft hover:text-berry"><Flag className="size-3.5" /> Şikâyet et</button>}
           <p className="mt-2.5 text-xs leading-relaxed text-ink-soft"><b className="text-ink">Kaydet</b> seti listende tutar. <b className="text-ink">Deftere ekle</b> kelimeleri tekrar sırana koyar, unuttukların yeniden karşına çıkar.{!s.mine && <> <b className="text-ink">Kopyala</b> sana ait, düzenlenebilir bir kopya açar.</>}</p>
         </div>
       </section>
@@ -249,7 +252,35 @@ export function SetDetailPage() {
       )}
 
       <AnimatePresence>{picking && <GamePickerSheet id={s.id} onClose={() => setPicking(false)} />}</AnimatePresence>
+      <ReportModal id={s.id} open={reporting} onClose={() => setReporting(false)} />
     </div>
+  )
+}
+
+const REASONS: [string, string][] = [['spam', 'Spam ya da reklam'], ['inappropriate', 'Uygunsuz içerik'], ['wrong', 'Yanlış çeviriler'], ['other', 'Başka bir sorun']]
+
+/** Reporting a shared set: enough reports hide it until a moderator looks. */
+function ReportModal({ id, open, onClose }: { id: number; open: boolean; onClose: () => void }) {
+  const toast = useToast()
+  const [reason, setReason] = useState('spam')
+  const [note, setNote] = useState('')
+  const send = useMutation({
+    mutationFn: () => post<{ message: string }>(`/word-sets/${id}/report`, { reason, note: note.trim() || null }),
+    onSuccess: (r) => { toast(r.message, 'success'); onClose() },
+    onError: (e: ApiError) => toast(e.message, 'error'),
+  })
+  return (
+    <Modal open={open} onClose={onClose}>
+      <h2 className="text-2xl">Seti şikâyet et</h2>
+      <p className="mt-1 text-sm text-ink-soft">Şikâyetin isimsiz iletilir. Birden fazla kişi bildirirse set inceleme bitene kadar gizlenir.</p>
+      <div className="mt-4 grid gap-2">
+        {REASONS.map(([k, l]) => (
+          <button key={k} onClick={() => setReason(k)} aria-pressed={reason === k} className={clsx('rounded-2xl border-2 px-4 py-3 text-left font-bold transition', reason === k ? 'border-berry bg-berry/5 text-berry' : 'border-line hover:border-ink/25')}>{l}</button>
+        ))}
+      </div>
+      <textarea value={note} onChange={(e) => setNote(e.target.value)} maxLength={300} rows={2} placeholder="İstersen kısa bir not ekle" className="mt-3 w-full rounded-2xl border-2 border-line bg-card px-3 py-2 text-sm" />
+      <Button className="mt-3" block variant="danger" loading={send.isPending} onClick={() => send.mutate()}>Gönder</Button>
+    </Modal>
   )
 }
 

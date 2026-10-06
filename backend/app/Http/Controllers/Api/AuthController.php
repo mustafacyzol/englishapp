@@ -90,6 +90,7 @@ class AuthController extends Controller
             'onboarded' => isset($data['learning_goal']),
         ]);
 
+        $this->starterGems($user);
         $this->referrals->attach($user, $data['referral_code'] ?? null);
         PlacementResult::claimable($data['placement_token'] ?? null, $user)?->applyTo($user);
         if (! empty($data['invite'])) {
@@ -226,7 +227,8 @@ class AuthController extends Controller
                 'onboarded' => isset($data['learning_goal']),
             ]);
             $user->forceFill([$column => $claims['sub'], 'email_verified_at' => $claims['email_verified'] ? now() : null])->save();
-            $this->referrals->attach($user, $data['referral_code'] ?? null);
+            $this->starterGems($user);
+        $this->referrals->attach($user, $data['referral_code'] ?? null);
             PlacementResult::claimable($data['placement_token'] ?? null, $user)?->applyTo($user);
             if (! empty($data['invite'])) {
                 app(InstitutionService::class)->acceptToken($user, $data['invite']);
@@ -252,6 +254,12 @@ class AuthController extends Controller
         $request->user()->currentAccessToken()?->delete();
 
         return response()->json(['ok' => true]);
+    }
+
+    /** The gems a new account starts with (Yönetim > Site ayarları > Ekonomi). */
+    private function starterGems(User $user): void
+    {
+        $user->forceFill(['gems' => max(0, min(100000, (int) Settings::get('economy.signup_gems')))])->save();
     }
 
     public function me(Request $request): JsonResponse

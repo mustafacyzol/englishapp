@@ -155,7 +155,7 @@ export function Report({ data, onInvite, onRemove, inviting, admin, view = 'all'
         {data.classes.length > 0 && (
           <div className="mb-3 flex flex-wrap gap-1.5">
             {['all', ...data.classes].map((c) => (
-              <button key={c} onClick={() => setCls(c)} className={clsx('shrink-0 rounded-full border-2 px-3 py-1 text-sm font-extrabold', cls === c ? 'border-ink bg-ink text-paper' : 'border-line text-ink-soft')}>{c === 'all' ? 'Tüm sınıflar' : c}</button>
+              <button key={c} onClick={() => setCls(c)} className={clsx('shrink-0 rounded-full border-2 px-3 py-1 text-sm font-extrabold', cls === c ? 'border-inv bg-inv text-on-inv' : 'border-line text-ink-soft')}>{c === 'all' ? 'Tüm sınıflar' : c}</button>
             ))}
           </div>
         )}

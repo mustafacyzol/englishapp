@@ -23,6 +23,10 @@
   --color-ink: var(--ink);
   --color-ink-soft: var(--ink-soft);
   --color-line: var(--line);
+  /* solid fills (active tabs, dark buttons, inverted sections): ink in light,
+     a raised slate in dark so nothing turns into a white slab */
+  --color-inv: var(--inv);
+  --color-on-inv: var(--on-inv);
 
   --color-flame: #e8403a;
   --color-flame-deep: #c02f2a;
@@ -61,6 +65,8 @@
   --ink: #1f2433;
   --ink-soft: #676d7c;
   --line: #e3e6eb;
+  --inv: #1f2433;
+  --on-inv: #f7f8fa;
   color-scheme: light;
 }
 
@@ -71,6 +77,8 @@
   --ink: #eef0f4;
   --ink-soft: #9aa1b2;
   --line: #2b3242;
+  --inv: #353d55;
+  --on-inv: #f4f6fa;
   color-scheme: dark;
 }
 
@@ -309,6 +317,8 @@ html[data-age='teen'] {
   --color-ink: #eef0f4;
   --color-ink-soft: #9aa1b2;
   --color-line: #262d3d;
+  --color-inv: #353d55;
+  --color-on-inv: #f4f6fa;
   color-scheme: dark;
 }
 

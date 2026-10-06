@@ -111,7 +111,7 @@ export default function Shop() {
               {g.key === 'look' && (
                 <div role="radiogroup" aria-label="Görünüm filtresi" className="flex flex-wrap gap-1.5">
                   {LOOK_FILTERS.map((f) => (
-                    <button key={f.value} role="radio" aria-checked={look === f.value} onClick={() => setLook(f.value)} className={clsx('rounded-full px-3.5 py-1.5 text-sm font-bold transition', look === f.value ? 'bg-ink text-paper' : 'bg-paper-2 text-ink-soft hover:text-ink')}>
+                    <button key={f.value} role="radio" aria-checked={look === f.value} onClick={() => setLook(f.value)} className={clsx('rounded-full px-3.5 py-1.5 text-sm font-bold transition', look === f.value ? 'bg-inv text-on-inv' : 'bg-paper-2 text-ink-soft hover:text-ink')}>
                       {f.label}
                     </button>
                   ))}

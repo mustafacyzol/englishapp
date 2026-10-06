@@ -399,7 +399,7 @@ export function ExerciseView({ ex, value, setValue, locked, ttsRate, aside }: { 
                     : locked && value === i
                       ? 'border-berry bg-berry/8 text-berry shadow-[0_3px_0_0_var(--color-berry)]'
                       : value === i
-                        ? 'border-ink bg-ink text-paper shadow-[0_3px_0_0_#000]'
+                        ? 'border-inv bg-inv text-on-inv shadow-[0_3px_0_0_#000]'
                         : 'border-line bg-card shadow-hard hover:border-ink/25',
                   locked && i !== ex.answer && value !== i && 'opacity-50',
                 )}
@@ -926,10 +926,10 @@ function MatchGame({ ex, onDone }: { ex: Extract<Exercise, { type: 'match' }>; o
         disabled={isDone}
         className={clsx(
           'press relative flex min-h-16 items-center justify-center gap-2 rounded-2xl border-2 px-3 py-3 text-center text-lg font-bold transition-colors',
-          isDone ? clsx('border-transparent', tone(it.i)) : isSel ? 'border-ink bg-ink text-paper shadow-[0_3px_0_0_#000]' : 'border-line bg-card shadow-hard hover:border-ink/25',
+          isDone ? clsx('border-transparent', tone(it.i)) : isSel ? 'border-inv bg-inv text-on-inv shadow-[0_3px_0_0_#000]' : 'border-line bg-card shadow-hard hover:border-ink/25',
         )}
       >
-        {side === 'l' && !isDone && <Volume2 className={clsx('size-4 shrink-0', isSel ? 'text-paper/70' : 'text-ink-soft')} />}
+        {side === 'l' && !isDone && <Volume2 className={clsx('size-4 shrink-0', isSel ? 'text-on-inv/70' : 'text-ink-soft')} />}
         {it.t}
         {isDone && <Check className="absolute right-2.5 top-2.5 size-4" strokeWidth={3} />}
       </motion.button>

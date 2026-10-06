@@ -45,7 +45,7 @@ class AuthFlowTest extends TestCase
             ->assertOk()->assertJsonPath('user.email_verified', true);
 
         $this->assertSame(200, $inviter->fresh()->gems); // referral gems + 50 for the "Elçi I" badge
-        $this->assertSame(150, User::query()->where('email', 'ayse@example.com')->value('gems')); // 50 start + 100
+        $this->assertSame(400, User::query()->where('email', 'ayse@example.com')->value('gems')); // 300 starter gems + 100
     }
 
     public function test_honeypot_blocks_bots(): void

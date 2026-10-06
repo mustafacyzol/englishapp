@@ -55,6 +55,9 @@ class AccountController extends Controller
             'preferences.language' => ['sometimes', 'in:tr,en'],
             'preferences.tour_done' => ['sometimes', 'boolean'],
             'preferences.email_reminders' => ['sometimes', 'boolean'],
+            'preferences.email_weekly' => ['sometimes', 'boolean'],
+            'preferences.notify' => ['sometimes', 'array:'.implode(',', \App\Support\NotifyPrefs::GROUPS)],
+            'preferences.notify.*' => ['boolean'],
             'preferences.sound' => ['sometimes', 'boolean'],
             'preferences.tts_voice' => ['sometimes', 'nullable', 'string', 'max:80'],
             'preferences.tts_rate' => ['sometimes', 'numeric', 'between:0.5,1.5'],
@@ -125,7 +128,10 @@ class AccountController extends Controller
         }
         if (isset($data['preferences'])) {
             // merge and whitelist; never let the client overwrite server-owned keys (frame)
-            $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'sound', 'tts_voice', 'tts_rate', 'theme', 'tour_done', 'exam_mode']));
+            $allowed = array_intersect_key($data['preferences'], array_flip(['email_reminders', 'email_weekly', 'notify', 'language', 'sound', 'tts_voice', 'tts_rate', 'theme', 'tour_done', 'exam_mode']));
+            if (isset($allowed['notify'])) {
+                $allowed['notify'] = array_merge($user->preferences['notify'] ?? [], array_map('boolval', $allowed['notify']));
+            }
             $data['preferences'] = array_merge($user->preferences ?? [], $allowed);
         }
         if (isset($data['name'])) {

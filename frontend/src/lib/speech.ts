@@ -45,7 +45,12 @@ type SpeakOpts = { rate?: number; voice?: string; onStart?: () => void; onEnd?: 
  * every word, sentence and story line is real English audio, whatever the phone's
  * language; clips are cached in memory. Otherwise an English browser voice is used.
  */
-export function speak(text: string, opts: SpeakOpts = {}) {
+/** The learner's own reading speed and voice (Ayarlar > Görünüm ve ses), used when a call gives none. */
+let defaults: { rate?: number; voice?: string } = {}
+export const setSpeechDefaults = (d: { rate?: number; voice?: string }) => { defaults = d }
+
+export function speak(text: string, given: SpeakOpts = {}) {
+  const opts = { ...given, rate: given.rate ?? defaults.rate, voice: given.voice ?? defaults.voice }
   if (tuning.speech && Date.now() > serverDownUntil) {
     void speakServer(text, opts)
     return

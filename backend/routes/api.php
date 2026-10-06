@@ -142,6 +142,7 @@ Route::prefix('v1')->group(function () {
                 Route::post('word-sets/{set}/copy', [\App\Http\Controllers\Api\WordSetController::class, 'copy']);
                 Route::post('word-sets/{set}/learn', [\App\Http\Controllers\Api\WordSetController::class, 'learn']);
                 Route::post('word-sets/{set}/played', [\App\Http\Controllers\Api\WordSetController::class, 'played']);
+                Route::post('word-sets/{set}/report', [\App\Http\Controllers\Api\WordSetController::class, 'report'])->middleware('throttle:10,1');
             });
             Route::post('review', [WordController::class, 'review'])->middleware('throttle:30,1');
 
@@ -232,6 +233,11 @@ Route::prefix('v1')->group(function () {
                 Route::get('institutions/{institution}/report', [AdminController::class, 'institutionReport']);
                 Route::post('institutions/{institution}/invite', [AdminController::class, 'institutionInvite']);
                 Route::delete('institution-members/{member}', [AdminController::class, 'institutionRemove']);
+            });
+
+            Route::middleware('perm:content')->prefix('moderation')->group(function () {
+                Route::get('word-sets', [\App\Http\Controllers\Api\Admin\ModerationController::class, 'wordSets']);
+                Route::post('word-sets/{set}', [\App\Http\Controllers\Api\Admin\ModerationController::class, 'moderate'])->whereNumber('set')->middleware('throttle:60,1');
             });
 
             Route::middleware('perm:content')->prefix('grade-units')->group(function () {

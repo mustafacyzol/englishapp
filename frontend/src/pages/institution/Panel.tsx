@@ -135,7 +135,7 @@ export function InstitutionClasses() {
               {act.length > 0 && <p className="mt-3 rounded-xl bg-paper-2/70 px-3 py-2 text-xs font-bold">Öneri: bu hafta sınıfla <span className={SKILL[weakest.k].text}>{SKILL[weakest.k].label.toLocaleLowerCase('tr')}</span> çalışın.</p>}
               <div className="mt-4 flex -space-x-2">
                 {list.slice(0, 8).map((m) => <span key={m.id} title={m.name ?? m.email} className="grid size-8 place-items-center rounded-full border-2 border-card bg-paper-2 text-xs font-black">{(m.name ?? m.email)[0].toUpperCase()}</span>)}
-                {list.length > 8 && <span className="grid size-8 place-items-center rounded-full border-2 border-card bg-ink text-[10px] font-black text-paper">+{list.length - 8}</span>}
+                {list.length > 8 && <span className="grid size-8 place-items-center rounded-full border-2 border-card bg-inv text-[10px] font-black text-on-inv">+{list.length - 8}</span>}
               </div>
             </section>
           )
@@ -158,8 +158,8 @@ function ClassLeague({ classes, manager }: { classes: string[]; manager: boolean
           <p className="text-sm text-ink-soft">Öğrencilerin uygulamada gördüğü sıralama. Haftalık ya da aylık XP'ye göre.</p>
         </div>
         <div className="flex max-w-full flex-wrap gap-1.5">
-          {manager && <button onClick={() => setPick('')} className={clsx('shrink-0 rounded-xl border-2 px-3 py-1.5 text-sm font-extrabold', pick === '' ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>Bütün okul</button>}
-          {classes.map((c) => <button key={c} onClick={() => setPick(c)} className={clsx('shrink-0 rounded-xl border-2 px-3 py-1.5 text-sm font-extrabold', pick === c ? 'border-ink bg-ink text-paper' : 'border-line bg-card')}>{c}</button>)}
+          {manager && <button onClick={() => setPick('')} className={clsx('shrink-0 rounded-xl border-2 px-3 py-1.5 text-sm font-extrabold', pick === '' ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card')}>Bütün okul</button>}
+          {classes.map((c) => <button key={c} onClick={() => setPick(c)} className={clsx('shrink-0 rounded-xl border-2 px-3 py-1.5 text-sm font-extrabold', pick === c ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card')}>{c}</button>)}
         </div>
       </div>
       <SchoolBoard key={pick} endpoint="/institution/leaderboard" query={pick ? `class=${encodeURIComponent(pick)}` : ''} showClass={!pick} title={pick ? `${pick} sınıfı` : 'Bütün okul'} />

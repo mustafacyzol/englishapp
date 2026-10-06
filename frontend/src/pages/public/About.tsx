@@ -117,7 +117,7 @@ export default function About() {
           <motion.span aria-hidden style={{ scaleY: draw }} className="absolute left-[15px] top-2 h-[calc(100%-1rem)] w-[3px] origin-top rounded-full bg-gradient-to-b from-flame via-butter to-mint" />
           {STORY.map((s, k) => (
             <motion.article key={s.title} initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true, amount: 0.5 }} transition={{ duration: 0.6, ease }} className="relative mb-10 last:mb-0">
-              <span className="absolute -left-10 top-0 grid size-8 place-items-center rounded-full border-[3px] border-card bg-ink text-paper shadow"><s.icon className="size-4" /></span>
+              <span className="absolute -left-10 top-0 grid size-8 place-items-center rounded-full border-[3px] border-card bg-inv text-on-inv shadow"><s.icon className="size-4" /></span>
               <p className="text-xs font-black uppercase tracking-[0.18em] text-ink-soft">0{k + 1} · {s.tag}</p>
               <h3 className="mt-1 font-display text-2xl font-black">{s.title}</h3>
               <p className="mt-2 text-[17px] leading-relaxed text-ink-soft">{s.text}</p>
@@ -191,12 +191,12 @@ export default function About() {
 
       {/* ----------------------------------------------------------- cta */}
       <section className="mx-auto max-w-6xl px-5 pb-24">
-        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="relative overflow-hidden rounded-[36px] bg-ink px-6 py-14 text-center text-paper sm:px-12">
+        <motion.div initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="relative overflow-hidden rounded-[36px] bg-inv px-6 py-14 text-center text-on-inv sm:px-12">
           <span aria-hidden className="absolute -left-16 -top-16 size-56 rounded-full bg-flame/25 blur-2xl" />
           <span aria-hidden className="absolute -bottom-20 -right-10 size-64 rounded-full bg-butter/20 blur-2xl" />
           <img src={higoImg('cheer')} alt="" className="relative mx-auto mb-4 w-24" />
           <h2 className="relative font-display text-[clamp(1.8rem,4vw,2.8rem)] font-black leading-tight">Bugün birkaç dakikayla başla.</h2>
-          <p className="relative mx-auto mt-3 max-w-lg text-paper/70">Ücretsiz hesap, kredi kartı yok. Seviyeni ölç, yolun sana göre açılsın.</p>
+          <p className="relative mx-auto mt-3 max-w-lg text-on-inv/70">Ücretsiz hesap, kredi kartı yok. Seviyeni ölç, yolun sana göre açılsın.</p>
           <div className="relative mt-8 flex flex-wrap justify-center gap-3">
             <LinkButton to="/register" size="lg" variant="butter" className="gap-2">Ücretsiz başla <ArrowRight className="size-5" /></LinkButton>
             <LinkButton to="/contact" size="lg" variant="secondary">Bize yaz</LinkButton>

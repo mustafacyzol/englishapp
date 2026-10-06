@@ -235,6 +235,12 @@ class InstitutionController extends Controller
         // a teacher always targets one of their own classes
         abort_unless($staff->role === 'manager' || ($data['class_name'] ?? null) !== null, 422, 'Bir sınıf seç.');
         abort_unless($this->school->canSeeClass($staff, $data['class_name'] ?? null), 403);
+        if ($data['kind'] === 'unit') {
+            abort_unless(\App\Models\GradeUnit::query()->whereKey((int) ($data['target'] ?? 0))->where('is_published', true)->exists(), 422, 'Ünite bulunamadı.');
+        }
+        if ($data['kind'] === 'exam' && ($data['target'] ?? null)) {
+            abort_unless(in_array($data['target'], ['mix', ...array_keys(\App\Support\Exams::SECTIONS)], true), 422, 'Geçersiz sınav bölümü.');
+        }
         if ($data['kind'] === 'lesson') {
             abort_unless(\App\Models\Lesson::query()->whereKey((int) ($data['target'] ?? 0))->exists(), 422, 'Ders bulunamadı.');
         }
@@ -275,15 +281,29 @@ class InstitutionController extends Controller
     }
 
     /** What a teacher can assign: lessons and stories of the platform. */
+    /**
+     * What a teacher can assign, grouped like the student's own panel: the
+     * coursebook units of each grade (and exam track), the CEFR path lessons,
+     * stories, word sets and the practice areas.
+     */
     public function catalog(Request $request): JsonResponse
     {
         $this->school->staff($request->user());
+        $tracks = \App\Services\GradeUnitService::TRACKS;
+        $units = \App\Models\GradeUnit::query()->where('is_published', true)->orderBy('position')->orderBy('id')->get(['id', 'track', 'title', 'title_tr', 'cefr_level']);
 
         return response()->json([
-            'lessons' => \App\Models\Lesson::query()->with('unit.course:id,cefr_level')->orderBy('unit_id')->orderBy('position')->limit(600)->get(['id', 'title', 'unit_id'])
-                ->map(fn ($l) => ['id' => $l->id, 'title' => $l->title, 'level' => $l->unit?->course?->cefr_level]),
+            'units' => collect($tracks)->map(fn ($label, $track) => [
+                'track' => $track, 'label' => $label,
+                'units' => $units->where('track', $track)->values()->map(fn ($u, $i) => ['id' => $u->id, 'n' => $i + 1, 'title' => $u->title, 'title_tr' => $u->title_tr, 'level' => $u->cefr_level]),
+            ])->filter(fn ($t) => $t['units']->isNotEmpty())->values(),
+            // the general path, without the generated coursebook copies
+            'lessons' => \App\Models\Lesson::query()->whereNull('meta->grade_unit')->with('unit:id,course_id,title,position', 'unit.course:id,cefr_level')
+                ->orderBy('unit_id')->orderBy('position')->limit(800)->get(['id', 'title', 'unit_id', 'kind'])
+                ->map(fn ($l) => ['id' => $l->id, 'title' => $l->title, 'kind' => $l->kind, 'unit' => $l->unit?->title, 'level' => $l->unit?->course?->cefr_level]),
             'stories' => \App\Models\Story::query()->where('is_published', true)->orderBy('cefr_level')->get(['slug', 'title', 'cefr_level']),
             'word_sets' => \App\Models\WordSet::query()->visibleTo($request->user())->orderByRaw('CASE WHEN user_id IS NULL THEN 0 ELSE 1 END')->orderBy('level')->limit(300)->get(['id', 'title', 'level', 'exam', 'words_count']),
+            'exam_sections' => [['key' => 'mix', 'label' => 'Karışık'], ...collect(\App\Support\Exams::SECTIONS)->map(fn ($v, $k) => ['key' => $k, 'label' => $v['label']])->values()],
         ]);
     }
 
@@ -328,6 +348,8 @@ class InstitutionController extends Controller
         $user = $request->user();
         $ok = $this->school->forStudent($user)->firstWhere('id', $assignment->id);
         abort_unless($ok, 404);
+        // lessons, units, stories and sets check themselves: no ticking them off by hand
+        abort_if(in_array($assignment->kind, ['unit', 'lesson', 'story', 'words'], true), 422, 'Bu ödev, yaptığında kendiliğinden işaretlenir.');
         \App\Models\AssignmentCompletion::query()->firstOrCreate(['assignment_id' => $assignment->id, 'user_id' => $user->id], ['completed_at' => now()]);
 
         return response()->json(['data' => $this->school->forStudent($user)]);

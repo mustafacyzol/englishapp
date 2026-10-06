@@ -78,7 +78,7 @@ class WordSetTest extends TestCase
     public function test_creating_and_sharing_is_limited_and_checked(): void
     {
         $this->seed([GameSeeder::class]);
-        $items = [['word' => 'apple', 'translation' => 'elma'], ['word' => 'pear', 'translation' => 'armut']];
+        $items = [['word' => 'apple', 'translation' => 'elma'], ['word' => 'pear', 'translation' => 'armut'], ['word' => 'plum', 'translation' => 'erik'], ['word' => 'cherry', 'translation' => 'kiraz'], ['word' => 'grape', 'translation' => 'üzüm']];
         $new = User::factory()->create(['email_verified_at' => now()]);
         // a brand-new account keeps its sets private
         $this->actingAs($new)->postJson('/api/v1/word-sets', ['title' => 'Meyveler', 'is_public' => true, 'items' => $items])->assertUnprocessable();
@@ -90,9 +90,12 @@ class WordSetTest extends TestCase
 
         // a daily quota on new sets
         \App\Support\Settings::put(['limits.word_sets_per_day' => 3]);
-        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'İki', 'items' => $items])->assertOk();
-        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'Üç', 'items' => $items])->assertOk();
-        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'Dört', 'items' => $items])->assertStatus(429);
+        $more = fn (string $w) => [...$items, ['word' => $w, 'translation' => $w.'-tr']];
+        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'İki', 'items' => $more('melon')])->assertOk();
+        // the same word list twice is refused before it uses the quota
+        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'İki tekrar', 'items' => $more('melon')])->assertUnprocessable();
+        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'Üç', 'items' => $more('lemon')])->assertOk();
+        $this->actingAs($u)->postJson('/api/v1/word-sets', ['title' => 'Dört', 'items' => $more('lime')])->assertStatus(429);
 
         // the word notebook has a ceiling
         \App\Support\Settings::put(['limits.notebook_size' => 1]);

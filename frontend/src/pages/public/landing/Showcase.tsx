@@ -274,7 +274,7 @@ export function AudiencesPro() {
                 <ul className="mt-5 space-y-3">
                   {cur.points.map((p) => (
                     <motion.li key={p} variants={{ hide: { opacity: 0, x: 36 }, show: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 420, damping: 30 } } }} className="flex gap-3 text-[16px]">
-                      <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-ink text-paper"><Check className="size-3.5" strokeWidth={3.5} /></span>{p}
+                      <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-inv text-on-inv"><Check className="size-3.5" strokeWidth={3.5} /></span>{p}
                     </motion.li>
                   ))}
                 </ul>
@@ -606,7 +606,7 @@ export function PricingPro({ plans, cta, embedded, title = 'Ücretsiz başla, ha
 function CorporateCard({ c }: { c: NonNullable<NonNullable<ReturnType<typeof useSiteConfig>['data']>['site']>['corporate'] & object }) {
   const features = (c.features ?? '').split('\n').map((f) => f.trim()).filter(Boolean)
   const external = /^https?:/.test(c.url ?? '')
-  const btn = 'press inline-flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-ink px-7 font-display font-extrabold uppercase tracking-wide text-paper shadow-[0_4px_0_0_#000] lg:w-auto'
+  const btn = 'press inline-flex h-14 w-full items-center justify-center gap-2 whitespace-nowrap rounded-2xl bg-inv px-7 font-display font-extrabold uppercase tracking-wide text-on-inv shadow-[0_4px_0_0_#000] lg:w-auto'
   // Same family as the plan cards: one border, the card colour, plain checks. A real
   // teacher and Higo instead of icons, a class strip instead of decoration.
   return (

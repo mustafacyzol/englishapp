@@ -92,7 +92,7 @@ export function SocialButtons({ onDone, remember = true, extra, className, compa
           {compact ? <><span className="sm:hidden">{t('Google ile devam et')}</span><span className="hidden sm:inline">Google</span></> : t('Google ile devam et')}
         </button>
       )}
-      <button type="button" onClick={apple} disabled={busy !== null} className={clsx(btn, 'border-ink bg-ink text-paper hover:opacity-90')}>
+      <button type="button" onClick={apple} disabled={busy !== null} className={clsx(btn, 'border-inv bg-inv text-on-inv hover:opacity-90')}>
         {busy === 'apple' ? <Loader2 className="size-5 animate-spin" /> : <AppleMark className="size-5 -translate-y-px" />}
         {compact ? <><span className="sm:hidden">{t('Apple ile devam et')}</span><span className="hidden sm:inline">Apple</span></> : t('Apple ile devam et')}
       </button>

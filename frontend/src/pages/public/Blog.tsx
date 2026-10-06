@@ -47,7 +47,7 @@ export function BlogList() {
         {cats.length > 1 && (
           <div className="mx-auto flex max-w-6xl flex-wrap gap-2 px-5 pb-6">
             {['', ...cats].map((c) => (
-              <button key={c || 'all'} onClick={() => setCat(c)} aria-pressed={cat === c} className={clsx('rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', cat === c ? 'border-ink bg-ink text-paper' : 'border-line bg-card text-ink-soft hover:text-ink')}>{c || 'Tümü'}</button>
+              <button key={c || 'all'} onClick={() => setCat(c)} aria-pressed={cat === c} className={clsx('rounded-full border-2 px-3.5 py-1.5 text-sm font-extrabold transition', cat === c ? 'border-inv bg-inv text-on-inv' : 'border-line bg-card text-ink-soft hover:text-ink')}>{c || 'Tümü'}</button>
             ))}
           </div>
         )}
@@ -100,19 +100,19 @@ function BlogNewsletter() {
   const sub = useMutation({ mutationFn: () => post<{ message: string }>('/newsletter', { email, source: 'blog' }) })
   return (
     <section className="mx-auto max-w-6xl px-5 pb-20">
-      <div className="relative overflow-hidden rounded-[32px] bg-ink px-6 py-10 text-paper sm:px-10">
+      <div className="relative overflow-hidden rounded-[32px] bg-inv px-6 py-10 text-on-inv sm:px-10">
         <span aria-hidden className="absolute -right-10 -top-16 size-56 rounded-full bg-flame/30 blur-3xl" />
         <div className="relative grid items-center gap-6 lg:grid-cols-[auto_1fr_1fr]">
           <img src={higoImg('read')} alt="" className="hidden size-24 object-contain lg:block" />
           <div>
             <p className="font-display text-2xl font-black sm:text-3xl">Haftada bir İngilizce ipucu</p>
-            <p className="mt-1 text-paper/70">Yeni yazılar ve kısa alıştırmalar e-postana gelsin.</p>
+            <p className="mt-1 text-on-inv/70">Yeni yazılar ve kısa alıştırmalar e-postana gelsin.</p>
           </div>
           {sub.isSuccess ? (
             <p className="flex items-center gap-2 rounded-2xl bg-mint/20 px-4 py-3 font-bold text-mint"><Check className="size-5" strokeWidth={3} /> {sub.data.message}</p>
           ) : (
             <form onSubmit={(e: FormEvent) => { e.preventDefault(); sub.mutate() }} className="flex gap-2 rounded-2xl bg-paper/10 p-1.5 ring-1 ring-paper/15">
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@eposta.com" aria-label="E-posta adresin" className="h-11 min-w-0 flex-1 bg-transparent px-3 font-semibold text-paper placeholder:text-paper/50 focus:outline-none" />
+              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="ornek@eposta.com" aria-label="E-posta adresin" className="h-11 min-w-0 flex-1 bg-transparent px-3 font-semibold text-on-inv placeholder:text-on-inv/50 focus:outline-none" />
               <button type="submit" disabled={sub.isPending} className="press h-11 shrink-0 rounded-xl bg-flame px-5 font-extrabold text-white disabled:opacity-60">Abone ol</button>
             </form>
           )}

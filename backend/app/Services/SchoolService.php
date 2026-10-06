@@ -89,6 +89,8 @@ class SchoolService
     {
         $manual = AssignmentCompletion::query()->where('assignment_id', $a->id)->whereIn('user_id', $userIds)->pluck('user_id');
         $auto = match ($a->kind) {
+            // a coursebook unit: its lesson in any course counts (each level has a copy)
+            'unit' => DB::table('lesson_progress')->whereIn('lesson_id', Lesson::query()->where('meta->grade_unit', (int) $a->target)->pluck('id'))->whereIn('user_id', $userIds)->where('completed_at', '>=', $a->created_at)->pluck('user_id'),
             'lesson' => DB::table('lesson_progress')->where('lesson_id', (int) $a->target)->whereIn('user_id', $userIds)->where('completed_at', '>=', $a->created_at)->pluck('user_id'),
             'words' => DB::table('word_set_plays')->where('word_set_id', (int) $a->target)->whereIn('user_id', $userIds)->where('created_at', '>=', $a->created_at)->distinct()->pluck('user_id'),
             'story' => DB::table('story_reads')->where('story_id', Story::query()->where('slug', $a->target)->value('id'))->whereIn('user_id', $userIds)->where('completed_at', '>=', $a->created_at)->pluck('user_id'),
@@ -126,8 +128,10 @@ class SchoolService
             'lesson' => "/lesson/{$a->target}",
             'story' => "/stories/{$a->target}",
             'words' => "/practice/sets/{$a->target}",
-            'exam' => '/exam',
+            'unit' => '/learn',
+            'exam' => '/exam'.($a->target ? "?section={$a->target}" : ''),
             'ai' => '/ai',
+            'writing' => '/writing',
             'practice' => '/practice',
             default => '/learn',
         };
@@ -140,7 +144,9 @@ class SchoolService
             'lesson' => 'Ders: '.(Lesson::query()->find((int) $target)?->title ?? 'Yol haritasından bir ders'),
             'story' => 'Hikâye: '.(Story::query()->where('slug', $target)->value('title') ?? 'Bir hikâye'),
             'words' => 'Kelime seti: '.(\App\Models\WordSet::query()->find((int) $target)?->title ?? 'Kelime seti'),
+            'unit' => 'Ünite: '.(\App\Models\GradeUnit::query()->find((int) $target)?->title ?? 'Ders kitabından bir ünite'),
             'exam' => 'Sınav modunda 10 soru',
+            'writing' => 'Yazı atölyesinde bir metin',
             'ai' => 'Defne ile 5 dakikalık konuşma',
             'practice' => '20 kelime tekrarı',
             default => 'Ödev',
@@ -159,7 +165,17 @@ class SchoolService
             ->where(fn ($q) => $q->whereNull('class_name')->orWhere('class_name', $m->class_name))
             ->where(fn ($q) => $q->whereNull('due_at')->orWhere('due_at', '>=', now()->subDays(7)))
             ->latest('id')->limit(30)->get()
-            ->map(fn (Assignment $a) => $this->present($a) + ['done' => $this->doneBy($a, collect([$user->id]))->isNotEmpty()]);
+            ->map(fn (Assignment $a) => array_merge($this->present($a), $a->kind === 'unit' ? ['link' => $this->unitLink($user, (int) $a->target)] : [], ['done' => $this->doneBy($a, collect([$user->id]))->isNotEmpty()]));
+    }
+
+    /** A coursebook unit opens as its lesson in the student's own course (or the nearest one). */
+    public function unitLink(User $user, int $gradeUnit): string
+    {
+        $course = app(\App\Services\PathService::class)->courseFor($user);
+        $lesson = Lesson::query()->where('meta->grade_unit', $gradeUnit)->whereIn('unit_id', $course->units()->pluck('id'))->value('id')
+            ?? Lesson::query()->where('meta->grade_unit', $gradeUnit)->value('id');
+
+        return $lesson ? "/lesson/{$lesson}" : '/learn';
     }
 
     /**
